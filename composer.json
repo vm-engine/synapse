@@ -1,0 +1,31 @@
+{
+    "name": "vm-engine/synapse",
+    "description": "HP Synapse rebuild using Livewire and as Laravel Package",
+    "type": "library",
+    "require": {
+        "laravel/framework": "12.x",
+        "livewire/livewire": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "VmEngine\\Synapse\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Achmad Ardiansyah",
+            "email": "theadods@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "VmEngine\\Synapse\\SynapseServiceProvider"
+            ]
+        },
+        "files": [
+            "src/helper.php"
+        ]
+    }
+}
