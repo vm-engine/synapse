@@ -6,6 +6,7 @@ class SynAppsConfigGenerator
 {
     public static function generate()
     {
+
         return [];
     }
 }
