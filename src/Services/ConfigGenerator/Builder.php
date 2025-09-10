@@ -2,13 +2,15 @@
 
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
-use VmEngine\Synapse\Services\ConfigGenerator\Builder\Client;
+use Illuminate\Broadcasting\PrivateChannel;
+use Laravel\Pail\Contracts\Printer;
+use VmEngine\Synapse\Services\ConfigGenerator\Builder\Apps;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\System;
 
 class Builder
 {
     protected $configBuilder = [
-        'apps' => Client::class,
+        'apps' => Apps::class,
         'system' => System::class,
     ];
 
@@ -20,6 +22,9 @@ class Builder
 
     public $config = []; //config AppConfig
     public $configHash = '';
+
+    public $modules;
+    public $moduleDir;
 
     public function __construct()
     {
@@ -42,5 +47,63 @@ class Builder
             file_get_contents(__DIR__ . '/../../../config.json'),
             true
         );
+
+        $this->config = [
+            'client' => [],
+            'system' => [],
+            'binding' => [],
+            'modules' => [],
+            'modules_ori' => [], //config2 default dari module dan lib (tidak akan masuk ke config AppConfig)
+        ];
+    }
+
+    private function initLoop()
+    {
+        foreach ($this->configBuilder as $key => $value) {
+            $this->builderInstances[$key] = new $value($this);
+            $this->builderInstances[$key]->init();
+        }
+
+    }
+
+    private function handlePreLoop()
+    {
+        foreach ($this->builderInstances as $instance) {
+            $instance->preLoop();
+        }
+    }
+
+    private function loopModules()
+    {
+        foreach ($this->builderInstances as $instance) {
+            foreach ($this->config['modules'] as $moduleName => $moduleConfig) {
+                $instance->loop($moduleName, $moduleConfig);
+            }
+        }
+    }
+
+    private function handlePostLoop()
+    {
+        foreach ($this->builderInstances as $instance) {
+            $instance->postLoop();
+        }
+    }
+
+    private function finalize()
+    {
+        foreach ($this->builderInstances as $instance) {
+            $instance->finalize();
+        }
+    }
+
+    public function generate()
+    {
+        $this->initLoop();
+        $this->handlePreLoop();
+        $this->loopModules();
+        $this->handlePostLoop();
+        $this->finalize();
+
+        unset($this->config['modules']);
     }
 }
