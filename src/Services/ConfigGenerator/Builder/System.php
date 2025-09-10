@@ -29,7 +29,6 @@ class System extends BuilderBase
 
         $newEnv = [];
 
-        //set agar hanya load system.dev yang boleh dieditnya saja
         foreach ($this->synapps->mainConfig['allowed_dev_keys'] as $value) {
             if (isset($tmpEnvSystem[$value])) {
                 $newEnv[$value] = $tmpEnvSystem[$value];
@@ -41,7 +40,7 @@ class System extends BuilderBase
                 $synappsPath . '/config/system.dev.json',
                 json_encode($newEnv, JSON_PRETTY_PRINT)
             );
-            $this->synapps->config['system'] = recuresive_array_merge(
+            $this->synapps->config['system'] = array_replace_recursive(
                 $this->synapps->config['system'],
                 $newEnv
             );

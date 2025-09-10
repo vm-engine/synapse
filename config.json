@@ -6,20 +6,12 @@
         "fallback_locale",
         "public_path",
         "public_url",
-        "uploaded_url",
-        "lang_endpoint",
-        "binding",
-        "providers",
-        "has_artisan_web_access",
-        "artisan_web_endpoint",
-        "web_admin"
+        "userfile_url",
+        "binding"
     ],
     "protected_module_keys": [
-        "name",
-        "package_namespace",
-        "package_dir",
-        "is_package",
-        "is_lib",
+        "id",
+        "namespaces",
         "git",
         "load_priority"
     ]

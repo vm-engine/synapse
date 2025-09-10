@@ -13,21 +13,21 @@ class Apps extends BuilderBase
             file_get_contents($synappsPath . '/config/apps.json'),
             true
         );
-        if (file_exists($synappsPath . '/config/apps.dev.json')) {
-            $tmpEnvClient = json_decode(
-                file_get_contents($synappsPath . '/config/apps.dev.json'),
-                true
-            );
-            $this->synapps->config['apps'] = recuresive_array_merge(
-                $this->synapps->config['apps'],
-                $tmpEnvClient
-            );
-        } else {
+        if (!file_exists($synappsPath . '/config/apps.dev.json')) {
             file_put_contents(
                 $$synappsPath . '/config/apps.dev.json',
                 json_encode($this->synapps->config['apps'], JSON_PRETTY_PRINT)
             );
         }
+
+        $tmpEnvClient = json_decode(
+            file_get_contents($synappsPath . '/config/apps.dev.json'),
+            true
+        );
+        $this->synapps->config['apps'] = array_replace_recursive(
+            $this->synapps->config['apps'],
+            $tmpEnvClient
+        );
     }
 
     public function finalize()
