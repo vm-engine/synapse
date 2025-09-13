@@ -4,19 +4,22 @@ namespace VmEngine\Synapse\Services;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class SynapseConfigGenerator
 {
     public static $defaultConfig = [
         'bindings' => [
             'controller' => [],
             'interface' => [],
-            'route' => []
+            'route' => [],
         ],
-        'lang_path' => [], //language path
-        'module_path' => [], //controller path
-        'view_path' => [], //blade view path
-        'migration_path' => [], //migrations path
-        'seed_path' => [], //seeds path
+        'lang_path' => [], // language path
+        'module_path' => [], // controller path
+        'view_path' => [], // blade view path
+        'migration_path' => [], // migrations path
+        'seed_path' => [], // seeds path
         /*
                 * namespace ke path lokasi daftar module module
                 *  NAMESPACE => [path_to_module_group, FILTER PREFIX
@@ -28,14 +31,14 @@ class SynapseConfigGenerator
 
     public static function generate()
     {
-        if (!self::hasCompiledConfigFile()) {
+        if (! self::hasCompiledConfigFile()) {
             return self::$defaultConfig;
         }
 
         $system = self::loadCompiledConfigFile('system');
         $client = self::loadCompiledConfigFile('client');
 
-        if (!$system || !$client) {
+        if (! $system || ! $client) {
             return self::$defaultConfig;
         }
 
@@ -57,11 +60,13 @@ class SynapseConfigGenerator
 
     private static function loadCompiledConfigFile($file = 'client')
     {
-        $filePath = base_path('synapps/config/compiled/' . $file . '.json');
+        $filePath = base_path('synapps/config/compiled/'.$file.'.json');
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
+
             return json_decode($content, true);
         }
+
         return null;
     }
 
@@ -69,12 +74,12 @@ class SynapseConfigGenerator
     {
         $config['namespaces']['general']['SynApps\\Modules'] = [
             synapps_path('Modules'),
-            false // no prefix
+            false, // no prefix
         ];
         $config['namespaces']['general']['SynModule'] = [
-            base_path('vendor' . DS . '*' . DS),
+            base_path('vendor'.DS.'*'.DS),
             // prefix with synmod-, synmodule- or synapp-
-            ['synmod-', 'synmodule-', 'synapp-']
+            ['synmod-', 'synmodule-', 'synapp-'],
         ];
     }
 
@@ -102,6 +107,7 @@ class SynapseConfigGenerator
             'lang',
             function ($namespace, $path, $moduleName, $modulePath, $namespaceValue) {
                 $unprefixedComponent = str_replace($namespaceValue[1], '', $moduleName);
+
                 return [$path, strtolower($unprefixedComponent)];
             }
         );
@@ -109,9 +115,10 @@ class SynapseConfigGenerator
 
         $viewPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'resources' . DS . 'views',
+            'resources'.DS.'views',
             function ($namespace, $path, $moduleName, $modulePath, $namespaceValue) {
                 $unprefixedComponent = str_replace($namespaceValue[1], '', $moduleName);
+
                 return [$path, strtolower($unprefixedComponent)];
             }
         );
@@ -125,11 +132,11 @@ class SynapseConfigGenerator
     {
         $migrationPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database' . DS . 'migrations'
+            'database'.DS.'migrations'
         );
         $seedPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database' . DS . 'seeders'
+            'database'.DS.'seeders'
         );
 
         $config['migration_path'] = ['general' => $migrationPaths];

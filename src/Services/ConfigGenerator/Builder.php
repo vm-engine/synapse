@@ -2,8 +2,6 @@
 
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
-use Illuminate\Broadcasting\PrivateChannel;
-use Laravel\Pail\Contracts\Printer;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Apps;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\System;
 
@@ -15,16 +13,18 @@ class Builder
     ];
 
     protected $builderInstances = [];
+
     protected $initComplete = false;
 
     public $synappsPath;
+
     public $mainConfig;
 
-    public $config = []; //config AppConfig
+    public $config = []; // config AppConfig
+
     public $configHash = '';
 
     public $modules;
-    public $moduleDir;
 
     public function __construct()
     {
@@ -34,7 +34,7 @@ class Builder
 
     private function init()
     {
-        if (!$this->initComplete) {
+        if (! $this->initComplete) {
             $this->buildConfigs();
             $this->initComplete = true;
         }
@@ -44,7 +44,7 @@ class Builder
     {
         $this->synappsPath = synapps_path();
         $this->mainConfig = json_decode(
-            file_get_contents(__DIR__ . '/../../../config.json'),
+            file_get_contents(__DIR__.'/../../../config.json'),
             true
         );
 
@@ -53,7 +53,7 @@ class Builder
             'system' => [],
             'binding' => [],
             'modules' => [],
-            'modules_ori' => [], //config2 default dari module dan lib (tidak akan masuk ke config AppConfig)
+            'modules_ori' => [], // config2 default dari module dan lib (tidak akan masuk ke config AppConfig)
         ];
     }
 
