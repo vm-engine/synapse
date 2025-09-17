@@ -60,7 +60,7 @@ class SynapseConfigGenerator
 
     private static function loadCompiledConfigFile($file = 'client')
     {
-        $filePath = base_path('synapps/config/compiled/'.$file.'.json');
+        $filePath = base_path('synapps/config/compiled/' . $file . '.json');
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
 
@@ -77,7 +77,7 @@ class SynapseConfigGenerator
             false, // no prefix
         ];
         $config['namespaces']['general']['SynModule'] = [
-            base_path('vendor'.DS.'*'.DS),
+            base_path('vendor' . DS . '*' . DS),
             // prefix with synmod-, synmodule- or synapp-
             ['synmod-', 'synmodule-', 'synapp-'],
         ];
@@ -88,8 +88,8 @@ class SynapseConfigGenerator
         $modulePaths = ['general' => []];
         $tmpModulePaths = SynapseUtils::listModuleNamespaces(
             $config['namespaces']['general'],
-            function ($namespace, $path) {
-                return [$namespace, $path];
+            function ($namespace, $path, $moduleName) {
+                return [$moduleName, $path];
             }
         );
 
@@ -115,11 +115,9 @@ class SynapseConfigGenerator
 
         $viewPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'resources'.DS.'views',
+            'resources' . DS . 'views',
             function ($namespace, $path, $moduleName, $modulePath, $namespaceValue) {
-                $unprefixedComponent = str_replace($namespaceValue[1], '', $moduleName);
-
-                return [$path, strtolower($unprefixedComponent)];
+                return [$path, strtolower($moduleName)];
             }
         );
         $viewPaths[] = synapps_path('resources/views');
@@ -132,11 +130,11 @@ class SynapseConfigGenerator
     {
         $migrationPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database'.DS.'migrations'
+            'database' . DS . 'migrations'
         );
         $seedPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database'.DS.'seeders'
+            'database' . DS . 'seeders'
         );
 
         $config['migration_path'] = ['general' => $migrationPaths];

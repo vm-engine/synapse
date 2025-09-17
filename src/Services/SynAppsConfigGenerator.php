@@ -2,11 +2,13 @@
 
 namespace VmEngine\Synapse\Services;
 
+use VmEngine\Synapse\Services\ConfigGenerator\Builder;
+
 class SynAppsConfigGenerator
 {
     public static function generate()
     {
 
-        return [];
+        return (new Builder())->generate();
     }
 }

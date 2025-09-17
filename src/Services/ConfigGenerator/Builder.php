@@ -3,6 +3,8 @@
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Apps;
+use VmEngine\Synapse\Services\ConfigGenerator\Builder\Binding;
+use VmEngine\Synapse\Services\ConfigGenerator\Builder\Modules;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\System;
 
 class Builder
@@ -10,6 +12,8 @@ class Builder
     protected $configBuilder = [
         'apps' => Apps::class,
         'system' => System::class,
+        'modules' => Modules::class,
+        'binding' => Binding::class,
     ];
 
     protected $builderInstances = [];
@@ -44,7 +48,7 @@ class Builder
     {
         $this->synappsPath = synapps_path();
         $this->mainConfig = json_decode(
-            file_get_contents(__DIR__.'/../../../config.json'),
+            file_get_contents(__DIR__ . '/../../../config.json'),
             true
         );
 
@@ -63,7 +67,6 @@ class Builder
             $this->builderInstances[$key] = new $value($this);
             $this->builderInstances[$key]->init();
         }
-
     }
 
     private function handlePreLoop()
@@ -104,6 +107,6 @@ class Builder
         $this->handlePostLoop();
         $this->finalize();
 
-        unset($this->config['modules']);
+        return $this->config;
     }
 }

@@ -21,20 +21,11 @@ class SynapseUtils
     public static function listModuleNamespaces(array $namespaces, $func): array
     {
         return self::readModules($namespaces, function ($namespace, $namespaceValue, $moduleName, $modulePath, $func) {
-            if ($namespace == 'SynModule') {
-                $modulePath .= DS.'src';
+            if ($namespace != 'SynModule') {
+                $moduleName = Str::snake($moduleName);
             }
 
-            $unprefixedComponent = str_replace($namespaceValue[1], '', $moduleName);
-
-            // $newNamespace : namespace ke folder per modulenya App/Modules/NAMAMODULE
-            $newNamespace = sprintf(
-                '%s\\%s\\',
-                $namespace,
-                Str::studly($unprefixedComponent)
-            );
-
-            return $func($newNamespace, $modulePath, $moduleName, $modulePath, $namespaceValue);
+            return $func($namespace, $modulePath, $moduleName, $modulePath, $namespaceValue);
         }, $func);
     }
 
@@ -43,7 +34,7 @@ class SynapseUtils
         return self::readModules(
             $namespaces,
             function ($namespace, $namespaceValue, $moduleName, $modulePath, $func) use ($path, $func) {
-                $resourcePath = $modulePath.DS.$path;
+                $resourcePath = $modulePath . DS . $path;
 
                 if (is_dir($resourcePath)) {
                     return $func($namespace, $resourcePath, $moduleName, $modulePath, $namespaceValue);
@@ -80,6 +71,7 @@ class SynapseUtils
                     $skipModule = true;
                     foreach ($namespaceValue[1] as $val) {
                         if (strpos($moduleName, $val) === 0) {
+                            $moduleName = str_replace($namespaceValue[1], '', $moduleName);
                             $skipModule = false;
                         }
                     }

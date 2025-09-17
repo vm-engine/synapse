@@ -21,75 +21,37 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
 
     public function map()
     {
-        $this->registerControllerNamespace();
+        $this->registerRoutes();
     }
 
     /**
      * @SuppressWarnings(PHPMD.ElseExpression)
      */
-    protected function registerControllerNamespace()
+    protected function registerRoutes()
     {
-        $controllerPaths = config('synapse.module_path.general', []);
+        $modulePaths = config('synapse.module_path', []);
 
-        $routeModuleException = config('synapps.system.routes.module_exception', []);
+        $urlPrefix = config('synapps.apps.urls.prefix');
+        $apiPrefix = config('synapps.apps.urls.api_prefix');
 
-        $fileNames = [
-            'api' => true,
-            'web' => false,
-        ];
-        foreach ($controllerPaths as $namespace => $pathToModule) {
-            $moduleConfig = config('synapps.modules.'.$namespace);
+        if (file_exists(base_path('routes/api.php'))) {
+            Route::prefix($apiPrefix)
+                ->middleware('api')
+                ->group(base_path('routes/api.php'));
+        }
 
-            $moduleNamespace = explode('\\', trim($namespace, '\\'));
-            $moduleNamespace = array_pop($moduleNamespace);
+        foreach ($modulePaths as $id => $path) {
+            $modulePrefix = config('synapps.modules.' . $id . '.url_prefix');
+            $routesPath = rtrim($path, DS) . DS . 'routes' . DS;
+            Route::middleware('web')
+                ->prefix($urlPrefix . '/' . $modulePrefix)
+                ->group($routesPath . 'web.php');
 
-            $namespace .= 'Controllers';
-
-            foreach ($fileNames as $fileName => $isApi) {
-                $path = sprintf('%s'.DS.'%s.php', $pathToModule, $fileName);
-
-                $pathBinding = config(
-                    'synapps.binding.route.'.$moduleNamespace.'.'.($isApi ? 'api' : 'web'),
-                    false
-                );
-                if ($pathBinding) {
-                    $pathBinding = synapps_path($pathBinding);
-                    if (file_exists($pathBinding)) {
-                        Route::middleware($isApi ? ['api'] : ['web'])
-                            ->prefix(
-                                $isApi && $moduleNamespace != 'moduser'
-                                    ? config('synapps.endpoint.laravel.api.'.$moduleNamespace)
-                                    : ''
-                            )
-                            ->namespace($namespace)
-                            ->group($pathBinding);
-                    }
-                }
-
-                if (! file_exists($path)) {
-                    continue;
-                }
-
-                if (in_array($moduleNamespace, $routeModuleException)) {
-                    // register router utama per module
-                    Route::namespace($namespace)
-                        ->group($path);
-
-                } else {
-                    Route::middleware($isApi ? ['api'] : ['web'])
-                        ->prefix(
-                            $isApi && $moduleNamespace != 'moduser'
-                                ? config('synapps.endpoint.laravel.api.'.$moduleNamespace)
-                                : ''
-                        )
-                        ->namespace($namespace)
-                        ->group($path);
-                }
+            if (file_exists($routesPath . 'api.php')) {
+                Route::middleware('api')
+                    ->prefix($apiPrefix . '/' . $modulePrefix)
+                    ->group($routesPath . 'api.php');
             }
         }
-        // dd($controllerPaths);
-
-        $this->mapApiRoutes();
-        $this->mapWebRoutes();
     }
 }
