@@ -3,6 +3,7 @@
 namespace VmEngine\Synapse\Services;
 
 use Closure;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
@@ -33,7 +34,7 @@ class SynapseUtils
     {
         return self::readModules(
             $namespaces,
-            function ($namespace, $namespaceValue, $moduleName, $modulePath, $func) use ($path, $func) {
+            function ($namespace, $namespaceValue, $moduleName, $modulePath, $func) use ($path) {
                 $resourcePath = $modulePath . DS . $path;
 
                 if (is_dir($resourcePath)) {
@@ -59,26 +60,28 @@ class SynapseUtils
         // $namespaceValue[0] = path ke namespace
         // $namespaceValue[1] = array prefix directory yang ada di path bersangkutan, false jika tanpa prefix
         foreach ($namespaces as $namespace => $namespaceValue) {
-            $tmp = glob(sprintf('%s*', $namespaceValue[0]), GLOB_ONLYDIR);
-            foreach ($tmp as $modulePath) {
-                // $moduleName : nama/folder module nya
-                $moduleName = substr($modulePath, strrpos($modulePath, DS) + 1);
-                // cek jika ada prefix maka hanya ambil path yg sesuai prefix nya saja
-                if ($namespaceValue[1]) {
-                    if (! is_array($namespaceValue[1])) {
-                        $namespaceValue[1] = [$namespaceValue[1]];
-                    }
-                    $skipModule = true;
-                    foreach ($namespaceValue[1] as $val) {
-                        if (strpos($moduleName, $val) === 0) {
-                            $moduleName = str_replace($namespaceValue[1], '', $moduleName);
-                            $skipModule = false;
-                        }
-                    }
-                    if ($skipModule) {
-                        continue;
-                    }
+            $tmp = [];
+            if ($namespaceValue[1]) {
+                if (!is_array($namespaceValue[1])) {
+                    $namespaceValue[1] = [$namespaceValue[1]];
                 }
+                foreach ($namespaceValue[1] as $prefix) {
+                    $paths = glob($namespaceValue[0] . DS . $prefix . '*' . DS);
+
+                    $tmp = array_merge(
+                        $tmp,
+                        $paths
+                    );
+                }
+            } else {
+                $tmp = glob($namespaceValue[0] . DS . '*', GLOB_ONLYDIR);
+            }
+            foreach ($tmp as $modulePath) {
+                $moduleName = last(explode(DS, trim($modulePath, DS)));
+                if ($namespaceValue[1]) {
+                    $moduleName = str_replace($namespaceValue[1], '', $moduleName);
+                }
+                $moduleName = Str::snake($moduleName);
 
                 $tempReturn = $process($namespace, $namespaceValue, $moduleName, $modulePath, $final);
                 if ($tempReturn) {

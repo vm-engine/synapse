@@ -4,12 +4,15 @@
     "type": "library",
     "require": {
         "laravel/framework": "12.x",
-        "livewire/livewire": "dev-main"
+        "livewire/livewire": "3.x"
     },
     "autoload": {
         "psr-4": {
             "VmEngine\\Synapse\\": "src/"
-        }
+        },
+        "files": [
+            "src/helper.php"
+        ]
     },
     "authors": [
         {
@@ -17,15 +20,15 @@
             "email": "theadods@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "extra": {
         "laravel": {
             "providers": [
-                "VmEngine\\Synapse\\SynapseServiceProvider"
+                "VmEngine\\Synapse\\SynapseServiceProvider",
+                "VmEngine\\Synapse\\SynapseLangServiceProvider",
+                "VmEngine\\Synapse\\SynapseRouteServiceProvider",
+                "VmEngine\\Synapse\\SynapseViewServiceProvider"
             ]
-        },
-        "files": [
-            "src/helper.php"
-        ]
+        }
     }
 }

@@ -2,6 +2,9 @@
 
 namespace VmEngine\Synapse\Services;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
 /**
@@ -36,9 +39,9 @@ class SynapseConfigGenerator
         }
 
         $system = self::loadCompiledConfigFile('system');
-        $client = self::loadCompiledConfigFile('client');
+        $apps= self::loadCompiledConfigFile('apps');
 
-        if (! $system || ! $client) {
+        if (! $system || ! $apps) {
             return self::$defaultConfig;
         }
 
@@ -54,7 +57,10 @@ class SynapseConfigGenerator
 
     private static function hasCompiledConfigFile()
     {
-        return file_exists(base_path('synapps/config/compiled/client.json'))
+        if (!file_exists(base_path('synapps/config/compiled'))) {
+            mkdir(base_path('synapps/config/compiled'), 0775, true);
+        }
+        return file_exists(base_path('synapps/config/compiled/apps.json'))
             && file_exists(base_path('synapps/config/compiled/system.json'));
     }
 
@@ -73,11 +79,11 @@ class SynapseConfigGenerator
     private static function setGeneralNamespaces(&$config)
     {
         $config['namespaces']['general']['SynApps\\Modules'] = [
-            synapps_path('Modules'),
+            synapps_path('modules'),
             false, // no prefix
         ];
         $config['namespaces']['general']['SynModule'] = [
-            base_path('vendor' . DS . '*' . DS),
+            base_path('vendor' . DS . '*'),
             // prefix with synmod-, synmodule- or synapp-
             ['synmod-', 'synmodule-', 'synapp-'],
         ];
@@ -97,6 +103,8 @@ class SynapseConfigGenerator
             $modulePaths['general'][$val[0]] = $val[1];
         }
 
+        // Log::debug('tmp module path', $tmpModulePaths);
+        // Log::debug('module path', $modulePaths);
         $config['module_path'] = $modulePaths;
     }
 
@@ -117,7 +125,7 @@ class SynapseConfigGenerator
             $config['namespaces']['general'],
             'resources' . DS . 'views',
             function ($namespace, $path, $moduleName, $modulePath, $namespaceValue) {
-                return [$path, strtolower($moduleName)];
+                return [$path, Str::slug($moduleName, '-')];
             }
         );
         $viewPaths[] = synapps_path('resources/views');
@@ -134,7 +142,10 @@ class SynapseConfigGenerator
         );
         $seedPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database' . DS . 'seeders'
+            'database' . DS . 'seeders',
+            function ($namespace, $resourcePath, $moduleName, $modulePath, $namespaceValue) {
+                return $resourcePath . DS . 'seeders.php';
+            }
         );
 
         $config['migration_path'] = ['general' => $migrationPaths];

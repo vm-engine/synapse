@@ -45,7 +45,7 @@ class Modules extends BuilderBase
         $moduleSorted = collect($this->synapps->config['modules'])->sortBy('load_priority');
         $this->synapps->config['modules']
             = $this->synapps->config['modules_ori']
-            = $moduleSorted;
+            = $moduleSorted->toArray();
     }
 
     private function loadSynAppsModuleConfig()
@@ -79,12 +79,12 @@ class Modules extends BuilderBase
             $configs[$id] = $filteredConfig;
         }
 
-        return $config;
+        return $configs;
     }
 
     private function mergeConfigs()
     {
-        $this->synapps->config['modules'] = array_replace_recursive(
+            $this->synapps->config['modules'] = array_replace_recursive(
             $this->synapps->config['modules'],
             $this->configAppOverride,
             $this->configDevOverride
@@ -95,7 +95,7 @@ class Modules extends BuilderBase
     {
         file_put_contents(
             synapps_path('config/compiled/modules.json'),
-            json_encode($this->synapps->config['modules'])
+            json_encode($this->synapps->config['modules'], JSON_PRETTY_PRINT)
         );
     }
 }

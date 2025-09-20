@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
 if (!function_exists('synapps_path')) {
@@ -269,12 +271,13 @@ if (!function_exists('clean_number_format')) {
         //    return $value;
         if ($value == "") {
             return "0";
-        } else {
-            if (!is_decimal(trim($value)))
-                return number_format($value, 0, $decimalSeparator, $thousandSeparator);
-            else
-                return number_format($value, $precision, $decimalSeparator, $thousandSeparator);
         }
+
+        if (!is_decimal(trim($value))) {
+            return number_format($value, 0, $decimalSeparator, $thousandSeparator);
+        }
+
+        return number_format($value, $precision, $decimalSeparator, $thousandSeparator);
     }
 }
 

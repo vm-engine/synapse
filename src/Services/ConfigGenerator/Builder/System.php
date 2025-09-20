@@ -81,7 +81,7 @@ class System extends BuilderBase
         $this->synapps->config['system'] = $systemConfig;
     }
 
-    public function write()
+    public function finalize()
     {
         file_put_contents(
             $this->synapps->synappsPath . '/config/compiled/checksum',
@@ -89,7 +89,7 @@ class System extends BuilderBase
         );
 
         file_put_contents(
-            $this->synapps->synappsPath . '/config/compiler/system.json',
+            $this->synapps->synappsPath . '/config/compiled/system.json',
             json_encode($this->synapps->config['system'], JSON_PRETTY_PRINT)
         );
     }

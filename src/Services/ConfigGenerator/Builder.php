@@ -53,7 +53,7 @@ class Builder
         );
 
         $this->config = [
-            'client' => [],
+            'apps' > [],
             'system' => [],
             'binding' => [],
             'modules' => [],

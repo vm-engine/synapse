@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 class SynapseRouteServiceProvider extends RouteServiceProvider
 {
-    public function boot()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(config('synapse.migration_path'));
-        }
-    }
+    public function boot() {}
 
     public function register()
     {
@@ -33,6 +28,10 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
 
         $urlPrefix = config('synapps.apps.urls.prefix');
         $apiPrefix = config('synapps.apps.urls.api_prefix');
+
+        Route::middleware('web')
+            ->prefix($urlPrefix)
+            ->group(base_path('routes/web.php'));
 
         if (file_exists(base_path('routes/api.php'))) {
             Route::prefix($apiPrefix)

@@ -15,7 +15,7 @@ class Apps extends BuilderBase
         );
         if (!file_exists($synappsPath . '/config/apps.dev.json')) {
             file_put_contents(
-                $$synappsPath . '/config/apps.dev.json',
+                $synappsPath . '/config/apps.dev.json',
                 json_encode($this->synapps->config['apps'], JSON_PRETTY_PRINT)
             );
         }
