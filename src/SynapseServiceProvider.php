@@ -6,6 +6,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
+use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 
 /**
  *  @SuppressWarnings(PHPMD.StaticAccess)
@@ -21,14 +22,15 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/synapse.php' => config_path('synapse.php'),
-                __DIR__.'/../config/synapps.php' => config_path('synapps.php'),
+                __DIR__ . '/../config/synapse.php' => config_path('synapse.php'),
+                __DIR__ . '/../config/synapps.php' => config_path('synapps.php'),
             ], 'synapse-config');
 
             $this->bootDbOverride();
 
             $this->commands([
-                SynAppsDiscover::class
+                SynAppsDiscover::class,
+                SynAppsPatchResources::class,
             ]);
         }
 
@@ -47,7 +49,7 @@ class SynapseServiceProvider extends ServiceProvider
         $this->bindPublicPath();
         $this->bindInterface();
         $this->bindClass();
-        $this->registerServiceProviders();
+        $this->registerSynAppsServiceProviders();
     }
 
     private function  bindAlias()
@@ -55,7 +57,7 @@ class SynapseServiceProvider extends ServiceProvider
         if (config('synapps.binding.alias')) {
             $this->app->booting(function () {
                 $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-                $classList = config('synapps.binding.alias');
+                $classList = config('synapps.binding.alias', []);
                 foreach ($classList as $classAliasName => $className) {
                     $loader->alias($classAliasName, $className);
                 }
@@ -95,27 +97,36 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerServiceProviders()
+    private function registerSynAppsServiceProviders()
     {
-        $moduleConfigs = config('synapps.modules');
+        $moduleConfigs = config('synapps.modules', []);
 
         foreach ($moduleConfigs as $moduleConfig) {
-            // $serviceProviderClass 
+            if ($moduleConfig['is_package']) {
+                continue;
+            }
+            // SynApps\Modules\Example\ExampleServiceProvider
+            $serviceProviderClass = "SynApps\\Modules\\"
+                . $moduleConfig['id_case']['pascal'] . "\\"
+                . $moduleConfig['id_case']['pascal'] . "ServiceProvider";
+
+            if (class_exists($serviceProviderClass)) {
+                $this->app->register($serviceProviderClass);
+            }
         }
     }
 
     private function bootDbOverride()
     {
         if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(config('synapse.migration_path'));
+            $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
             $this->callAfterResolving(DatabaseSeeder::class, function ($seeder) {
-                $seedList = config('synapse.seed_path');
+                $seedList = config('synapse.seed_path.general');
                 foreach ($seedList as $seederFile) {
                     $seederClassList = include $seederFile;
-                    array_walk($seederClassList, function ($seederClass) use ($seeder) {
-
-                        $seeder->call($seederClass);
-                    });
+                    if (count($seederClassList)) {
+                        $seeder->call($seederClassList);
+                    }
                 }
             });
         }

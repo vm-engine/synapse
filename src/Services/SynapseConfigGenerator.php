@@ -39,7 +39,7 @@ class SynapseConfigGenerator
         }
 
         $system = self::loadCompiledConfigFile('system');
-        $apps= self::loadCompiledConfigFile('apps');
+        $apps = self::loadCompiledConfigFile('apps');
 
         if (! $system || ! $apps) {
             return self::$defaultConfig;
@@ -128,7 +128,7 @@ class SynapseConfigGenerator
                 return [$path, Str::slug($moduleName, '-')];
             }
         );
-        $viewPaths[] = synapps_path('resources/views');
+        $viewPaths[] = [synapps_path('resources' . DS . 'views'), 'synapps'];
 
         $config['lang_path'] = ['general' => $langPaths];
         $config['view_path'] = ['general' => $viewPaths];

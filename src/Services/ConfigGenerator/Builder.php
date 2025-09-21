@@ -28,8 +28,6 @@ class Builder
 
     public $configHash = '';
 
-    public $modules;
-
     public function __construct()
     {
         $this->init();

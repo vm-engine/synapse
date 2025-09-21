@@ -4,6 +4,7 @@ namespace VmEngine\Synapse;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class SynapseRouteServiceProvider extends RouteServiceProvider
 {
@@ -24,10 +25,10 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
      */
     protected function registerRoutes()
     {
-        $modulePaths = config('synapse.module_path', []);
+        $modulePaths = config('synapse.module_path.general', []);
 
-        $urlPrefix = config('synapps.apps.urls.prefix');
-        $apiPrefix = config('synapps.apps.urls.api_prefix');
+        $urlPrefix = config('synapps.apps.urls.prefix', '/');
+        $apiPrefix = config('synapps.apps.urls.api_prefix', '/api');
 
         Route::middleware('web')
             ->prefix($urlPrefix)
@@ -40,14 +41,19 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
         }
 
         foreach ($modulePaths as $id => $path) {
-            $modulePrefix = config('synapps.modules.' . $id . '.url_prefix');
+            $modulePrefix = config(
+                'synapps.modules.' . $id . '.url_prefix',
+                Str::slug($id, '-')
+            );
             $routesPath = rtrim($path, DS) . DS . 'routes' . DS;
             Route::middleware('web')
+                ->name($id . '.')
                 ->prefix($urlPrefix . '/' . $modulePrefix)
                 ->group($routesPath . 'web.php');
 
             if (file_exists($routesPath . 'api.php')) {
                 Route::middleware('api')
+                    ->name('api.' . $id . '.')
                     ->prefix($apiPrefix . '/' . $modulePrefix)
                     ->group($routesPath . 'api.php');
             }

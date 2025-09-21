@@ -13,6 +13,7 @@
         "id",
         "namespaces",
         "git",
-        "load_priority"
+        "load_priority",
+        "is_package"
     ]
 }

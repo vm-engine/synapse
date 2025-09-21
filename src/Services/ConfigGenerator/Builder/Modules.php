@@ -23,20 +23,26 @@ class Modules extends BuilderBase
 
     private function loadModulePackageConfig()
     {
-        $this->synapps->modules = array_merge(
+        $modules = array_merge(
             glob(synapps_path('modules/*/module.json')),
             glob(base_path('vendor/*/synmod-*/module.json')),
             glob(base_path('vendor/*/synmodule-*/module.json')),
             glob(base_path('vendor/*/synapps-*/module.json')),
         );
 
-        foreach ($this->synapps->modules as $modulePath) {
+        foreach ($modules as $modulePath) {
             $moduleConfig = json_decode(
                 file_get_contents($modulePath),
                 true
             );
-            if (! isset($moduleConfig['load_priority'])) {
+
+            if (!isset($moduleConfig['load_priority'])) {
                 $moduleConfig['load_priority'] = 99;
+            }
+
+            $moduleConfig['is_package'] = 0;
+            if (strpos($modulePath, base_path('vendor')) !== false) {
+                $moduleConfig['is_package'] = 1;
             }
 
             $this->synapps->config['modules'][$moduleConfig['id']] = $moduleConfig;
@@ -84,7 +90,7 @@ class Modules extends BuilderBase
 
     private function mergeConfigs()
     {
-            $this->synapps->config['modules'] = array_replace_recursive(
+        $this->synapps->config['modules'] = array_replace_recursive(
             $this->synapps->config['modules'],
             $this->configAppOverride,
             $this->configDevOverride
