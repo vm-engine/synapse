@@ -10,8 +10,15 @@ defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
+/**
+ * Class for generating config arrays, by reading the module paths for specific patterns
+ * or module location in synapps folder
+ */
 class SynapseConfigGenerator
 {
+    /**
+    * Default Empty Configuration
+    */
     public static $defaultConfig = [
         'bindings' => [
             'controller' => [],
@@ -23,21 +30,22 @@ class SynapseConfigGenerator
         'view_path' => [], // blade view path
         'migration_path' => [], // migrations path
         'seed_path' => [], // seeds path
-        /*
-                * namespace ke path lokasi daftar module module
-                *  NAMESPACE => [path_to_module_group, FILTER PREFIX
-                */
         'namespaces' => [],
-
-        'view_path' => [],
     ];
 
+    /**
+     * Generate The Configuration
+     *
+     * @return array Generated Config Arrays
+     */
     public static function generate()
     {
+        // If the compiled configuration Json file is not exists, return the default empty configurations
         if (! self::hasCompiledConfigFile()) {
             return self::$defaultConfig;
         }
 
+        // If the compiled file exists but invalid, also return the default empty configurations
         $system = self::loadCompiledConfigFile('system');
         $apps = self::loadCompiledConfigFile('apps');
 
@@ -55,6 +63,12 @@ class SynapseConfigGenerator
         return $config;
     }
 
+    /**
+    * Check if compiled Json configuration file already exists
+    * If the folder does not exists, it will be created
+    *
+    * @return boolean
+    */ 
     private static function hasCompiledConfigFile()
     {
         if (!file_exists(base_path('synapps/config/compiled'))) {
@@ -64,6 +78,12 @@ class SynapseConfigGenerator
             && file_exists(base_path('synapps/config/compiled/system.json'));
     }
 
+    /**
+    * Load the compiled configuration Json file
+    *
+    * @param string $file
+    * @return array|null
+    */
     private static function loadCompiledConfigFile($file = 'client')
     {
         $filePath = base_path('synapps/config/compiled/' . $file . '.json');
@@ -76,6 +96,12 @@ class SynapseConfigGenerator
         return null;
     }
 
+    /**
+    * Set Base Array of paths to look up
+    *
+    * @param array $config Config Pointer
+    * @return void
+    */
     private static function setGeneralNamespaces(&$config)
     {
         $config['namespaces']['general']['SynApps\\Modules'] = [
