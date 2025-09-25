@@ -2,6 +2,7 @@
 
 namespace VmEngine\Synapse;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\View\ViewServiceProvider;
 
 class SynapseViewServiceProvider extends ViewServiceProvider
@@ -16,5 +17,13 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         if (config('livewire.layout')) {
             config(['livewire.layout' =>  'synapps::components.layouts.app']);
         }
+        if (config('livewire.pagination_theme')) {
+            config(['livewire.pagination_theme' =>  'bootstrap']);
+        }
+    }
+
+    public function boot()
+    {
+        Paginator::useBootstrapFive();
     }
 }

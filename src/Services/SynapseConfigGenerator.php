@@ -129,6 +129,10 @@ class SynapseConfigGenerator
             }
         );
         $viewPaths[] = [synapps_path('resources' . DS . 'views'), 'synapps'];
+        $viewPaths[] = [
+            __DIR__ . DS . '..' , DS , '..' . DS . 'resources' . DS . 'views',
+            'synapse'
+        ];
 
         $config['lang_path'] = ['general' => $langPaths];
         $config['view_path'] = ['general' => $viewPaths];
