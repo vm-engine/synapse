@@ -2,9 +2,9 @@
 
 namespace VmEngine\Synapse\Services;
 
-use Closure;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Closure;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
@@ -47,6 +47,12 @@ class SynapseUtils
                 return $path;
             }
         );
+    }
+
+    public static function isSynAppsAutoloaded(): bool
+    {
+        $composerJson = file_get_contents(base_path('composer.json'));
+        return strpos($composerJson, 'SynApps') !== false;
     }
 
     private static function readModules(

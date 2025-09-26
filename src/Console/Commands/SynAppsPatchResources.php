@@ -25,52 +25,49 @@ class SynAppsPatchResources extends Command
      */
     public function handle()
     {
-        $jsFile = fopen(resource_path('js/app.js'), 'r+');
-        $cssFile = fopen(resource_path('css/app.css'), 'r+');
-
         $jsLine = "import '" . addslashes(synapps_path('resources' . DS . 'js' . DS . 'synapps.js')) . "';";
         $cssLine = "@import '" . addslashes(synapps_path('resources' . DS . 'css' . DS . 'synapps.css')) . "';";
 
         $jsPatched = false;
-        $jsInsertPos = 0;
-        while (!feof($jsFile)) {
-            $line = fgets($jsFile);
+        $jsLines = file(resource_path('js/app.js'));
+        $lastImportJs = 0;
+        foreach ($jsLines as $row => $line) {
             if (strpos($line, $jsLine) !== false) {
                 $jsPatched = false;
                 break;
             }
             if (strpos($line, 'import') !== false) {
-                $jsInsertPos = ftell($jsFile);
+                $lastImportJs = $row;
             }
             $jsPatched = true;
         }
-        if ($jsPatched && $jsInsertPos > 0) {
-            fseek($jsFile, $jsInsertPos);
-            fwrite($jsFile, $jsLine . "\n");
+        if ($jsPatched || empty($jsLines)) {
+            array_splice($jsLines, $lastImportJs + 1, 0, $jsLine . "\n");
+            file_put_contents(resource_path('js/app.js'), implode("\n", $jsLines));
+            $jsPatched = true;
         }
-        fclose($jsFile);
 
         $cssPatched = false;
-        $cssInsertPos = 0;
-        while (!feof($cssFile)) {
-            $line = fgets($cssFile);
+        $cssLines = file(resource_path('css/app.css'));
+        $lastImportCss = 0;
+        foreach ($cssLines as $row => $line) {
             if (strpos($line, $cssLine) !== false) {
                 $cssPatched = false;
                 break;
             }
             if (strpos($line, '@import') !== false) {
-                $cssInsertPos = ftell($cssFile);
+                $lastImportCss = $row;
             }
             $cssPatched = true;
         }
-        if ($cssPatched && $cssInsertPos > 0) {
-            fseek($cssFile, $cssInsertPos);
-            fwrite($cssFile, $cssLine . "\n");
+        if ($cssPatched || empty($cssLines)) {
+            array_splice($cssLines, $lastImportCss + 1, 0, $cssLine . "\n");
+            file_put_contents(resource_path('css/app.css'), implode('', $cssLines));
+            $cssPatched = true;
         }
-        fclose($cssFile);
 
         if ($jsPatched || $cssPatched) {
-            $this->info('Resource files patched.');
+            $this->components->info('Resource files patched.');
         }
     }
 }

@@ -5,6 +5,7 @@ namespace VmEngine\Synapse;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use VmEngine\Synapse\Services\SynapseUtils;
 
 class SynapseRouteServiceProvider extends RouteServiceProvider
 {
@@ -17,7 +18,9 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
 
     public function map()
     {
-        $this->registerRoutes();
+        if (SynapseUtils::isSynAppsAutoloaded()) {
+            $this->registerRoutes();
+        }
     }
 
     /**

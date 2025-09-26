@@ -28,9 +28,7 @@ class SynAppsDiscover extends Command
 
     protected $packageJson = [];
     protected $composerJson = [];
-
     protected $namespaces = [];
-
     protected $npmDeps = 0;
     protected $composerDeps = 0;
     protected $npmDevDeps = 0;
@@ -56,11 +54,10 @@ class SynAppsDiscover extends Command
 
         $this->updateNpm();
 
-        $this->info('Caching Config');
-        Artisan::call('config:cache');
+        $this->components->info('Please run `php artisan config:cache` after this command.');
 
         if ($this->npmDeps || $this->npmDevDeps) {
-            $this->info('Compiling assets');
+            $this->components->info('Compiling assets');
             exec('npm run build');
         }
     }
@@ -73,15 +70,15 @@ class SynAppsDiscover extends Command
             $moduleConfig = json_decode(file_get_contents($moduleConfigPath), true);
             $modulePath = ltrim(str_replace(
                 base_path(),
-                "",
+                '',
                 dirname($moduleConfigPath)
             ));
-            $moduleNamespace = "SynApps\\Modules\\" . $moduleConfig['id_case']['pascal'] . "\\";
-            $dbNamespace = "SynDB\\Modules\\" . $moduleConfig['id_case']['pascal'] . "\\";
-            $this->namespaces[$moduleNamespace] = ltrim($modulePath, DS) . DS . "src" . DS;
-            $this->namespaces[$dbNamespace . "Seeders\\"] = ltrim($modulePath, DS) . DS . "database" . DS . "seeders" . DS;
-            $this->namespaces[$dbNamespace . "Factories\\"] = ltrim($modulePath, DS) . DS . "database" . DS . "factories" . DS;
-            $this->info("Discovered Module: {$moduleConfig['name']} at {$modulePath}");
+            $moduleNamespace = 'SynApps\\Modules\\' . $moduleConfig['id_case']['pascal'] . '\\';
+            $dbNamespace = 'SynDB\\Modules\\' . $moduleConfig['id_case']['pascal'] . '\\';
+            $this->namespaces[$moduleNamespace] = ltrim($modulePath, DS) . DS . 'src' . DS;
+            $this->namespaces[$dbNamespace . 'Seeders\\'] = ltrim($modulePath, DS) . DS . 'database' . DS . 'seeders' . DS;
+            $this->namespaces[$dbNamespace . 'Factories\\'] = ltrim($modulePath, DS) . DS . 'database' . DS . 'factories' . DS;
+            $this->components->info("Discovered Module: {$moduleConfig['name']} at {$modulePath}");
 
             $this->compareDependencies($moduleConfig['dependencies']);
         }
@@ -114,18 +111,18 @@ class SynAppsDiscover extends Command
 
     private function informDiscoveries()
     {
-        $this->info('Added ' . count($this->namespaces) . ' Namespaces');
+        $this->components->info('Added ' . count($this->namespaces) . ' Namespaces');
         if ($this->npmDeps) {
-            $this->info('Discovered ' . $this->npmDeps . ' NPM Dependencies');
+            $this->components->info('Discovered ' . $this->npmDeps . ' NPM Dependencies');
         }
         if ($this->composerDeps) {
-            $this->info('Discovered ' . $this->composerDeps . ' Composer Dependencies');
+            $this->components->info('Discovered ' . $this->composerDeps . ' Composer Dependencies');
         }
         if ($this->npmDeps) {
-            $this->info('Discovered ' . $this->npmDeps . ' NPM Dev Dependencies');
+            $this->components->info('Discovered ' . $this->npmDeps . ' NPM Dev Dependencies');
         }
         if ($this->composerDeps) {
-            $this->info('Discovered ' . $this->composerDeps . ' Composer Dev Dependencies');
+            $this->components->info('Discovered ' . $this->composerDeps . ' Composer Dev Dependencies');
         }
     }
 
@@ -136,18 +133,18 @@ class SynAppsDiscover extends Command
             $this->namespaces
         );
 
-        $this->info('Updating composer.json');
+        $this->components->info('Updating composer.json');
         file_put_contents(
             base_path('composer.json'),
             json_encode($this->composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
         );
 
         if ($this->composerDeps || $this->composerDevDeps) {
-            $this->info('Running composer update');
+            $this->components->info('Running composer update');
             exec('composer update');
             return;
         }
-        $this->info('Running composer dump-autoload');
+        $this->components->info('Running composer dump-autoload');
         exec('composer dump-autoload');
     }
 
@@ -160,14 +157,13 @@ class SynAppsDiscover extends Command
             $this->packageJson['devDependencies'] = new \stdClass();
         }
 
-
         if ($this->npmDeps || $this->npmDevDeps) {
-            $this->info('Updating package.json');
+            $this->components->info('Updating package.json');
             file_put_contents(
                 base_path('package.json'),
                 json_encode($this->packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
             );
-            $this->info('Running npm install');
+            $this->components->info('Running npm install');
             exec('npm i');
         }
     }
@@ -197,12 +193,12 @@ class SynAppsDiscover extends Command
 
         foreach ($toLoop as $package => $version) {
             if (
-                !isset($collection[$package])
-                || Comparator::greaterThan($version, $collection[$package])
+                !isset($collection[$package]) ||
+                Comparator::greaterThan($version, $collection[$package])
             ) {
                 $collection[$package] = $version;
                 $this->{$counterVar}++;
-                $this->info('Discovered Dependency: ' . $package . ' - ' . $version);
+                $this->components->info('Discovered Dependency: ' . $package . ' - ' . $version);
             }
         }
 

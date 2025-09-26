@@ -7,9 +7,8 @@ use Illuminate\Support\Str;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
-/**
- * @SuppressWarnings(PHPMD.StaticAccess)
- */
+/** @SuppressWarnings(PHPMD.StaticAccess) */
+
 /**
  * Class for generating config arrays, by reading the module paths for specific patterns
  * or module location in synapps folder
@@ -17,19 +16,19 @@ defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 class SynapseConfigGenerator
 {
     /**
-    * Default Empty Configuration
-    */
+     * Default Empty Configuration
+     */
     public static $defaultConfig = [
         'bindings' => [
             'controller' => [],
             'interface' => [],
             'route' => [],
         ],
-        'lang_path' => [], // language path
-        'module_path' => [], // controller path
-        'view_path' => [], // blade view path
-        'migration_path' => [], // migrations path
-        'seed_path' => [], // seeds path
+        'lang_path' => [],  // language path
+        'module_path' => [],  // controller path
+        'view_path' => [],  // blade view path
+        'migration_path' => [],  // migrations path
+        'seed_path' => [],  // seeds path
         'namespaces' => [],
     ];
 
@@ -41,7 +40,7 @@ class SynapseConfigGenerator
     public static function generate()
     {
         // If the compiled configuration Json file is not exists, return the default empty configurations
-        if (! self::hasCompiledConfigFile()) {
+        if (!self::hasCompiledConfigFile()) {
             return self::$defaultConfig;
         }
 
@@ -49,7 +48,7 @@ class SynapseConfigGenerator
         $system = self::loadCompiledConfigFile('system');
         $apps = self::loadCompiledConfigFile('apps');
 
-        if (! $system || ! $apps) {
+        if (!$system || !$apps) {
             return self::$defaultConfig;
         }
 
@@ -64,26 +63,26 @@ class SynapseConfigGenerator
     }
 
     /**
-    * Check if compiled Json configuration file already exists
-    * If the folder does not exists, it will be created
-    *
-    * @return boolean
-    */ 
-    private static function hasCompiledConfigFile()
+     * Check if compiled Json configuration file already exists
+     * If the folder does not exists, it will be created
+     *
+     * @return boolean
+     */
+    public static function hasCompiledConfigFile()
     {
         if (!file_exists(base_path('synapps/config/compiled'))) {
             mkdir(base_path('synapps/config/compiled'), 0775, true);
         }
-        return file_exists(base_path('synapps/config/compiled/apps.json'))
-            && file_exists(base_path('synapps/config/compiled/system.json'));
+        return file_exists(base_path('synapps/config/compiled/apps.json')) &&
+            file_exists(base_path('synapps/config/compiled/system.json'));
     }
 
     /**
-    * Load the compiled configuration Json file
-    *
-    * @param string $file
-    * @return array|null
-    */
+     * Load the compiled configuration Json file
+     *
+     * @param string $file
+     * @return array|null
+     */
     private static function loadCompiledConfigFile($file = 'client')
     {
         $filePath = base_path('synapps/config/compiled/' . $file . '.json');
@@ -97,16 +96,16 @@ class SynapseConfigGenerator
     }
 
     /**
-    * Set Base Array of paths to look up
-    *
-    * @param array $config Config Pointer
-    * @return void
-    */
+     * Set Base Array of paths to look up
+     *
+     * @param array $config Config Pointer
+     * @return void
+     */
     private static function setGeneralNamespaces(&$config)
     {
-        $config['namespaces']['general']['SynApps\\Modules'] = [
+        $config['namespaces']['general']['SynApps\Modules'] = [
             synapps_path('modules'),
-            false, // no prefix
+            false,  // no prefix
         ];
         $config['namespaces']['general']['SynModule'] = [
             base_path('vendor' . DS . '*'),
@@ -156,7 +155,7 @@ class SynapseConfigGenerator
         );
         $viewPaths[] = [synapps_path('resources' . DS . 'views'), 'synapps'];
         $viewPaths[] = [
-            __DIR__ . DS . '..' , DS , '..' . DS . 'resources' . DS . 'views',
+            __DIR__ . DS . '..', DS, '..' . DS . 'resources' . DS . 'views',
             'synapse'
         ];
 

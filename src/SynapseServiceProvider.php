@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
+use VmEngine\Synapse\Services\SynapseUtils;
 
 /**
- *  @SuppressWarnings(PHPMD.StaticAccess)
+ * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class SynapseServiceProvider extends ServiceProvider
 {
@@ -26,12 +27,17 @@ class SynapseServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/synapps.php' => config_path('synapps.php'),
             ], 'synapse-config');
 
-            $this->bootDbOverride();
-
             $this->commands([
                 SynAppsDiscover::class,
                 SynAppsPatchResources::class,
             ]);
+        }
+
+        if (
+            SynapseUtils::isSynAppsAutoloaded() &&
+            $this->app->runningInConsole()
+        ) {
+            $this->bootDbOverride();
         }
 
         Schema::defaultStringLength(191);
@@ -45,14 +51,16 @@ class SynapseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->bindAlias();
-        $this->bindPublicPath();
-        $this->bindInterface();
-        $this->bindClass();
-        $this->registerSynAppsServiceProviders();
+        if (SynapseUtils::isSynAppsAutoloaded()) {
+            $this->bindAlias();
+            $this->bindPublicPath();
+            $this->bindInterface();
+            $this->bindClass();
+            $this->registerSynAppsServiceProviders();
+        }
     }
 
-    private function  bindAlias()
+    private function bindAlias()
     {
         if (config('synapps.binding.alias')) {
             $this->app->booting(function () {
@@ -106,9 +114,9 @@ class SynapseServiceProvider extends ServiceProvider
                 continue;
             }
             // SynApps\Modules\Example\ExampleServiceProvider
-            $serviceProviderClass = "SynApps\\Modules\\"
-                . $moduleConfig['id_case']['pascal'] . "\\"
-                . $moduleConfig['id_case']['pascal'] . "ServiceProvider";
+            $serviceProviderClass = 'SynApps\\Modules\\'
+                . $moduleConfig['id_case']['pascal'] . '\\'
+                . $moduleConfig['id_case']['pascal'] . 'ServiceProvider';
 
             if (class_exists($serviceProviderClass)) {
                 $this->app->register($serviceProviderClass);
