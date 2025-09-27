@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use VmEngine\Synapse\Services\SynapseUtils;
 
+/**
+ *  @SuppressWarnings(PHPMD.StaticAccess) 
+ */
 class SynapseRouteServiceProvider extends RouteServiceProvider
 {
     public function boot() {}

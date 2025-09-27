@@ -23,9 +23,13 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/synapse.php' => config_path('synapse.php'),
-                __DIR__ . '/../config/synapps.php' => config_path('synapps.php'),
+                __DIR__.'/../config/synapse.php' => config_path('synapse.php'),
+                __DIR__.'/../config/synapps.php' => config_path('synapps.php'),
             ], 'synapse-config');
+
+            $this->publishes([
+                synapps_path('resources/assets') => public_path('assets'),
+            ], 'synapse-assets');
 
             $this->commands([
                 SynAppsDiscover::class,
@@ -115,8 +119,8 @@ class SynapseServiceProvider extends ServiceProvider
             }
             // SynApps\Modules\Example\ExampleServiceProvider
             $serviceProviderClass = 'SynApps\\Modules\\'
-                . $moduleConfig['id_case']['pascal'] . '\\'
-                . $moduleConfig['id_case']['pascal'] . 'ServiceProvider';
+                .$moduleConfig['id_case']['pascal'].'\\'
+                .$moduleConfig['id_case']['pascal'].'ServiceProvider';
 
             if (class_exists($serviceProviderClass)) {
                 $this->app->register($serviceProviderClass);
