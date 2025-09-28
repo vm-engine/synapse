@@ -3,7 +3,10 @@
 namespace VmEngine\Synapse;
 
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewServiceProvider;
+use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\Select;
 use VmEngine\Synapse\Services\SynapseUtils;
 
 class SynapseViewServiceProvider extends ViewServiceProvider
@@ -19,13 +22,14 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         if (config('livewire.layout') && SynapseUtils::isSynAppsAutoloaded()) {
             config(['livewire.layout' => 'synapps::components.layouts.app']);
         }
-        if (config('livewire.pagination_theme')) {
-            config(['livewire.pagination_theme' => 'bootstrap']);
-        }
+        $this->registerSynapseComponents();
     }
 
-    public function boot()
+    public function boot() {}
+
+    private function registerSynapseComponents()
     {
-        Paginator::useBootstrapFive();
+        Blade::component(Drawer::class, 'synapse-drawer');
+        Blade::component(Select::class, 'synapse-select');
     }
 }

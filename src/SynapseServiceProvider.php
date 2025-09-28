@@ -23,8 +23,8 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/synapse.php' => config_path('synapse.php'),
-                __DIR__.'/../config/synapps.php' => config_path('synapps.php'),
+                __DIR__ . '/../config/synapse.php' => config_path('synapse.php'),
+                __DIR__ . '/../config/synapps.php' => config_path('synapps.php'),
             ], 'synapse-config');
 
             $this->publishes([
@@ -61,6 +61,7 @@ class SynapseServiceProvider extends ServiceProvider
             $this->bindInterface();
             $this->bindClass();
             $this->registerSynAppsServiceProviders();
+            $this->registerLangFiles();
         }
     }
 
@@ -119,8 +120,8 @@ class SynapseServiceProvider extends ServiceProvider
             }
             // SynApps\Modules\Example\ExampleServiceProvider
             $serviceProviderClass = 'SynApps\\Modules\\'
-                .$moduleConfig['id_case']['pascal'].'\\'
-                .$moduleConfig['id_case']['pascal'].'ServiceProvider';
+                . $moduleConfig['id_case']['pascal'] . '\\'
+                . $moduleConfig['id_case']['pascal'] . 'ServiceProvider';
 
             if (class_exists($serviceProviderClass)) {
                 $this->app->register($serviceProviderClass);
@@ -142,5 +143,17 @@ class SynapseServiceProvider extends ServiceProvider
                 }
             });
         }
+    }
+
+    private function registerLangFiles()
+    {
+        $langPath = config('synapse.lang_path.general', []);
+        $that = $this;
+        array_walk(
+            $langPath,
+            function ($v) use ($that) {
+                $that->loadTranslationsFrom($v[0], $v[1]);
+            }
+        );
     }
 }

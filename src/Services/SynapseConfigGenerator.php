@@ -139,12 +139,10 @@ class SynapseConfigGenerator
             $config['namespaces']['general'],
             'lang',
             function ($namespace, $path, $moduleName, $modulePath, $namespaceValue) {
-                $unprefixedComponent = str_replace($namespaceValue[1], '', $moduleName);
-
-                return [$path, strtolower($unprefixedComponent)];
+                return [$path, Str::slug($moduleName, '-')];
             }
         );
-        $langPaths[] = synapps_path('lang');
+        $langPaths[] = synapps_path('lang', 'synapps');
 
         $viewPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
@@ -155,7 +153,7 @@ class SynapseConfigGenerator
         );
         $viewPaths[] = [synapps_path('resources' . DS . 'views'), 'synapps'];
         $viewPaths[] = [
-            __DIR__ . DS . '..', DS, '..' . DS . 'resources' . DS . 'views',
+            realpath(__DIR__ . DS . '..' . DS . '..' . DS . 'resources' . DS . 'views'),
             'synapse'
         ];
 
