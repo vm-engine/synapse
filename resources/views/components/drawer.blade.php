@@ -1,4 +1,4 @@
-<div>
+<div x-cloak>
     <div @click="drawerOpen = false" :class="drawerOpen ? 'block' : 'hidden'"
         class="fixed top-0 left-0 w-full h-screen z-39 bg-gray-900/50"></div>
     <div id="drawer-example"
