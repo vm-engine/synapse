@@ -6,12 +6,12 @@
         tabindex="-1" aria-labelledby="drawer-label" :class="drawerOpen ? 'transform-none' : 'translate-x-full'">
         <h5 id="drawer-label"
             class="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
-            <span class="fa-solid fa-filter mr-2"></span>
+            <span class="fa-reguler fa-filter mr-2"></span>
             {{ $title ?? '' }}
         </h5>
         <button type="button" @click="drawerOpen = false" aria-controls="drawer-example"
             class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white">
-            <span class="fa-solid fa-xmark"></span>
+            <span class="fa-reguler fa-xmark"></span>
             <span class="sr-only">Close</span>
         </button>
 

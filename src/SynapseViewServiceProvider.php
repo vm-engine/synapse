@@ -2,9 +2,9 @@
 
 namespace VmEngine\Synapse;
 
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewServiceProvider;
+use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\Select;
@@ -33,5 +33,6 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         Blade::component(Drawer::class, 'synapse-drawer');
         Blade::component(Select::class, 'synapse-select');
         Blade::component(Password::class, 'synapse-password');
+        Blade::component(Currency::class, 'synapse-currency');
     }
 }
