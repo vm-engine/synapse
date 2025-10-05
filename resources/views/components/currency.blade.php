@@ -1,4 +1,9 @@
 <div class="input-group">
     <span class="input-group-item left">{{ $currency }}</span>
-    <input type="text" class="form-input pl-[62px]!" x-mask:dynamic="$money($input, ',', '.', 0)" {{ $attributes }}>
+    <input
+        class="form-input pl-[62px]!"
+        type="text"
+        x-mask:dynamic="$money($input, ',', '.', 0)"
+        {{ $attributes }}
+    >
 </div>

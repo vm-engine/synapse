@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewServiceProvider;
 use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\Currency;
+use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
@@ -40,5 +41,6 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         Blade::component(Currency::class, 'synapse-currency');
         Blade::component(RadioButtons::class, 'synapse-radio-buttons');
         Blade::component(Checkboxes::class, 'synapse-checkboxes');
+        Blade::component(Datepicker::class, 'synapse-datepicker');
     }
 }
