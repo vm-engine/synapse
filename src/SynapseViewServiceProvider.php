@@ -4,9 +4,12 @@ namespace VmEngine\Synapse;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewServiceProvider;
+use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
+use VmEngine\Synapse\Components\RadioButtons;
 use VmEngine\Synapse\Components\Select;
 use VmEngine\Synapse\Services\SynapseUtils;
 
@@ -32,7 +35,10 @@ class SynapseViewServiceProvider extends ViewServiceProvider
     {
         Blade::component(Drawer::class, 'synapse-drawer');
         Blade::component(Select::class, 'synapse-select');
+        Blade::component(MultiSelect::class, 'synapse-multiselect');
         Blade::component(Password::class, 'synapse-password');
         Blade::component(Currency::class, 'synapse-currency');
+        Blade::component(RadioButtons::class, 'synapse-radio-buttons');
+        Blade::component(Checkboxes::class, 'synapse-checkboxes');
     }
 }
