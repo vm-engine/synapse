@@ -21,8 +21,9 @@
         <input
             name="{{ $name }}"
             type="hidden"
+            x-ref="hiddenInput"
             :value="selectedValues()"
-            wire:model="{{ $name }}"
+            {{ $attributes }}
         />
         <div class="relative z-20 inline-block w-full">
             <div class="relative flex flex-col items-center">
@@ -30,15 +31,13 @@
                     class="w-full"
                     @click="open"
                 >
-                    <div
-                        class="shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900">
+                    <div {{ $attributes->merge(['class' => 'form-input shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900'])->only('class') }}>
                         <div class="flex flex-auto flex-wrap gap-2">
                             <template
                                 x-for="(option,index) in selected"
                                 :key="index"
                             >
-                                <div
-                                    class="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pr-2 pl-2.5 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800">
+                                <div class="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pr-2 pl-2.5 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800">
                                     <div
                                         class="max-w-full flex-initial"
                                         x-model="options[option]"
@@ -170,10 +169,19 @@
                     this.selected.splice(this.selected.lastIndexOf(index), 1);
                     this.options[index].selected = false;
                 }
+                this.dispatchInputEvent();
             },
             remove(index, option) {
                 this.options[option].selected = false;
                 this.selected.splice(index, 1);
+                this.dispatchInputEvent();
+            },
+            dispatchInputEvent() {
+                this.$nextTick(() => {
+                    this.$refs.hiddenInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                });
             },
             loadOptions(el) {
                 const options = document.getElementById(el).options;
@@ -191,9 +199,9 @@
                 }
             },
             selectedValues() {
-                return this.selected.map((option) => {
+                return JSON.stringify(this.selected.map((option) => {
                     return this.options[option].value;
-                });
+                }));
             },
         };
     }
