@@ -3,10 +3,9 @@
     x-data="{ isOptionSelected: false }"
 >
     <select
-        class="form-input"
         :class="isOptionSelected && 'text-gray-800 dark:text-white/90'"
         @change="isOptionSelected = true"
-        {{ $attributes }}
+        {{ $attributes->merge(['class' => 'form-input']) }}
     >
         @foreach ($options as $key => $option)
             <option

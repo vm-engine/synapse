@@ -3,10 +3,9 @@
     x-data="{ showPassword: false }"
 >
     <input
-        class="form-input"
         :type="showPassword ? 'text' : 'password'"
         placeholder="Enter your password"
-        {{ $attributes }}
+        {{ $attributes->merge(['class' => 'form-input']) }}
     />
     <span
         class="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer"

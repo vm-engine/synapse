@@ -1,7 +1,13 @@
 <div class="input-group">
     <input
         type="date"
-        x-init="flatpickr($el, {{ $flatpickr }})"
+        x-init="flatpickr($el, Object.assign({}, {{ $flatpickr }}, {
+            onChange: function(selectedDates, dateStr, instance) {
+                $el.value = dateStr;
+                $el.dispatchEvent(new Event('input', { bubbles: true }));
+                $el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }))"
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
     <span class="pointer-events-none input-group-item right">
