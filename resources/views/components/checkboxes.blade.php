@@ -14,8 +14,8 @@
                             name="{{ $name }}[]"
                             type="checkbox"
                             value="{{ $option }}"
-                            wire:model="{{ $name }}"
                             @change="checked = !checked"
+                            {{ $attributes }}
                         />
                         <div
                             class="f hover:border-brand-500 dark:hover:border-brand-500 mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]"

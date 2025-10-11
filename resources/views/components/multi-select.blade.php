@@ -1,9 +1,18 @@
+{{--
+    Multi-Select Component
+
+    Usage with Livewire:
+    The component uses a native <select multiple> element which automatically returns an array.
+    Simply use wire:model on the component and it will work with array properties.
+--}}
 <div>
     <select
         class="hidden"
         id="{{ $name }}"
+        name="{{ $name }}"
         x-cloak
         multiple
+        {{ $attributes }}
     >
         @foreach ($options as $key => $option)
             <option
@@ -18,13 +27,6 @@
         x-data="dropdown()"
         x-init="loadOptions('{{ $name }}')"
     >
-        <input
-            name="{{ $name }}"
-            type="hidden"
-            x-ref="hiddenInput"
-            :value="selectedValues()"
-            {{ $attributes }}
-        />
         <div class="relative z-20 inline-block w-full">
             <div class="relative flex flex-col items-center">
                 <div
@@ -75,7 +77,7 @@
                                 <input
                                     class="h-full w-full appearance-none border-0 bg-transparent p-1 pr-2 text-sm outline-hidden placeholder:text-gray-800 focus:border-0 focus:ring-0 focus:outline-hidden dark:placeholder:text-white/90"
                                     placeholder="Select option"
-                                    :value="selectedValues()"
+                                    readonly
                                 />
                             </div>
                         </div>
@@ -169,19 +171,31 @@
                     this.selected.splice(this.selected.lastIndexOf(index), 1);
                     this.options[index].selected = false;
                 }
-                this.dispatchInputEvent();
+                this.syncSelectElement();
             },
             remove(index, option) {
                 this.options[option].selected = false;
                 this.selected.splice(index, 1);
-                this.dispatchInputEvent();
+                this.syncSelectElement();
             },
-            dispatchInputEvent() {
-                this.$nextTick(() => {
-                    this.$refs.hiddenInput.dispatchEvent(new Event('input', {
-                        bubbles: true
-                    }));
-                });
+            syncSelectElement() {
+                // Update the native select element's selected options
+                const selectEl = document.getElementById('{{ $name }}');
+                if (selectEl) {
+                    // Get all option elements
+                    const selectOptions = selectEl.options;
+
+                    // Update selected state for each option
+                    for (let i = 0; i < selectOptions.length; i++) {
+                        const optionValue = selectOptions[i].value;
+                        const isSelected = this.selectedValuesArray().includes(optionValue);
+                        selectOptions[i].selected = isSelected;
+                    }
+
+                    // Dispatch change event for Livewire to pick up
+                    selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             },
             loadOptions(el) {
                 const options = document.getElementById(el).options;
@@ -198,10 +212,10 @@
                     }
                 }
             },
-            selectedValues() {
-                return JSON.stringify(this.selected.map((option) => {
+            selectedValuesArray() {
+                return this.selected.map((option) => {
                     return this.options[option].value;
-                }));
+                });
             },
         };
     }

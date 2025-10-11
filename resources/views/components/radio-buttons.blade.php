@@ -17,8 +17,8 @@
                             name="{{ $name }}"
                             type="radio"
                             value="{{ $option }}"
-                            wire:model="{{ $name }}"
                             @change="selected = '{{ $key }}'"
+                            {{ $attributes }}
                         />
                         <div
                             class="hover:border-brand-500 dark:hover:border-brand-500 mr-3 flex h-5 w-5 items-center justify-center rounded-full border-[1.25px]"
