@@ -1,4 +1,4 @@
-<div class="input-group">
+<div class="input-group" wire:ignore>
     <input
         type="date"
         x-init="flatpickr($el, Object.assign({}, {{ $flatpickr }}, {
