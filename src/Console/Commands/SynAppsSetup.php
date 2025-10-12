@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\File;
 use stdClass;
 
 use function Laravel\Prompts\text;
-use function Laravel\Prompts\textarea;
 
 class SynAppsSetup extends Command
 {
@@ -65,7 +64,7 @@ class SynAppsSetup extends Command
             label: 'Application Title',
             default: $appName,
         );
-        $appDesc = textarea(
+        $appDesc = text(
             label: 'Application Description',
         );
         $appsJson = [
@@ -97,13 +96,17 @@ class SynAppsSetup extends Command
             ],
         ];
 
-        File::copyDirectory(
+        if (! File::copyDirectory(
             __DIR__.'/../../stubs/synapps',
             base_path('synapps')
-        );
+        )) {
+            $this->components->error('Failed to copy synapps folder');
+
+            return 1;
+        }
 
         file_put_contents(
-            base_path('synapps/config/apps.json'),
+            base_path('synapps'.DS.'config'.DS.'apps.json'),
             json_encode($appsJson, JSON_PRETTY_PRINT)
         );
 
