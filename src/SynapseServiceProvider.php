@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
+use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Services\SynapseUtils;
 
 /**
@@ -23,8 +24,8 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/synapse.php' => config_path('synapse.php'),
-                __DIR__ . '/../config/synapps.php' => config_path('synapps.php'),
+                __DIR__.'/../config/synapse.php' => config_path('synapse.php'),
+                __DIR__.'/../config/synapps.php' => config_path('synapps.php'),
             ], 'synapse-config');
 
             $this->publishes([
@@ -32,6 +33,7 @@ class SynapseServiceProvider extends ServiceProvider
             ], 'synapse-assets');
 
             $this->commands([
+                SynAppsSetup::class,
                 SynAppsDiscover::class,
                 SynAppsPatchResources::class,
             ]);
@@ -120,8 +122,8 @@ class SynapseServiceProvider extends ServiceProvider
             }
             // SynApps\Modules\Example\ExampleServiceProvider
             $serviceProviderClass = 'SynApps\\Modules\\'
-                . $moduleConfig['id_case']['pascal'] . '\\'
-                . $moduleConfig['id_case']['pascal'] . 'ServiceProvider';
+                .$moduleConfig['id_case']['pascal'].'\\'
+                .$moduleConfig['id_case']['pascal'].'ServiceProvider';
 
             if (class_exists($serviceProviderClass)) {
                 $this->app->register($serviceProviderClass);
