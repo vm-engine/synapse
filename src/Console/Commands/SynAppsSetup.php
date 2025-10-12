@@ -100,7 +100,7 @@ class SynAppsSetup extends Command
             mkdir(base_path('synapps'), 0755);
         }
         if (! SynapseUtils::copyDirectory(
-            __DIR__.DS.'..'.DS.'..'.DS.'stubs'.DS.'synapps',
+            realpath(__DIR__.DS.'..'.DS.'..'.DS.'stubs'.DS.'synapps'),
             base_path('synapps')
         )) {
             $this->components->error('Failed to copy synapps folder');
