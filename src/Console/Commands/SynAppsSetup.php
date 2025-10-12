@@ -3,6 +3,7 @@
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use stdClass;
 use VmEngine\Synapse\Services\SynapseUtils;
 
@@ -26,11 +27,11 @@ class SynAppsSetup extends Command
 
     public function handle()
     {
-        $appCode = text(
+        $appCode = Str::snake(text(
             label: 'App code',
             hint: 'Use snake-case',
             required: true
-        );
+        ));
         $appName = text(
             label: 'App name',
             required: true
@@ -86,7 +87,12 @@ class SynAppsSetup extends Command
             'description' => $appDesc,
             'dependencies' => [
                 'npm' => [
-                    'main' => new stdClass,
+                    'main' => [
+                        'jquery' => '^3.7',
+                        '@alpinejs/mask' => '^3.15.0',
+                        '@fortawesome/fontawesome-free' => '^7.1.0',
+                        'flatpickr' => '^4.6.13',
+                    ],
                     'dev' => new stdClass,
                 ],
                 'composer' => [
@@ -114,8 +120,10 @@ class SynAppsSetup extends Command
         );
 
         $this->components->success('Setup complete.');
+        $this->components->warn('Run `vendor:publish --tag="synapse-config"` before using another command.');
         $this->components->info('Run `synapps:discover` and `config:cache` artisan command before migrating.');
         $this->components->info('Run `synapps:patch-resources` before compiling assets');
+        $this->components->info('Remove Laravel default Route in `routes/web.php` to start using Home module as default Route');
         $this->components->info("Don't forget to init Git Repository in synapps folder");
     }
 }
