@@ -29,7 +29,7 @@ class SynAppsSetup extends Command
     {
         $appCode = Str::snake(text(
             label: 'App code',
-            hint: 'Use snake-case',
+            hint: 'Use snake_case',
             required: true
         ));
         $appName = text(
