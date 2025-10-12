@@ -3,8 +3,8 @@
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use stdClass;
+use VmEngine\Synapse\Services\SynapseUtils;
 
 use function Laravel\Prompts\text;
 
@@ -99,7 +99,7 @@ class SynAppsSetup extends Command
         if (! file_exists(base_path('synapps'))) {
             mkdir(base_path('synapps'), 0755);
         }
-        if (! File::copyDirectory(
+        if (! SynapseUtils::copyDirectory(
             __DIR__.'/../../stubs/synapps',
             base_path('synapps')
         )) {
