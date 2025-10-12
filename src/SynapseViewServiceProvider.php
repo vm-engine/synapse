@@ -5,6 +5,7 @@ namespace VmEngine\Synapse;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewServiceProvider;
 use VmEngine\Synapse\Components\Checkboxes;
+use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\Drawer;
@@ -12,6 +13,7 @@ use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\RadioButtons;
 use VmEngine\Synapse\Components\Select;
+use VmEngine\Synapse\Components\Toastr;
 use VmEngine\Synapse\Services\SynapseUtils;
 
 class SynapseViewServiceProvider extends ViewServiceProvider
@@ -42,5 +44,7 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         Blade::component(RadioButtons::class, 'synapse-radio-buttons');
         Blade::component(Checkboxes::class, 'synapse-checkboxes');
         Blade::component(Datepicker::class, 'synapse-datepicker');
+        Blade::component(ConfirmDialog::class, 'synapse-confirm-dialog');
+        Blade::component(Toastr::class, 'synapse-toastr');
     }
 }

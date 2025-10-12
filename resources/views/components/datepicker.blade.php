@@ -1,13 +1,24 @@
-<div class="input-group" wire:ignore>
+<div
+    class="input-group"
+    wire:ignore
+>
     <input
         type="date"
-        x-init="flatpickr($el, Object.assign({}, {{ $flatpickr }}, {
+        x-data="{
+            flatpickrInstance: null,
+            value: @entangle($attributes->wire('model'))
+        }"
+        x-init="flatpickrInstance = flatpickr($el, Object.assign({}, {{ $flatpickr }}, {
+            defaultDate: value || null,
             onChange: function(selectedDates, dateStr, instance) {
-                $el.value = dateStr;
-                $el.dispatchEvent(new Event('input', { bubbles: true }));
-                $el.dispatchEvent(new Event('change', { bubbles: true }));
+                value = dateStr;
             }
-        }))"
+        }));
+        $watch('value', val => {
+            if (flatpickrInstance && val !== flatpickrInstance.input.value) {
+                flatpickrInstance.setDate(val || null, false);
+            }
+        });"
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
     <span class="pointer-events-none input-group-item right">
