@@ -8,7 +8,10 @@
         "composer/semver": "^3.0"
     },
     "require-dev": {
-        "laradumps/laradumps": "^4.0"
+        "laradumps/laradumps": "^4.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "orchestra/testbench": "^10.0"
     },
     "autoload": {
         "psr-4": {
@@ -18,6 +21,11 @@
             "src/helper.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Achmad Ardiansyah",
@@ -25,6 +33,15 @@
         }
     ],
     "minimum-stability": "stable",
+    "scripts": {
+        "test": "pest",
+        "test-coverage": "pest --coverage"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
