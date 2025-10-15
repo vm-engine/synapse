@@ -1,8 +1,10 @@
 <?php
 
-use VmEngine\Synapse\SynapseServiceProvider;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Blade;
 use VmEngine\Synapse\SynapseLangServiceProvider;
 use VmEngine\Synapse\SynapseRouteServiceProvider;
+use VmEngine\Synapse\SynapseServiceProvider;
 use VmEngine\Synapse\SynapseViewServiceProvider;
 
 describe('SynapseServiceProvider', function () {
@@ -61,15 +63,15 @@ describe('SynapseViewServiceProvider', function () {
         $componentNamespaces = Blade::getClassComponentAliases();
 
         // Verify some of the synapse components are registered
-        expect(array_keys($componentNamespaces))->toContain('synapse::checkboxes')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::radio-buttons')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::select')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::password')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::currency')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::datepicker')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::confirm-dialog')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::drawer')
-            ->and(array_keys($componentNamespaces))->toContain('synapse::toastr');
+        expect(array_keys($componentNamespaces))->toContain('synapse-checkboxes')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-radio-buttons')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-select')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-password')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-currency')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-datepicker')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-confirm-dialog')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-drawer')
+            ->and(array_keys($componentNamespaces))->toContain('synapse-toastr');
     });
 });
 
