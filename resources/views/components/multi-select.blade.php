@@ -31,15 +31,18 @@
             <div class="relative flex flex-col items-center">
                 <div
                     class="w-full"
+                    id="multi-select-{{ $name }}"
                     @click="open"
                 >
-                    <div {{ $attributes->merge(['class' => 'form-input shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900'])->only('class') }}>
+                    <div
+                        {{ $attributes->merge(['class' => 'form-input shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900'])->only('class') }}>
                         <div class="flex flex-auto flex-wrap gap-2">
                             <template
                                 x-for="(option,index) in selected"
                                 :key="index"
                             >
-                                <div class="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pr-2 pl-2.5 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800">
+                                <div
+                                    class="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pr-2 pl-2.5 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800">
                                     <div
                                         class="max-w-full flex-initial"
                                         x-model="options[option]"
@@ -119,7 +122,7 @@
                                 x-for="(option,index) in options"
                                 :key="index"
                             >
-                                <div>
+                                <div class="multi-select-item">
                                     <div
                                         class="hover:bg-primary/5 w-full cursor-pointer rounded-t border-b border-gray-200 dark:border-gray-800"
                                         @click="select(index,$event)"
@@ -193,8 +196,12 @@
                     }
 
                     // Dispatch change event for Livewire to pick up
-                    selectEl.dispatchEvent(new Event('input', { bubbles: true }));
-                    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    selectEl.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    selectEl.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
                 }
             },
             loadOptions(el) {

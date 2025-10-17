@@ -29,6 +29,7 @@
 
 <div
     style="display: none;"
+    wire:ignore
     x-data="{
         show: false,
         title: '{{ $title }}',

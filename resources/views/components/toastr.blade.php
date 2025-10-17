@@ -46,19 +46,19 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
         notifications: [],
         displayDuration: 8000,
         soundEffect: false,
-
+    
         addNotification({ variant = 'info', sender = null, title = null, message = null }) {
             const id = Date.now()
             const notification = { id, variant, sender, title, message }
-
+    
             // Keep only the most recent 20 notifications
             if (this.notifications.length >= 20) {
                 this.notifications.splice(0, this.notifications.length - 19)
             }
-
+    
             // Add the new notification to the notifications stack
             this.notifications.push(notification)
-
+    
             if (this.soundEffect) {
                 // Play the notification sound
                 const notificationSound = new Audio('https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3')
@@ -76,7 +76,6 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
         },
     }"
     @notify.window="
-        console.log('Notify event received:', $event.detail);
         addNotification({
             variant: $event.detail.variant || $event.detail[0]?.variant,
             sender: $event.detail.sender || $event.detail[0]?.sender,
@@ -84,8 +83,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
             message: $event.detail.message || $event.detail[0]?.message,
         })
     "
-    x-init="// Show session flash messages on page load
-    @if(session('success'))
+    x-init="@if(session('success'))
     addNotification({ variant: 'success', title: 'Success', message: '{{ addslashes(session('success')) }}' });
     @endif
     @if(session('info'))
@@ -113,7 +111,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Info Notification  -->
                 <template x-if="notification.variant === 'info'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark"
+                        class="pointer-events-auto relative rounded-radius border border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -178,10 +176,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                     class="size-5 shrink-0"
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0
-                                    0
-                                    24
-                                    24
+                                    viewBox="0 0 24 24"
                                     stroke="currentColor"
                                     fill="none"
                                     stroke-width="2"
@@ -200,7 +195,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Success Notification  -->
                 <template x-if="notification.variant === 'success'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark"
+                        class="pointer-events-auto relative rounded-radius border border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -284,7 +279,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Warning Notification  -->
                 <template x-if="notification.variant === 'warning'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark"
+                        class="pointer-events-auto relative rounded-radius border border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -368,7 +363,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Danger Notification  -->
                 <template x-if="notification.variant === 'danger'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark"
+                        class="pointer-events-auto relative rounded-radius border border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -452,7 +447,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Message Notification  -->
                 <template x-if="notification.variant === 'message'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark"
+                        class="pointer-events-auto relative rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
