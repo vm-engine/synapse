@@ -25,8 +25,14 @@ class SynAppsSetup extends Command
      */
     protected $description = 'Setup SynApps folder';
 
-    public function handle()
+    public function handle(): int
     {
+        $key = env('APP_KEY');
+        if (! $key) {
+            $this->components->error('Pleasee run `key:generate` before continue');
+
+            return 1;
+        }
         $appCode = Str::snake(text(
             label: 'App code',
             hint: 'Use snake_case',
@@ -119,11 +125,24 @@ class SynAppsSetup extends Command
             json_encode($appsJson, JSON_PRETTY_PRINT)
         );
 
+        $systemFile = synapps_path('config/system.json');
+        $jsonSystem = json_decode(
+            file_get_contents($systemFile),
+            true
+        );
+        $jsonSystem['laravel_key'] = $key;
+        file_put_contents(
+            $systemFile,
+            json_encode($jsonSystem, JSON_PRETTY_PRINT)
+        );
+
         $this->components->success('Setup complete.');
         $this->components->warn('Run `vendor:publish --tag="synapse-config"` before using another command.');
         $this->components->info('Run `synapps:discover` and `config:cache` artisan command before migrating.');
         $this->components->info('Run `synapps:patch-resources` before compiling assets');
         $this->components->info('Remove Laravel default Route in `routes/web.php` to start using Home module as default Route');
         $this->components->info("Don't forget to init Git Repository in synapps folder");
+
+        return 0;
     }
 }
