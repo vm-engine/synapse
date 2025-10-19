@@ -5,6 +5,7 @@ namespace VmEngine\Synapse\Services\ConfigGenerator;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Apps;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Binding;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Modules;
+use VmEngine\Synapse\Services\ConfigGenerator\Builder\Navigation;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\System;
 
 class Builder
@@ -14,6 +15,7 @@ class Builder
         'system' => System::class,
         'modules' => Modules::class,
         'binding' => Binding::class,
+        'navigation' => Navigation::class,
     ];
 
     protected $builderInstances = [];
@@ -46,7 +48,7 @@ class Builder
     {
         $this->synappsPath = synapps_path();
         $this->mainConfig = json_decode(
-            file_get_contents(__DIR__ . '/../../../config.json'),
+            file_get_contents(__DIR__.'/../../../config.json'),
             true
         );
 
@@ -56,6 +58,10 @@ class Builder
             'binding' => [],
             'modules' => [],
             'modules_ori' => [], // config2 default dari module dan lib (tidak akan masuk ke config AppConfig)
+            'nav' => [
+                'frontend' => [],
+                'backend' => [],
+            ],
         ];
     }
 

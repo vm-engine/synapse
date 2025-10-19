@@ -24,8 +24,8 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/synapse.php' => config_path('synapse.php'),
-                __DIR__.'/../config/synapps.php' => config_path('synapps.php'),
+                __DIR__.'/../stubs/config/synapse.php' => config_path('synapse.php'),
+                __DIR__.'/../stubs/config/synapps.php' => config_path('synapps.php'),
             ], 'synapse-config');
 
             $this->publishes([

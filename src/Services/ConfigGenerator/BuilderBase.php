@@ -6,7 +6,7 @@ class BuilderBase
 {
     protected $synapps;
 
-    public function __construct(&$synapps)
+    public function __construct(Builder &$synapps)
     {
         $this->synapps = $synapps;
     }
