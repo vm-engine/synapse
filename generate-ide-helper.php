@@ -8,8 +8,24 @@
  * by analyzing facades, models, and helper functions from the package
  * and its dependencies.
  *
- * Usage: php generate-ide-helper.php
- * Output: _ide_helper.php
+ * Usage:
+ *   php generate-ide-helper.php
+ *   php generate-ide-helper.php --scan-models=/path/to/models
+ *   php generate-ide-helper.php --scan-models=/path1 --scan-models=/path2
+ *   php generate-ide-helper.php --scan-facades=/path1 --scan-models=/path2,/path3
+ *
+ * Options:
+ *   --scan-models=<path>    Additional path(s) to scan for Eloquent models (comma-separated or multiple flags)
+ *   --scan-facades=<path>   Additional path(s) to scan for custom facades (comma-separated or multiple flags)
+ *   --scan-helpers=<path>   Additional path(s) to scan for helper functions (comma-separated or multiple flags)
+ *   --output=<file>         Output file path (default: _ide_helper.php in current directory)
+ *   --help                  Show this help message
+ *
+ * Default Scan Paths:
+ *   Models:  ./src, ./app/Models, ./vendor/laravel/framework/src/Illuminate/Foundation/Auth
+ *   Helpers: ./src/helper.php
+ *
+ * Output: _ide_helper.php in current working directory (or custom output file)
  */
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -21,9 +37,18 @@ class IdeHelperGenerator
     protected array $models = [];
     protected array $helpers = [];
     protected array $serviceProviders = [];
+    protected array $scanModelPaths = [];
+    protected array $scanFacadePaths = [];
+    protected array $scanHelperPaths = [];
+    protected string $outputFile = '_ide_helper.php';
 
-    public function __construct()
+    public function __construct(array $options = [])
     {
+        // Parse command line options
+        $this->scanModelPaths = $options['scan-models'] ?? [];
+        $this->scanFacadePaths = $options['scan-facades'] ?? [];
+        $this->scanHelperPaths = $options['scan-helpers'] ?? [];
+        $this->outputFile = $options['output'] ?? '_ide_helper.php';
         $this->output = "<?php\n\n";
         $this->output .= "/**\n";
         $this->output .= " * IDE Helper for vm-engine/synapse\n";
@@ -124,18 +149,28 @@ class IdeHelperGenerator
     {
         echo "  → Discovering Eloquent models...\n";
 
-        // Scan src directory for models
-        $srcPath = __DIR__ . '/src';
-        $this->scanForModels($srcPath);
-
-        // Scan vendor for common model locations
-        $vendorPaths = [
+        // Default paths to scan
+        $defaultPaths = [
+            __DIR__ . '/src',
+            __DIR__ . '/app/Models',  // Laravel app Models directory
             __DIR__ . '/vendor/laravel/framework/src/Illuminate/Foundation/Auth',
         ];
 
-        foreach ($vendorPaths as $path) {
-            if (is_dir($path)) {
-                $this->scanForModels($path);
+        // Merge with additional scan paths from options
+        $allPaths = array_merge($defaultPaths, $this->scanModelPaths);
+
+        foreach ($allPaths as $path) {
+            // Support both absolute and relative paths
+            $resolvedPath = $this->resolvePath($path);
+
+            if (is_dir($resolvedPath)) {
+                echo "    → Scanning: {$resolvedPath}\n";
+                $this->scanForModels($resolvedPath);
+            } else {
+                // Only show warning for explicitly provided paths, not default paths
+                if (in_array($path, $this->scanModelPaths)) {
+                    echo "    ⚠ Path not found: {$path}\n";
+                }
             }
         }
     }
@@ -176,22 +211,51 @@ class IdeHelperGenerator
     {
         echo "  → Discovering helper functions...\n";
 
-        $helperFile = __DIR__ . '/src/helper.php';
+        // Default helper file
+        $defaultHelperFiles = [
+            __DIR__ . '/src/helper.php',
+        ];
 
-        if (file_exists($helperFile)) {
-            $content = file_get_contents($helperFile);
+        // Merge with additional helper paths
+        $allHelperFiles = array_merge($defaultHelperFiles, $this->scanHelperPaths);
 
-            // Match function definitions
-            preg_match_all('/function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/s', $content, $matches);
+        foreach ($allHelperFiles as $helperFile) {
+            $resolvedPath = $this->resolvePath($helperFile);
 
-            if (!empty($matches[1])) {
-                foreach ($matches[1] as $index => $functionName) {
+            if (file_exists($resolvedPath)) {
+                echo "    → Scanning: {$resolvedPath}\n";
+                $this->scanForHelpers($resolvedPath);
+            } else {
+                echo "    ⚠ File not found: {$helperFile}\n";
+            }
+        }
+    }
+
+    protected function scanForHelpers(string $filePath): void
+    {
+        $content = file_get_contents($filePath);
+
+        // Match function definitions
+        preg_match_all('/function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/s', $content, $matches);
+
+        if (!empty($matches[1])) {
+            foreach ($matches[1] as $index => $functionName) {
+                // Skip if already discovered
+                $alreadyExists = false;
+                foreach ($this->helpers as $helper) {
+                    if ($helper['name'] === $functionName) {
+                        $alreadyExists = true;
+                        break;
+                    }
+                }
+
+                if (!$alreadyExists) {
                     $params = $matches[2][$index] ?? '';
 
                     $this->helpers[] = [
                         'name' => $functionName,
                         'params' => $params,
-                        'file' => $helperFile,
+                        'file' => $filePath,
                     ];
                 }
             }
@@ -445,9 +509,144 @@ class IdeHelperGenerator
 
     protected function writeFile(): void
     {
-        $outputFile = __DIR__ . '/_ide_helper.php';
+        // Use current working directory instead of script directory
+        $outputFile = $this->resolveOutputPath($this->outputFile);
         file_put_contents($outputFile, $this->output);
+        echo "  → Written to: {$outputFile}\n";
     }
+
+    /**
+     * Resolve output path relative to current working directory
+     */
+    protected function resolveOutputPath(string $path): string
+    {
+        // If already absolute, return as is
+        if (str_starts_with($path, '/') || preg_match('/^[A-Z]:/i', $path)) {
+            return $path;
+        }
+
+        // Resolve relative to current working directory (where command is executed)
+        return getcwd() . DIRECTORY_SEPARATOR . ltrim($path, './' . DIRECTORY_SEPARATOR);
+    }
+
+    /**
+     * Resolve path to absolute path
+     * Supports both absolute and relative paths
+     */
+    protected function resolvePath(string $path): string
+    {
+        // If already absolute, return as is
+        if (str_starts_with($path, '/') || preg_match('/^[A-Z]:/i', $path)) {
+            return $path;
+        }
+
+        // Resolve relative to current directory
+        return __DIR__ . '/' . ltrim($path, './');
+    }
+
+    /**
+     * Show help message
+     */
+    public static function showHelp(): void
+    {
+        echo <<<HELP
+Universal IDE Helper Generator for vm-engine/synapse
+
+Usage:
+  php generate-ide-helper.php [options]
+
+Options:
+  --scan-models=<path>      Additional path(s) to scan for Eloquent models
+                            Can be used multiple times or comma-separated
+                            Examples:
+                              --scan-models=/path/to/models
+                              --scan-models=/path1,/path2
+                              --scan-models=/path1 --scan-models=/path2
+
+  --scan-facades=<path>     Additional path(s) to scan for custom facades
+                            (Currently scaffolded for future implementation)
+
+  --scan-helpers=<path>     Additional path(s) to scan for helper files
+                            Can be used multiple times or comma-separated
+                            Examples:
+                              --scan-helpers=/app/helpers.php
+                              --scan-helpers=/app/helpers.php,/app/custom_helpers.php
+
+  --output=<file>           Output file path (default: _ide_helper.php)
+                            Examples:
+                              --output=custom_ide_helper.php
+                              --output=/path/to/_ide_helper.php
+
+  --help                    Show this help message
+
+Examples:
+  # Basic usage (scans default paths)
+  php generate-ide-helper.php
+
+  # Scan additional model directories
+  php generate-ide-helper.php --scan-models=../app/Models
+
+  # Scan multiple paths
+  php generate-ide-helper.php --scan-models=/path1 --scan-models=/path2
+
+  # Scan with custom output
+  php generate-ide-helper.php --scan-models=/app/Models --output=custom_helper.php
+
+  # Scan models and helpers
+  php generate-ide-helper.php \\
+    --scan-models=/app/Models,/modules/*/Models \\
+    --scan-helpers=/app/helpers.php,/modules/*/helpers.php
+
+Default Scan Paths:
+  Models:  ./src, ./app/Models, ./vendor/laravel/framework/src/Illuminate/Foundation/Auth
+  Helpers: ./src/helper.php
+
+Output Location:
+  The generated file is placed in the current working directory (where you run the command)
+  Use --output with absolute path to specify a different location
+
+HELP;
+    }
+}
+
+/**
+ * Parse command line arguments
+ */
+function parseArguments(array $argv): array
+{
+    $options = [
+        'scan-models' => [],
+        'scan-facades' => [],
+        'scan-helpers' => [],
+        'output' => '_ide_helper.php',
+        'help' => false,
+    ];
+
+    for ($i = 1; $i < count($argv); $i++) {
+        $arg = $argv[$i];
+
+        if ($arg === '--help' || $arg === '-h') {
+            $options['help'] = true;
+            continue;
+        }
+
+        // Parse --option=value format
+        if (str_starts_with($arg, '--')) {
+            $parts = explode('=', $arg, 2);
+            $key = ltrim($parts[0], '-');
+            $value = $parts[1] ?? '';
+
+            if ($key === 'scan-models' || $key === 'scan-facades' || $key === 'scan-helpers') {
+                // Support comma-separated values
+                $paths = array_filter(array_map('trim', explode(',', $value)));
+                $options[$key] = array_merge($options[$key], $paths);
+            } elseif ($key === 'output') {
+                $options['output'] = $value;
+            }
+        }
+    }
+
+    return $options;
 }
 
 // Run the generator
@@ -457,12 +656,43 @@ echo "║   Package: vm-engine/synapse                      ║\n";
 echo "╚════════════════════════════════════════════════════╝\n\n";
 
 try {
-    $generator = new IdeHelperGenerator();
+    // Parse command line arguments
+    $options = parseArguments($argv);
+
+    // Show help if requested
+    if ($options['help']) {
+        IdeHelperGenerator::showHelp();
+        exit(0);
+    }
+
+    // Show configuration
+    if (!empty($options['scan-models']) || !empty($options['scan-helpers']) || $options['output'] !== '_ide_helper.php') {
+        echo "Configuration:\n";
+        if (!empty($options['scan-models'])) {
+            echo "  Additional model paths:\n";
+            foreach ($options['scan-models'] as $path) {
+                echo "    - {$path}\n";
+            }
+        }
+        if (!empty($options['scan-helpers'])) {
+            echo "  Additional helper paths:\n";
+            foreach ($options['scan-helpers'] as $path) {
+                echo "    - {$path}\n";
+            }
+        }
+        if ($options['output'] !== '_ide_helper.php') {
+            echo "  Output file: {$options['output']}\n";
+        }
+        echo "\n";
+    }
+
+    $generator = new IdeHelperGenerator($options);
     $generator->generate();
 
-    echo "\n✓ Done! Add _ide_helper.php to your IDE for better autocompletion.\n";
+    echo "\n✓ Done! Add {$options['output']} to your IDE for better autocompletion.\n";
     echo "  Don't forget to add it to .gitignore if not already present.\n";
 } catch (Exception $e) {
     echo "✗ Error: " . $e->getMessage() . "\n";
+    echo "\nRun with --help for usage information.\n";
     exit(1);
 }

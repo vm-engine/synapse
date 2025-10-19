@@ -9,6 +9,7 @@ use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Services\SynapseUtils;
+use VmEngine\Synapse\Services\SyNav;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -57,6 +58,9 @@ class SynapseServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('synav', function ($app) {
+            return new SyNav;
+        });
         if (SynapseUtils::isSynAppsAutoloaded()) {
             $this->bindAlias();
             $this->bindPublicPath();

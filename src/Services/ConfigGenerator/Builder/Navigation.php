@@ -13,6 +13,7 @@ class Navigation extends BuilderBase
             $backendNav['position'] = count($this->synapps->config['nav']['backend']);
         }
         $this->synapps->config['nav']['backend'][$namespace] = $backendNav;
+        unset($this->synapps->config['modules'][$namespace]['nav']['backend']);
     }
 
     public function postLoop()

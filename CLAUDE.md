@@ -885,8 +885,173 @@ Toast notification component for user feedback.
 <x-synapse::toastr />
 ```
 
+## IDE Helper Generator
+
+**Script:** `generate-ide-helper.php`
+**Location:** Package root
+
+Generates PHPDoc annotations for better IDE autocompletion by analyzing facades, models, and helper functions.
+
+### Usage
+
+```bash
+# Basic usage (from Laravel root)
+cd /path/to/laravel
+php packages/synapse/generate-ide-helper.php
+
+# With additional model paths
+php packages/synapse/generate-ide-helper.php \
+  --scan-models=synapps/modules/home/Models \
+  --scan-models=synapps/modules/users/Models
+
+# With helper files
+php packages/synapse/generate-ide-helper.php \
+  --scan-helpers=app/helpers.php
+
+# Custom output location
+php packages/synapse/generate-ide-helper.php \
+  --output=/custom/path/_ide_helper.php
+
+# Show help
+php packages/synapse/generate-ide-helper.php --help
+```
+
+### What It Does
+
+1. **Scans for Models** (default paths):
+   - `./src` (package models)
+   - `./app/Models` (Laravel app models - automatic!)
+   - `./vendor/laravel/framework/.../Auth` (Laravel auth models)
+
+2. **Scans for Helpers** (default paths):
+   - `./src/helper.php` (package helpers)
+
+3. **Generates PHPDoc for**:
+   - All Laravel core facades (App, Artisan, Auth, Blade, Cache, etc.)
+   - Livewire facade (if installed)
+   - Eloquent models with query builder methods
+   - Helper functions with parameter signatures
+
+4. **Outputs**: `_ide_helper.php` in current working directory
+
+### Command Line Options
+
+- `--scan-models=<path>` - Additional model directories (comma-separated or multiple flags)
+- `--scan-helpers=<path>` - Additional helper files (comma-separated or multiple flags)
+- `--output=<file>` - Output file path (default: `_ide_helper.php`)
+- `--help` - Show help message
+
+### Output Location Behavior
+
+The generated file is placed in the **current working directory** (where you run the command), using `getcwd()` instead of script directory. This is intentional and follows standard CLI tool conventions.
+
+**Recommended:** Always run from Laravel root:
+```bash
+cd /path/to/laravel
+php packages/synapse/generate-ide-helper.php
+# Creates: /path/to/laravel/_ide_helper.php
+```
+
+### Features (V2)
+
+- ✅ Automatically scans `app/Models` (no manual specification needed)
+- ✅ Output placed in current directory (intuitive CLI behavior)
+- ✅ Supports multiple model paths via flags or comma-separated
+- ✅ Supports multiple helper files
+- ✅ Custom output location via `--output`
+- ✅ Silent skipping of missing default paths (no noise)
+- ✅ Comprehensive help via `--help`
+
+See [IDE_HELPER.md](IDE_HELPER.md) for complete documentation.
+
+## Testing
+
+The package includes comprehensive test coverage using **PestPHP 3.x**.
+
+### Test Structure
+
+```
+tests/
+├── Feature/                          # Integration tests
+│   ├── Commands/
+│   │   └── SynAppsCommandsTest.php
+│   └── ModuleDiscoveryTest.php
+├── Unit/                             # Unit tests
+│   ├── Components/
+│   │   └── BladeComponentsTest.php
+│   ├── Services/
+│   │   ├── Helper/
+│   │   │   └── BreadcrumbsTest.php
+│   │   ├── ConfigGenerator/
+│   │   │   ├── BuilderTest.php
+│   │   │   └── BuilderBaseTest.php
+│   │   ├── ConfigGeneratorsTest.php
+│   │   └── SynapseUtilsTest.php
+│   ├── HelperFunctionsTest.php
+│   └── ServiceProvidersTest.php
+├── Pest.php
+└── TestCase.php
+```
+
+### Running Tests
+
+```bash
+# All tests
+composer test
+
+# With coverage
+composer test-coverage
+
+# Specific suite
+./vendor/bin/pest tests/Unit
+./vendor/bin/pest tests/Feature
+
+# Specific file
+./vendor/bin/pest tests/Unit/HelperFunctionsTest.php
+
+# Filter by name
+./vendor/bin/pest --filter="breadcrumbs"
+```
+
+### Test Coverage (400+ tests)
+
+**Unit Tests:**
+- Helper functions (195+ tests) - All global helpers in `src/helper.php`
+- Breadcrumbs service (16 tests) - Navigation builder
+- SynapseUtils (23 tests) - Utility methods
+- ConfigGenerator builders (21 tests) - Config generation system
+- Config generators (30 tests) - SynapseConfigGenerator & SynAppsConfigGenerator
+- Blade components (70+ tests) - All 10 UI components
+- Service providers (10 tests) - Provider registration
+
+**Feature Tests:**
+- Artisan commands (9 tests) - synapps:patch-resources, synapps:discover, synapps:setup
+- Module discovery (23 tests) - Integration tests for module system
+
+**Test Infrastructure:**
+- Uses **Orchestra Testbench** for package testing
+- In-memory SQLite for fast database tests
+- Helper methods in TestCase for module creation/cleanup
+- GitHub Actions workflow ready
+
+### Test Configuration
+
+- `phpunit.xml` - PHPUnit/Pest configuration
+- `tests/Pest.php` - Pest setup and expectations
+- `tests/TestCase.php` - Base test case with helpers
+- Coverage target: ~85%
+
+See [TESTING.md](TESTING.md) for complete testing documentation.
+
 ## Dependencies
 
 - Laravel Framework 12.x
 - Livewire 3.x
 - composer/semver ^3.0 (for dependency version comparison)
+
+### Dev Dependencies
+
+- pestphp/pest ^3.0
+- pestphp/pest-plugin-laravel ^3.0
+- orchestra/testbench ^10.0
+- laradumps/laradumps ^4.0

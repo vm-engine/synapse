@@ -28,3 +28,15 @@ if (! function_exists('is_decimal')) {
         return is_numeric($value) && floor($value) != $value;
     }
 }
+
+if (! function_exists('synav')) {
+    /**
+     * SyNav Helper function
+     *
+     * @return VmEngine\Synapse\Services\SyNav
+     */
+    function synav()
+    {
+        return app('synav');
+    }
+}

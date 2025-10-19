@@ -511,11 +511,62 @@ This package is proprietary software developed by VM Engine.
 
 For issues and questions, please contact the VM Engine development team.
 
+## IDE Helper Generator
+
+Generate PHPDoc annotations for better IDE autocompletion:
+
+```bash
+# Navigate to Laravel root
+cd /path/to/laravel
+
+# Generate IDE helper
+php packages/synapse/generate-ide-helper.php
+```
+
+**What it does:**
+- ✅ Scans `packages/synapse/src` for package models
+- ✅ Scans `app/Models` for application models (automatic!)
+- ✅ Generates PHPDoc for Laravel facades
+- ✅ Outputs to `_ide_helper.php` in current directory
+
+**For modular apps:**
+```bash
+php packages/synapse/generate-ide-helper.php \
+  --scan-models=synapps/modules/home/Models \
+  --scan-models=synapps/modules/users/Models
+```
+
+See [IDE_HELPER.md](IDE_HELPER.md) for complete documentation.
+
+## Testing
+
+This package includes comprehensive test coverage using PestPHP:
+
+```bash
+# Run all tests
+composer test
+
+# Run with coverage
+composer test-coverage
+
+# Run specific test suite
+./vendor/bin/pest tests/Unit
+./vendor/bin/pest tests/Feature
+```
+
+**Test Coverage:**
+- Helper functions (195+ tests)
+- Services (Breadcrumbs, SynapseUtils, ConfigGenerators)
+- Blade components (all 10 components)
+- Service providers
+- Artisan commands
+- Module discovery
+
+See [TESTING.md](TESTING.md) for complete testing documentation.
+
 ## Additional Documentation
 
-For detailed technical documentation, see [CLAUDE.md](CLAUDE.md) which includes:
-- Architecture details
-- ConfigGenerator subsystem
-- Builder pattern implementation
-- Service provider registration flow
-- All available components and helpers
+For detailed technical documentation, see:
+- **[CLAUDE.md](CLAUDE.md)** - Architecture, ConfigGenerator, Builder pattern, Service providers
+- **[IDE_HELPER.md](IDE_HELPER.md)** - IDE helper generator complete guide
+- **[TESTING.md](TESTING.md)** - Comprehensive testing guide with 400+ test cases
