@@ -885,6 +885,96 @@ Toast notification component for user feedback.
 <x-synapse::toastr />
 ```
 
+#### Alert
+**Class:** `VmEngine\Synapse\Components\Alert`
+**View:** `synapse::components.alert`
+
+Flexible alert component with multiple variants and dismissible functionality using Alpine.js.
+
+**Props:**
+- `type` (string, default: 'info') - Alert type: `'success'`, `'warning'`, `'danger'`, `'error'`, `'info'`
+- `title` (string, optional) - Optional alert title
+- `message` (string, optional) - Alert message text (can also use slot for HTML content)
+- `dismissible` (boolean, default: true) - Whether alert can be closed
+- `icon` (string, auto-assigned) - FontAwesome icon class (auto-assigned based on type if not provided)
+- `border` (boolean, default: false) - Show left border accent
+- `solid` (boolean, default: false) - Use solid background instead of light variant
+
+**Features:**
+- Auto-assigns icons based on alert type
+- Smooth show/hide animations with Alpine.js
+- Full dark mode support
+- Supports both props and slot content
+- Border and solid style variants
+- ARIA accessibility attributes
+
+**Default Icons by Type:**
+- Success: `fa-solid fa-circle-check`
+- Warning: `fa-solid fa-triangle-exclamation`
+- Danger/Error: `fa-solid fa-circle-exclamation`
+- Info: `fa-solid fa-circle-info`
+
+**Usage:**
+```blade
+<!-- Basic alert -->
+<x-synapse::alert type="success" message="Operation completed successfully!" />
+
+<!-- Alert with title and message -->
+<x-synapse::alert
+    type="warning"
+    title="Warning"
+    message="Please review your changes before submitting." />
+
+<!-- Non-dismissible alert -->
+<x-synapse::alert
+    type="danger"
+    :dismissible="false"
+    message="This is a critical error that requires attention." />
+
+<!-- Border accent style -->
+<x-synapse::alert
+    type="info"
+    :border="true"
+    message="Information with border accent" />
+
+<!-- Solid background style -->
+<x-synapse::alert
+    type="success"
+    :solid="true"
+    message="Solid background variant" />
+
+<!-- Custom HTML content with slot -->
+<x-synapse::alert type="info" title="Getting Started">
+    <p>Welcome! Check out <a href="/docs" class="underline">our documentation</a>.</p>
+    <ul class="list-disc list-inside mt-2">
+        <li>Feature 1</li>
+        <li>Feature 2</li>
+    </ul>
+</x-synapse::alert>
+
+<!-- Custom icon -->
+<x-synapse::alert
+    type="success"
+    icon="fa-solid fa-check-double"
+    message="Verified successfully!" />
+
+<!-- Flash messages -->
+@if(session('success'))
+    <x-synapse::alert type="success" :message="session('success')" />
+@endif
+
+<!-- Validation errors -->
+@if($errors->any())
+    <x-synapse::alert type="danger" title="Validation Errors">
+        <ul class="list-disc list-inside space-y-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </x-synapse::alert>
+@endif
+```
+
 ## IDE Helper Generator
 
 **Script:** `generate-ide-helper.php`

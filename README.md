@@ -321,6 +321,108 @@ Toast notifications for user feedback:
 
 Place this component in your layout file to enable toast notifications throughout your application.
 
+#### Alert
+
+Flexible alert component with dismissible functionality:
+
+```blade
+<!-- Basic alert -->
+<x-synapse::alert type="success" message="Operation completed successfully!" />
+
+<!-- Alert with title -->
+<x-synapse::alert
+    type="warning"
+    title="Warning"
+    message="Please review your changes before submitting." />
+
+<!-- Non-dismissible alert -->
+<x-synapse::alert
+    type="danger"
+    :dismissible="false"
+    message="This is a critical error." />
+
+<!-- Border accent style -->
+<x-synapse::alert
+    type="info"
+    :border="true"
+    message="Information with border accent" />
+
+<!-- Solid background style -->
+<x-synapse::alert
+    type="success"
+    :solid="true"
+    message="Solid background variant" />
+
+<!-- Custom HTML content using slot -->
+<x-synapse::alert type="info" title="Getting Started">
+    <p>Welcome! Check out <a href="/docs" class="underline">our documentation</a>.</p>
+    <ul class="list-disc list-inside mt-2">
+        <li>Feature 1</li>
+        <li>Feature 2</li>
+    </ul>
+</x-synapse::alert>
+
+<!-- Custom icon -->
+<x-synapse::alert
+    type="success"
+    icon="fa-solid fa-check-double"
+    message="Verified successfully!" />
+```
+
+**Props:**
+- `type` (string, default: 'info') - Alert type: `'success'`, `'warning'`, `'danger'`, `'error'`, `'info'`
+- `title` (string, optional) - Alert title
+- `message` (string, optional) - Alert message (can also use slot for HTML)
+- `dismissible` (boolean, default: true) - Whether alert can be closed
+- `icon` (string, auto-assigned) - FontAwesome icon class (auto-assigned based on type)
+- `border` (boolean, default: false) - Show left border accent
+- `solid` (boolean, default: false) - Use solid background instead of light variant
+
+**Features:**
+- 4 alert types with auto-assigned icons (success, warning, danger, info)
+- Dismissible with Alpine.js smooth animations
+- Dark mode support
+- Supports both props and slot content
+- Border and solid style variants
+- Accessible with ARIA attributes
+
+**Default Icons:**
+- Success: `fa-solid fa-circle-check`
+- Warning: `fa-solid fa-triangle-exclamation`
+- Danger/Error: `fa-solid fa-circle-exclamation`
+- Info: `fa-solid fa-circle-info`
+
+**Common Use Cases:**
+
+```blade
+<!-- Flash messages -->
+@if(session('success'))
+    <x-synapse::alert type="success" :message="session('success')" />
+@endif
+
+@if(session('error'))
+    <x-synapse::alert type="danger" :message="session('error')" />
+@endif
+
+<!-- Validation errors -->
+@if($errors->any())
+    <x-synapse::alert type="danger" title="Validation Errors">
+        <ul class="list-disc list-inside space-y-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </x-synapse::alert>
+@endif
+
+<!-- Multiple alerts -->
+<div class="space-y-4">
+    <x-synapse::alert type="success" message="Payment received." />
+    <x-synapse::alert type="warning" message="Subscription expires in 3 days." />
+    <x-synapse::alert type="info" message="New features available." />
+</div>
+```
+
 ## Helper Functions
 
 Synapse provides global helper functions for common tasks:
