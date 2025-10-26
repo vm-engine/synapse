@@ -40,7 +40,7 @@ class SynapseConfigGenerator
     public static function generate()
     {
         // If the compiled configuration Json file is not exists, return the default empty configurations
-        if (!self::hasCompiledConfigFile()) {
+        if (! self::hasCompiledConfigFile()) {
             return self::$defaultConfig;
         }
 
@@ -48,7 +48,7 @@ class SynapseConfigGenerator
         $system = self::loadCompiledConfigFile('system');
         $apps = self::loadCompiledConfigFile('apps');
 
-        if (!$system || !$apps) {
+        if (! $system || ! $apps) {
             return self::$defaultConfig;
         }
 
@@ -66,13 +66,14 @@ class SynapseConfigGenerator
      * Check if compiled Json configuration file already exists
      * If the folder does not exists, it will be created
      *
-     * @return boolean
+     * @return bool
      */
     public static function hasCompiledConfigFile()
     {
-        if (!file_exists(base_path('synapps/config/compiled'))) {
+        if (! file_exists(base_path('synapps/config/compiled'))) {
             mkdir(base_path('synapps/config/compiled'), 0775, true);
         }
+
         return file_exists(base_path('synapps/config/compiled/apps.json')) &&
             file_exists(base_path('synapps/config/compiled/system.json'));
     }
@@ -80,12 +81,12 @@ class SynapseConfigGenerator
     /**
      * Load the compiled configuration Json file
      *
-     * @param string $file
+     * @param  string  $file
      * @return array|null
      */
     private static function loadCompiledConfigFile($file = 'client')
     {
-        $filePath = base_path('synapps/config/compiled/' . $file . '.json');
+        $filePath = base_path('synapps/config/compiled/'.$file.'.json');
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
 
@@ -98,7 +99,7 @@ class SynapseConfigGenerator
     /**
      * Set Base Array of paths to look up
      *
-     * @param array $config Config Pointer
+     * @param  array  $config  Config Pointer
      * @return void
      */
     private static function setGeneralNamespaces(&$config)
@@ -108,9 +109,9 @@ class SynapseConfigGenerator
             false,  // no prefix
         ];
         $config['namespaces']['general']['SynModule'] = [
-            base_path('vendor' . DS . '*'),
-            // prefix with synmod-, synmodule- or synapp-
-            ['synmod-', 'synmodule-', 'synapp-'],
+            base_path('vendor'.DS.'*'),
+            // prefix with synmod-, synmodule- or synapps-
+            ['synmod-', 'synmodule-', 'synapps-'],
         ];
     }
 
@@ -146,15 +147,15 @@ class SynapseConfigGenerator
 
         $viewPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'resources' . DS . 'views',
+            'resources'.DS.'views',
             function ($namespace, $path, $moduleName, $modulePath, $namespaceValue) {
                 return [$path, Str::slug($moduleName, '-')];
             }
         );
-        $viewPaths[] = [synapps_path('resources' . DS . 'views'), 'synapps'];
+        $viewPaths[] = [synapps_path('resources'.DS.'views'), 'synapps'];
         $viewPaths[] = [
-            realpath(__DIR__ . DS . '..' . DS . '..' . DS . 'resources' . DS . 'views'),
-            'synapse'
+            realpath(__DIR__.DS.'..'.DS.'..'.DS.'resources'.DS.'views'),
+            'synapse',
         ];
 
         $config['lang_path'] = ['general' => $langPaths];
@@ -165,13 +166,13 @@ class SynapseConfigGenerator
     {
         $migrationPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database' . DS . 'migrations'
+            'database'.DS.'migrations'
         );
         $seedPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
-            'database' . DS . 'seeders',
+            'database'.DS.'seeders',
             function ($namespace, $resourcePath, $moduleName, $modulePath, $namespaceValue) {
-                return $resourcePath . DS . 'seeders.php';
+                return $resourcePath.DS.'seeders.php';
             }
         );
 

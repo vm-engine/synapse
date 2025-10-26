@@ -3,3 +3,4 @@ composer.lock
 .php-cs-fixer.cache
 .phpactor.json
 _ide_helper.php
+.phpunit.cache/
