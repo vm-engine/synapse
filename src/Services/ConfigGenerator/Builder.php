@@ -3,6 +3,7 @@
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Apps;
+use VmEngine\Synapse\Services\ConfigGenerator\Builder\Auth;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Binding;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Modules;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Navigation;
@@ -16,6 +17,7 @@ class Builder
         'modules' => Modules::class,
         'binding' => Binding::class,
         'navigation' => Navigation::class,
+        'auth' => Auth::class,
     ];
 
     protected $builderInstances = [];
