@@ -136,6 +136,8 @@ class SynAppsSetup extends Command
             json_encode($jsonSystem, JSON_PRETTY_PRINT)
         );
 
+        $this->callSilently('synapps:link-errors');
+
         $this->components->success('Setup complete.');
         $this->components->warn('Run `vendor:publish --tag="synapse-config"` before using another command.');
         $this->components->info('Run `synapps:discover` and `config:cache` artisan command before migrating.');

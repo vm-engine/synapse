@@ -258,6 +258,215 @@ Resource files patched.
 - Inserts imports strategically after existing imports to maintain load order
 - Does not modify or remove existing imports
 
+### Test Configuration: synapps:patch-tests
+**Class:** `VmEngine\Synapse\Console\Commands\SynAppsPatchTests`
+**Signature:** `php artisan synapps:patch-tests`
+
+Comprehensive test configuration command that sets up everything needed for proper testing with in-memory database and module discovery. This command patches three key files: `tests/Pest.php`, `.env.testing`, and `composer.json`.
+
+#### What it Does
+
+**1. Patches `tests/Pest.php`** (Module Test Discovery)
+   - Checks if `tests/Pest.php` exists
+   - Locates the `pest()->extend()->in()` chain (with or without `->use()`)
+   - Adds paths for directory-based modules: `../synapps/modules/*/tests/Feature` and `../synapps/modules/*/tests/Browser`
+   - Adds paths for package modules: `../vendor/*/synmod-*/tests/`, `../vendor/*/synmodule-*/tests/`, `../vendor/*/synapps-*/tests/`
+   - Adds `'Browser'` directory for Pest Browser Testing
+   - Removes duplicates automatically
+   - Preserves all existing paths and configuration
+
+**2. Creates/Updates `.env.testing`** (In-Memory Database Configuration)
+   - Creates `.env.testing` file if it doesn't exist
+   - Configures in-memory SQLite database: `DB_DATABASE=:memory:`
+   - Sets test-specific configurations: `CACHE_STORE=array`, `QUEUE_CONNECTION=sync`, etc.
+   - Prevents tests from touching actual database
+   - If file exists, checks if database configuration is correct
+
+**3. Updates `composer.json` Test Script** (Proper Test Workflow)
+   - Ensures test script includes: `config:clear`, `config:cache`, and `test --env=testing`
+   - Adds `--env=testing` flag to ensure `.env.testing` is loaded
+   - Maintains other composer scripts unchanged
+   - Only updates if test script exists and needs modification
+
+#### Module Test Paths Added
+
+```php
+pest()->extend(Tests\TestCase::class)
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in(
+        'Feature',
+        'Browser',
+        '../synapps/modules/*/tests/Feature',
+        '../vendor/*/synmod-*/tests/Feature',
+        '../vendor/*/synmodule-*/tests/Feature',
+        '../vendor/*/synapps-*/tests/Feature',
+        '../synapps/modules/*/tests/Browser',
+        '../vendor/*/synmod-*/tests/Browser',
+        '../vendor/*/synmodule-*/tests/Browser',
+        '../vendor/*/synapps-*/tests/Browser'
+    );
+```
+
+#### When to Run
+
+Run this command:
+- After fresh installation of Synapse package
+- After creating your first module with tests
+- If module tests are not being discovered by Pest
+- After resetting `tests/Pest.php` to defaults
+
+#### Output Examples
+
+**First-time setup (all files created/updated):**
+```
+✓ tests/Pest.php patched successfully!
+✓ .env.testing created/updated successfully!
+✓ composer.json test script updated successfully!
+
+✓ Test configuration completed successfully!
+ℹ ✓ tests/Pest.php - Module paths added
+ℹ ✓ .env.testing - In-memory database configured
+ℹ ✓ composer.json - Test script updated
+```
+
+**Already configured:**
+```
+ℹ tests/Pest.php is already patched with module paths.
+ℹ .env.testing already configured correctly.
+ℹ composer.json test script already configured correctly.
+
+✓ Test configuration completed successfully!
+ℹ ✓ tests/Pest.php - Module paths added
+ℹ ✓ .env.testing - In-memory database configured
+ℹ ✓ composer.json - Test script updated
+```
+
+**Partial configuration (some files need updating):**
+```
+ℹ tests/Pest.php is already patched with module paths.
+✓ .env.testing created/updated successfully!
+ℹ composer.json test script already configured correctly.
+
+✓ Test configuration completed successfully!
+ℹ ✓ tests/Pest.php - Module paths added
+ℹ ✓ .env.testing - In-memory database configured
+ℹ ✓ composer.json - Test script updated
+```
+
+#### Usage
+
+```bash
+# Patch tests/Pest.php to include module paths
+php artisan synapps:patch-tests
+
+# Safe to run multiple times (idempotent)
+php artisan synapps:patch-tests
+php artisan synapps:patch-tests  # Will detect already patched
+```
+
+#### How It Works
+
+The command uses regex pattern matching to:
+1. Find the `pest()->extend()->use()->in(...)` chain
+2. Parse existing paths from the `->in()` method
+3. Merge module paths with existing paths (avoiding duplicates)
+4. Rebuild the configuration with proper formatting
+5. Write back to `tests/Pest.php`
+
+#### Notes
+- **Idempotent:** Safe to run multiple times - detects what's already configured and skips unnecessary changes
+- **Preserves existing paths:** All original test paths in `tests/Pest.php` are kept
+- **Non-destructive:** Only adds/updates necessary configuration, never removes existing settings
+- **Proper formatting:** Maintains consistent indentation and structure in all files
+- **Critical for testing:** Ensures tests use in-memory database and never touch actual database
+- Module tests must follow the standard structure: `{module}/tests/Feature/` and `{module}/tests/Browser/`
+
+#### Files Created/Modified
+
+1. **tests/Pest.php** - Adds module test paths
+2. **.env.testing** - Creates with in-memory database configuration
+3. **composer.json** - Updates test script with proper flags
+
+### Error Pages Linking: synapps:link-errors
+**Class:** `VmEngine\Synapse\Console\Commands\SynAppsLinkErrors`
+**Signature:** `php artisan synapps:link-errors`
+
+Creates a link from Laravel's `resources/views/errors` to `synapps/resources/views/errors` so Laravel automatically uses custom error pages from the synapps directory.
+
+#### What it Does
+
+1. **Validates Source Directory**
+   - Checks if `synapps/resources/views/errors` exists
+   - Displays error if source directory is missing
+
+2. **Removes Existing Link/Directory**
+   - Automatically removes any existing link, junction, or directory at `resources/views/errors`
+   - Handles symlinks, Windows junctions, and regular directories
+   - Clears PHP file stat cache to ensure accurate detection
+
+3. **Creates New Link**
+   - **Tries symlink first** - Works on Linux/Mac, or Windows with administrator privileges
+   - **Falls back to Windows junction** - On Windows without admin rights (most common scenario)
+   - Junctions don't require administrator privileges on Windows
+
+4. **Cross-Platform Support**
+   - Unix/Linux: Creates standard symlink
+   - macOS: Creates standard symlink
+   - Windows (with admin): Creates symlink
+   - Windows (without admin): Creates junction using `mklink /J`
+
+#### When to Run
+
+Run this command:
+- After creating custom error pages in `synapps/resources/views/errors`
+- After modifying error page templates in synapps
+- To refresh the link if it becomes broken or outdated
+- During initial project setup to integrate custom error handling
+
+#### Output Examples
+
+**Successful link creation:**
+```
+ℹ Existing link/directory found. Removing...
+ℹ Symlink failed, trying Windows junction...
+✓ Link created successfully!
+ℹ resources/views/errors → synapps/resources/views/errors
+```
+
+**Source directory missing:**
+```
+✗ Source directory does not exist: /path/to/synapps/resources/views/errors
+ℹ Please ensure synapps/resources/views/errors directory exists first.
+```
+
+#### Usage
+
+```bash
+# Create/refresh error pages link
+php artisan synapps:link-errors
+
+# Safe to run multiple times (idempotent)
+php artisan synapps:link-errors
+php artisan synapps:link-errors  # Will remove and recreate
+```
+
+#### How Laravel Uses Error Views
+
+Once linked, Laravel automatically uses error pages from `synapps/resources/views/errors/` when:
+- HTTP 404 (Not Found) occurs
+- HTTP 403 (Forbidden) occurs
+- HTTP 500 (Internal Server Error) occurs
+- HTTP 503 (Service Unavailable) occurs
+- HTTP 419 (Page Expired / CSRF Token Mismatch) occurs
+- Any other HTTP error with a corresponding `{code}.blade.php` file
+
+#### Notes
+- **Idempotent:** Safe to run multiple times - automatically removes and recreates link
+- **No admin required on Windows:** Uses junctions which don't need elevated privileges
+- **Preserves original files:** The command creates a link, not a copy - changes in synapps are immediately reflected
+- **Automatic fallback:** Tries the best method for your OS automatically
+- Custom error pages should be created in `synapps/resources/views/errors/` before running this command
+
 ## Architecture
 
 ### Configuration System

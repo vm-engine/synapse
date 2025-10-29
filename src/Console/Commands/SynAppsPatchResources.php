@@ -25,8 +25,10 @@ class SynAppsPatchResources extends Command
      */
     public function handle()
     {
-        $jsLine = "import '" . addslashes(synapps_path('resources' . DS . 'js' . DS . 'synapps.js')) . "';";
-        $cssLine = "@import '" . addslashes(synapps_path('resources' . DS . 'css' . DS . 'synapps.css')) . "';";
+        // $jsLine = "import '" . addslashes(synapps_path('resources' . DS . 'js' . DS . 'synapps.js')) . "';";
+        // $cssLine = "@import '" . addslashes(synapps_path('resources' . DS . 'css' . DS . 'synapps.css')) . "';";
+        $jsLine = "import '../../synapps/resources/js/synapps.js';";
+        $cssLine = "@import '../../synapps/resources/css/synapps.css';";
 
         $jsPatched = false;
         $jsLines = file(resource_path('js/app.js'));
@@ -42,7 +44,7 @@ class SynAppsPatchResources extends Command
             $jsPatched = true;
         }
         if ($jsPatched || empty($jsLines)) {
-            array_splice($jsLines, $lastImportJs + 1, 0, $jsLine . "\n");
+            array_splice($jsLines, $lastImportJs + 1, 0, $jsLine."\n");
             file_put_contents(resource_path('js/app.js'), implode("\n", $jsLines));
             $jsPatched = true;
         }
@@ -61,7 +63,7 @@ class SynAppsPatchResources extends Command
             $cssPatched = true;
         }
         if ($cssPatched || empty($cssLines)) {
-            array_splice($cssLines, $lastImportCss + 1, 0, $cssLine . "\n");
+            array_splice($cssLines, $lastImportCss + 1, 0, $cssLine."\n");
             file_put_contents(resource_path('css/app.css'), implode('', $cssLines));
             $cssPatched = true;
         }
