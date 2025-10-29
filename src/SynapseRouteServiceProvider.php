@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use VmEngine\Synapse\Services\SynapseUtils;
 
-/**
- *  @SuppressWarnings(PHPMD.StaticAccess) 
- */
 class SynapseRouteServiceProvider extends RouteServiceProvider
 {
     public function boot() {}
@@ -26,9 +23,6 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
         }
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.ElseExpression)
-     */
     protected function registerRoutes()
     {
         $modulePaths = config('synapse.module_path.general', []);
@@ -48,20 +42,27 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
 
         foreach ($modulePaths as $id => $path) {
             $modulePrefix = config(
-                'synapps.modules.' . $id . '.url_prefix',
+                'synapps.modules.'.$id.'.url_prefix',
                 Str::slug($id, '-')
             );
-            $routesPath = rtrim($path, DS) . DS . 'routes' . DS;
+            $routesPath = rtrim($path, DS).DS.'routes'.DS;
             Route::middleware('web')
-                ->name($id . '.')
-                ->prefix($urlPrefix . '/' . $modulePrefix)
-                ->group($routesPath . 'web.php');
+                ->name($id.'.')
+                ->prefix($urlPrefix.'/'.$modulePrefix)
+                ->group($routesPath.'web.php');
 
-            if (file_exists($routesPath . 'api.php')) {
+            // this route will not have url prefixed, used to override global path
+            if (file_exists($routesPath.'web.override.php')) {
+                Route::middleware('web')
+                    ->name($id.'.')
+                    ->group($routesPath.'web.override.php');
+            }
+
+            if (file_exists($routesPath.'api.php')) {
                 Route::middleware('api')
-                    ->name('api.' . $id . '.')
-                    ->prefix($apiPrefix . '/' . $modulePrefix)
-                    ->group($routesPath . 'api.php');
+                    ->name('api.'.$id.'.')
+                    ->prefix($apiPrefix.'/'.$modulePrefix)
+                    ->group($routesPath.'api.php');
             }
         }
     }

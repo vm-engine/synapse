@@ -306,9 +306,16 @@ The package registers **4 service providers** automatically via Laravel package 
 2. **SynapseLangServiceProvider**: Language file management
 
 3. **SynapseRouteServiceProvider**:
-   - Automatically registers routes from `routes/web.php` and `routes/api.php` for each module
-   - Applies module-specific URL prefixes from `url_prefix` in module.json
-   - Routes named with module ID prefix: `{module}.{route}`
+   - Automatically registers routes from multiple route files for each module:
+     - `routes/web.php` - Standard module routes (URL and name prefixed with module)
+     - `routes/web.backend.php` - Backend routes (auto-auth middleware, URL prefixed with `backend_prefix`, name prefixed with `backend.`)
+     - `routes/web.override.php` - Override routes (URL not prefixed, but name still prefixed with module)
+     - `routes/api.php` - API routes
+   - Applies module-specific URL prefixes from `url_prefix` in module.json (except for override routes)
+   - Route naming conventions:
+     - Standard routes: `{module}.{route}`
+     - Backend routes: `backend.{route}`
+     - Override routes: `{module}.{route}` (URL not prefixed, name still prefixed)
 
 4. **SynapseViewServiceProvider**: View and component registration
 

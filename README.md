@@ -485,7 +485,9 @@ synapps/modules/{module-name}/
 │   ├── Livewire/           # Livewire components
 │   └── Models/             # Eloquent models
 ├── routes/
-│   ├── web.php             # Web routes
+│   ├── web.php             # Standard module routes (URL & name prefixed)
+│   ├── web.backend.php     # Backend routes (auto-auth, backend_prefix URL, 'backend.' name)
+│   ├── web.override.php    # Override routes (no URL prefix, module name prefix)
 │   └── api.php             # API routes
 ├── resources/
 │   └── views/
