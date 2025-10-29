@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ IMPORTANT: Git Commit and Push Policy
+
+**NEVER commit and push changes without explicit user approval.**
+
+When you complete tasks:
+1. Show the user what changes were made
+2. Wait for the user to review the changes
+3. Only commit and push after the user explicitly approves
+
+Do NOT automatically commit and push, even if changes are complete. Always ask first:
+- "Would you like me to commit and push these changes?"
+- "Ready to commit? Here's what will be included..."
+
+This applies to ALL repositories in this project (main repo, packages, synapps, etc.).
+
 ## Project Overview
 
 **vm-engine/synapse** is a Laravel package that provides a sophisticated modular architecture system for Laravel applications. It enables both directory-based modules (in `synapps/modules/`) and package-based modules (with `synmod-`, `synmodule-`, or `synapps-` prefix in vendor).
