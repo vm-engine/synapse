@@ -4,6 +4,7 @@ namespace VmEngine\Synapse;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewServiceProvider;
+use VmEngine\Synapse\Components\Alert;
 use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
@@ -36,6 +37,7 @@ class SynapseViewServiceProvider extends ViewServiceProvider
 
     private function registerSynapseComponents()
     {
+        Blade::component(Alert::class, 'synapse-alert');
         Blade::component(Drawer::class, 'synapse-drawer');
         Blade::component(Select::class, 'synapse-select');
         Blade::component(MultiSelect::class, 'synapse-multiselect');
