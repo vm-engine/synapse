@@ -36,7 +36,7 @@ class Modules extends BuilderBase
                 true
             );
 
-            if (!isset($moduleConfig['load_priority'])) {
+            if (! isset($moduleConfig['load_priority'])) {
                 $moduleConfig['load_priority'] = 99;
             }
 

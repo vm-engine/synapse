@@ -3,7 +3,6 @@
 namespace VmEngine\Synapse\Components;
 
 use Illuminate\View\Component;
-use ReflectionMethod;
 
 class Select extends Component
 {

@@ -3,9 +3,9 @@
 namespace Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
-use VmEngine\Synapse\SynapseServiceProvider;
 use VmEngine\Synapse\SynapseLangServiceProvider;
 use VmEngine\Synapse\SynapseRouteServiceProvider;
+use VmEngine\Synapse\SynapseServiceProvider;
 use VmEngine\Synapse\SynapseViewServiceProvider;
 
 class TestCase extends Orchestra
@@ -32,14 +32,14 @@ class TestCase extends Orchestra
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'testbench');
         $app['config']->set('database.connections.testbench', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
 
         // Create synapps directory structure for testing
         $synappsPath = base_path('synapps');
-        if (!is_dir($synappsPath)) {
+        if (! is_dir($synappsPath)) {
             mkdir($synappsPath, 0777, true);
         }
 
@@ -51,8 +51,8 @@ class TestCase extends Orchestra
         ];
 
         foreach ($dirs as $dir) {
-            $path = $synappsPath . '/' . $dir;
-            if (!is_dir($path)) {
+            $path = $synappsPath.'/'.$dir;
+            if (! is_dir($path)) {
                 mkdir($path, 0777, true);
             }
         }
@@ -70,15 +70,15 @@ class TestCase extends Orchestra
     {
         $modulePath = base_path("synapps/modules/{$moduleName}");
 
-        if (!is_dir($modulePath)) {
+        if (! is_dir($modulePath)) {
             mkdir($modulePath, 0777, true);
         }
 
         // Create basic structure
         $dirs = ['src', 'routes', 'resources/views', 'database/migrations', 'database/seeders', 'database/factories'];
         foreach ($dirs as $dir) {
-            $path = $modulePath . '/' . $dir;
-            if (!is_dir($path)) {
+            $path = $modulePath.'/'.$dir;
+            if (! is_dir($path)) {
                 mkdir($path, 0777, true);
             }
         }
@@ -100,13 +100,13 @@ class TestCase extends Orchestra
             'url_prefix' => $moduleName,
             'load_priority' => 99,
             'dependencies' => [
-                'npm' => ['main' => new \stdClass(), 'dev' => new \stdClass()],
-                'composer' => ['main' => new \stdClass(), 'dev' => new \stdClass()],
+                'npm' => ['main' => new \stdClass, 'dev' => new \stdClass],
+                'composer' => ['main' => new \stdClass, 'dev' => new \stdClass],
             ],
         ];
 
         $config = array_merge($defaultConfig, $moduleConfig);
-        file_put_contents($modulePath . '/module.json', json_encode($config, JSON_PRETTY_PRINT));
+        file_put_contents($modulePath.'/module.json', json_encode($config, JSON_PRETTY_PRINT));
 
         return $modulePath;
     }
@@ -127,11 +127,11 @@ class TestCase extends Orchestra
      */
     protected function deleteDirectory(string $dir): bool
     {
-        if (!file_exists($dir)) {
+        if (! file_exists($dir)) {
             return true;
         }
 
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             return unlink($dir);
         }
 
@@ -140,7 +140,7 @@ class TestCase extends Orchestra
                 continue;
             }
 
-            if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+            if (! $this->deleteDirectory($dir.DIRECTORY_SEPARATOR.$item)) {
                 return false;
             }
         }

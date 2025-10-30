@@ -1,39 +1,38 @@
 <?php
 
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
 
 describe('synapps:patch-resources command', function () {
     beforeEach(function () {
         // Create resources directories if they don't exist
         $resourcesPath = base_path('resources');
-        if (!is_dir($resourcesPath)) {
+        if (! is_dir($resourcesPath)) {
             mkdir($resourcesPath, 0777, true);
         }
 
-        if (!is_dir($resourcesPath . '/js')) {
-            mkdir($resourcesPath . '/js', 0777, true);
+        if (! is_dir($resourcesPath.'/js')) {
+            mkdir($resourcesPath.'/js', 0777, true);
         }
 
-        if (!is_dir($resourcesPath . '/css')) {
-            mkdir($resourcesPath . '/css', 0777, true);
+        if (! is_dir($resourcesPath.'/css')) {
+            mkdir($resourcesPath.'/css', 0777, true);
         }
 
         // Create minimal app.js and app.css files
-        file_put_contents($resourcesPath . '/js/app.js', "import './bootstrap.js';\n");
-        file_put_contents($resourcesPath . '/css/app.css', "@import './bootstrap.css';\n");
+        file_put_contents($resourcesPath.'/js/app.js', "import './bootstrap.js';\n");
+        file_put_contents($resourcesPath.'/css/app.css', "@import './bootstrap.css';\n");
 
         // Create synapps resources
         $synappsPath = base_path('synapps/resources');
-        if (!is_dir($synappsPath . '/js')) {
-            mkdir($synappsPath . '/js', 0777, true);
+        if (! is_dir($synappsPath.'/js')) {
+            mkdir($synappsPath.'/js', 0777, true);
         }
-        if (!is_dir($synappsPath . '/css')) {
-            mkdir($synappsPath . '/css', 0777, true);
+        if (! is_dir($synappsPath.'/css')) {
+            mkdir($synappsPath.'/css', 0777, true);
         }
 
-        file_put_contents($synappsPath . '/js/synapps.js', "console.log('synapps');\n");
-        file_put_contents($synappsPath . '/css/synapps.css', "body { margin: 0; }\n");
+        file_put_contents($synappsPath.'/js/synapps.js', "console.log('synapps');\n");
+        file_put_contents($synappsPath.'/css/synapps.css', "body { margin: 0; }\n");
     });
 
     it('patches app.js with synapps import', function () {
@@ -78,13 +77,13 @@ describe('synapps:discover command', function () {
     beforeEach(function () {
         // Ensure required directories exist
         $modulesPath = base_path('synapps/modules');
-        if (!is_dir($modulesPath)) {
+        if (! is_dir($modulesPath)) {
             mkdir($modulesPath, 0777, true);
         }
 
         // Create a test module
-        $testModulePath = $modulesPath . '/test_module';
-        if (!is_dir($testModulePath)) {
+        $testModulePath = $modulesPath.'/test_module';
+        if (! is_dir($testModulePath)) {
             mkdir($testModulePath, 0777, true);
         }
 
@@ -105,13 +104,13 @@ describe('synapps:discover command', function () {
             'url_prefix' => 'test',
             'load_priority' => 99,
             'dependencies' => [
-                'npm' => ['main' => new stdClass(), 'dev' => new stdClass()],
-                'composer' => ['main' => new stdClass(), 'dev' => new stdClass()],
+                'npm' => ['main' => new stdClass, 'dev' => new stdClass],
+                'composer' => ['main' => new stdClass, 'dev' => new stdClass],
             ],
         ];
 
         file_put_contents(
-            $testModulePath . '/module.json',
+            $testModulePath.'/module.json',
             json_encode($moduleConfig, JSON_PRETTY_PRINT)
         );
     });

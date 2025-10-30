@@ -9,6 +9,6 @@ class SynAppsConfigGenerator
     public static function generate()
     {
 
-        return (new Builder())->generate();
+        return (new Builder)->generate();
     }
 }

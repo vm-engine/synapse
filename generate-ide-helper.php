@@ -28,18 +28,26 @@
  * Output: _ide_helper.php in current working directory (or custom output file)
  */
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__.'/vendor/autoload.php';
 
 class IdeHelperGenerator
 {
     protected string $output = '';
+
     protected array $facades = [];
+
     protected array $models = [];
+
     protected array $helpers = [];
+
     protected array $serviceProviders = [];
+
     protected array $scanModelPaths = [];
+
     protected array $scanFacadePaths = [];
+
     protected array $scanHelperPaths = [];
+
     protected string $outputFile = '_ide_helper.php';
 
     public function __construct(array $options = [])
@@ -52,7 +60,7 @@ class IdeHelperGenerator
         $this->output = "<?php\n\n";
         $this->output .= "/**\n";
         $this->output .= " * IDE Helper for vm-engine/synapse\n";
-        $this->output .= " * Generated: " . date('Y-m-d H:i:s') . "\n";
+        $this->output .= ' * Generated: '.date('Y-m-d H:i:s')."\n";
         $this->output .= " * \n";
         $this->output .= " * This file provides autocompletion support for:\n";
         $this->output .= " * - Laravel Facades\n";
@@ -90,10 +98,10 @@ class IdeHelperGenerator
 
         echo "✓ IDE helper generated successfully: _ide_helper.php\n";
         echo "📊 Summary:\n";
-        echo "   - Facades: " . count($this->facades) . "\n";
-        echo "   - Models: " . count($this->models) . "\n";
-        echo "   - Helpers: " . count($this->helpers) . "\n";
-        echo "   - Service Providers: " . count($this->serviceProviders) . "\n";
+        echo '   - Facades: '.count($this->facades)."\n";
+        echo '   - Models: '.count($this->models)."\n";
+        echo '   - Helpers: '.count($this->helpers)."\n";
+        echo '   - Service Providers: '.count($this->serviceProviders)."\n";
     }
 
     protected function discoverFacades(): void
@@ -151,9 +159,9 @@ class IdeHelperGenerator
 
         // Default paths to scan
         $defaultPaths = [
-            __DIR__ . '/src',
-            __DIR__ . '/app/Models',  // Laravel app Models directory
-            __DIR__ . '/vendor/laravel/framework/src/Illuminate/Foundation/Auth',
+            __DIR__.'/src',
+            __DIR__.'/app/Models',  // Laravel app Models directory
+            __DIR__.'/vendor/laravel/framework/src/Illuminate/Foundation/Auth',
         ];
 
         // Merge with additional scan paths from options
@@ -177,7 +185,7 @@ class IdeHelperGenerator
 
     protected function scanForModels(string $directory): void
     {
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             return;
         }
 
@@ -194,7 +202,7 @@ class IdeHelperGenerator
                     if (preg_match('/class\s+(\w+)\s+extends\s+Model/i', $content, $classMatch)) {
                         $namespace = trim($namespaceMatch[1]);
                         $className = $classMatch[1];
-                        $fullClass = $namespace . '\\' . $className;
+                        $fullClass = $namespace.'\\'.$className;
 
                         $this->models[] = [
                             'class' => $fullClass,
@@ -213,7 +221,7 @@ class IdeHelperGenerator
 
         // Default helper file
         $defaultHelperFiles = [
-            __DIR__ . '/src/helper.php',
+            __DIR__.'/src/helper.php',
         ];
 
         // Merge with additional helper paths
@@ -238,7 +246,7 @@ class IdeHelperGenerator
         // Match function definitions
         preg_match_all('/function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/s', $content, $matches);
 
-        if (!empty($matches[1])) {
+        if (! empty($matches[1])) {
             foreach ($matches[1] as $index => $functionName) {
                 // Skip if already discovered
                 $alreadyExists = false;
@@ -249,7 +257,7 @@ class IdeHelperGenerator
                     }
                 }
 
-                if (!$alreadyExists) {
+                if (! $alreadyExists) {
                     $params = $matches[2][$index] ?? '';
 
                     $this->helpers[] = [
@@ -266,7 +274,7 @@ class IdeHelperGenerator
     {
         echo "  → Discovering service providers...\n";
 
-        $composerJson = json_decode(file_get_contents(__DIR__ . '/composer.json'), true);
+        $composerJson = json_decode(file_get_contents(__DIR__.'/composer.json'), true);
 
         if (isset($composerJson['extra']['laravel']['providers'])) {
             $this->serviceProviders = $composerJson['extra']['laravel']['providers'];
@@ -288,7 +296,7 @@ class IdeHelperGenerator
             $this->output .= "    /**\n";
             $this->output .= "     * @see \\{$class}\n";
 
-            if (!empty($methods)) {
+            if (! empty($methods)) {
                 $this->output .= "     * \n";
                 foreach ($methods as $method) {
                     $this->output .= "     * {$method}\n";
@@ -304,7 +312,7 @@ class IdeHelperGenerator
     {
         $methods = [];
 
-        if (!class_exists($className) && !interface_exists($className)) {
+        if (! class_exists($className) && ! interface_exists($className)) {
             return $methods;
         }
 
@@ -320,7 +328,7 @@ class IdeHelperGenerator
                 // Skip inherited methods from base classes (limit to direct class methods)
                 if ($method->getDeclaringClass()->getName() !== $className) {
                     // But include interface methods
-                    if (!$reflection->isInterface()) {
+                    if (! $reflection->isInterface()) {
                         continue;
                     }
                 }
@@ -350,28 +358,28 @@ class IdeHelperGenerator
             if ($param->hasType()) {
                 $type = $param->getType();
                 if ($type instanceof ReflectionNamedType) {
-                    $paramStr .= ($type->allowsNull() ? '?' : '') . $type->getName() . ' ';
+                    $paramStr .= ($type->allowsNull() ? '?' : '').$type->getName().' ';
                 } elseif ($type instanceof ReflectionUnionType) {
-                    $paramStr .= implode('|', array_map(fn($t) => $t->getName(), $type->getTypes())) . ' ';
+                    $paramStr .= implode('|', array_map(fn ($t) => $t->getName(), $type->getTypes())).' ';
                 }
             }
 
-            $paramStr .= '$' . $param->getName();
+            $paramStr .= '$'.$param->getName();
 
             // Add default value
-            if ($param->isOptional() && !$param->isVariadic()) {
+            if ($param->isOptional() && ! $param->isVariadic()) {
                 try {
                     $default = $param->getDefaultValue();
                     if (is_null($default)) {
                         $paramStr .= ' = null';
                     } elseif (is_bool($default)) {
-                        $paramStr .= ' = ' . ($default ? 'true' : 'false');
+                        $paramStr .= ' = '.($default ? 'true' : 'false');
                     } elseif (is_string($default)) {
-                        $paramStr .= ' = \'' . addslashes($default) . '\'';
+                        $paramStr .= ' = \''.addslashes($default).'\'';
                     } elseif (is_array($default)) {
                         $paramStr .= ' = []';
                     } else {
-                        $paramStr .= ' = ' . var_export($default, true);
+                        $paramStr .= ' = '.var_export($default, true);
                     }
                 } catch (ReflectionException $e) {
                     // Can't get default value
@@ -379,7 +387,7 @@ class IdeHelperGenerator
             }
 
             if ($param->isVariadic()) {
-                $paramStr = '...' . $paramStr;
+                $paramStr = '...'.$paramStr;
             }
 
             $params[] = $paramStr;
@@ -389,18 +397,18 @@ class IdeHelperGenerator
         if ($method->hasReturnType()) {
             $type = $method->getReturnType();
             if ($type instanceof ReflectionNamedType) {
-                $returnType = ($type->allowsNull() ? '?' : '') . $type->getName();
+                $returnType = ($type->allowsNull() ? '?' : '').$type->getName();
             } elseif ($type instanceof ReflectionUnionType) {
-                $returnType = implode('|', array_map(fn($t) => $t->getName(), $type->getTypes()));
+                $returnType = implode('|', array_map(fn ($t) => $t->getName(), $type->getTypes()));
             }
         }
 
         // Normalize return type for better IDE support
-        $returnType = str_replace('self', '\\' . $method->getDeclaringClass()->getName(), $returnType);
+        $returnType = str_replace('self', '\\'.$method->getDeclaringClass()->getName(), $returnType);
 
         $static = $method->isStatic() ? 'static ' : '';
 
-        return "@method {$static}{$returnType} {$method->getName()}(" . implode(', ', $params) . ")";
+        return "@method {$static}{$returnType} {$method->getName()}(".implode(', ', $params).')';
     }
 
     protected function generateModelHelpers(): void
@@ -455,7 +463,7 @@ class IdeHelperGenerator
 
             $this->output .= "    /**\n";
             $this->output .= "     * {$helper['name']} helper function\n";
-            if (!empty($paramDocs)) {
+            if (! empty($paramDocs)) {
                 foreach ($paramDocs as $paramDoc) {
                     $this->output .= "     * @param {$paramDoc}\n";
                 }
@@ -526,7 +534,7 @@ class IdeHelperGenerator
         }
 
         // Resolve relative to current working directory (where command is executed)
-        return getcwd() . DIRECTORY_SEPARATOR . ltrim($path, './' . DIRECTORY_SEPARATOR);
+        return getcwd().DIRECTORY_SEPARATOR.ltrim($path, './'.DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -541,7 +549,7 @@ class IdeHelperGenerator
         }
 
         // Resolve relative to current directory
-        return __DIR__ . '/' . ltrim($path, './');
+        return __DIR__.'/'.ltrim($path, './');
     }
 
     /**
@@ -549,7 +557,7 @@ class IdeHelperGenerator
      */
     public static function showHelp(): void
     {
-        echo <<<HELP
+        echo <<<'HELP'
 Universal IDE Helper Generator for vm-engine/synapse
 
 Usage:
@@ -593,8 +601,8 @@ Examples:
   php generate-ide-helper.php --scan-models=/app/Models --output=custom_helper.php
 
   # Scan models and helpers
-  php generate-ide-helper.php \\
-    --scan-models=/app/Models,/modules/*/Models \\
+  php generate-ide-helper.php \
+    --scan-models=/app/Models,/modules/*/Models \
     --scan-helpers=/app/helpers.php,/modules/*/helpers.php
 
 Default Scan Paths:
@@ -627,6 +635,7 @@ function parseArguments(array $argv): array
 
         if ($arg === '--help' || $arg === '-h') {
             $options['help'] = true;
+
             continue;
         }
 
@@ -666,15 +675,15 @@ try {
     }
 
     // Show configuration
-    if (!empty($options['scan-models']) || !empty($options['scan-helpers']) || $options['output'] !== '_ide_helper.php') {
+    if (! empty($options['scan-models']) || ! empty($options['scan-helpers']) || $options['output'] !== '_ide_helper.php') {
         echo "Configuration:\n";
-        if (!empty($options['scan-models'])) {
+        if (! empty($options['scan-models'])) {
             echo "  Additional model paths:\n";
             foreach ($options['scan-models'] as $path) {
                 echo "    - {$path}\n";
             }
         }
-        if (!empty($options['scan-helpers'])) {
+        if (! empty($options['scan-helpers'])) {
             echo "  Additional helper paths:\n";
             foreach ($options['scan-helpers'] as $path) {
                 echo "    - {$path}\n";
@@ -692,7 +701,7 @@ try {
     echo "\n✓ Done! Add {$options['output']} to your IDE for better autocompletion.\n";
     echo "  Don't forget to add it to .gitignore if not already present.\n";
 } catch (Exception $e) {
-    echo "✗ Error: " . $e->getMessage() . "\n";
+    echo '✗ Error: '.$e->getMessage()."\n";
     echo "\nRun with --help for usage information.\n";
     exit(1);
 }

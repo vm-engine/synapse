@@ -11,11 +11,11 @@ describe('Module Discovery Integration', function () {
             'dependencies' => [
                 'npm' => [
                     'main' => ['test-package' => '^1.0'],
-                    'dev' => new \stdClass(),
+                    'dev' => new \stdClass,
                 ],
                 'composer' => [
-                    'main' => new \stdClass(),
-                    'dev' => new \stdClass(),
+                    'main' => new \stdClass,
+                    'dev' => new \stdClass,
                 ],
             ],
         ]);
@@ -27,16 +27,16 @@ describe('Module Discovery Integration', function () {
 
     it('creates module directory structure', function () {
         expect(is_dir($this->modulePath))->toBeTrue()
-            ->and(is_dir($this->modulePath . '/src'))->toBeTrue()
-            ->and(is_dir($this->modulePath . '/routes'))->toBeTrue()
-            ->and(is_dir($this->modulePath . '/resources/views'))->toBeTrue()
-            ->and(is_dir($this->modulePath . '/database/migrations'))->toBeTrue()
-            ->and(is_dir($this->modulePath . '/database/seeders'))->toBeTrue()
-            ->and(is_dir($this->modulePath . '/database/factories'))->toBeTrue();
+            ->and(is_dir($this->modulePath.'/src'))->toBeTrue()
+            ->and(is_dir($this->modulePath.'/routes'))->toBeTrue()
+            ->and(is_dir($this->modulePath.'/resources/views'))->toBeTrue()
+            ->and(is_dir($this->modulePath.'/database/migrations'))->toBeTrue()
+            ->and(is_dir($this->modulePath.'/database/seeders'))->toBeTrue()
+            ->and(is_dir($this->modulePath.'/database/factories'))->toBeTrue();
     });
 
     it('creates valid module.json', function () {
-        $moduleJsonPath = $this->modulePath . '/module.json';
+        $moduleJsonPath = $this->modulePath.'/module.json';
 
         expect(file_exists($moduleJsonPath))->toBeTrue();
 
@@ -51,7 +51,7 @@ describe('Module Discovery Integration', function () {
     });
 
     it('module.json has correct id_case structure', function () {
-        $moduleJsonPath = $this->modulePath . '/module.json';
+        $moduleJsonPath = $this->modulePath.'/module.json';
         $config = json_decode(file_get_contents($moduleJsonPath), true);
 
         expect($config['id_case'])->toHaveKey('snake')
@@ -61,7 +61,7 @@ describe('Module Discovery Integration', function () {
     });
 
     it('module.json has correct dependencies structure', function () {
-        $moduleJsonPath = $this->modulePath . '/module.json';
+        $moduleJsonPath = $this->modulePath.'/module.json';
         $config = json_decode(file_get_contents($moduleJsonPath), true);
 
         expect($config['dependencies'])->toHaveKey('npm')
@@ -85,8 +85,8 @@ describe('Module Discovery Integration', function () {
         $module1 = $this->createTestModule('module_one', ['version' => '1.0.0']);
         $module2 = $this->createTestModule('module_two', ['version' => '2.0.0']);
 
-        $config1 = json_decode(file_get_contents($module1 . '/module.json'), true);
-        $config2 = json_decode(file_get_contents($module2 . '/module.json'), true);
+        $config1 = json_decode(file_get_contents($module1.'/module.json'), true);
+        $config2 = json_decode(file_get_contents($module2.'/module.json'), true);
 
         expect($config1['id'])->toBe('module_one')
             ->and($config2['id'])->toBe('module_two')
@@ -111,7 +111,7 @@ describe('Module Configuration Validation', function () {
         ];
 
         $modulePath = $this->createTestModule('validation_test');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         foreach ($requiredFields as $field) {
             expect($config)->toHaveKey($field);
@@ -124,7 +124,7 @@ describe('Module Configuration Validation', function () {
         $requiredFormats = ['snake', 'pascal', 'slug', 'studly'];
 
         $modulePath = $this->createTestModule('case_test');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         foreach ($requiredFormats as $format) {
             expect($config['id_case'])->toHaveKey($format);
@@ -135,7 +135,7 @@ describe('Module Configuration Validation', function () {
 
     it('validates dependencies structure', function () {
         $modulePath = $this->createTestModule('deps_test');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         expect($config['dependencies'])->toHaveKey('npm')
             ->and($config['dependencies'])->toHaveKey('composer')
@@ -162,7 +162,7 @@ describe('Module Resource Structure', function () {
         ];
 
         foreach ($requiredDirs as $dir) {
-            expect(is_dir($modulePath . '/' . $dir))->toBeTrue();
+            expect(is_dir($modulePath.'/'.$dir))->toBeTrue();
         }
 
         $this->cleanupTestModules();
@@ -174,7 +174,7 @@ describe('Module Resource Structure', function () {
         $testDirs = ['src', 'routes', 'resources/views'];
 
         foreach ($testDirs as $dir) {
-            $fullPath = $modulePath . '/' . $dir;
+            $fullPath = $modulePath.'/'.$dir;
             expect(is_writable($fullPath))->toBeTrue();
         }
 
@@ -185,7 +185,7 @@ describe('Module Resource Structure', function () {
         $modulePath = $this->createTestModule('file_write_test');
 
         // Try writing a test file
-        $testFile = $modulePath . '/src/TestClass.php';
+        $testFile = $modulePath.'/src/TestClass.php';
         $content = '<?php class TestClass {}';
         file_put_contents($testFile, $content);
 
@@ -199,7 +199,7 @@ describe('Module Resource Structure', function () {
 describe('Module Naming Conventions', function () {
     it('handles snake_case module names', function () {
         $modulePath = $this->createTestModule('test_module_name');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         expect($config['id'])->toBe('test_module_name')
             ->and($config['id_case']['snake'])->toBe('test_module_name');
@@ -209,7 +209,7 @@ describe('Module Naming Conventions', function () {
 
     it('converts to PascalCase correctly', function () {
         $modulePath = $this->createTestModule('test_module');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         expect($config['id_case']['pascal'])->toBe('TestModule');
 
@@ -218,7 +218,7 @@ describe('Module Naming Conventions', function () {
 
     it('converts to slug format correctly', function () {
         $modulePath = $this->createTestModule('test_module');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         expect($config['id_case']['slug'])->toBe('test-module');
 
@@ -227,7 +227,7 @@ describe('Module Naming Conventions', function () {
 
     it('converts to studly format correctly', function () {
         $modulePath = $this->createTestModule('test_module');
-        $config = json_decode(file_get_contents($modulePath . '/module.json'), true);
+        $config = json_decode(file_get_contents($modulePath.'/module.json'), true);
 
         expect($config['id_case']['studly'])->toBe('testModule');
 
