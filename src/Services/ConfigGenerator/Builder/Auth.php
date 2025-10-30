@@ -27,7 +27,7 @@ class Auth extends BuilderBase
         if (! isset($packageConfig['acl'])) {
             $packageConfig['acl'] = [
                 'index' => [
-                    'label' => $packageNamespace.'::acl.index',
+                    'label' => '__'.$packageNamespace.'::acl.index',
                     'create' => 0,
                     'read' => 1,
                     'update' => 0,

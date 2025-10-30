@@ -327,43 +327,43 @@ Flexible alert component with dismissible functionality:
 
 ```blade
 <!-- Basic alert -->
-<x-synapse::alert type="success" message="Operation completed successfully!" />
+<x-synapse-alert type="success" message="Operation completed successfully!" />
 
 <!-- Alert with title -->
-<x-synapse::alert
+<x-synapse-alert
     type="warning"
     title="Warning"
     message="Please review your changes before submitting." />
 
 <!-- Non-dismissible alert -->
-<x-synapse::alert
+<x-synapse-alert
     type="danger"
     :dismissible="false"
     message="This is a critical error." />
 
 <!-- Border accent style -->
-<x-synapse::alert
+<x-synapse-alert
     type="info"
     :border="true"
     message="Information with border accent" />
 
 <!-- Solid background style -->
-<x-synapse::alert
+<x-synapse-alert
     type="success"
     :solid="true"
     message="Solid background variant" />
 
 <!-- Custom HTML content using slot -->
-<x-synapse::alert type="info" title="Getting Started">
+<x-synapse-alert type="info" title="Getting Started">
     <p>Welcome! Check out <a href="/docs" class="underline">our documentation</a>.</p>
     <ul class="list-disc list-inside mt-2">
         <li>Feature 1</li>
         <li>Feature 2</li>
     </ul>
-</x-synapse::alert>
+</x-synapse-alert>
 
 <!-- Custom icon -->
-<x-synapse::alert
+<x-synapse-alert
     type="success"
     icon="fa-solid fa-check-double"
     message="Verified successfully!" />
@@ -397,29 +397,29 @@ Flexible alert component with dismissible functionality:
 ```blade
 <!-- Flash messages -->
 @if(session('success'))
-    <x-synapse::alert type="success" :message="session('success')" />
+    <x-synapse-alert type="success" :message="session('success')" />
 @endif
 
 @if(session('error'))
-    <x-synapse::alert type="danger" :message="session('error')" />
+    <x-synapse-alert type="danger" :message="session('error')" />
 @endif
 
 <!-- Validation errors -->
 @if($errors->any())
-    <x-synapse::alert type="danger" title="Validation Errors">
+    <x-synapse-alert type="danger" title="Validation Errors">
         <ul class="list-disc list-inside space-y-1">
             @foreach($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
         </ul>
-    </x-synapse::alert>
+    </x-synapse-alert>
 @endif
 
 <!-- Multiple alerts -->
 <div class="space-y-4">
-    <x-synapse::alert type="success" message="Payment received." />
-    <x-synapse::alert type="warning" message="Subscription expires in 3 days." />
-    <x-synapse::alert type="info" message="New features available." />
+    <x-synapse-alert type="success" message="Payment received." />
+    <x-synapse-alert type="warning" message="Subscription expires in 3 days." />
+    <x-synapse-alert type="info" message="New features available." />
 </div>
 ```
 
