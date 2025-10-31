@@ -14,13 +14,13 @@
     $componentId = 'select2-' . $name . '-' . uniqid();
 @endphp
 
-@once
-    @asset('https://code.jquery.com/jquery-3.7.1.min.js')
-    @asset('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js')
-    @asset('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css')
-
-    @push('styles')
-        <style>
+@assets
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<style>
             /* Multiple Select */
             .select2-container--default .select2-selection--multiple {
                 border: 1px solid rgb(209 213 219);
@@ -140,161 +140,12 @@
             .select2-container {
                 width: 100% !important;
             }
-        </style>
-    @endpush
-@endonce
+</style>
+@endassets
 
 <div
-    x-data="{
-        select2Instance: null,
-        initAttempts: 0,
-        maxAttempts: 10,
-        init() {
-            this.tryInitialize();
-        },
-        tryInitialize() {
-            try {
-                // Check if jQuery and Select2 are loaded
-                if (typeof $ === 'undefined' || typeof $.fn === 'undefined' || typeof $.fn.select2 === 'undefined') {
-                    // Retry initialization after a short delay
-                    if (this.initAttempts < this.maxAttempts) {
-                        this.initAttempts++;
-                        setTimeout(() => this.tryInitialize(), 100);
-                        return;
-                    } else {
-                        console.error('Select2: jQuery or Select2 library not loaded after', this.maxAttempts, 'attempts');
-                        return;
-                    }
-                }
-
-                const $select = $('#{{ $componentId }}');
-
-                if ($select.length === 0) {
-                    console.error('Select2: Element #{{ $componentId }} not found');
-                    return;
-                }
-
-                // Initialize Select2
-                const isMultiple = {{ $multiple ? 'true' : 'false' }};
-                @php
-                    $wireModelAttr = collect($attributes->getAttributes())->keys()->first(fn($key) => str_starts_with($key, 'wire:model'));
-                    $isLive = $wireModelAttr && str_contains($wireModelAttr, '.live');
-                @endphp
-                const isLiveUpdate = {{ $isLive ? 'true' : 'false' }};
-                const select2Options = {
-                    placeholder: '{{ $placeholder }}',
-                    allowClear: !isMultiple,
-                    closeOnSelect: false
-                };
-
-                @if ($ajax && $ajaxUrl) select2Options.ajax = {
-                url: '{{ $ajaxUrl }}',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        search: params.term,
-                        page: params.page || 1
-                    };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data
-                    };
-                },
-                cache: true
-            };
-            select2Options.minimumInputLength = 0;
-            @else
-            @if ($searchable)
-            select2Options.minimumResultsForSearch = 0;
-            @else
-            select2Options.minimumResultsForSearch = Infinity; @endif
-                @endif
-
-                this.select2Instance = $select.select2(select2Options);
-
-                // Fix body scroll lock when dropdown closes
-                $select.on('select2:open', function(e) {
-                    // Don't lock body scroll
-                    $('body').css('overflow', '');
-                });
-
-                $select.on('select2:close', function(e) {
-                    // Ensure body scroll is restored
-                    $('body').css('overflow', '');
-                });
-
-                $select.on('select2:select', function(e) {
-                    // Restore scroll after selection
-                    $('body').css('overflow', '');
-                    if (!isMultiple) {
-                        $select.select2('close');
-                    }
-                });
-
-                // Handle unselect - close dropdown immediately
-                $select.on('select2:unselect', function(e) {
-                    // Restore scroll
-                    $('body').css('overflow', '');
-                    // Small delay to let Select2 process the unselect first
-                    setTimeout(() => {
-                        $select.select2('close');
-                    }, 1);
-                });
-
-                // Allow clicking outside to close dropdown
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('.select2-container').length &&
-                        !$(e.target).closest('#{{ $componentId }}').length) {
-                        $select.select2('close');
-                        // Restore scroll
-                        $('body').css('overflow', '');
-                    }
-                });
-
-                // Sync Select2 changes to Livewire
-                $select.on('change', (e) => {
-                    @if($attributes->wire('model')->value())
-                    // Only trigger live update if wire:model.live is used
-                    if (isLiveUpdate) {
-                        const value = $(e.target).val();
-                        @if($multiple)
-                        this.$wire.set('{{ $attributes->wire('model')->value() }}', value || []);
-                        @else
-                        this.$wire.set('{{ $attributes->wire('model')->value() }}', value || null);
-                        @endif
-                    }
-                    // For regular wire:model, just dispatch events and let Livewire handle it
-                    @endif
-                });
-
-                @if($attributes->wire('model')->value())
-                // Watch Livewire model changes
-                this.$watch('$wire.{{ $attributes->wire('model')->value() }}', value => {
-                    const currentValue = $select.val();
-                    const newValue = isMultiple ? (value || []) : value;
-
-                    // Only update if different
-                    if (JSON.stringify(currentValue) !== JSON.stringify(newValue)) {
-                        $select.val(newValue).trigger('change.select2');
-                    }
-                });
-                @endif
-            } catch (error) {
-                console.error('Select2 initialization error:', error);
-            }
-        },
-        destroy() {
-            if (this.select2Instance) {
-                $('#{{ $componentId }}').select2('destroy');
-                // Ensure body scroll is restored
-                $('body').css('overflow', '');
-            }
-        }
-    }"
-    x-init="init()"
-    @wire:navigate.start.window="destroy()"
+    x-data="{ select2Instance: null }"
+    x-on:destroy.window="if (select2Instance) { $('#{{ $componentId }}').select2('destroy'); $('body').css('overflow', ''); }"
 >
     <select
         id="{{ $componentId }}"
@@ -316,3 +167,108 @@
         @endforeach
     </select>
 </div>
+
+@script
+<script>
+    const componentId = '{{ $componentId }}';
+    const $select = $('#' + componentId);
+    const isMultiple = {{ $multiple ? 'true' : 'false' }};
+    const isLiveUpdate = {{ ($wireModelAttr = collect($attributes->getAttributes())->keys()->first(fn($key) => str_starts_with($key, 'wire:model'))) && str_contains($wireModelAttr, '.live') ? 'true' : 'false' }};
+
+    // Select2 options
+    const select2Options = {
+        placeholder: '{{ $placeholder }}',
+        allowClear: !isMultiple,
+        closeOnSelect: false
+    };
+
+    @if ($ajax && $ajaxUrl)
+    select2Options.ajax = {
+        url: '{{ $ajaxUrl }}',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return {
+                search: params.term,
+                page: params.page || 1
+            };
+        },
+        processResults: function (data) {
+            return {
+                results: data
+            };
+        },
+        cache: true
+    };
+    select2Options.minimumInputLength = 0;
+    @else
+    @if ($searchable)
+    select2Options.minimumResultsForSearch = 0;
+    @else
+    select2Options.minimumResultsForSearch = Infinity;
+    @endif
+    @endif
+
+    // Initialize Select2
+    $select.select2(select2Options);
+
+    // Fix body scroll lock
+    $select.on('select2:open', function(e) {
+        $('body').css('overflow', '');
+    });
+
+    $select.on('select2:close', function(e) {
+        $('body').css('overflow', '');
+    });
+
+    $select.on('select2:select', function(e) {
+        $('body').css('overflow', '');
+        if (!isMultiple) {
+            $select.select2('close');
+        }
+    });
+
+    $select.on('select2:unselect', function(e) {
+        $('body').css('overflow', '');
+        setTimeout(() => $select.select2('close'), 1);
+    });
+
+    // Allow clicking outside to close dropdown
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.select2-container').length &&
+            !$(e.target).closest('#' + componentId).length) {
+            $select.select2('close');
+            $('body').css('overflow', '');
+        }
+    });
+
+    // Sync Select2 changes to Livewire
+    $select.on('change', (e) => {
+        @if($attributes->wire('model')->value())
+        if (isLiveUpdate) {
+            const value = $(e.target).val();
+            @if($multiple)
+            $wire.set('{{ $attributes->wire('model')->value() }}', value || []);
+            @else
+            $wire.set('{{ $attributes->wire('model')->value() }}', value || null);
+            @endif
+        }
+        @endif
+    });
+
+    @if($attributes->wire('model')->value())
+    // Watch Livewire model changes
+    Livewire.hook('morph.updated', ({ el, component }) => {
+        if (component.id === $wire.__instance.id) {
+            const wireValue = $wire.get('{{ $attributes->wire('model')->value() }}');
+            const currentValue = $select.val();
+            const newValue = isMultiple ? (wireValue || []) : wireValue;
+
+            if (JSON.stringify(currentValue) !== JSON.stringify(newValue)) {
+                $select.val(newValue).trigger('change.select2');
+            }
+        }
+    });
+    @endif
+</script>
+@endscript
