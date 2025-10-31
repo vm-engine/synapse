@@ -11,11 +11,10 @@ class Select2 extends Component
         public array $options = [],
         public mixed $model = null,
         public bool $multiple = false,
-        public bool $searchable = true,
-        public bool $ajax = false,
-        public string $ajaxUrl = '',
         public string $placeholder = 'Select option',
         public string $searchPlaceholder = 'Search...',
+        public string $config = '{}',
+        public string $modelName = '',
     ) {}
 
     public function render()
