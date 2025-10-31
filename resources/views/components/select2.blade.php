@@ -173,6 +173,11 @@
 
                 // Initialize Select2
                 const isMultiple = {{ $multiple ? 'true' : 'false' }};
+                @php
+                    $wireModelAttr = collect($attributes->getAttributes())->keys()->first(fn($key) => str_starts_with($key, 'wire:model'));
+                    $isLive = $wireModelAttr && str_contains($wireModelAttr, '.live');
+                @endphp
+                const isLiveUpdate = {{ $isLive ? 'true' : 'false' }};
                 const select2Options = {
                     placeholder: '{{ $placeholder }}',
                     allowClear: !isMultiple,
@@ -248,12 +253,16 @@
                 // Sync Select2 changes to Livewire
                 $select.on('change', (e) => {
                     @if($attributes->wire('model')->value())
-                    const value = $(e.target).val();
-                    @if($multiple)
-                    this.$wire.set('{{ $attributes->wire('model')->value() }}', value || []);
-                    @else
-                    this.$wire.set('{{ $attributes->wire('model')->value() }}', value || null);
-                    @endif
+                    // Only trigger live update if wire:model.live is used
+                    if (isLiveUpdate) {
+                        const value = $(e.target).val();
+                        @if($multiple)
+                        this.$wire.set('{{ $attributes->wire('model')->value() }}', value || []);
+                        @else
+                        this.$wire.set('{{ $attributes->wire('model')->value() }}', value || null);
+                        @endif
+                    }
+                    // For regular wire:model, just dispatch events and let Livewire handle it
                     @endif
                 });
 
