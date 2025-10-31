@@ -40,6 +40,9 @@
         icon: '{{ $icon }}',
         onConfirm: null,
         onCancel: null,
+        wireMethod: null,
+        wireParams: null,
+        wireComponent: null,
         open(data) {
             this.title = data.title || '{{ $title }}';
             this.message = data.message || '{{ $message }}';
@@ -49,13 +52,28 @@
             this.icon = data.icon || '{{ $icon }}';
             this.onConfirm = data.onConfirm || null;
             this.onCancel = data.onCancel || null;
+            this.wireMethod = data.wireMethod || null;
+            this.wireParams = data.wireParams || null;
+            this.wireComponent = data.wireComponent || null;
             this.show = true;
         },
         close() {
             this.show = false;
         },
         confirm() {
-            if (this.onConfirm && typeof this.onConfirm === 'function') {
+            // Try Livewire wire method first (for paginated content)
+            if (this.wireMethod && this.wireComponent) {
+                const component = Livewire.find(this.wireComponent);
+                if (component && typeof component[this.wireMethod] === 'function') {
+                    if (this.wireParams && Array.isArray(this.wireParams)) {
+                        component[this.wireMethod](...this.wireParams);
+                    } else {
+                        component[this.wireMethod]();
+                    }
+                }
+            }
+            // Fallback to onConfirm callback
+            else if (this.onConfirm && typeof this.onConfirm === 'function') {
                 this.onConfirm();
             }
             this.close();
