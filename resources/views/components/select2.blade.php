@@ -12,7 +12,7 @@
     $componentId = 'select2-' . $name . '-' . uniqid();
 @endphp
 
-@assets
+@push('styles')
     <script
         src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
@@ -144,7 +144,7 @@
             width: 100% !important;
         }
     </style>
-@endassets
+@endpush
 
 <div wire:ignore>
     <select
@@ -220,11 +220,11 @@
 
             // Sync Select2 changes to Livewire (only if wire:model.live)
             $select.on('change', function(e) {
-                if (isLiveUpdate) {
-                    const value = $(e.target).val();
-                    const finalValue = isMultiple ? (value || []) : (value || null);
-                    $wire.$set('{{ $attributes->wire('model')->value() }}', finalValue);
-                }
+                // if (isLiveUpdate) {
+                const value = $(e.target).val();
+                const finalValue = isMultiple ? (value || []) : (value || null);
+                $wire.$set('{{ $attributes->wire('model')->value() }}', finalValue);
+                // }
             });
         });
     </script>
