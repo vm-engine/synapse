@@ -156,12 +156,24 @@
 <div
     x-data="{
         select2Instance: null,
+        initAttempts: 0,
+        maxAttempts: 10,
         init() {
+            this.tryInitialize();
+        },
+        tryInitialize() {
             try {
-                // Ensure jQuery and Select2 are loaded
-                if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
-                    console.error('Select2: jQuery or Select2 library not loaded');
-                    return;
+                // Check if jQuery and Select2 are loaded
+                if (typeof $ === 'undefined' || typeof $.fn === 'undefined' || typeof $.fn.select2 === 'undefined') {
+                    // Retry initialization after a short delay
+                    if (this.initAttempts < this.maxAttempts) {
+                        this.initAttempts++;
+                        setTimeout(() => this.tryInitialize(), 100);
+                        return;
+                    } else {
+                        console.error('Select2: jQuery or Select2 library not loaded after', this.maxAttempts, 'attempts');
+                        return;
+                    }
                 }
 
                 const $select = $('#{{ $componentId }}');
@@ -290,7 +302,7 @@
             }
         }
     }"
-    x-init="$nextTick(() => init())"
+    x-init="init()"
     @wire:navigate.start.window="destroy()"
 >
     <select
