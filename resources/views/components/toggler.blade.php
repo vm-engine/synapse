@@ -21,62 +21,61 @@
     $componentId = $id ?: ($name ?: 'toggler-' . uniqid());
 @endphp
 
-@if($inline)
-<div x-data="{ active: {{ $checked ? 'true' : 'false' }} }">
-    <label
-        for="{{ $componentId }}"
-        class="flex cursor-pointer items-center gap-2 text-sm font-medium select-none"
-        {{ $attributes->only(['title']) }}
-    >
-        <div class="relative">
-            <input
-                type="checkbox"
-                id="{{ $componentId }}"
-                name="{{ $name }}"
-                class="sr-only"
-                :checked="active"
-                {{ $attributes->only(['@change']) }}
-            />
-            <div
-                class="block h-6 w-11 rounded-full transition-colors"
-                :class="active ? '{{ $activeColorClass }}' : 'bg-gray-300 dark:bg-gray-600'"
-            ></div>
-            <div
-                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
-                :class="active ? 'translate-x-full' : 'translate-x-0'"
-            ></div>
-        </div>
-    </label>
-</div>
+@if ($inline)
+    <div x-data="{ active: {{ $checked ? 'true' : 'false' }} }">
+        <label
+            class="flex cursor-pointer items-center gap-2 text-sm font-medium select-none"
+            for="{{ $componentId }}"
+            {{ $attributes->only(['title']) }}
+        >
+            <div class="relative">
+                <input
+                    class="sr-only"
+                    id="{{ $componentId }}"
+                    name="{{ $name }}"
+                    type="checkbox"
+                    :checked="active"
+                    {{ $attributes->only(['@change', 'wire:model']) }}
+                />
+                <div
+                    class="block h-6 w-11 rounded-full transition-colors"
+                    :class="active ? '{{ $activeColorClass }}' : 'bg-gray-300 dark:bg-gray-600'"
+                ></div>
+                <div
+                    class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
+                    :class="active ? 'translate-x-full' : 'translate-x-0'"
+                ></div>
+            </div>
+        </label>
+    </div>
 @else
-<div x-data="{ active: @entangle($attributes->wire('model')->value()) }">
-    <label
-        for="{{ $componentId }}"
-        class="flex cursor-pointer items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-400 select-none"
-    >
-        <div class="relative">
-            <input
-                type="checkbox"
-                id="{{ $componentId }}"
-                name="{{ $name }}"
-                class="sr-only"
-                x-model="active"
-            />
-            <div
-                class="block h-6 w-11 rounded-full transition-colors"
-                :class="active ? '{{ $activeColorClass }}' : 'bg-gray-300 dark:bg-gray-600'"
-            ></div>
-            <div
-                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
-                :class="active ? 'translate-x-full' : 'translate-x-0'"
-            ></div>
-        </div>
-        @if($label)
-            <span>{{ $label }}</span>
-        @else
-            <span x-text="active ? 'Active' : 'Inactive'"></span>
-        @endif
-    </label>
-</div>
+    <div x-data="{ active: @entangle($attributes->wire('model')->value()) }">
+        <label
+            class="flex cursor-pointer items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-400 select-none"
+            for="{{ $componentId }}"
+        >
+            <div class="relative">
+                <input
+                    class="sr-only"
+                    id="{{ $componentId }}"
+                    name="{{ $name }}"
+                    type="checkbox"
+                    x-model="active"
+                />
+                <div
+                    class="block h-6 w-11 rounded-full transition-colors"
+                    :class="active ? '{{ $activeColorClass }}' : 'bg-gray-300 dark:bg-gray-600'"
+                ></div>
+                <div
+                    class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
+                    :class="active ? 'translate-x-full' : 'translate-x-0'"
+                ></div>
+            </div>
+            @if ($label)
+                <span>{{ $label }}</span>
+            @else
+                <span x-text="active ? 'Active' : 'Inactive'"></span>
+            @endif
+        </label>
+    </div>
 @endif
-

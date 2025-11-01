@@ -12,7 +12,7 @@
     $componentId = 'select2-' . $name . '-' . uniqid();
 @endphp
 
-@push('styles')
+@assets
     <script
         src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
@@ -144,7 +144,7 @@
             width: 100% !important;
         }
     </style>
-@endpush
+@endassets
 
 <div wire:ignore>
     <select
