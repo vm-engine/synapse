@@ -423,6 +423,53 @@ Flexible alert component with dismissible functionality:
 </div>
 ```
 
+#### Advanced Select
+
+A fully featured, reusable **Livewire + Alpine.js select component**.
+
+Supports:
+
+- ✅ Single or multiple selection
+- ✅ Searchable dropdown (static or remote)
+- ✅ Static or dynamic data
+- ✅ Preloaded default values
+- ✅ Optional "live" syncing with Livewire
+- ✅ Works with Livewire SPA navigation
+
+---
+
+## ⚙️ Props
+
+| Prop | Type | Default | Description |
+|------|------|----------|-------------|
+| `wireModel` | `string` | — | The Livewire property to bind to. |
+| `searchMethod` | `string|null` | `null` | Name of a Livewire method for remote searching. |
+| `multiple` | `bool` | `false` | Enables multiple selection mode. |
+| `placeholder` | `string` | `'Select an option'` | Placeholder text shown in the input. |
+| `labelField` | `string` | `'label'` | The field name used for option labels. |
+| `valueField` | `string` | `'value'` | The field name used for option values. |
+| `preload` | `array` | `[]` | Preselected options (for edit forms). |
+| `options` | `array` | `[]` | Static options for client-side use. |
+| `minSearchLength` | `int` | `2` | Minimum characters before triggering remote search. |
+| `live` | `bool` | `false` | If `true`, updates Livewire instantly as user selects. |
+
+---
+
+## 🧠 Usage Examples
+
+### 🔹 Static Single Select
+
+```blade
+<x-adv-select
+    wire-model="role"
+    :options="[
+        ['value' => 'admin', 'label' => 'Administrator'],
+        ['value' => 'editor', 'label' => 'Editor'],
+        ['value' => 'user', 'label' => 'User'],
+    ]"
+/>
+
+
 ## Helper Functions
 
 Synapse provides global helper functions for common tasks:

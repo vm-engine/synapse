@@ -5,6 +5,7 @@
     'multiple' => false,
     'placeholder' => 'Select option',
     'config' => '{}',
+    'remoteDataMethod' => null,
 ])
 
 @php
@@ -183,7 +184,9 @@
             const isLiveUpdate = {{ $isLive ? 'true' : 'false' }};
 
             // Select2 options
-            const select2Options = {{ $config }}
+            const select2Options = {{ $config }};
+            console.log(select2Options);
+
 
             // Initialize Select2
             $select.select2(select2Options);
@@ -223,7 +226,7 @@
                 // if (isLiveUpdate) {
                 const value = $(e.target).val();
                 const finalValue = isMultiple ? (value || []) : (value || null);
-                $wire.$set('{{ $attributes->wire('model')->value() }}', finalValue);
+                $wire.$set('{{ $attributes->wire('model')->value() }}', finalValue, isLiveUpdate);
                 // }
             });
         });
