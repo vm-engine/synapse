@@ -62,7 +62,7 @@ class ExampleForm extends Component
 
         synav()->setActiveMenu('example.index');
 
-        $categories = ExampleCategory::active()->pluck('name', 'id')->toArray();
+        $categories = ExampleCategory::active()->select('name as label', 'id as value')->get()->toArray();
 
         // View: synapps/modules/example/resources/views/livewire/example-form.blade.php
         return view('example::livewire.example-form', [

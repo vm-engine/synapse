@@ -139,7 +139,7 @@ class ExampleList extends Component
     public function render()
     {
         $options = ['all' => '-- All --'] + Example::$options;
-        $categories = ExampleCategory::active()->pluck('name', 'id')->toArray();
+        $categories = ExampleCategory::active()->select('id as value', 'name as label')->get()->toArray();
 
         $breadcrumbs = Breadcrumbs::make(
             label: 'Example List',

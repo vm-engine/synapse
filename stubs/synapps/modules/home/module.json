@@ -28,7 +28,7 @@
             "index": {
                 "id": "index",
                 "name": "__home::menu.fe.index",
-                "route": "home.index"
+                "route": "home.guest"
             }
         },
         "backend": {

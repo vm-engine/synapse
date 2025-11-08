@@ -1,5 +1,5 @@
 <aside
-    class="sidebar fixed left-0 top-0 z-20 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0 transition-all ease-linear"
+    class="sidebar fixed left-0 top-0 z-20 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all ease-linear lg:static lg:translate-x-0 dark:border-gray-800 dark:bg-black"
     :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
 >
     <div
@@ -42,7 +42,7 @@
                         MENU
                     </span>
                     <svg
-                        class="mx-auto fill-current menu-group-icon"
+                        class="menu-group-icon mx-auto fill-current"
                         :class="sidebarToggle ? 'lg:block hidden' : 'hidden'"
                         width="24"
                         height="24"
@@ -61,13 +61,14 @@
                 </h3>
                 <ul class="menu">
                     @foreach (synav()->backend() as $key => $menu)
+                        @canAccess($menu['acl'] ?? null)
                         <li class="{{ $menu['class'] }}">
                             <a
-                                class="menu-item group {{ synav()->is($key) ? 'menu-item-active' : 'menu-item-inactive' }}"
+                                class="menu-item {{ synav()->is($key) ? 'menu-item-active' : 'menu-item-inactive' }} group"
                                 @isset($menu['sub'])
                                 @click.prevent="selected = selected === '{{ $key }}' ? '' : '{{ $key }}'"
                                 @else
-                                href="{{ route('backend.'.$menu['route']) }}"
+                                href="{{ route('backend.' . $menu['route']) }}"
                                 @endisset
                                 wire:navigate
                             >
@@ -107,7 +108,7 @@
                             </a>
                             @isset($menu['sub'])
                                 <div
-                                    class="translate transform overflow-hidden block"
+                                    class="translate block transform overflow-hidden"
                                     :class="(selected.startsWith('{{ $key }}')) ? 'block' : 'hidden'"
                                 >
                                     <ul
@@ -115,10 +116,11 @@
                                         :class="sidebarToggle ? 'xl:hidden' : 'flex'"
                                     >
                                         @foreach ($menu['sub'] as $sub => $subMenu)
+                                            @canAccess($submenu['acl'] ?? null)
                                             <li class="{{ $subMenu['class'] }}">
                                                 <a
                                                     class="menu-dropdown-item group"
-                                                    href="{{ route('backend.'.$subMenu['route']) }}"
+                                                    href="{{ route('backend.' . $subMenu['route']) }}"
                                                     :class="page === '{{ $key . '.' . $sub }}' ? 'menu-dropdown-item-active' :
                                                         'menu-dropdown-item-inactive'"
                                                     wire:navigate
@@ -129,11 +131,13 @@
                                                     {{ synav()->translate($subMenu['name']) }}
                                                 </a>
                                             </li>
+                                            @endcanAccess
                                         @endforeach
                                     </ul>
                                 </div>
                             @endisset
                         </li>
+                        @endcanAccess
                     @endforeach
                 </ul>
             </div>

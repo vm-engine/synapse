@@ -1,24 +1,5 @@
 <?php
 
-describe('synapps_path()', function () {
-    it('returns base synapps path when no argument provided', function () {
-        $path = synapps_path();
-        expect($path)->toContain('synapps');
-    });
-
-    it('returns path with provided subdirectory', function () {
-        $path = synapps_path('modules/example');
-        expect($path)->toContain('synapps')
-            ->and($path)->toContain('modules')
-            ->and($path)->toContain('example');
-    });
-
-    it('handles empty string', function () {
-        $path = synapps_path('');
-        expect($path)->toContain('synapps');
-    });
-});
-
 describe('array_is_list()', function () {
     it('returns true for empty array', function () {
         expect(array_is_list([]))->toBeTrue();

@@ -36,20 +36,23 @@
             "position": 1,
             "class": "",
             "icon": "fa-solid fa-table",
+            "acl": "example.any",
             "sub": {
                 "index": {
                     "id": "index",
                     "name": "__example::menu.be.index",
                     "route": "example.index",
                     "class": "",
-                    "icon": "fa-solid fa-table"
+                    "icon": "fa-solid fa-table",
+                    "acl": "example.manage"
                 },
                 "category": {
                     "id": "category",
                     "name": "__example::menu.be.category",
                     "route": "example.category",
                     "class": "",
-                    "icon": "fa-solid fa-folder"
+                    "icon": "fa-solid fa-folder",
+                    "acl": "example.category"
                 }
             }
         }

@@ -1,4 +1,5 @@
 <div x-data="{ pageName: 'Example List', isHome: false, drawerOpen: false }">
+    @include('synapps::components.layouts.partials.loader')
     @include('synapps::components.layouts.partials.breadcrumbs')
 
     <!-- Confirmation Dialog -->
@@ -15,7 +16,8 @@
                         Example List
                     </h3>
                 </div>
-                <div class="my-auto px-5 flex gap-3">
+                <div class="my-auto flex gap-3 px-5">
+                    @canAccess('example.manage.create')
                     <div>
                         <a
                             class="btn primary"
@@ -26,6 +28,7 @@
                             Add
                         </a>
                     </div>
+                    @endcanAccess
                     <div class="input-group">
                         <button
                             class="input-group-item right btn"
@@ -34,7 +37,7 @@
                             @click="drawerOpen = true"
                         ><span class="fa-solid fa-filter"></span></button>
                         <input
-                            class="p-2 form-input"
+                            class="form-input p-2"
                             id="q"
                             name="q"
                             type=" text"
@@ -47,7 +50,7 @@
             <div class="border-t border-gray-100 dark:border-gray-800">
                 <div class="max-w-full overflow-x-auto">
                     <table
-                        class="min-w-full datatable"
+                        class="datatable min-w-full"
                         id="dataTable"
                         width="100%"
                         cellspacing="0"
@@ -121,22 +124,21 @@
                                     </td>
                                     <td>
                                         <div class="flex items-center">
-                                            @if($list->category)
+                                            @if ($list->category)
                                                 <button
+                                                    class="{{ in_array($list->category_id, $filterCategories)
+                                                        ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300'
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-brand-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-brand-900/20' }} inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-medium transition-colors"
                                                     type="button"
-                                                    wire:click="filterByCategory({{ $list->category_id }})"
-                                                    class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-medium
-                                                           transition-colors cursor-pointer
-                                                           {{ in_array($list->category_id, $filterCategories)
-                                                               ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300'
-                                                               : 'bg-gray-100 text-gray-700 hover:bg-brand-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-brand-900/20' }}"
                                                     title="Click to filter by this category"
+                                                    wire:click="filterByCategory({{ $list->category_id }})"
                                                 >
                                                     <span class="fa-solid fa-folder text-xs"></span>
                                                     <span>{{ $list->category->name }}</span>
                                                 </button>
                                             @else
-                                                <span class="text-gray-400 dark:text-gray-600 text-sm italic">No category</span>
+                                                <span class="text-sm italic text-gray-400 dark:text-gray-600">No
+                                                    category</span>
                                             @endif
                                         </div>
                                     </td>
@@ -171,6 +173,7 @@
                                     </td>
                                     <td>
                                         <div class="text-center">
+                                            @canAccess('example.manage.update')
                                             <a
                                                 class="btn-icon warning has-tooltip group"
                                                 href="{{ route('backend.example.form', ['id' => $list->id]) }}"
@@ -179,6 +182,8 @@
                                                 <span class="fa-solid fa-edit"></span>
                                                 <span class="tooltip">Edit</span>
                                             </a>
+                                            @endcanAccess
+                                            @canAccess('example.manage.delete')
                                             <button
                                                 class="btn-icon danger has-tooltip group"
                                                 type="button"
@@ -197,6 +202,7 @@
                                                 <span class="fa-solid fa-trash"></span>
                                                 <span class="tooltip">Delete</span>
                                             </button>
+                                            @endcanAccess
                                         </div>
                                     </td>
                                 </tr>
@@ -208,7 +214,7 @@
                     </table>
                 </div>
             </div>
-            <div class="p-3 flex gap-2">
+            <div class="flex gap-2 p-3">
                 <div class="flex-none p-1">
                     <select
                         class="shadow-theme-sm rounded-sm p-1"
@@ -222,7 +228,7 @@
                         <option value="100">100</option>
                     </select>
                 </div>
-                <div class="flex-1 grow pagination-container">
+                <div class="pagination-container flex-1 grow">
                     {{ $this->exampleList->links() }}
                 </div>
             </div>
@@ -251,12 +257,11 @@
                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Categories
                 </label>
-                <x-synapse-select2
-                    name="filterCategories"
+                <x-synapse-adv-select
+                    wire-model="filterCategories"
+                    :live="true"
                     :options="$categories"
-                    :model="$filterCategories"
                     :multiple="true"
-                    wire:model.live="filterCategories"
                     placeholder="Select categories"
                 />
             </div>

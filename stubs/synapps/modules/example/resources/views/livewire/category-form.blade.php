@@ -15,8 +15,11 @@
     <!-- Modal Header -->
     <div class="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            <span x-show="$wire.form.category">{{ __('example::labels.edit_category') }}</span>
-            <span x-show="!$wire.form.category">{{ __('example::labels.add_category') }}</span>
+            @if($form->category)
+                {{ __('example::labels.edit_category') }}
+            @else
+                {{ __('example::labels.add_category') }}
+            @endif
         </h3>
         <button
             class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"

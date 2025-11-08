@@ -8,7 +8,11 @@
       "Read(//d/Data/Works/Internal/vm-engine/laravel/**)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add Alert Blade component with dismissible functionality\n\n- Add Alert component class with auto-icon assignment\n- Create comprehensive Blade template with Alpine.js animations\n- Support 4 alert types: success, warning, danger/error, info\n- Implement dismissible functionality with smooth transitions\n- Add border accent and solid background style variants\n- Include dark mode support and ARIA accessibility\n- Add 19 comprehensive unit tests (all passing)\n- Update README.md with Alert component documentation\n- Update CLAUDE.md with technical documentation\n\nFeatures:\n- Auto-assigns FontAwesome icons based on alert type\n- Normalizes ''error'' type to ''danger''\n- Supports both props (title, message) and slot content\n- Customizable icons, dismissible state, border, and solid styles\n- Tailwind CSS 4.x with full responsive design\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(composer test:*)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(cat:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

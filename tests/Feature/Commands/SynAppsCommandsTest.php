@@ -1,149 +1,144 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 
-describe('synapps:patch-resources command', function () {
-    beforeEach(function () {
-        // Create resources directories if they don't exist
-        $resourcesPath = base_path('resources');
-        if (! is_dir($resourcesPath)) {
-            mkdir($resourcesPath, 0777, true);
-        }
+test('patch-resources: patches app.js with synapps import', function () {
+    // Create test resources directory
+    $jsPath = resource_path('js/app.js');
+    $cssPath = resource_path('css/app.css');
+    File::ensureDirectoryExists(dirname($jsPath));
+    File::ensureDirectoryExists(dirname($cssPath));
+    File::put($jsPath, "import './bootstrap';\n");
+    File::put($cssPath, "@import 'tailwindcss';\n");
 
-        if (! is_dir($resourcesPath.'/js')) {
-            mkdir($resourcesPath.'/js', 0777, true);
-        }
+    $this->artisan('synapps:patch-resources')
+        ->assertSuccessful();
 
-        if (! is_dir($resourcesPath.'/css')) {
-            mkdir($resourcesPath.'/css', 0777, true);
-        }
+    $content = File::get($jsPath);
+    expect($content)->toContain('synapps/resources/js/synapps.js');
 
-        // Create minimal app.js and app.css files
-        file_put_contents($resourcesPath.'/js/app.js', "import './bootstrap.js';\n");
-        file_put_contents($resourcesPath.'/css/app.css', "@import './bootstrap.css';\n");
-
-        // Create synapps resources
-        $synappsPath = base_path('synapps/resources');
-        if (! is_dir($synappsPath.'/js')) {
-            mkdir($synappsPath.'/js', 0777, true);
-        }
-        if (! is_dir($synappsPath.'/css')) {
-            mkdir($synappsPath.'/css', 0777, true);
-        }
-
-        file_put_contents($synappsPath.'/js/synapps.js', "console.log('synapps');\n");
-        file_put_contents($synappsPath.'/css/synapps.css', "body { margin: 0; }\n");
-    });
-
-    it('patches app.js with synapps import', function () {
-        Artisan::call('synapps:patch-resources');
-
-        $appJs = file_get_contents(base_path('resources/js/app.js'));
-
-        expect($appJs)->toContain('synapps.js');
-    });
-
-    it('patches app.css with synapps import', function () {
-        Artisan::call('synapps:patch-resources');
-
-        $appCss = file_get_contents(base_path('resources/css/app.css'));
-
-        expect($appCss)->toContain('synapps.css');
-    });
-
-    it('is idempotent - running twice does not duplicate imports', function () {
-        Artisan::call('synapps:patch-resources');
-        Artisan::call('synapps:patch-resources');
-
-        $appJs = file_get_contents(base_path('resources/js/app.js'));
-        $appCss = file_get_contents(base_path('resources/css/app.css'));
-
-        // Count occurrences
-        $jsCount = substr_count($appJs, 'synapps.js');
-        $cssCount = substr_count($appCss, 'synapps.css');
-
-        expect($jsCount)->toBe(1)
-            ->and($cssCount)->toBe(1);
-    });
-
-    it('returns success message', function () {
-        $result = Artisan::call('synapps:patch-resources');
-
-        expect($result)->toBe(0); // Success exit code
-    });
+    // Cleanup
+    File::delete($jsPath);
+    File::delete($cssPath);
 });
 
-describe('synapps:discover command', function () {
-    beforeEach(function () {
-        // Ensure required directories exist
-        $modulesPath = base_path('synapps/modules');
-        if (! is_dir($modulesPath)) {
-            mkdir($modulesPath, 0777, true);
-        }
+test('patch-resources: patches app.css with synapps import', function () {
+    // Create test resources directory
+    $jsPath = resource_path('js/app.js');
+    $cssPath = resource_path('css/app.css');
+    File::ensureDirectoryExists(dirname($jsPath));
+    File::ensureDirectoryExists(dirname($cssPath));
+    File::put($jsPath, "import './bootstrap';\n");
+    File::put($cssPath, "@import 'tailwindcss';\n");
 
-        // Create a test module
-        $testModulePath = $modulesPath.'/test_module';
-        if (! is_dir($testModulePath)) {
-            mkdir($testModulePath, 0777, true);
-        }
+    $this->artisan('synapps:patch-resources')
+        ->assertSuccessful();
 
-        // Create module.json
-        $moduleConfig = [
-            'id' => 'test_module',
-            'id_case' => [
-                'snake' => 'test_module',
-                'pascal' => 'TestModule',
-                'slug' => 'test-module',
-                'studly' => 'testModule',
-            ],
-            'name' => 'Test Module',
-            'description' => 'Test module description',
-            'version' => '0.1.0',
-            'author' => 'Test Author',
-            'email' => 'test@example.com',
-            'url_prefix' => 'test',
-            'load_priority' => 99,
-            'dependencies' => [
-                'npm' => ['main' => new stdClass, 'dev' => new stdClass],
-                'composer' => ['main' => new stdClass, 'dev' => new stdClass],
-            ],
-        ];
+    $content = File::get($cssPath);
+    expect($content)->toContain('synapps/resources/css/synapps.css');
 
-        file_put_contents(
-            $testModulePath.'/module.json',
-            json_encode($moduleConfig, JSON_PRETTY_PRINT)
-        );
-    });
-
-    it('can discover modules', function () {
-        // This test would require mocking composer and npm commands
-        // For now, we just test that the command can be called
-        expect(true)->toBeTrue();
-    })->skip('Requires mocking composer and npm');
-
-    it('adds PSR-4 namespaces to composer.json', function () {
-        // This test would modify the actual composer.json
-        // Should be tested in an isolated environment
-        expect(true)->toBeTrue();
-    })->skip('Requires isolated test environment');
+    // Cleanup
+    File::delete($jsPath);
+    File::delete($cssPath);
 });
 
-describe('synapps:setup command', function () {
-    it('creates synapps directory structure', function () {
-        // This command is interactive and requires user input
-        // Testing would require mocking Laravel Prompts
-        expect(true)->toBeTrue();
-    })->skip('Interactive command requires prompt mocking');
+test('patch-resources: is idempotent', function () {
+    // Create test resources
+    $jsPath = resource_path('js/app.js');
+    $cssPath = resource_path('css/app.css');
+    File::ensureDirectoryExists(dirname($jsPath));
+    File::ensureDirectoryExists(dirname($cssPath));
+    File::put($jsPath, "import './bootstrap';\n");
+    File::put($cssPath, "@import 'tailwindcss';\n");
 
-    it('copies stub files', function () {
-        // This test would create actual files
-        // Should be tested in isolated environment
-        expect(true)->toBeTrue();
-    })->skip('Requires isolated test environment');
+    // Run twice
+    $this->artisan('synapps:patch-resources')->assertSuccessful();
+    $firstJs = File::get($jsPath);
+    $firstCss = File::get($cssPath);
 
-    it('generates apps.json configuration', function () {
-        // This test would create actual files
-        // Should be tested in isolated environment
-        expect(true)->toBeTrue();
-    })->skip('Requires isolated test environment');
+    $this->artisan('synapps:patch-resources')->assertSuccessful();
+    $secondJs = File::get($jsPath);
+    $secondCss = File::get($cssPath);
+
+    expect($firstJs)->toBe($secondJs)
+        ->and($firstCss)->toBe($secondCss);
+
+    // Cleanup
+    File::delete($jsPath);
+    File::delete($cssPath);
+});
+
+test('patch-resources: returns success exit code', function () {
+    $jsPath = resource_path('js/app.js');
+    $cssPath = resource_path('css/app.css');
+    File::ensureDirectoryExists(dirname($jsPath));
+    File::ensureDirectoryExists(dirname($cssPath));
+    File::put($jsPath, "import './bootstrap';\n");
+    File::put($cssPath, "@import 'tailwindcss';\n");
+
+    $this->artisan('synapps:patch-resources')
+        ->assertExitCode(0);
+
+    // Cleanup
+    File::delete($jsPath);
+    File::delete($cssPath);
+});
+
+test('patch-tests: patches Pest.php with module paths', function () {
+    $pestPath = base_path('tests/Pest.php');
+    $originalContent = File::get($pestPath);
+
+    // Create backup
+    File::put($pestPath.'.backup', $originalContent);
+
+    $this->artisan('synapps:patch-tests')
+        ->assertSuccessful();
+
+    $content = File::get($pestPath);
+    expect($content)->toContain('synapps/modules/*/tests/Feature')
+        ->and($content)->toContain('Browser');
+
+    // Restore original
+    File::put($pestPath, $originalContent);
+    File::delete($pestPath.'.backup');
+});
+
+test('patch-tests: patches phpunit.xml with module testsuites', function () {
+    $phpunitPath = base_path('phpunit.xml');
+    $originalContent = File::get($phpunitPath);
+
+    // Create backup
+    File::put($phpunitPath.'.backup', $originalContent);
+
+    $this->artisan('synapps:patch-tests')
+        ->assertSuccessful();
+
+    $content = File::get($phpunitPath);
+    expect($content)->toContain('testsuite name="Browser"')
+        ->and($content)->toContain('testsuite name="Modules"')
+        ->and($content)->toContain('testsuite name="Packages"');
+
+    // Restore original
+    File::put($phpunitPath, $originalContent);
+    File::delete($phpunitPath.'.backup');
+});
+
+test('patch-tests: adds environment variables to phpunit.xml', function () {
+    $phpunitPath = base_path('phpunit.xml');
+    $originalContent = File::get($phpunitPath);
+
+    // Create backup
+    File::put($phpunitPath.'.backup', $originalContent);
+
+    $this->artisan('synapps:patch-tests')
+        ->assertSuccessful();
+
+    $content = File::get($phpunitPath);
+    expect($content)->toContain('name="APP_ENV" value="testing"')
+        ->and($content)->toContain('name="DB_DATABASE" value=":memory:"')
+        ->and($content)->toContain('name="CACHE_STORE" value="array"');
+
+    // Restore original
+    File::put($phpunitPath, $originalContent);
+    File::delete($phpunitPath.'.backup');
 });

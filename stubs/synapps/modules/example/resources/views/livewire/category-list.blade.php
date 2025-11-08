@@ -15,7 +15,8 @@
                         {{ __('example::labels.category_list') }}
                     </h3>
                 </div>
-                <div class="my-auto px-5 flex gap-3">
+                <div class="my-auto flex gap-3 px-5">
+                    @canAccess('example.category.create')
                     <div>
                         <button
                             class="btn primary"
@@ -26,6 +27,7 @@
                             {{ __('example::labels.add') }}
                         </button>
                     </div>
+                    @endcanAccess
                     <div class="input-group">
                         <button
                             class="input-group-item right btn"
@@ -34,7 +36,7 @@
                             @click="drawerOpen = true"
                         ><span class="fa-solid fa-filter"></span></button>
                         <input
-                            class="p-2 form-input"
+                            class="form-input p-2"
                             id="q"
                             name="q"
                             type="text"
@@ -47,7 +49,7 @@
             <div class="border-t border-gray-100 dark:border-gray-800">
                 <div class="max-w-full overflow-x-auto">
                     <table
-                        class="min-w-full datatable"
+                        class="datatable min-w-full"
                         id="dataTable"
                         width="100%"
                         cellspacing="0"
@@ -114,17 +116,26 @@
                                     </td>
                                     <td>
                                         <div class="flex items-center">
+                                            @canAccess('example.category.update')
                                             <x-synapse-toggler
                                                 title="Toggle Status"
                                                 :inline="true"
-                                                :checked="$category->is_active ? 'true' : 'false'"
+                                                :checked="$category->is_active"
                                                 @change="active = !active; $wire.toggleActive({{ $category->id }})"
                                                 activeColor="green"
                                             />
+                                        @else
+                                            @if ($category->is_active)
+                                                <span class="text-success">Active</span>
+                                            @else
+                                                <span class="text-danger">Inactive</span>
+                                            @endif
+                                            @endcanAccess
                                         </div>
                                     </td>
                                     <td>
                                         <div class="text-center">
+                                            @canAccess('example.category.update')
                                             <button
                                                 class="btn-icon warning has-tooltip group"
                                                 type="button"
@@ -133,6 +144,8 @@
                                                 <span class="fa-solid fa-edit"></span>
                                                 <span class="tooltip">{{ __('example::labels.edit') }}</span>
                                             </button>
+                                            @endcanAccess
+                                            @canAccess('example.category.delete')
                                             <button
                                                 class="btn-icon danger has-tooltip group"
                                                 type="button"
@@ -151,6 +164,7 @@
                                                 <span class="fa-solid fa-trash"></span>
                                                 <span class="tooltip">{{ __('example::labels.delete') }}</span>
                                             </button>
+                                            @endcanAccess
                                         </div>
                                     </td>
                                 </tr>
@@ -162,7 +176,7 @@
                     </table>
                 </div>
             </div>
-            <div class="p-3 flex gap-2">
+            <div class="flex gap-2 p-3">
                 <div class="flex-none p-1">
                     <select
                         class="shadow-theme-sm rounded-sm p-1"
@@ -176,7 +190,7 @@
                         <option value="100">100</option>
                     </select>
                 </div>
-                <div class="flex-1 grow pagination-container">
+                <div class="pagination-container flex-1 grow">
                     {{ $this->categoryList->links() }}
                 </div>
             </div>

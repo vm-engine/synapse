@@ -2,6 +2,7 @@
     class="relative overflow-y-auto"
     x-data="{ pageName: 'Example Form', isHome: false }"
 >
+    @include('synapps::components.layouts.partials.loader')
     @include('synapps::components.layouts.partials.breadcrumbs')
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-16">
         <div class="space-y-6">
@@ -12,11 +13,10 @@
                 <div class="card-body">
                     <div class="form-box">
                         <label for="category">Category</label>
-                        <x-synapse-select2
-                            name="category_id"
+                        <x-synapse-adv-select
+                            wire-model="form.category_id"
                             :options="$categories"
-                            :model="$form->category_id"
-                            wire:model="form.category_id"
+                            :multiple="true"
                             placeholder="Select a category"
                         />
                         @error('form.category_id')

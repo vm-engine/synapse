@@ -18,10 +18,11 @@ class SynAppsPatchTests extends Command
      *
      * @var string
      */
-    protected $description = 'Patch tests/Pest.php, .env.testing, and composer.json for proper test configuration';
+    protected $description = 'Patch tests/Pest.php, .env.testing, composer.json, and phpunit.xml for proper test configuration';
 
     private array $pathsToAdd = [
         'Browser', // Add Browser directory for Pest Browser Testing
+        '../vendor/vm-engine/synapse/tests/Feature', // Synapse Feature tests
         '../synapps/modules/*/tests/Feature',
         '../vendor/*/synmod-*/tests/Feature',
         '../vendor/*/synmodule-*/tests/Feature',
@@ -51,12 +52,18 @@ class SynAppsPatchTests extends Command
             $success = false;
         }
 
+        // 4. Patch phpunit.xml
+        if (! $this->patchPhpunitXml()) {
+            $success = false;
+        }
+
         if ($success) {
             $this->newLine();
             $this->components->success('Test configuration completed successfully!');
             $this->components->info('✓ tests/Pest.php - Module paths added');
             $this->components->info('✓ .env.testing - In-memory database configured');
             $this->components->info('✓ composer.json - Test script updated');
+            $this->components->info('✓ phpunit.xml - Test suites and environment configured');
         }
 
         return $success ? 0 : 1;
@@ -288,5 +295,203 @@ ENV;
         }
 
         return $indent.implode(','.$indent, $lines);
+    }
+
+    private function patchPhpunitXml(): bool
+    {
+        $phpunitPath = base_path('phpunit.xml');
+
+        // Check if phpunit.xml exists
+        if (! file_exists($phpunitPath)) {
+            $this->components->warn('phpunit.xml not found. Skipping.');
+
+            return true; // Not critical, skip
+        }
+
+        // Load the XML file
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+
+        if (! @$dom->load($phpunitPath)) {
+            $this->components->error('Failed to parse phpunit.xml.');
+
+            return false;
+        }
+
+        $modified = false;
+
+        // 1. Ensure testsuites section exists and patch it
+        if ($this->ensureTestSuites($dom)) {
+            $modified = true;
+        }
+
+        // 2. Ensure php environment section has correct values
+        if ($this->ensurePhpEnvVars($dom)) {
+            $modified = true;
+        }
+
+        // Save if modified
+        if ($modified) {
+            if (! $dom->save($phpunitPath)) {
+                $this->components->error('Failed to save phpunit.xml.');
+
+                return false;
+            }
+
+            $this->components->success('phpunit.xml patched successfully!');
+        } else {
+            $this->components->info('phpunit.xml already configured correctly.');
+        }
+
+        return true;
+    }
+
+    private function ensureTestSuites(\DOMDocument $dom): bool
+    {
+        $modified = false;
+        $xpath = new \DOMXPath($dom);
+
+        // Find or create testsuites element
+        $testsuites = $xpath->query('/phpunit/testsuites')->item(0);
+
+        if (! $testsuites) {
+            $testsuites = $dom->createElement('testsuites');
+            $dom->documentElement->appendChild($testsuites);
+            $modified = true;
+        }
+
+        // Define required testsuites
+        $requiredSuites = [
+            'Browser' => [
+                'tests/Browser',
+                'synapps/modules/*/tests/Browser',
+                'vendor/*/synmod-*/tests/Browser',
+                'vendor/*/synmodule-*/tests/Browser',
+                'vendor/*/synapps-*/tests/Browser',
+            ],
+            'Modules' => [
+                'synapps/modules/*/tests',
+            ],
+            'ModulesExclude' => [
+                'synapps/modules/*/tests/Browser',
+            ],
+            'Packages' => [
+                'vendor/*/synmod-*/tests',
+                'vendor/*/synmodule-*/tests',
+                'vendor/*/synapps-*/tests',
+            ],
+            'PackagesExclude' => [
+                'vendor/*/synmod-*/tests/Browser',
+                'vendor/*/synmodule-*/tests/Browser',
+                'vendor/*/synapps-*/tests/Browser',
+            ],
+        ];
+
+        // Check and add Browser testsuite
+        if (! $this->testsuiteExists($xpath, 'Browser')) {
+            $this->addTestSuite($dom, $testsuites, 'Browser', $requiredSuites['Browser'], []);
+            $modified = true;
+        }
+
+        // Check and add Modules testsuite
+        if (! $this->testsuiteExists($xpath, 'Modules')) {
+            $this->addTestSuite($dom, $testsuites, 'Modules', $requiredSuites['Modules'], $requiredSuites['ModulesExclude']);
+            $modified = true;
+        }
+
+        // Check and add Packages testsuite
+        if (! $this->testsuiteExists($xpath, 'Packages')) {
+            $this->addTestSuite($dom, $testsuites, 'Packages', $requiredSuites['Packages'], $requiredSuites['PackagesExclude']);
+            $modified = true;
+        }
+
+        return $modified;
+    }
+
+    private function testsuiteExists(\DOMXPath $xpath, string $name): bool
+    {
+        $result = $xpath->query("/phpunit/testsuites/testsuite[@name='{$name}']");
+
+        return $result->length > 0;
+    }
+
+    private function addTestSuite(\DOMDocument $dom, \DOMElement $testsuites, string $name, array $directories, array $excludes = []): void
+    {
+        $testsuite = $dom->createElement('testsuite');
+        $testsuite->setAttribute('name', $name);
+
+        foreach ($directories as $dir) {
+            $directory = $dom->createElement('directory', $dir);
+            $testsuite->appendChild($directory);
+        }
+
+        foreach ($excludes as $exclude) {
+            $excludeElement = $dom->createElement('exclude', $exclude);
+            $testsuite->appendChild($excludeElement);
+        }
+
+        $testsuites->appendChild($testsuite);
+    }
+
+    private function ensurePhpEnvVars(\DOMDocument $dom): bool
+    {
+        $modified = false;
+        $xpath = new \DOMXPath($dom);
+
+        // Find or create php element
+        $php = $xpath->query('/phpunit/php')->item(0);
+
+        if (! $php) {
+            $php = $dom->createElement('php');
+            $dom->documentElement->appendChild($php);
+            $modified = true;
+        }
+
+        // Define required environment variables
+        $requiredEnvVars = [
+            'APP_ENV' => 'testing',
+            'DB_CONNECTION' => 'sqlite',
+            'DB_DATABASE' => ':memory:',
+            'CACHE_STORE' => 'array',
+            'SESSION_DRIVER' => 'array',
+            'QUEUE_CONNECTION' => 'sync',
+            'MAIL_MAILER' => 'array',
+            'BCRYPT_ROUNDS' => '4',
+        ];
+
+        foreach ($requiredEnvVars as $name => $value) {
+            if ($this->ensureEnvVar($dom, $xpath, $php, $name, $value)) {
+                $modified = true;
+            }
+        }
+
+        return $modified;
+    }
+
+    private function ensureEnvVar(\DOMDocument $dom, \DOMXPath $xpath, \DOMElement $php, string $name, string $value): bool
+    {
+        // Check if env var exists
+        $envVars = $xpath->query("/phpunit/php/env[@name='{$name}']");
+
+        if ($envVars->length > 0) {
+            // Update if value is different
+            $envVar = $envVars->item(0);
+            if ($envVar->getAttribute('value') !== $value) {
+                $envVar->setAttribute('value', $value);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        // Create new env var
+        $env = $dom->createElement('env');
+        $env->setAttribute('name', $name);
+        $env->setAttribute('value', $value);
+        $php->appendChild($env);
+
+        return true;
     }
 }
