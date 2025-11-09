@@ -1,8 +1,10 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use SynApps\Modules\Example\Models\Example;
+use VmEngine\SynAuth\Models\Role;
+use VmEngine\SynAuth\Models\RolePermission;
+use VmEngine\SynAuth\Models\User;
 
 uses(RefreshDatabase::class);
 
@@ -23,7 +25,16 @@ it('can create an example', function () {
 });
 
 it('renders the example form', function () {
+    $permission = RolePermission::factory()
+        ->forModule('example', 'manage')
+        ->fullCrud();
+    $adminRole = Role::factory()->has($permission)->create([
+        'name' => 'Administrator',
+        'slug' => 'admin',
+        'level' => 5,
+    ]);
     $user = User::factory()->create();
+    $user->roles()->attach($adminRole);
 
     $response = $this->actingAs($user)->get(route('backend.example.form'));
 
@@ -31,7 +42,16 @@ it('renders the example form', function () {
 });
 
 it('renders the example list', function () {
+    $permission = RolePermission::factory()
+        ->forModule('example', 'manage')
+        ->fullCrud();
+    $adminRole = Role::factory()->has($permission)->create([
+        'name' => 'Administrator',
+        'slug' => 'admin',
+        'level' => 5,
+    ]);
     $user = User::factory()->create();
+    $user->roles()->attach($adminRole);
 
     $response = $this->actingAs($user)->get(route('backend.example.index'));
 

@@ -12,7 +12,8 @@
       "Bash(composer test:*)",
       "Bash(./vendor/bin/pint:*)",
       "Bash(cat:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
