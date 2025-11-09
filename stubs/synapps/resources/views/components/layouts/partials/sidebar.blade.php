@@ -6,7 +6,7 @@
         class="sidebar-header"
         :class="sidebarToggle ? 'justify-center' : 'justify-between'"
     >
-        <a href="{{ route('backend.home.home') }}">
+        <a href="{{ route('backend.home.dashboard') }}">
             <span
                 class="logo"
                 :class="sidebarToggle ? 'hidden' : ''"

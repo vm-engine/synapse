@@ -34,7 +34,7 @@
         "backend": {
             "name": "__home::menu.be.index",
             "position": 0,
-            "route": "home.home",
+            "route": "home.dashboard",
             "class": "",
             "icon": "fa-solid fa-house"
         }

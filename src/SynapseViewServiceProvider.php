@@ -10,6 +10,7 @@ use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
+use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\Modal;
 use VmEngine\Synapse\Components\MultiSelect;
@@ -54,5 +55,6 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         Blade::component(Toggler::class, 'synapse-toggler');
         Blade::component(ConfirmDialog::class, 'synapse-confirm-dialog');
         Blade::component(Toastr::class, 'synapse-toastr');
+        Blade::component(DragNDrop::class, 'synapse-drag-n-drop');
     }
 }
