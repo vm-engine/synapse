@@ -1,0 +1,33 @@
+# .gitattributes - Configure export-ignore for composer archive releases
+
+# Git files
+.gitattributes export-ignore
+.gitignore export-ignore
+.git export-ignore
+
+# Development & CI/CD
+.github/ export-ignore
+.claude/ export-ignore
+
+# Testing
+tests/ export-ignore
+.pest.php export-ignore
+phpunit.xml export-ignore
+.phpunit.cache/ export-ignore
+TESTING.md export-ignore
+
+# Development tools
+generate-ide-helper.php export-ignore
+_ide_helper.php export-ignore
+IDE_HELPER.md export-ignore
+
+# Development documentation
+CONVERSATION_SUMMARY.md export-ignore
+CLAUDE.md export-ignore
+
+# Dependencies lock file (not needed in packages)
+composer.lock export-ignore
+
+# IDE/Editor files
+.phpactor.json export-ignore
+.php-cs-fixer.cache export-ignore

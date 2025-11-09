@@ -58,7 +58,7 @@ Follow these steps to set up Synapse in your Laravel project:
 
 ### 1. Initialize SynApps Directory
 
-**Option A: New Project Setup**
+**Option A: New Project Setup (Recommended)**
 
 Run the interactive setup wizard:
 
@@ -66,14 +66,26 @@ Run the interactive setup wizard:
 php artisan synapps:setup
 ```
 
-This will prompt you for:
-- App code (snake-case identifier)
-- App name
-- Author information
-- Repository URL
-- Domain URLs (dev/prod)
-- URL prefixes (frontend/API)
-- Application title and description
+This command will:
+1. **Prompt you for project information:**
+   - App code (snake-case identifier)
+   - App name
+   - Author information
+   - Repository URL
+   - Domain URLs (dev/prod)
+   - URL prefixes (frontend/API)
+   - Application title and description
+
+2. **Copy the SynApps stub directory** to `synapps/`
+
+3. **Generate configuration file** at `synapps/config/apps.json`
+
+4. **Automatically run these setup commands:**
+   - `vendor:publish --tag=synapps-config` - Publish Synapse config files
+   - `synapps:link-errors` - Create symlink for error views
+   - `synapps:patch-resources` - Patch JS/CSS imports
+   - `synapps:patch-tests` - Configure testing infrastructure
+   - `synapps:discover` - Discover modules and update dependencies
 
 **Option B: Existing SynApps Repository**
 
@@ -83,37 +95,19 @@ If you have an existing SynApps repository, clone it to the `synapps/` folder:
 git clone <your-synapps-repo-url> synapps
 ```
 
-> **Skip this step** if your Laravel project is already a Synapse project.
-
-### 2. Publish Synapse Configuration
-
-Publish the Synapse configuration files:
+Then manually run the setup commands:
 
 ```bash
-php artisan vendor:publish --tag="synapse-config"
-```
-
-This publishes:
-- `config/synapse.php` - Core Synapse configuration
-- `config/synapps.php` - Application configuration
-
-### 3. Discover Modules and Dependencies
-
-Run the discovery command to scan modules and update dependencies:
-
-```bash
+php artisan vendor:publish --tag="synapps-config" --force
+php artisan synapps:link-errors
+php artisan synapps:patch-resources
+php artisan synapps:patch-tests
 php artisan synapps:discover
 ```
 
-This command will:
-- Discover all modules in `synapps/modules/`
-- Auto-generate PSR-4 namespaces in `composer.json`
-- Scan and merge npm/composer dependencies
-- Run `composer dump-autoload` or `composer update`
-- Run `npm install` if needed
-- Compile assets if dependencies changed
+> **Skip this step** if your Laravel project is already a Synapse project.
 
-### 4. Cache Configuration
+### 2. Cache Configuration
 
 Cache the generated configurations:
 
@@ -121,7 +115,7 @@ Cache the generated configurations:
 php artisan config:cache
 ```
 
-### 5. Run Database Migrations
+### 3. Run Database Migrations
 
 If you're using the example module or have module migrations:
 
@@ -131,19 +125,7 @@ php artisan migrate
 
 This creates database tables defined in module migrations.
 
-### 6. Patch Resource Files
-
-Integrate Synapse resources into your Laravel app:
-
-```bash
-php artisan synapps:patch-resources
-```
-
-This adds import statements to:
-- `resources/js/app.js` - Imports Synapse JavaScript
-- `resources/css/app.css` - Imports Synapse styles
-
-### 7. Clean Up Default Routes (Fresh Laravel Only)
+### 4. Clean Up Default Routes (Fresh Laravel Only)
 
 If you're using a fresh Laravel installation, remove the default route from `routes/web.php`:
 
@@ -156,7 +138,7 @@ Route::get('/', function () {
 
 Module routes will handle all routing automatically.
 
-### 8. Compile Assets
+### 5. Compile Assets
 
 Build your frontend assets:
 
@@ -587,26 +569,155 @@ synapps/modules/{module-name}/
 
 ## Artisan Commands
 
+### Quick Reference
+
+| Command | Purpose | When to Run | Auto-run by Setup |
+|---------|---------|-------------|-------------------|
+| `synapps:setup` | Initial setup wizard | Once on fresh install | N/A |
+| `synapps:discover` | Module discovery & deps | After module changes | ✅ Yes |
+| `synapps:patch-resources` | Patch JS/CSS imports | After install, if assets missing | ✅ Yes |
+| `synapps:patch-tests` | Configure test discovery | After install, new modules | ✅ Yes |
+| `synapps:link-errors` | Link error views | After custom error pages | ✅ Yes |
+
+> **Note:** If you run `synapps:setup`, you don't need to manually run the other commands unless you're troubleshooting or have specific requirements.
+
+---
+
 ### synapps:setup
-Interactive setup wizard for new installations.
+
+Interactive setup wizard for new installations. This is the primary command for setting up Synapse in your Laravel project.
 
 ```bash
 php artisan synapps:setup
 ```
 
+**What it does:**
+1. Prompts for project configuration (app code, name, author, URLs, etc.)
+2. Copies stub directory from `packages/synapse/src/stubs/synapps/` to `synapps/`
+3. Generates `synapps/config/apps.json` configuration file
+4. **Automatically executes these commands in sequence:**
+   - `vendor:publish --tag=synapps-config --force` - Publishes Synapse configuration files
+   - `synapps:link-errors` - Links custom error views
+   - `synapps:patch-resources` - Patches JS/CSS imports
+   - `synapps:patch-tests` - Configures testing infrastructure
+   - `synapps:discover` - Discovers modules and updates dependencies
+
+**Configuration files published:**
+- `config/synapse.php` - Core Synapse configuration
+- `config/synapps.php` - Application configuration
+
+**When to run:** Once on fresh Laravel installation, or when initializing Synapse.
+
+---
+
 ### synapps:discover
-Discover modules and manage dependencies.
+
+Scans for modules and manages project dependencies automatically.
 
 ```bash
 php artisan synapps:discover
 ```
 
+**What it does:**
+1. Scans `synapps/modules/` and `vendor/*/synmod-*` for `module.json` files
+2. Generates PSR-4 autoload namespaces in `composer.json` (3 per module: App, Seeders, Factories)
+3. Aggregates npm/composer dependencies from all modules
+4. Smart merges dependencies using semver (only upgrades versions)
+5. Runs `composer dump-autoload` or `composer update` as needed
+6. Runs `npm install` if package.json changed
+
+**When to run:**
+- After creating new modules
+- After modifying `module.json` files
+- After changing module dependencies
+- **Automatically called by `synapps:setup`**
+
+---
+
 ### synapps:patch-resources
-Integrate Synapse resources into Laravel.
+
+Integrates Synapse JavaScript and CSS into your Laravel application.
 
 ```bash
 php artisan synapps:patch-resources
 ```
+
+**What it does:**
+- Adds `import '../../synapps/resources/js/synapps.js';` to `resources/js/app.js`
+- Adds `@import '../../synapps/resources/css/synapps.css';` to `resources/css/app.css`
+
+**Safe to run multiple times** - Only patches if imports are not already present.
+
+**When to run:**
+- After fresh installation
+- If Synapse assets are not loading
+- **Automatically called by `synapps:setup`**
+
+---
+
+### synapps:patch-tests
+
+Configures comprehensive testing infrastructure for Synapse modules.
+
+```bash
+php artisan synapps:patch-tests
+```
+
+**What it does - patches 4 files:**
+
+1. **`tests/Pest.php`** - Adds module test discovery paths:
+   ```php
+   '../synapps/modules/*/tests/Feature'
+   '../vendor/*/synmod-*/tests/Feature'
+   'Browser' // Pest Browser Testing
+   ```
+
+2. **`.env.testing`** - Creates with in-memory SQLite configuration:
+   ```env
+   DB_DATABASE=:memory:
+   CACHE_STORE=array
+   QUEUE_CONNECTION=sync
+   ```
+
+3. **`composer.json`** - Updates test script:
+   ```json
+   "test": "php artisan config:clear && php artisan config:cache && php artisan test --env=testing"
+   ```
+
+4. **`phpunit.xml`** - Adds 3 test suites (Browser, Modules, Packages) with proper exclusions
+
+**Run test suites:**
+```bash
+php artisan test                        # All tests
+php artisan test --testsuite=Browser    # Browser tests only
+php artisan test --testsuite=Modules    # Module tests only
+php artisan test --testsuite=Packages   # Package tests only
+```
+
+**When to run:**
+- After fresh installation
+- After adding new modules with tests
+- **Automatically called by `synapps:setup`**
+
+---
+
+### synapps:link-errors
+
+Creates a symlink/junction from Laravel's error views to Synapse's custom error pages.
+
+```bash
+php artisan synapps:link-errors
+```
+
+**What it does:**
+- Creates symlink: `resources/views/errors` → `synapps/resources/views/errors`
+- Tries symlink first, falls back to Windows junction (no admin required)
+- Auto-removes existing link/directory before creating new one
+
+**When to run:**
+- After fresh installation
+- After customizing error pages
+- **Automatically called by `synapps:setup`**
 
 ## Module Namespaces
 

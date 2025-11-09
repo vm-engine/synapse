@@ -17,22 +17,29 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 
 ## Artisan Commands Quick Reference
 
-| Command | Purpose | When to Run | Idempotent |
-|---------|---------|-------------|------------|
-| `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) |
-| `synapps:discover` | Module discovery & deps | After module changes | Yes |
-| `synapps:patch-resources` | Patch JS/CSS imports | After install, if assets missing | Yes |
-| `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes |
-| `synapps:link-errors` | Link error views | After custom error pages | Yes |
+| Command | Purpose | When to Run | Idempotent | Auto-run by Setup |
+|---------|---------|-------------|------------|-------------------|
+| `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
+| `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
+| `synapps:patch-resources` | Patch JS/CSS imports | After install, if assets missing | Yes | ✅ Yes |
+| `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
+| `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 
 ### synapps:setup
 Interactive wizard that:
 1. Collects project info (app code, name, author, URLs, prefixes)
 2. Copies stub directory from `src/stubs/synapps/` to `synapps/`
 3. Generates `synapps/config/apps.json`
-4. Displays next steps
+4. **Automatically runs these setup commands in sequence:**
+   - `vendor:publish --tag=synapps-config --force` - Publish config files (`config/synapse.php`, `config/synapps.php`)
+   - `synapps:link-errors` - Create symlink for error views
+   - `synapps:patch-resources` - Patch JS/CSS imports
+   - `synapps:patch-tests` - Configure testing infrastructure
+   - `synapps:discover` - Discover modules and update dependencies
 
-**Follow-up:** Run `synapps:discover`, `config:cache`, `synapps:patch-resources`
+**Follow-up:** Run `config:cache` before migrating
+
+> **Note:** The setup command now handles all initialization automatically, including publishing configuration files. You only need to manually run the individual commands if troubleshooting or have specific requirements.
 
 ### synapps:discover
 Critical command that:

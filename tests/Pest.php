@@ -1,11 +1,14 @@
 <?php
 
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Pest Configuration
 |--------------------------------------------------------------------------
 |
-| Unit tests don't require a TestCase as they test pure functions/classes.
-| Feature tests will be discovered by the main Laravel project's Pest configuration.
+| Configure Pest to use Orchestra Testbench for Laravel package testing.
 |
 */
+
+uses(TestCase::class)->in('Feature');

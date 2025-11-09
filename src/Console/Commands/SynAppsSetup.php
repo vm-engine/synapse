@@ -2,12 +2,12 @@
 
 namespace VmEngine\Synapse\Console\Commands;
 
+use function Laravel\Prompts\text;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use stdClass;
-use VmEngine\Synapse\Services\SynapseUtils;
 
-use function Laravel\Prompts\text;
+use VmEngine\Synapse\Services\SynapseUtils;
 
 class SynAppsSetup extends Command
 {
@@ -144,14 +144,19 @@ class SynAppsSetup extends Command
             json_encode($jsonSystem, JSON_PRETTY_PRINT)
         );
 
-        $this->callSilently('synapps:link-errors');
+        $this->call('vendor:publish', [
+            '--tag' => 'synapps-config',
+            '--force' => true,
+        ]);
+        $this->call('synapps:link-errors');
+        $this->call('synapps:patch-resources');
+        $this->call('synapps:patch-tests');
+        $this->call('synapps:discover');
 
         $this->components->success('Setup complete.');
-        $this->components->warn('Run `vendor:publish --tag="synapse-config"` before using another command.');
-        $this->components->info('Run `synapps:discover` and `config:cache` artisan command before migrating.');
-        $this->components->info('Run `synapps:patch-resources` before compiling assets');
+        $this->components->info('Run `config:cache` artisan command before migrating.');
         $this->components->info('Remove Laravel default Route in `routes/web.php` to start using Home module as default Route');
-        $this->components->info("Don't forget to init Git Repository in synapps folder");
+        $this->components->warn("Don't forget to init Git Repository in synapps folder or your project root.");
 
         return 0;
     }

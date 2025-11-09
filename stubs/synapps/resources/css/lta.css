@@ -929,7 +929,7 @@ textarea.form-input {
 }
 
 .btn {
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition shadow-theme-xs hover:shadow-theme-md;
+    @apply inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition shadow-theme-xs hover:shadow-theme-md cursor-pointer;
 }
 
 .btn.secondary {
