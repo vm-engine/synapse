@@ -1,5 +1,10 @@
 # CLAUDE.md
 
+# Import personal global standards
+@~/.claude/CLAUDE.md
+
+---
+
 Package guidance for **vm-engine/synapse** - Laravel modular architecture system.
 
 ## ⚠️ Git Policy
