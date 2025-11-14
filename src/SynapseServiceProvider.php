@@ -128,7 +128,7 @@ class SynapseServiceProvider extends ServiceProvider
             if ($moduleConfig['is_package']) {
                 continue;
             }
-            // SynApps\Modules\Example\ExampleServiceProvider
+            // VmEngine\Example\ExampleServiceProvider
             $serviceProviderClass = 'SynApps\\Modules\\'
                 .$moduleConfig['id_case']['pascal'].'\\'
                 .$moduleConfig['id_case']['pascal'].'ServiceProvider';
