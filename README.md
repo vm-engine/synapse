@@ -163,7 +163,7 @@ Synapse provides pre-built Blade components for common UI patterns. All componen
 Multiple checkbox inputs for array-based selections:
 
 ```blade
-<x-synapse::checkboxes
+<x-synapse-checkboxes
     name="permissions"
     :options="['read' => 'Read', 'write' => 'Write', 'delete' => 'Delete']"
     :model="$selectedPermissions" />
@@ -179,7 +179,7 @@ Multiple checkbox inputs for array-based selections:
 Radio button group for single selection:
 
 ```blade
-<x-synapse::radio-buttons
+<x-synapse-radio-buttons
     name="status"
     :options="['active' => 'Active', 'inactive' => 'Inactive']"
     :model="$currentStatus" />
@@ -195,7 +195,7 @@ Radio button group for single selection:
 Standard dropdown select:
 
 ```blade
-<x-synapse::select
+<x-synapse-select
     :options="['option1' => 'Option 1', 'option2' => 'Option 2']" />
 ```
 
@@ -207,7 +207,7 @@ Standard dropdown select:
 Multiple selection dropdown:
 
 ```blade
-<x-synapse::multi-select
+<x-synapse-multiselect
     name="tags"
     :options="$availableTags"
     :model="$selectedTags" />
@@ -223,7 +223,7 @@ Multiple selection dropdown:
 Password field with show/hide toggle:
 
 ```blade
-<x-synapse::password />
+<x-synapse-password />
 ```
 
 #### Currency Input
@@ -231,8 +231,8 @@ Password field with show/hide toggle:
 Currency input with formatting:
 
 ```blade
-<x-synapse::currency currency="$" />
-<x-synapse::currency currency="Rp." />
+<x-synapse-currency currency="$" />
+<x-synapse-currency currency="Rp." />
 ```
 
 **Props:**
@@ -243,10 +243,10 @@ Currency input with formatting:
 Date picker using Flatpickr:
 
 ```blade
-<x-synapse::datepicker />
+<x-synapse-datepicker />
 
 <!-- With custom Flatpickr config -->
-<x-synapse::datepicker
+<x-synapse-datepicker
     :flatpickr='{"dateFormat": "Y-m-d", "enableTime": true}' />
 ```
 
@@ -260,7 +260,7 @@ Date picker using Flatpickr:
 Modal confirmation for destructive actions:
 
 ```blade
-<x-synapse::confirm-dialog
+<x-synapse-confirm-dialog
     title="Delete Item"
     message="This action cannot be undone. Are you sure?"
     confirmText="Delete"
@@ -282,12 +282,12 @@ Modal confirmation for destructive actions:
 Slide-out side panel:
 
 ```blade
-<x-synapse::drawer title="Settings">
+<x-synapse-drawer title="Settings">
     <!-- Drawer content here -->
     <form>
         <!-- Form fields -->
     </form>
-</x-synapse::drawer>
+</x-synapse-drawer>
 ```
 
 **Props:**
@@ -298,7 +298,7 @@ Slide-out side panel:
 Toast notifications for user feedback:
 
 ```blade
-<x-synapse::toastr />
+<x-synapse-toastr />
 ```
 
 Place this component in your layout file to enable toast notifications throughout your application.
