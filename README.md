@@ -37,7 +37,7 @@ Add the package to your requirements:
 ```json
 {
     "require": {
-        "vm-engine/synapse": "@dev"
+        "vm-engine/synapse": "^1.0"
     }
 }
 ```
