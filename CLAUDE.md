@@ -313,11 +313,19 @@ tests/
 ```
 
 **Commands:**
+
+> ⚠️ **WARNING:** Using `composer test` may use default config and refresh main database. Always use Pest directly.
+
 ```bash
-composer test                           # All tests
-composer test-coverage                  # With coverage
+# ✅ RECOMMENDED: Use Pest directly (uses in-memory SQLite)
+./vendor/bin/pest                        # All tests
+./vendor/bin/pest --coverage            # With coverage
 ./vendor/bin/pest tests/Unit            # Specific suite
 ./vendor/bin/pest --filter="breadcrumbs" # Filter
+
+# ⚠️ AVOID: May refresh main database
+# composer test
+# composer test-coverage
 ```
 
 **Coverage (400+ tests):**

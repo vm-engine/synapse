@@ -804,16 +804,22 @@ See [IDE_HELPER.md](IDE_HELPER.md) for complete documentation.
 
 This package includes comprehensive test coverage using PestPHP:
 
+> ⚠️ **WARNING:** Running tests using `composer test` will use the default Laravel configuration and may **refresh your main database**. Always prefer using Pest directly for safer test execution.
+
 ```bash
-# Run all tests
-composer test
+# ✅ RECOMMENDED: Run tests using Pest directly (uses in-memory SQLite)
+./vendor/bin/pest
 
 # Run with coverage
-composer test-coverage
+./vendor/bin/pest --coverage
 
 # Run specific test suite
 ./vendor/bin/pest tests/Unit
 ./vendor/bin/pest tests/Feature
+
+# ⚠️ NOT RECOMMENDED: May refresh main database
+# composer test
+# composer test-coverage
 ```
 
 **Test Coverage:**
