@@ -266,10 +266,10 @@ Generates PHPDoc for facades, models, and helpers.
 
 ```bash
 # From Laravel root
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 
 # With additional paths
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models \
   --scan-helpers=app/helpers.php \
   --output=/custom/path/_ide_helper.php

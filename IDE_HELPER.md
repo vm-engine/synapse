@@ -30,7 +30,7 @@
 cd /path/to/laravel
 
 # 2. Run the generator
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 
 # 3. Add to .gitignore
 echo "_ide_helper.php" >> .gitignore
@@ -39,7 +39,7 @@ echo "_ide_helper.php" >> .gitignore
 ```
 
 **What it does:**
-- ✅ Scans `packages/synapse/src` for package models
+- ✅ Scans `vendor/vm-engine/synapse/src` for package models
 - ✅ Scans `app/Models` for application models (automatic!)
 - ✅ Scans Laravel framework auth models
 - ✅ Outputs to `_ide_helper.php` in Laravel root
@@ -48,7 +48,7 @@ echo "_ide_helper.php" >> .gitignore
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models \
   --scan-models=synapps/modules/users/Models
 ```
@@ -62,7 +62,7 @@ php packages/synapse/generate-ide-helper.php \
 #### 1. Output Location Changed to Current Working Directory
 
 **Before V1:**
-- File always created in script directory (`packages/synapse/_ide_helper.php`)
+- File always created in script directory (`vendor/vm-engine/synapse/_ide_helper.php`)
 - Required manual copying to Laravel root
 - Confusing and error-prone
 
@@ -75,13 +75,13 @@ php packages/synapse/generate-ide-helper.php \
 ```bash
 # V1 (old)
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
-# Output: packages/synapse/_ide_helper.php ❌
-# Then: cp packages/synapse/_ide_helper.php _ide_helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
+# Output: vendor/vm-engine/synapse/_ide_helper.php ❌
+# Then: cp vendor/vm-engine/synapse/_ide_helper.php _ide_helper.php
 
 # V2 (new)
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 # Output: /path/to/laravel/_ide_helper.php ✓
 ```
 
@@ -133,7 +133,7 @@ php generate-ide-helper.php --help
 ```bash
 # Run from Laravel root (recommended)
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 # Output: /path/to/laravel/_ide_helper.php
 ```
 
@@ -142,7 +142,7 @@ php packages/synapse/generate-ide-helper.php
 **✅ Recommended:**
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 # Creates: /path/to/laravel/_ide_helper.php
 ```
 
@@ -150,7 +150,7 @@ php packages/synapse/generate-ide-helper.php
 ```bash
 cd /path/to/laravel/packages/synapse
 php generate-ide-helper.php
-# Creates: /path/to/laravel/packages/synapse/_ide_helper.php
+# Creates: /path/to/laravel/vendor/vm-engine/synapse/_ide_helper.php
 ```
 
 ---
@@ -266,7 +266,7 @@ The generated file is placed in the **current working directory** (where you run
 **Run from Laravel root:**
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 # Output: /path/to/laravel/_ide_helper.php ✓
 ```
 
@@ -274,13 +274,13 @@ php packages/synapse/generate-ide-helper.php
 ```bash
 cd /path/to/laravel/packages/synapse
 php generate-ide-helper.php
-# Output: /path/to/laravel/packages/synapse/_ide_helper.php
+# Output: /path/to/laravel/vendor/vm-engine/synapse/_ide_helper.php
 ```
 
 **Use absolute path for control:**
 ```bash
 cd /anywhere
-php /path/to/packages/synapse/generate-ide-helper.php \
+php /path/to/vendor/vm-engine/synapse/generate-ide-helper.php \
   --output=/path/to/laravel/_ide_helper.php
 # Output: /path/to/laravel/_ide_helper.php ✓
 ```
@@ -293,11 +293,11 @@ php /path/to/packages/synapse/generate-ide-helper.php \
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 ```
 
 **Scans:**
-- Package models in `packages/synapse/src`
+- Package models in `vendor/vm-engine/synapse/src`
 - App models in `app/Models` ✓
 - Laravel auth models
 
@@ -307,7 +307,7 @@ php packages/synapse/generate-ide-helper.php
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models \
   --scan-models=synapps/modules/users/Models \
   --scan-models=synapps/modules/products/Models
@@ -323,7 +323,7 @@ php packages/synapse/generate-ide-helper.php \
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/*/Models \
   --scan-helpers=app/helpers.php \
   --scan-helpers=synapps/helpers/custom.php
@@ -333,7 +333,7 @@ php packages/synapse/generate-ide-helper.php \
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --output=storage/_ide_helper.php
 ```
 
@@ -341,7 +341,7 @@ php packages/synapse/generate-ide-helper.php \
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models,synapps/modules/users/Models \
   --scan-helpers=app/helpers.php,modules/*/helpers.php \
   --output=_ide_helper.php
@@ -357,21 +357,21 @@ php packages/synapse/generate-ide-helper.php \
 ```bash
 # Step 1: Run with complex options
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=../../app/Models \
   --output=../../_ide_helper.php
 
 # Step 2: File created in wrong location sometimes
 # Step 3: Need to move file manually
-cp packages/synapse/_ide_helper.php _ide_helper.php
-rm packages/synapse/_ide_helper.php
+cp vendor/vm-engine/synapse/_ide_helper.php _ide_helper.php
+rm vendor/vm-engine/synapse/_ide_helper.php
 ```
 
 #### ✅ After V2
 ```bash
 # One simple command
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 
 # Done! ✓
 # app/Models scanned automatically ✓
@@ -383,7 +383,7 @@ php packages/synapse/generate-ide-helper.php
 #### ❌ Before V2
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=../../app/Models \
   --scan-models=../../synapps/modules/home/Models \
   --scan-models=../../synapps/modules/users/Models \
@@ -397,7 +397,7 @@ php packages/synapse/generate-ide-helper.php \
 #### ✅ After V2
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models \
   --scan-models=synapps/modules/users/Models
 
@@ -429,7 +429,7 @@ php packages/synapse/generate-ide-helper.php \
 ```json
 {
   "scripts": {
-    "ide-helper": "php packages/synapse/generate-ide-helper.php"
+    "ide-helper": "php vendor/vm-engine/synapse/generate-ide-helper.php"
   }
 }
 ```
@@ -443,7 +443,7 @@ npm run ide-helper
 ```json
 {
   "scripts": {
-    "ide-helper": "php packages/synapse/generate-ide-helper.php --scan-models=synapps/modules/*/Models"
+    "ide-helper": "php vendor/vm-engine/synapse/generate-ide-helper.php --scan-models=synapps/modules/*/Models"
   }
 }
 ```
@@ -454,7 +454,7 @@ npm run ide-helper
 ```json
 {
   "scripts": {
-    "ide-helper": "php packages/synapse/generate-ide-helper.php"
+    "ide-helper": "php vendor/vm-engine/synapse/generate-ide-helper.php"
   }
 }
 ```
@@ -479,7 +479,7 @@ composer ide-helper
 ```json
 {
   "scripts": {
-    "ide-helper": "php packages/synapse/generate-ide-helper.php"
+    "ide-helper": "php vendor/vm-engine/synapse/generate-ide-helper.php"
   }
 }
 ```
@@ -516,7 +516,7 @@ laravel/
 
 **V1 (Old - Complex):**
 ```bash
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=app/Models \
   --scan-models=synapps/modules/home/Models \
   --scan-models=synapps/modules/blog/Models \
@@ -525,7 +525,7 @@ php packages/synapse/generate-ide-helper.php \
 
 **V2 (New - Simple):**
 ```bash
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models \
   --scan-models=synapps/modules/blog/Models
 ```
@@ -620,7 +620,7 @@ function synapps_path($path = '') {}
 ```json
 {
   "scripts": {
-    "ide-helper": "php packages/synapse/generate-ide-helper.php"
+    "ide-helper": "php vendor/vm-engine/synapse/generate-ide-helper.php"
   }
 }
 ```
@@ -629,7 +629,7 @@ function synapps_path($path = '') {}
 
 ```bash
 # Remove old helper files
-rm packages/synapse/_ide_helper.php 2>/dev/null || true
+rm vendor/vm-engine/synapse/_ide_helper.php 2>/dev/null || true
 rm _ide_helper.php 2>/dev/null || true
 
 # Generate new
@@ -660,8 +660,8 @@ _ide_helper.php
 Use `--output` with absolute path:
 ```bash
 cd /anywhere
-php /path/to/packages/synapse/generate-ide-helper.php \
-  --output=/path/to/packages/synapse/_ide_helper.php
+php /path/to/vendor/vm-engine/synapse/generate-ide-helper.php \
+  --output=/path/to/vendor/vm-engine/synapse/_ide_helper.php
 ```
 
 ---
@@ -712,7 +712,7 @@ Make sure you run from Laravel root:
 ```bash
 # ✅ Correct
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 
 # ❌ Wrong
 cd /path/to/laravel/packages/synapse
@@ -768,7 +768,7 @@ php generate-ide-helper.php \
 - name: Generate IDE Helper
   run: |
     cd /path/to/laravel
-    php packages/synapse/generate-ide-helper.php
+    php vendor/vm-engine/synapse/generate-ide-helper.php
     git add _ide_helper.php
     git commit -m "Update IDE helper" || exit 0
 ```
@@ -788,7 +788,7 @@ php generate-ide-helper.php \
 ```bash
 # ✅ Good
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 
 # ❌ Avoid
 cd /path/to/laravel/packages/synapse
@@ -800,7 +800,7 @@ php generate-ide-helper.php
 ```json
 {
   "scripts": {
-    "ide-helper": "php packages/synapse/generate-ide-helper.php"
+    "ide-helper": "php vendor/vm-engine/synapse/generate-ide-helper.php"
   }
 }
 ```
@@ -857,7 +857,7 @@ For most Laravel apps, this is all you need:
 
 ```bash
 cd /path/to/laravel
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 ```
 
 **That's it!** 🎉
@@ -868,22 +868,22 @@ php packages/synapse/generate-ide-helper.php
 
 ```bash
 # Basic usage (recommended)
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 
 # With module scanning
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/*/Models
 
 # With helpers
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-helpers=app/helpers.php
 
 # Custom output
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --output=/custom/path/_ide_helper.php
 
 # Show help
-php packages/synapse/generate-ide-helper.php --help
+php vendor/vm-engine/synapse/generate-ide-helper.php --help
 ```
 
 ---

@@ -593,7 +593,7 @@ php artisan synapps:setup
 
 **What it does:**
 1. Prompts for project configuration (app code, name, author, URLs, etc.)
-2. Copies stub directory from `packages/synapse/src/stubs/synapps/` to `synapps/`
+2. Copies stub directory from `vendor/vm-engine/synapse/src/stubs/synapps/` to `synapps/`
 3. Generates `synapps/config/apps.json` configuration file
 4. **Automatically executes these commands in sequence:**
    - `vendor:publish --tag=synapps-config --force` - Publishes Synapse configuration files
@@ -782,18 +782,18 @@ Generate PHPDoc annotations for better IDE autocompletion:
 cd /path/to/laravel
 
 # Generate IDE helper
-php packages/synapse/generate-ide-helper.php
+php vendor/vm-engine/synapse/generate-ide-helper.php
 ```
 
 **What it does:**
-- ✅ Scans `packages/synapse/src` for package models
+- ✅ Scans `vendor/vm-engine/synapse/src` for package models
 - ✅ Scans `app/Models` for application models (automatic!)
 - ✅ Generates PHPDoc for Laravel facades
 - ✅ Outputs to `_ide_helper.php` in current directory
 
 **For modular apps:**
 ```bash
-php packages/synapse/generate-ide-helper.php \
+php vendor/vm-engine/synapse/generate-ide-helper.php \
   --scan-models=synapps/modules/home/Models \
   --scan-models=synapps/modules/users/Models
 ```
