@@ -7,18 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-11-15
+
 ### Added
+- **AdvSelect Component Enhancements**:
+  - `allowCreate` prop - allows users to create new options by pressing Enter
+  - Reset event listener for clearing selections externally
+  - Visual feedback for creating new items with green highlight
+  - Dark mode support for dropdown and create hint
+- Example todos module in stubs for quick module scaffolding
 - `.gitattributes` file to exclude development files from release archives
 - `TestCase.php` for proper Orchestra Testbench integration in package tests
 
 ### Changed
+- Improved AdvSelect component with better UX for tag/option creation
+- Updated dropdown to show create hint when no results match search
+- Enhanced dark mode styling across AdvSelect component
+- Code quality improvements (imports ordering, formatting)
 - Updated README.md with detailed setup guide showing automated command execution
 - Updated CLAUDE.md to reflect `synapps:setup` automation improvements
 - Improved test infrastructure for better package testing
 
 ### Fixed
+- Fixed preload syntax in AdvSelect to use `@js()` directive for proper JSON encoding
 - Fixed failing tests by implementing proper TestCase with Orchestra Testbench
 - Removed incompatible `patch-tests` tests that require full Laravel context
+- Code formatting in TestCase.php and SynAppsSetup.php
 
 ## [1.0.0-beta.1] - 2024-11-09
 
@@ -217,6 +231,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 - [Issue Tracker](https://repo.4visionmedia.com:4000/vm-engine/synapse/issues)
 - [Documentation](README.md)
 
-[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.0-beta.1...HEAD
+[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.0...HEAD
+[1.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0
 [1.0.0-beta.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0-beta.1
 [0.1.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v0.1.0

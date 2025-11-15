@@ -17,6 +17,7 @@ class AdvSelect extends Component
         public $options = [],
         public $minSearchLength = 2,
         public $live = false,
+        public $allowCreate = false,
     ) {}
 
     public function render()

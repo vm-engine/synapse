@@ -1,0 +1,36 @@
+{
+    "id": "todos",
+    "id_case": {
+        "snake": "todos",
+        "pascal": "Todos",
+        "slug": "todos",
+        "studly": "todos"
+    },
+    "name": "Todos Module",
+    "description": "Todos - Example module for Synapse Apps",
+    "version": "0.1.0",
+    "author": "Adods",
+    "email": "theadods@gmail.com",
+    "git_repo": "",
+    "url_prefix": "todos",
+    "dependencies": {
+        "npm": {
+            "main": {},
+            "dev": {}
+        },
+        "composer": {
+            "main": {},
+            "dev": {}
+        }
+    },
+    "nav": {
+        "frontend": {
+            "index": {
+                "id": "index",
+                "name": "__todos::menu.fe.index",
+                "route": "todos.index"
+            }
+        },
+        "backend": {}
+    }
+}

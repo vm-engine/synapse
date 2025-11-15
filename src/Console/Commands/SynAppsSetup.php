@@ -2,12 +2,12 @@
 
 namespace VmEngine\Synapse\Console\Commands;
 
-use function Laravel\Prompts\text;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use stdClass;
-
 use VmEngine\Synapse\Services\SynapseUtils;
+
+use function Laravel\Prompts\text;
 
 class SynAppsSetup extends Command
 {

@@ -27,6 +27,7 @@ A fully featured, reactive select component that supports:
 | options           | array       | []                  | Static options for client-side dropdowns. |
 | minSearchLength   | int         | 2                   | Minimum characters before remote search triggers. |
 | live              | bool        | false               | If true, updates Livewire immediately on change. |
+| allowCreate       | bool        | false               | If true, allows user to create new options by pressing Enter. |
 
 --------------------------------------------------------------------
 💡 Examples
@@ -93,7 +94,7 @@ Version: 1.0.0
     x-data="{
         search: '',
         results: [],
-        selected: {{ $preload ?? '[]' }},
+        selected: @js($preload ?? []),
         multiple: {{ $multiple ? 'true' : 'false' }},
         open: false,
         searchMethod: {{ $searchMethod ? "'{$searchMethod}'" : 'null' }},
@@ -103,6 +104,7 @@ Version: 1.0.0
         staticOptions: @js($options),
         minSearchLength: {{ $minSearchLength }},
         isLive: {{ $live ? 'true' : 'false' }},
+        allowCreate: {{ $allowCreate ? 'true' : 'false' }},
     
         init() {
             // Set initial value to Livewire model
@@ -110,7 +112,7 @@ Version: 1.0.0
             if (this.selected && this.selected.length > 0) {
                 this.syncWithWire();
             }
-    
+
             // Reopen dropdown after Livewire updates
             Livewire.hook('message.processed', () => {
                 if (document.activeElement === this.$refs.search && this.search
@@ -118,6 +120,11 @@ Version: 1.0.0
                     0) {
                     this.open = true;
                 }
+            });
+
+            // Listen for reset event
+            window.addEventListener('reset-tag-input', () => {
+                this.clearSelection();
             });
         },
     
@@ -174,6 +181,28 @@ Version: 1.0.0
             this.results = [];
             this.open = false;
             this.syncWithWire();
+        },
+
+        createNew() {
+            if (!this.allowCreate || !this.search.trim()) return;
+
+            const newItem = {
+                [this.valueField]: this.search.trim(),
+                [this.labelField]: this.search.trim()
+            };
+
+            // Add to static options for future searches
+            this.staticOptions.push(newItem);
+
+            // Select the new item
+            this.select(newItem);
+        },
+
+        handleKeydown(e) {
+            if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
+                e.preventDefault();
+                this.createNew();
+            }
         },
     
         remove(index) {
@@ -245,6 +274,7 @@ Version: 1.0.0
             x-model="search"
             x-on:focus="fetch()"
             x-on:input.debounce.300ms="fetch()"
+            x-on:keydown="handleKeydown($event)"
             placeholder="{{ $placeholder }}"
             :class="{ 'hidden': !multiple && selected.length }"
         />
@@ -263,8 +293,8 @@ Version: 1.0.0
 
     {{-- Dropdown --}}
     <div
-        class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-md max-h-60 overflow-y-auto"
-        x-show="open && results.length > 0"
+        class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-md max-h-60 overflow-y-auto dark:bg-gray-900 dark:border-gray-700"
+        x-show="open && (results.length > 0 || (allowCreate && search.trim()))"
         x-transition
     >
         <template
@@ -272,10 +302,23 @@ Version: 1.0.0
             :key="item[valueField]"
         >
             <div
-                class="p-2 hover:bg-blue-100 cursor-pointer"
+                class="p-2 hover:bg-blue-100 cursor-pointer dark:hover:bg-gray-800"
                 x-text="item[labelField]"
                 @click="select(item)"
             ></div>
+        </template>
+
+        {{-- Create new option hint --}}
+        <template x-if="allowCreate && search.trim() && results.length === 0">
+            <div
+                class="p-2 hover:bg-green-100 cursor-pointer border-t border-gray-200 dark:border-gray-700 dark:hover:bg-green-900/20"
+                @click="createNew()"
+            >
+                <span class="text-green-600 dark:text-green-400">
+                    <i class="fa-solid fa-plus mr-1"></i>
+                    Create "<span x-text="search"></span>"
+                </span>
+            </div>
         </template>
     </div>
 </div>
