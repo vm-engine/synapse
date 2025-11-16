@@ -145,7 +145,7 @@ class SynAppsSetup extends Command
         );
 
         $this->call('vendor:publish', [
-            '--tag' => 'synapps-config',
+            '--tag' => 'synapse-config',
             '--force' => true,
         ]);
         $this->call('synapps:link-errors');

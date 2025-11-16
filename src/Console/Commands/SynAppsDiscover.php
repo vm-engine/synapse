@@ -108,6 +108,9 @@ class SynAppsDiscover extends Command
         $appsConfig = json_decode(file_get_contents(synapps_path('config/apps.json')), true);
         $this->compareDependencies($appsConfig['dependencies']);
 
+        if (! file_exists(synapps_path('config/apps.dev.json'))) {
+            file_put_contents(synapps_path('config/apps.dev.json'), '{}');
+        }
         $appsDevConfig = json_decode(file_get_contents(synapps_path('config/apps.dev.json')), true);
         if (isset($appsDevConfig['dependencies'])) {
             $this->compareDependencies($appsDevConfig['dependencies']);
