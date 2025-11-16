@@ -26,7 +26,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 |---------|---------|-------------|------------|-------------------|
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
-| `synapps:patch-resources` | Patch JS/CSS imports | After install, if assets missing | Yes | ✅ Yes |
+| `synapps:patch-resources` | Patch JS/CSS/Vite config | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 
@@ -61,6 +61,18 @@ Critical command that:
 Patches Laravel resource files:
 - **resources/js/app.js** - Adds import for `synapps/resources/js/synapps.js`
 - **resources/css/app.css** - Adds import for `synapps/resources/css/synapps.css`
+- **resources/css/app.css** - Adds @source directives for module Blade/JS files:
+  - `synapps/**/*.blade.php` and `synapps/**/*.js`
+  - `vendor/vm-engine/*/**/*.blade.php` and `vendor/vm-engine/*/**/*.js`
+  - `vendor/*/synmod-*/**/*.blade.php` and `vendor/*/synmod-*/**/*.js`
+  - `vendor/*/synapps-*/**/*.blade.php` and `vendor/*/synapps-*/**/*.js`
+- **vite.config.js** - Adds `vite-plugin-static-copy` plugin to copy static assets:
+  - Imports `vite-plugin-static-copy` and `glob` packages
+  - Copies assets from `synapps/resources/assets/**/*` to `public/assets`
+  - Copies assets from `vendor/*/synmod-*/resources/assets/**/*` to `public/assets`
+  - Copies assets from `vendor/vm-engine/synapps-*/resources/assets/**/*` to `public/assets`
+
+**Required npm packages:** `vite-plugin-static-copy` and `glob` (automatically included in `synapps:setup` dependencies)
 
 Safe to run multiple times (only patches if not already present).
 

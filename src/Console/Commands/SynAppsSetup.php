@@ -107,7 +107,10 @@ class SynAppsSetup extends Command
                         '@fortawesome/fontawesome-free' => '^7.1.0',
                         'flatpickr' => '^4.6.13',
                     ],
-                    'dev' => new stdClass,
+                    'dev' => [
+                        'vite-plugin-static-copy' => '^1.0.6',
+                        'glob' => '^11.0.0',
+                    ],
                 ],
                 'composer' => [
                     'main' => new stdClass,
