@@ -29,7 +29,7 @@
             <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
                     <!-- Logo/Brand -->
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <a
                             class="text-2xl font-bold text-gray-900 dark:text-white"
                             href="/"
@@ -38,7 +38,26 @@
                         </a>
                     </div>
 
-                    <!-- Navigation Links -->
+                    <!-- Navigation Menu -->
+                    <div class="hidden items-center gap-6 md:flex">
+                        <a
+                            class="text-sm font-medium text-gray-700 transition hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                            href="/"
+                            wire:navigate
+                        >
+                            Home
+                        </a>
+                        <a
+                            class="text-sm font-medium text-gray-700 transition hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                            href="{{ route('todos.index') }}"
+                            wire:navigate
+                        >
+                            Todos
+                        </a>
+                        {{-- Add more menu items here --}}
+                    </div>
+
+                    <!-- Auth Links -->
                     <div class="flex items-center gap-4">
                         @if (auth()->check())
                             <a
@@ -61,8 +80,10 @@
         </header>
 
         <!-- Main Content -->
-        <main class="flex-grow">
-            {{ $slot }}
+        <main class="grow">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                {{ $slot }}
+            </div>
         </main>
 
         <!-- Footer -->
