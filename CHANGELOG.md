@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-11-15
+
+### Fixed
+- **SynAppsDiscover Command**: Added safety check to create `apps.dev.json` if missing, preventing errors during module discovery
+- **SynAppsSetup Command**: Fixed vendor:publish tag from incorrect `synapps-config` to correct `synapse-config`
+
+### Documentation
+- Updated installation instructions to use stable `^1.0` version instead of `@dev`
+- Fixed all Blade component examples to use correct hyphenated syntax (`x-synapse-*` instead of `x-synapse::*`)
+- Updated all file paths from `packages/synapse` to `vendor/vm-engine/synapse` for accuracy
+- Added critical warnings about `composer test` potentially refreshing main database
+- Recommended using `./vendor/bin/pest` directly for safer test execution
+
 ## [1.0.0] - 2025-11-15
 
 ### Added
@@ -231,7 +244,8 @@ This project follows [Semantic Versioning](https://semver.org/):
 - [Issue Tracker](https://repo.4visionmedia.com:4000/vm-engine/synapse/issues)
 - [Documentation](README.md)
 
-[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.0...HEAD
+[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.1...HEAD
+[1.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.1
 [1.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0
 [1.0.0-beta.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0-beta.1
 [0.1.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v0.1.0
