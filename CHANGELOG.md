@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2025-11-16
+
+### Added
+- Improved layout stub with navigation and updated Tailwind configuration
+
+### Fixed
+- Fixed misplaced `@if` directive in frontend layout file in stubs
+
+
 ## [1.0.1] - 2025-11-15
 
 ### Fixed
@@ -244,7 +253,8 @@ This project follows [Semantic Versioning](https://semver.org/):
 - [Issue Tracker](https://repo.4visionmedia.com:4000/vm-engine/synapse/issues)
 - [Documentation](README.md)
 
-[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.1...HEAD
+[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.2...HEAD
+[1.0.2]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.2
 [1.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.1
 [1.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0
 [1.0.0-beta.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0-beta.1
