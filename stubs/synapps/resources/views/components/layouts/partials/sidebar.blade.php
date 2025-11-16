@@ -62,7 +62,7 @@
                 <ul class="menu">
                     @foreach (synav()->backend() as $key => $menu)
                         @canAccess($menu['acl'] ?? null)
-                        <li class="{{ $menu['class'] }}">
+                        <li class="{{ $menu['class'] ?? '' }}">
                             <a
                                 class="menu-item {{ synav()->is($key) ? 'menu-item-active' : 'menu-item-inactive' }} group"
                                 @isset($menu['sub'])

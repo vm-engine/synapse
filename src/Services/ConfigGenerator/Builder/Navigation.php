@@ -8,11 +8,13 @@ class Navigation extends BuilderBase
 {
     public function loop($namespace, $config)
     {
-        $backendNav = $config['nav']['backend'];
-        if (! isset($backendNav['position'])) {
-            $backendNav['position'] = count($this->synapps->config['nav']['backend']);
+        $backendNav = $config['nav']['backend'] ?? [];
+        if (count($backendNav)) {
+            if (! isset($backendNav['position'])) {
+                $backendNav['position'] = count($this->synapps->config['nav']['backend']);
+            }
+            $this->synapps->config['nav']['backend'][$namespace] = $backendNav;
         }
-        $this->synapps->config['nav']['backend'][$namespace] = $backendNav;
         unset($this->synapps->config['modules'][$namespace]['nav']['backend']);
     }
 
