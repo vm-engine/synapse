@@ -64,7 +64,7 @@ class SynAppsPatchResources extends Command
         }
         if ($cssPatched || empty($cssLines)) {
             array_splice($cssLines, $lastImportCss + 1, 0, $cssLine."\n");
-            file_put_contents(resource_path('css/app.css'), implode('', $cssLines));
+            file_put_contents(resource_path('css/app.css'), implode("\n", $cssLines));
             $cssPatched = true;
         }
 
@@ -89,7 +89,7 @@ class SynAppsPatchResources extends Command
     {
         $cssPath = resource_path('css/app.css');
 
-        if (!file_exists($cssPath)) {
+        if (! file_exists($cssPath)) {
             return false;
         }
 
@@ -104,7 +104,7 @@ class SynAppsPatchResources extends Command
             "@source '../../vendor/*/synmod-*/**/*.blade.php';",
             "@source '../../vendor/*/synmod-*/**/*.js';",
             "@source '../../vendor/*/synapps-*/**/*.blade.php';",
-            "@source '../../vendor/*/synapps-*/**/*.js';"
+            "@source '../../vendor/*/synapps-*/**/*.js';",
         ];
 
         $lines = explode("\n", $content);
@@ -151,7 +151,7 @@ class SynAppsPatchResources extends Command
     {
         $viteConfigPath = base_path('vite.config.js');
 
-        if (!file_exists($viteConfigPath)) {
+        if (! file_exists($viteConfigPath)) {
             return false;
         }
 
@@ -165,7 +165,7 @@ class SynAppsPatchResources extends Command
         // Add imports after existing imports
         $importLines = [
             "import { viteStaticCopy } from 'vite-plugin-static-copy';",
-            "import { glob } from 'glob';"
+            "import { glob } from 'glob';",
         ];
 
         // Find the last import line
@@ -207,7 +207,7 @@ PLUGIN;
         $updatedContent = implode("\n", $lines);
         $updatedContent = preg_replace(
             '/(tailwindcss\(\),)/',
-            "$1\n        " . $pluginConfig . ",",
+            "$1\n        ".$pluginConfig.',',
             $updatedContent
         );
 

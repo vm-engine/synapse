@@ -11,6 +11,7 @@ use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\RadioButtons;
 use VmEngine\Synapse\Components\Select;
 use VmEngine\Synapse\Components\Toastr;
+use VmEngine\Synapse\Components\Toggler;
 
 describe('Checkboxes Component', function () {
     it('can be instantiated', function () {
@@ -523,6 +524,97 @@ describe('Alert Component', function () {
 
     it('has render method', function () {
         $component = new Alert;
+
+        expect(method_exists($component, 'render'))->toBeTrue();
+    });
+});
+
+describe('Toggler Component', function () {
+    it('can be instantiated', function () {
+        $component = new Toggler;
+
+        expect($component)->toBeInstanceOf(Toggler::class);
+    });
+
+    it('has default values', function () {
+        $component = new Toggler;
+
+        expect($component->id)->toBe('')
+            ->and($component->name)->toBe('')
+            ->and($component->label)->toBe('')
+            ->and($component->checked)->toBeFalse()
+            ->and($component->activeColor)->toBe('green')
+            ->and($component->inline)->toBeFalse();
+    });
+
+    it('stores id property', function () {
+        $component = new Toggler(id: 'my-toggler');
+
+        expect($component->id)->toBe('my-toggler');
+    });
+
+    it('stores name property', function () {
+        $component = new Toggler(name: 'is_active');
+
+        expect($component->name)->toBe('is_active');
+    });
+
+    it('stores label property', function () {
+        $component = new Toggler(label: 'Active Status');
+
+        expect($component->label)->toBe('Active Status');
+    });
+
+    it('stores checked property as true', function () {
+        $component = new Toggler(checked: true);
+
+        expect($component->checked)->toBeTrue();
+    });
+
+    it('stores checked property as false', function () {
+        $component = new Toggler(checked: false);
+
+        expect($component->checked)->toBeFalse();
+    });
+
+    it('stores activeColor property', function () {
+        $component = new Toggler(activeColor: 'blue');
+
+        expect($component->activeColor)->toBe('blue');
+    });
+
+    it('stores inline property as true', function () {
+        $component = new Toggler(inline: true);
+
+        expect($component->inline)->toBeTrue();
+    });
+
+    it('stores inline property as false', function () {
+        $component = new Toggler(inline: false);
+
+        expect($component->inline)->toBeFalse();
+    });
+
+    it('accepts all parameters', function () {
+        $component = new Toggler(
+            id: 'toggler-1',
+            name: 'status',
+            label: 'Enable Feature',
+            checked: true,
+            activeColor: 'purple',
+            inline: true
+        );
+
+        expect($component->id)->toBe('toggler-1')
+            ->and($component->name)->toBe('status')
+            ->and($component->label)->toBe('Enable Feature')
+            ->and($component->checked)->toBeTrue()
+            ->and($component->activeColor)->toBe('purple')
+            ->and($component->inline)->toBeTrue();
+    });
+
+    it('has render method', function () {
+        $component = new Toggler;
 
         expect(method_exists($component, 'render'))->toBeTrue();
     });

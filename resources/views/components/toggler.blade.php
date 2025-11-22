@@ -19,10 +19,22 @@
 
     $activeColorClass = $colorClasses[$activeColor] ?? $colorClasses['green'];
     $componentId = $id ?: ($name ?: 'toggler-' . uniqid());
+    $checkedValue = $checked ? 'true' : 'false';
 @endphp
 
 @if ($inline)
-    <div x-data="{ active: {{ $checked ? 'true' : 'false' }} }">
+    <div
+        x-data="{ active: {{ $checkedValue }} }"
+        x-init="
+            active = {{ $checkedValue }};
+            Livewire.hook('morph.updated', ({ el, component }) => {
+                if (el.contains($el) || el === $el) {
+                    active = $el.dataset.checked === 'true';
+                }
+            });
+        "
+        data-checked="{{ $checkedValue }}"
+    >
         <label
             class="flex cursor-pointer items-center gap-2 text-sm font-medium select-none"
             for="{{ $componentId }}"

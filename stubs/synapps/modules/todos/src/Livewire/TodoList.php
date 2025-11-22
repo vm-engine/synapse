@@ -67,10 +67,20 @@ class TodoList extends Component
         $this->dispatch('edit-todo', id: $id);
     }
 
-    public function deleteTodo(int $id): void
+    public function deleteTodo(string $token): void
     {
+        $id = Todo::validateDeleteToken($token);
+        if (! $id) {
+            $this->dispatch('notify',
+                variant: 'danger',
+                title: __('todos::todos.notifications.error'),
+                message: __('todos::todos.messages.invalid_delete_token')
+            );
+
+            return;
+        }
         $todo = Todo::findOrFail($id);
-        Todo::findOrFail($id)->delete();
+        $todo->delete();
 
         $this->dispatch('notify',
             variant: 'success',

@@ -65,7 +65,8 @@
                             type="checkbox"
                             wire:model.live="filterOverdue"
                         />
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('todos::todos.filters.show_overdue') }}</span>
+                        <span
+                            class="text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('todos::todos.filters.show_overdue') }}</span>
                     </label>
                 </div>
             </div>
@@ -125,7 +126,7 @@
                         @if ($todo->due_date)
                             <div class="mt-2">
                                 @php
-                                    $isOverdue = ! $todo->completed && $todo->due_date->isPast();
+                                    $isOverdue = !$todo->completed && $todo->due_date->isPast();
                                     $isDueToday = $todo->due_date->isToday();
                                 @endphp
                                 <span @class([
@@ -133,7 +134,7 @@
                                     'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400' => $isOverdue,
                                     'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' => $isDueToday,
                                     'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400' =>
-                                        ! $isOverdue && ! $isDueToday,
+                                        !$isOverdue && !$isDueToday,
                                 ])>
                                     <i class="fa-solid fa-clock mr-1"></i>
                                     {{ $todo->due_date->format('M d, Y H:i') }}
@@ -181,7 +182,7 @@
                                 confirmColor: 'danger',
                                 icon: 'fa-solid fa-trash',
                                 wireMethod: 'deleteTodo',
-                                wireParams: [{{ $todo->id }}],
+                                wireParams: ['{{ $todo->delete_token }}'],
                                 wireComponent: '{{ $this->getId() }}'
                             })"
                         >

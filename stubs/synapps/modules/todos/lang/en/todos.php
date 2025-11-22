@@ -59,6 +59,7 @@ return [
         'deleted' => 'Todo ":title" deleted successfully!',
         'status_updated' => 'Todo status updated!',
         'throttle' => 'Please wait :seconds seconds before submitting again.',
+        'invalid_delete_token' => 'Invalid delete token. Please try again.',
     ],
 
     // Notifications

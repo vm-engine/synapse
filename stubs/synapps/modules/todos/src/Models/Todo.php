@@ -6,10 +6,12 @@ namespace SynApps\Modules\Todos\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use VmEngine\Synapse\Traits\WithDeleteToken;
 
 class Todo extends Model
 {
     use HasFactory;
+    use WithDeleteToken;
 
     /**
      * Create a new factory instance for the model.
