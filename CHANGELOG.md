@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2025-11-22
+
+### Added
+- **WithDeleteToken Trait**: New security trait for secure delete operations
+  - Generates encrypted delete tokens with session salt
+  - Validates delete tokens before allowing deletions
+  - Prevents unauthorized delete operations via token manipulation
+  - Auto-appends `delete_token` attribute to models
+
+### Changed
+- **Toggler Component**: Improved Livewire reactivity and state synchronization
+  - Added Livewire morph.updated hook for proper state updates
+  - Fixed toggler checked state synchronization issues
+  - Improved data binding with data-checked attribute
+- **Todos Module**: Implemented secure delete with token validation
+  - Updated TodoList component to use encrypted delete tokens
+  - Added delete token validation before deletion
+  - Added error handling for invalid delete tokens
+  - Applied WithDeleteToken trait to Todo model
+
+### Fixed
+- **SynAppsPatchResources Command**: Code formatting improvements
+  - Fixed CSS file patching to use proper newline separators
+  - Improved code consistency with Laravel PSR-12 standards
+  - Fixed formatting issues with array trailing commas
+
+### Tests
+- Added 19 comprehensive tests for Toggler component
+  - Test all component properties and default values
+  - Test color variants (green, blue, red, yellow, purple, gray)
+  - Test inline and block display modes
+  - Test component instantiation and render method
+
 ## [1.0.3] - 2025-11-22
 
 ### Added
@@ -275,7 +308,8 @@ This project follows [Semantic Versioning](https://semver.org/):
 - [Issue Tracker](https://repo.4visionmedia.com:4000/vm-engine/synapse/issues)
 - [Documentation](README.md)
 
-[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.3...HEAD
+[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.4...HEAD
+[1.0.4]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.4
 [1.0.3]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.3
 [1.0.2]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.2
 [1.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.1
