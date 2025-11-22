@@ -59,7 +59,24 @@ class SynapseConfigGenerator
         self::setResourcesPaths($config);
         self::setDatabasePaths($config);
 
+        file_put_contents(
+            synapps_path('config/compiled/synapse.json'),
+            json_encode($config, JSON_PRETTY_PRINT)
+        );
+
         return $config;
+    }
+
+    public static function config()
+    {
+        if (! file_exists(synapps_path('config/compiled/synapse.json'))) {
+            return self::generate();
+        }
+
+        return json_decode(
+            file_get_contents(synapps_path('config/compiled/synapse.json')),
+            true
+        );
     }
 
     /**

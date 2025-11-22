@@ -105,6 +105,15 @@ class Builder
         }
     }
 
+    private function writeFinalFile()
+    {
+        $finalPath = synapps_path('config/compiled/synapps.json');
+        if (! file_exists(dirname($finalPath))) {
+            mkdir(dirname($finalPath), 0775, true);
+        }
+        file_put_contents($finalPath, json_encode($this->config, JSON_PRETTY_PRINT));
+    }
+
     public function generate()
     {
         $this->initLoop();
@@ -112,6 +121,8 @@ class Builder
         $this->loopModules();
         $this->handlePostLoop();
         $this->finalize();
+
+        $this->writeFinalFile();
 
         return $this->config;
     }

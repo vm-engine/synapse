@@ -3,8 +3,8 @@
 use VmEngine\Synapse\Services\SynAppsConfigGenerator;
 
 /**
- * Generate SynApps Confuration
+ * Get SynApps Confuration, Generate if not exists
  *
  * This Configration for Application Related variables
  */
-return SynAppsConfigGenerator::generate();
+return SynAppsConfigGenerator::config();

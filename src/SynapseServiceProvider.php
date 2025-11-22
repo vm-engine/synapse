@@ -5,6 +5,7 @@ namespace VmEngine\Synapse;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Console\Commands\SynAppsConfig;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
@@ -41,6 +42,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsPatchResources::class,
                 SynAppsPatchTests::class,
                 SynAppsLinkErrors::class,
+                SynAppsConfig::class,
             ]);
         }
 

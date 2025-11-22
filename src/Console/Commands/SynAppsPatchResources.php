@@ -18,7 +18,7 @@ class SynAppsPatchResources extends Command
      *
      * @var string
      */
-    protected $description = 'Patch CSS, JS, and Vite config to add Synapse resource files';
+    protected $description = 'Patch CSS, JS, Vite config, and routes to add Synapse resources';
 
     /**
      * Execute the console command.
@@ -74,7 +74,10 @@ class SynAppsPatchResources extends Command
         // Patch vite.config.js
         $vitePatched = $this->patchViteConfig();
 
-        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched) {
+        // Patch routes/web.php to disable default Laravel welcome route
+        $routePatched = $this->patchWebRoutes();
+
+        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched || $routePatched) {
             $this->components->info('Resource files patched.');
         }
     }
@@ -211,5 +214,147 @@ PLUGIN;
         file_put_contents($viteConfigPath, $updatedContent);
 
         return true;
+    }
+
+    /**
+     * Patch routes/web.php to disable the default Laravel welcome route.
+     * Only comments out the default route if no other routes are defined.
+     *
+     * @return bool True if the file was patched, false otherwise.
+     */
+    protected function patchWebRoutes(): bool
+    {
+        $webRoutesPath = base_path('routes/web.php');
+
+        if (! file_exists($webRoutesPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($webRoutesPath);
+        $lines = file($webRoutesPath, FILE_IGNORE_NEW_LINES);
+
+        // Check if default route exists and is not already commented
+        $hasDefaultRoute = false;
+        $defaultRoutePattern = "/Route::get\s*\(\s*['\"]\/['\"]\s*,\s*function\s*\(\s*\)/";
+
+        foreach ($lines as $line) {
+            if (preg_match($defaultRoutePattern, $line) && ! $this->isCommented($line)) {
+                $hasDefaultRoute = true;
+                break;
+            }
+        }
+
+        if (! $hasDefaultRoute) {
+            return false;
+        }
+
+        // Check if there are other route definitions (excluding the default route)
+        $hasOtherRoutes = $this->hasOtherRouteDefinitions($lines, $defaultRoutePattern);
+
+        if ($hasOtherRoutes) {
+            // Skip patching if other routes exist
+            return false;
+        }
+
+        // Comment out the default route (multi-line)
+        $patched = $this->commentOutDefaultRoute($lines, $defaultRoutePattern);
+
+        if ($patched) {
+            file_put_contents($webRoutesPath, implode("\n", $lines)."\n");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a line is already commented.
+     */
+    protected function isCommented(string $line): bool
+    {
+        return preg_match('/^\s*\/\//', trim($line)) || preg_match('/^\s*\/\*/', trim($line));
+    }
+
+    /**
+     * Check if there are other route definitions beyond the default welcome route.
+     */
+    protected function hasOtherRouteDefinitions(array $lines, string $defaultRoutePattern): bool
+    {
+        $routePatterns = [
+            '/Route::(get|post|put|patch|delete|options|any|match|redirect|view|permanentRedirect|resource|apiResource|group)\s*\(/',
+        ];
+
+        $inDefaultRoute = false;
+        $braceCount = 0;
+
+        foreach ($lines as $line) {
+            $trimmedLine = trim($line);
+
+            // Track if we're inside the default route closure
+            if (preg_match($defaultRoutePattern, $line)) {
+                $inDefaultRoute = true;
+            }
+
+            if ($inDefaultRoute) {
+                $braceCount += substr_count($line, '{') - substr_count($line, '}');
+                if ($braceCount <= 0) {
+                    $inDefaultRoute = false;
+                    $braceCount = 0;
+                }
+
+                continue;
+            }
+
+            // Check for other route definitions (not commented)
+            if (! $this->isCommented($trimmedLine)) {
+                foreach ($routePatterns as $pattern) {
+                    if (preg_match($pattern, $trimmedLine)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Comment out the default Laravel route (handles multi-line).
+     */
+    protected function commentOutDefaultRoute(array &$lines, string $defaultRoutePattern): bool
+    {
+        $patched = false;
+        $inDefaultRoute = false;
+        $braceCount = 0;
+        $startLine = -1;
+
+        foreach ($lines as $index => $line) {
+            // Find the start of the default route
+            if (! $inDefaultRoute && preg_match($defaultRoutePattern, $line)) {
+                $inDefaultRoute = true;
+                $startLine = $index;
+            }
+
+            if ($inDefaultRoute) {
+                // Count braces to track closure
+                $braceCount += substr_count($line, '{') - substr_count($line, '}');
+
+                // Comment out this line
+                if (! $this->isCommented($line)) {
+                    $lines[$index] = '// '.$line;
+                    $patched = true;
+                }
+
+                // Check if we've closed the route definition
+                if ($braceCount <= 0) {
+                    $inDefaultRoute = false;
+                    $braceCount = 0;
+                    break;
+                }
+            }
+        }
+
+        return $patched;
     }
 }
