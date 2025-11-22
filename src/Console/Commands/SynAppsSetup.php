@@ -151,14 +151,13 @@ class SynAppsSetup extends Command
             '--tag' => 'synapse-config',
             '--force' => true,
         ]);
+        $this->call('synapps:config');
         $this->call('synapps:link-errors');
         $this->call('synapps:patch-resources');
         $this->call('synapps:patch-tests');
         $this->call('synapps:discover');
 
         $this->components->success('Setup complete.');
-        $this->components->info('Run `config:cache` artisan command before migrating.');
-        $this->components->info('Remove Laravel default Route in `routes/web.php` to start using Home module as default Route');
         $this->components->warn("Don't forget to init Git Repository in synapps folder or your project root.");
 
         return 0;

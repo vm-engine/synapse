@@ -73,10 +73,10 @@ Once v1.0.0 is released:
    composer update vm-engine/synapse
    ```
 
-4. **Run Discovery**
+4. **Run Discovery and Regenerate Config**
    ```bash
    php artisan synapps:discover
-   php artisan config:cache
+   php artisan synapps:config
    ```
 
 5. **Test Your Application**
@@ -118,7 +118,7 @@ All features from beta are now stable. See [CHANGELOG.md](CHANGELOG.md) for full
    ```bash
    composer update vm-engine/synapse
    php artisan synapps:discover
-   php artisan config:cache
+   php artisan synapps:config
    ```
 
 3. **Update module.json files** (if using old format):
@@ -263,7 +263,8 @@ php artisan view:clear
 ```bash
 # If you modified configs
 git checkout HEAD~1 config/
-php artisan config:cache
+git checkout HEAD~1 synapps/config/
+php artisan synapps:config
 ```
 
 ### 4. Report Issues

@@ -107,13 +107,15 @@ php artisan synapps:discover
 
 > **Skip this step** if your Laravel project is already a Synapse project.
 
-### 2. Cache Configuration
+### 2. Regenerate Configuration
 
-Cache the generated configurations:
+Regenerate SynApps and Synapse configuration files:
 
 ```bash
-php artisan config:cache
+php artisan synapps:config
 ```
+
+This replaces the need for `config:cache` when working with Synapse modular configurations.
 
 ### 3. Run Database Migrations
 
@@ -565,7 +567,7 @@ synapps/modules/{module-name}/
 2. Create `module.json` with configuration
 3. Create ServiceProvider in `src/{ModuleName}ServiceProvider.php`
 4. Run `php artisan synapps:discover` to register namespaces
-5. Run `php artisan config:cache`
+5. Run `php artisan synapps:config` to regenerate configurations
 
 ## Artisan Commands
 
@@ -574,6 +576,7 @@ synapps/modules/{module-name}/
 | Command | Purpose | When to Run | Auto-run by Setup |
 |---------|---------|-------------|-------------------|
 | `synapps:setup` | Initial setup wizard | Once on fresh install | N/A |
+| `synapps:config` | Regenerate config files | After config changes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | ✅ Yes |
 | `synapps:patch-resources` | Patch JS/CSS imports | After install, if assets missing | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | ✅ Yes |
@@ -596,7 +599,8 @@ php artisan synapps:setup
 2. Copies stub directory from `vendor/vm-engine/synapse/src/stubs/synapps/` to `synapps/`
 3. Generates `synapps/config/apps.json` configuration file
 4. **Automatically executes these commands in sequence:**
-   - `vendor:publish --tag=synapps-config --force` - Publishes Synapse configuration files
+   - `vendor:publish --tag=synapse-config --force` - Publishes Synapse configuration files
+   - `synapps:config` - Regenerates SynApps & Synapse configuration files
    - `synapps:link-errors` - Links custom error views
    - `synapps:patch-resources` - Patches JS/CSS imports
    - `synapps:patch-tests` - Configures testing infrastructure
@@ -607,6 +611,32 @@ php artisan synapps:setup
 - `config/synapps.php` - Application configuration
 
 **When to run:** Once on fresh Laravel installation, or when initializing Synapse.
+
+---
+
+### synapps:config
+
+Regenerates SynApps and Synapse configuration files by running both configuration generators.
+
+```bash
+php artisan synapps:config
+```
+
+**What it does:**
+1. Runs **SynAppsConfigGenerator** to generate `config/synapps.php`
+2. Runs **SynapseConfigGenerator** to generate `config/synapse.php`
+3. Reads source configs from `synapps/config/{apps,system,modules}.json` and `.dev.json` overrides
+4. Executes all config builders (Apps, System, Modules, Binding) through their lifecycle phases
+5. Generates compiled configs in `synapps/config/compiled/`
+
+**When to run:**
+- After modifying any `synapps/config/*.json` files
+- After adding or removing modules
+- After changing module configurations
+- After updating system or app settings
+- **Instead of `config:cache`** when working with Synapse modular configurations
+
+**Important:** This command replaces the need for `php artisan config:cache` in Synapse projects, as it regenerates module-specific configurations before caching.
 
 ---
 

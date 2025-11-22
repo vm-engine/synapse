@@ -25,6 +25,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | Command | Purpose | When to Run | Idempotent | Auto-run by Setup |
 |---------|---------|-------------|------------|-------------------|
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
+| `synapps:config` | Regenerate config files | After config changes | Yes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
 | `synapps:patch-resources` | Patch JS/CSS/Vite config | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
@@ -36,15 +37,41 @@ Interactive wizard that:
 2. Copies stub directory from `src/stubs/synapps/` to `synapps/`
 3. Generates `synapps/config/apps.json`
 4. **Automatically runs these setup commands in sequence:**
-   - `vendor:publish --tag=synapps-config --force` - Publish config files (`config/synapse.php`, `config/synapps.php`)
+   - `vendor:publish --tag=synapse-config --force` - Publish config files (`config/synapse.php`, `config/synapps.php`)
+   - `synapps:config` - Regenerate SynApps & Synapse configuration files
    - `synapps:link-errors` - Create symlink for error views
    - `synapps:patch-resources` - Patch JS/CSS imports
    - `synapps:patch-tests` - Configure testing infrastructure
    - `synapps:discover` - Discover modules and update dependencies
 
-**Follow-up:** Run `config:cache` before migrating
+**No follow-up required** - All configuration is automatically generated
 
 > **Note:** The setup command now handles all initialization automatically, including publishing configuration files. You only need to manually run the individual commands if troubleshooting or have specific requirements.
+
+### synapps:config
+Regenerates SynApps and Synapse configuration files by running both configuration generators:
+1. **SynAppsConfigGenerator** - Generates `config/synapps.php` using Builder pattern
+2. **SynapseConfigGenerator** - Generates `config/synapse.php` from compiled JSON
+
+```bash
+php artisan synapps:config
+```
+
+**What it does:**
+- Reads source configs from `synapps/config/{apps,system,modules}.json` and `.dev.json` overrides
+- Executes all config builders (Apps, System, Modules, Binding) through their lifecycle phases
+- Generates compiled configs in `synapps/config/compiled/`
+- Writes final configs to `config/synapps.php` and `config/synapse.php`
+
+**Run after:**
+- Modifying any `synapps/config/*.json` files
+- Adding/removing modules
+- Changing module configurations
+- Updating system or app settings
+
+**Replaces:** `php artisan config:cache` for Synapse-specific configuration regeneration
+
+> **Note:** This command should be used instead of `config:cache` when working with Synapse modular configurations. It ensures all module configs, bindings, and system settings are properly regenerated before being cached.
 
 ### synapps:discover
 Critical command that:

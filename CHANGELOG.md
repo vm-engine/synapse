@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2025-11-22
+
+### Added
+- **synapps:config Command**: New Artisan command to regenerate SynApps and Synapse configuration files
+  - Runs both `SynAppsConfigGenerator` and `SynapseConfigGenerator`
+  - Replaces the need for `config:cache` when working with Synapse modular configurations
+  - Automatically called by `synapps:setup` during initial setup
+
+### Changed
+- **synapps:setup Command**: Now automatically runs `synapps:config` after copying synapps stubs
+  - Ensures all configurations are properly generated during initial setup
+  - Removed manual `config:cache` instruction from setup output
+  - Removed redundant message about removing default route (handled by `synapps:patch-resources`)
+
+### Documentation
+- Updated all documentation to use `synapps:config` instead of `config:cache` for Synapse projects
+- Updated CLAUDE.md with comprehensive `synapps:config` command documentation
+- Updated README.md with detailed `synapps:config` usage and examples
+- Updated UPGRADE.md to reflect new configuration regeneration workflow
+- Added `synapps:config` to command quick reference tables in all documentation
+- Clarified that `synapps:config` is auto-run by `synapps:setup`
+
 ## [1.0.2] - 2025-11-16
 
 ### Added
@@ -253,7 +275,8 @@ This project follows [Semantic Versioning](https://semver.org/):
 - [Issue Tracker](https://repo.4visionmedia.com:4000/vm-engine/synapse/issues)
 - [Documentation](README.md)
 
-[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.2...HEAD
+[Unreleased]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.3...HEAD
+[1.0.3]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.3
 [1.0.2]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.2
 [1.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.1
 [1.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/releases/tag/v1.0.0
