@@ -6,7 +6,7 @@
         class="sidebar-header"
         :class="sidebarToggle ? 'justify-center' : 'justify-between'"
     >
-        <a href="{{ route('backend.home.dashboard') }}">
+        <a href="{{ backend_route('home.dashboard') }}">
             <span
                 class="logo"
                 :class="sidebarToggle ? 'hidden' : ''"
@@ -68,7 +68,7 @@
                                 @isset($menu['sub'])
                                 @click.prevent="selected = selected === '{{ $key }}' ? '' : '{{ $key }}'"
                                 @else
-                                href="{{ route('backend.' . $menu['route']) }}"
+                                href="{{ backend_route($menu['route']) }}"
                                 @endisset
                                 wire:navigate
                             >
@@ -120,7 +120,7 @@
                                             <li class="{{ $subMenu['class'] }}">
                                                 <a
                                                     class="menu-dropdown-item group"
-                                                    href="{{ route('backend.' . $subMenu['route']) }}"
+                                                    href="{{ backend_route($subMenu['route']) }}"
                                                     :class="page === '{{ $key . '.' . $sub }}' ? 'menu-dropdown-item-active' :
                                                         'menu-dropdown-item-inactive'"
                                                     wire:navigate

@@ -146,18 +146,34 @@ Creates symlink/junction from `resources/views/errors` → `synapps/resources/vi
 
 ### Configuration System
 
-**Dual-generator pattern:**
+**Dual-generator pattern with caching:**
 
 **1. SynapseConfigGenerator** - Generates `synapse.php`:
+- `::config()` - **Optimized method** - reads from cached `synapse.json`, generates if missing
+- `::generate()` - **Legacy method** - always regenerates configuration
 - Scans filesystem for modules
 - Builds paths for migrations, seeders, views, languages
 - Relies on compiled JSON in `synapps/config/compiled/`
 
 **2. SynAppsConfigGenerator** - Generates `synapps.php` using Builder pattern:
+- `::config()` - **Optimized method** - reads from cached `synapps.json`, generates if missing
+- `::generate()` - **Legacy method** - always regenerates configuration
 - **Apps Builder**: App-level config (`apps.json` + `apps.dev.json`)
 - **System Builder**: System config with protected keys (`system.json` + `system.dev.json`)
 - **Modules Builder**: Module discovery and merging (`modules.json` + `modules.dev.json`)
 - **Binding Builder**: Service container bindings
+
+**Performance Optimization:**
+Use `::config()` instead of `::generate()` in `config/synapse.php` and `config/synapps.php`:
+```php
+// Optimized (reads cached JSON, only generates if missing)
+return SynapseConfigGenerator::config();
+return SynAppsConfigGenerator::config();
+
+// Legacy (always regenerates - slower)
+return SynapseConfigGenerator::generate();
+return SynAppsConfigGenerator::generate();
+```
 
 **Builder Lifecycle (5 phases):**
 1. `init()` - Initialize state, load configs

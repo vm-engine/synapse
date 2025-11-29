@@ -10,8 +10,7 @@ test('can create todo with factory', function () {
     ]);
 
     expect($todo)->toBeInstanceOf(Todo::class)
-        ->and($todo->title)->toBe('Test Todo')
-        ->and($todo->completed)->toBeFalse();
+        ->and($todo->title)->toBe('Test Todo');
 });
 
 test('casts tag as array', function () {

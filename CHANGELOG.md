@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2025-11-29
+
+### Added
+- **Configuration System Documentation**: Added performance optimization guidance
+  - Documented `::config()` vs `::generate()` methods for config generators
+  - Added code examples for optimized config loading with caching
+  - Explained legacy vs optimized configuration generation approaches
+
+### Changed
+- **SynAppsSetup Command**: Updated npm dependencies for static asset copying
+  - Added `glob` (^13.0.0) as main dependency for file pattern matching
+  - Updated `vite-plugin-static-copy` to ^3.1.4 as main dependency
+  - Ensures proper static asset handling in Vite builds
+
+### Fixed
+- **Todos Module Tests**: Updated tests to use delete tokens
+  - Fixed `TodoListTest` to use `delete_token` instead of raw ID
+  - Updated `TodoModelTest` to remove invalid `completed` assertion
+  - Ensures tests align with WithDeleteToken trait implementation
+- **Stub Layout Templates**: Fixed routing helper usage
+  - Changed `route('backend.*')` to `backend_route()` helper in layout files
+  - Fixed after_login route to use direct config value instead of route()
+  - Improved consistency with Synapse routing conventions
+  - Affects: layout.blade.php, breadcrumbs.blade.php, sidebar.blade.php
+
 ## [1.0.4] - 2025-11-22
 
 ### Added

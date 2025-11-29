@@ -167,7 +167,7 @@ test('can delete todo', function () {
     $todo = Todo::factory()->create(['title' => 'To Delete']);
 
     Livewire::test(TodoList::class)
-        ->call('deleteTodo', $todo->id)
+        ->call('deleteTodo', $todo->delete_token)
         ->assertDispatched('notify');
 
     expect(Todo::find($todo->id))->toBeNull();
