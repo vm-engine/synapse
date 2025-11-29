@@ -27,7 +27,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
 | `synapps:config` | Regenerate config files | After config changes | Yes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
-| `synapps:patch-resources` | Patch JS/CSS/Vite config | After install, if assets missing | Yes | ✅ Yes |
+| `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 
@@ -71,7 +71,7 @@ php artisan synapps:config
 
 **Replaces:** `php artisan config:cache` for Synapse-specific configuration regeneration
 
-> **Note:** This command should be used instead of `config:cache` when working with Synapse modular configurations. It ensures all module configs, bindings, and system settings are properly regenerated before being cached.
+> **Note:** This command should be used instead of `config:cache` when working with Synapse modular configurations. It ensures all module configs, bindings, and system settings are properly regenerated. Both `synapps:setup` and `synapps:discover` automatically call this command.
 
 ### synapps:discover
 Critical command that:
@@ -85,7 +85,7 @@ Critical command that:
 **Run after:** Creating modules, modifying `module.json`, changing dependencies
 
 ### synapps:patch-resources
-Patches Laravel resource files:
+Patches Laravel resource files and cleans up default Laravel files:
 - **resources/js/app.js** - Adds import for `synapps/resources/js/synapps.js`
 - **resources/css/app.css** - Adds import for `synapps/resources/css/synapps.css`
 - **resources/css/app.css** - Adds @source directives for module Blade/JS files:
@@ -98,6 +98,8 @@ Patches Laravel resource files:
   - Copies assets from `synapps/resources/assets/**/*` to `public/assets`
   - Copies assets from `vendor/*/synmod-*/resources/assets/**/*` to `public/assets`
   - Copies assets from `vendor/vm-engine/synapps-*/resources/assets/**/*` to `public/assets`
+- **routes/web.php** - Comments out default Laravel welcome route (only if no other routes exist)
+- **database/seeders/DatabaseSeeder.php** - Comments out default `User::factory()` calls
 
 **Required npm packages:** `vite-plugin-static-copy` and `glob` (automatically included in `synapps:setup` dependencies)
 

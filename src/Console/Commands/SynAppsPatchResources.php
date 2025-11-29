@@ -18,7 +18,7 @@ class SynAppsPatchResources extends Command
      *
      * @var string
      */
-    protected $description = 'Patch CSS, JS, Vite config, and routes to add Synapse resources';
+    protected $description = 'Patch CSS, JS, Vite config, routes, and seeders to add Synapse resources';
 
     /**
      * Execute the console command.
@@ -77,7 +77,10 @@ class SynAppsPatchResources extends Command
         // Patch routes/web.php to disable default Laravel welcome route
         $routePatched = $this->patchWebRoutes();
 
-        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched || $routePatched) {
+        // Patch DatabaseSeeder to comment out default user seeder
+        $seederPatched = $this->patchDatabaseSeeder();
+
+        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched || $routePatched || $seederPatched) {
             $this->components->info('Resource files patched.');
         }
     }
@@ -353,6 +356,87 @@ PLUGIN;
                     break;
                 }
             }
+        }
+
+        return $patched;
+    }
+
+    /**
+     * Patch database/seeders/DatabaseSeeder.php to comment out default Laravel user seeder.
+     * Comments out User::factory() calls if they exist.
+     *
+     * @return bool True if the file was patched, false otherwise.
+     */
+    protected function patchDatabaseSeeder(): bool
+    {
+        $seederPath = base_path('database/seeders/DatabaseSeeder.php');
+
+        if (! file_exists($seederPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($seederPath);
+        $lines = file($seederPath, FILE_IGNORE_NEW_LINES);
+
+        $patched = false;
+
+        // Patterns to match User::factory() calls
+        $userFactoryPatterns = [
+            '/^\s*User::factory\s*\(/',  // Matches: User::factory(
+            '/^\s*\\\\App\\\\Models\\\\User::factory\s*\(/',  // Matches: \App\Models\User::factory(
+        ];
+
+        foreach ($lines as $index => $line) {
+            $trimmedLine = trim($line);
+
+            // Skip if already commented
+            if ($this->isCommented($line)) {
+                continue;
+            }
+
+            // Check if line matches any User::factory() pattern
+            foreach ($userFactoryPatterns as $pattern) {
+                if (preg_match($pattern, $line)) {
+                    // Comment out this line
+                    $lines[$index] = '        // '.$trimmedLine;
+                    $patched = true;
+
+                    // Check if this is a multi-line factory call
+                    // Look for lines that are part of the same statement (no semicolon yet)
+                    $checkIndex = $index + 1;
+                    while (isset($lines[$checkIndex])) {
+                        $nextLine = $lines[$checkIndex];
+                        $nextTrimmed = trim($nextLine);
+
+                        // If already commented, skip
+                        if ($this->isCommented($nextLine)) {
+                            $checkIndex++;
+                            continue;
+                        }
+
+                        // If empty line, stop
+                        if (empty($nextTrimmed)) {
+                            break;
+                        }
+
+                        // Comment out continuation lines until we find semicolon
+                        $lines[$checkIndex] = '        // '.$nextTrimmed;
+
+                        // Stop if we found the semicolon (end of statement)
+                        if (str_contains($nextTrimmed, ';')) {
+                            break;
+                        }
+
+                        $checkIndex++;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        if ($patched) {
+            file_put_contents($seederPath, implode("\n", $lines)."\n");
         }
 
         return $patched;

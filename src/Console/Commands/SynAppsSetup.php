@@ -110,7 +110,7 @@ class SynAppsSetup extends Command
                         'vite-plugin-static-copy' => '^3.1.4',
                     ],
                     'dev' => [
-                        'vite-plugin-static-copy' => '^1.0.6',
+                        'vite-plugin-static-copy' => '^3.1.4',
                         'glob' => '^11.0.0',
                     ],
                 ],

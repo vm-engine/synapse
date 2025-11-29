@@ -59,7 +59,7 @@ class SynAppsDiscover extends Command
 
         $this->updateNpm();
 
-        $this->components->info('Please run `php artisan config:cache` after this command.');
+        $this->call('synapps:config');
 
         if ($this->npmDeps || $this->npmDevDeps) {
             $this->components->info('Compiling assets');

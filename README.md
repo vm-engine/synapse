@@ -81,9 +81,10 @@ This command will:
 3. **Generate configuration file** at `synapps/config/apps.json`
 
 4. **Automatically run these setup commands:**
-   - `vendor:publish --tag=synapps-config` - Publish Synapse config files
+   - `vendor:publish --tag=synapse-config --force` - Publish Synapse config files
+   - `synapps:config` - Regenerate configuration files
    - `synapps:link-errors` - Create symlink for error views
-   - `synapps:patch-resources` - Patch JS/CSS imports
+   - `synapps:patch-resources` - Patch JS/CSS imports and comment default seeder
    - `synapps:patch-tests` - Configure testing infrastructure
    - `synapps:discover` - Discover modules and update dependencies
 
@@ -98,7 +99,8 @@ git clone <your-synapps-repo-url> synapps
 Then manually run the setup commands:
 
 ```bash
-php artisan vendor:publish --tag="synapps-config" --force
+php artisan vendor:publish --tag="synapse-config" --force
+php artisan synapps:config
 php artisan synapps:link-errors
 php artisan synapps:patch-resources
 php artisan synapps:patch-tests
@@ -107,17 +109,7 @@ php artisan synapps:discover
 
 > **Skip this step** if your Laravel project is already a Synapse project.
 
-### 2. Regenerate Configuration
-
-Regenerate SynApps and Synapse configuration files:
-
-```bash
-php artisan synapps:config
-```
-
-This replaces the need for `config:cache` when working with Synapse modular configurations.
-
-### 3. Run Database Migrations
+### 2. Run Database Migrations
 
 If you're using the example module or have module migrations:
 
@@ -127,20 +119,7 @@ php artisan migrate
 
 This creates database tables defined in module migrations.
 
-### 4. Clean Up Default Routes (Fresh Laravel Only)
-
-If you're using a fresh Laravel installation, remove the default route from `routes/web.php`:
-
-```php
-// Delete this:
-Route::get('/', function () {
-    return view('welcome');
-});
-```
-
-Module routes will handle all routing automatically.
-
-### 5. Compile Assets
+### 3. Compile Assets
 
 Build your frontend assets:
 
@@ -566,8 +545,7 @@ synapps/modules/{module-name}/
 1. Create directory structure in `synapps/modules/{module-name}/`
 2. Create `module.json` with configuration
 3. Create ServiceProvider in `src/{ModuleName}ServiceProvider.php`
-4. Run `php artisan synapps:discover` to register namespaces
-5. Run `php artisan synapps:config` to regenerate configurations
+4. Run `php artisan synapps:discover` to register namespaces and regenerate configurations
 
 ## Artisan Commands
 
@@ -636,7 +614,7 @@ php artisan synapps:config
 - After updating system or app settings
 - **Instead of `config:cache`** when working with Synapse modular configurations
 
-**Important:** This command replaces the need for `php artisan config:cache` in Synapse projects, as it regenerates module-specific configurations before caching.
+**Important:** This command replaces `php artisan config:cache` in Synapse projects, as it regenerates module-specific configurations. Note that `synapps:setup` and `synapps:discover` automatically call this command, so you don't need to run it manually after those operations.
 
 ---
 
@@ -666,7 +644,7 @@ php artisan synapps:discover
 
 ### synapps:patch-resources
 
-Integrates Synapse JavaScript and CSS into your Laravel application.
+Integrates Synapse resources into your Laravel application and cleans up default Laravel files.
 
 ```bash
 php artisan synapps:patch-resources
@@ -675,8 +653,12 @@ php artisan synapps:patch-resources
 **What it does:**
 - Adds `import '../../synapps/resources/js/synapps.js';` to `resources/js/app.js`
 - Adds `@import '../../synapps/resources/css/synapps.css';` to `resources/css/app.css`
+- Adds Tailwind CSS `@source` directives for module Blade/JS files
+- Configures Vite to copy static assets from modules
+- Comments out default Laravel welcome route in `routes/web.php`
+- **Comments out default user seeder** in `database/seeders/DatabaseSeeder.php`
 
-**Safe to run multiple times** - Only patches if imports are not already present.
+**Safe to run multiple times** - Only patches if changes are not already present.
 
 **When to run:**
 - After fresh installation
