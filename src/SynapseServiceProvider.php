@@ -10,12 +10,17 @@ use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchTests;
+use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
+use VmEngine\Synapse\Console\Commands\SynapseDbConfig;
+use VmEngine\Synapse\Console\Commands\SynapseDbLang;
+use VmEngine\Synapse\Services\DbConfig;
+use VmEngine\Synapse\Services\DbLang;
 use VmEngine\Synapse\Services\SynapseUtils;
 use VmEngine\Synapse\Services\SyNav;
 
 /**
- * @SuppressWarnings(PHPMD.StaticAccess)
+ * @SuppressWarnings PHPMD.StaticAccess
  */
 class SynapseServiceProvider extends ServiceProvider
 {
@@ -43,6 +48,9 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsPatchTests::class,
                 SynAppsLinkErrors::class,
                 SynAppsConfig::class,
+                SynAppsPublishSettings::class,
+                SynapseDbConfig::class,
+                SynapseDbLang::class,
             ]);
         }
 
@@ -67,6 +75,12 @@ class SynapseServiceProvider extends ServiceProvider
         $this->app->singleton('synav', function ($app) {
             return new SyNav;
         });
+        $this->app->singleton('dbconf', function ($app) {
+            return new DbConfig;
+        });
+        $this->app->singleton('dblang', function ($app) {
+            return new DbLang;
+        });
         if (SynapseUtils::isSynAppsAutoloaded()) {
             $this->bindAlias();
             $this->bindPublicPath();
@@ -74,6 +88,7 @@ class SynapseServiceProvider extends ServiceProvider
             $this->bindClass();
             $this->registerSynAppsServiceProviders();
             $this->registerLangFiles();
+            $this->overrideConfigs();
         }
     }
 
@@ -145,9 +160,13 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
+            // @phpstan-ignore-next-line DatabaseSeeder exists in the consuming Laravel application
             $this->callAfterResolving(DatabaseSeeder::class, function ($seeder) {
                 $seedList = config('synapse.seed_path.general');
                 foreach ($seedList as $seederFile) {
+                    if (! file_exists($seederFile)) {
+                        continue;
+                    }
                     $seederClassList = include $seederFile;
                     if (count($seederClassList)) {
                         $seeder->call($seederClassList);
@@ -167,5 +186,21 @@ class SynapseServiceProvider extends ServiceProvider
                 $that->loadTranslationsFrom($v[0], $v[1]);
             }
         );
+    }
+
+    private function overrideConfigs()
+    {
+        $path = synapps_path('config'.DS.'override');
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $configs = glob($path.DS.'*.php');
+        foreach ($configs as $config) {
+            $configName = basename($config, '.php');
+            if (file_exists(base_path('config'.DS.$configName.'.php'))) {
+                $this->mergeConfigFrom($config, $configName);
+            }
+        }
     }
 }

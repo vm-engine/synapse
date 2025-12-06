@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
 if (! function_exists('synapps_path')) {
@@ -19,7 +21,7 @@ if (! function_exists('is_decimal')) {
     /**
      *  mengecek apakah sebuah nilai angka mengandung decimal atau tidak
      *
-     * @param  type  $value  yang akan dicek (float/double)
+     * @param  mixed  $value  yang akan dicek (float/double)
      * @return bool
      */
     function is_decimal($value)
@@ -38,5 +40,50 @@ if (! function_exists('synav')) {
     function synav()
     {
         return app('synav');
+    }
+}
+
+if (! function_exists('dbconf')) {
+    /**
+     * Get Config from database
+     *
+     * @param  string|array  $configString  String to get config, e.g.: 'group.key', Add ! prefix to skip config cache
+     *                                      Associative Array to set config ['group.key' => 'value']
+     * @param  mixed  $default  Default value
+     * @param  bool  $force  Force get from database directly
+     * @return mixed
+     */
+    function dbconf(string|array $configString, $default = null, $force = false): mixed
+    {
+        $config = app('dbconf');
+        if (is_string($configString)) {
+            if (Str::startsWith($configString, '!')) {
+                $force = true;
+                $configString = Str::after($configString, '!');
+            }
+            [$group, $key] = explode('.', $configString, 2);
+
+            return $config->get($group, $key, $default, $force);
+        } else {
+            $configKey = key($configString);
+            [$group, $key] = explode('.', (string) $configKey, 2);
+            $value = current($configString);
+
+            return $config->set($group, $key, $value);
+        }
+    }
+}
+
+if (! function_exists('___')) {
+    /**
+     * Get Language from Database
+     *
+     * @param  string  $key  Translation key
+     * @param  string|null  $languageCode  Optional language code (defaults to current language)
+     * @return string
+     */
+    function ___(string $key, ?string $languageCode = null): string
+    {
+        return app('dblang')->get($key, $languageCode);
     }
 }

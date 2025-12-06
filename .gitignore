@@ -4,3 +4,4 @@ composer.lock
 .phpactor.json
 _ide_helper.php
 .phpunit.cache/
+stubs/synapps/modules/settings

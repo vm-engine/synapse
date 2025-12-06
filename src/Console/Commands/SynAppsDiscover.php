@@ -5,10 +5,6 @@ namespace VmEngine\Synapse\Console\Commands;
 use Composer\Semver\Comparator;
 use Illuminate\Console\Command;
 
-/**
- * @SuppressWarnings(PHPMD.StaticAccess)
- * @SuppressWarnings(PHPMD.ElseStatement)
- */
 class SynAppsDiscover extends Command
 {
     /**

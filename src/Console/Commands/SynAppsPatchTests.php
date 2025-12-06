@@ -353,12 +353,14 @@ ENV;
         $xpath = new \DOMXPath($dom);
 
         // Find or create testsuites element
-        $testsuites = $xpath->query('/phpunit/testsuites')->item(0);
+        $testsuitesNode = $xpath->query('/phpunit/testsuites')->item(0);
 
-        if (! $testsuites) {
+        if (! $testsuitesNode instanceof \DOMElement) {
             $testsuites = $dom->createElement('testsuites');
             $dom->documentElement->appendChild($testsuites);
             $modified = true;
+        } else {
+            $testsuites = $testsuitesNode;
         }
 
         // Define required testsuites
@@ -440,12 +442,14 @@ ENV;
         $xpath = new \DOMXPath($dom);
 
         // Find or create php element
-        $php = $xpath->query('/phpunit/php')->item(0);
+        $phpNode = $xpath->query('/phpunit/php')->item(0);
 
-        if (! $php) {
+        if (! $phpNode instanceof \DOMElement) {
             $php = $dom->createElement('php');
             $dom->documentElement->appendChild($php);
             $modified = true;
+        } else {
+            $php = $phpNode;
         }
 
         // Define required environment variables
@@ -477,7 +481,7 @@ ENV;
         if ($envVars->length > 0) {
             // Update if value is different
             $envVar = $envVars->item(0);
-            if ($envVar->getAttribute('value') !== $value) {
+            if ($envVar instanceof \DOMElement && $envVar->getAttribute('value') !== $value) {
                 $envVar->setAttribute('value', $value);
 
                 return true;

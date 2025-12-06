@@ -2,6 +2,7 @@
 
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
+use Illuminate\Support\Str;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Apps;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Auth;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Binding;
@@ -105,6 +106,15 @@ class Builder
         }
     }
 
+    private function fetchEnvValues()
+    {
+        array_walk_recursive($this->config, function (&$value) {
+            if (Str::startsWith($value, 'env::')) {
+                $value = env(Str::after($value, 'env::'));
+            }
+        });
+    }
+
     private function writeFinalFile()
     {
         $finalPath = synapps_path('config/compiled/synapps.json');
@@ -121,6 +131,8 @@ class Builder
         $this->loopModules();
         $this->handlePostLoop();
         $this->finalize();
+
+        $this->fetchEnvValues();
 
         $this->writeFinalFile();
 

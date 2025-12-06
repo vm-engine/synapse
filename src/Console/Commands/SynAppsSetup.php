@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use stdClass;
 use VmEngine\Synapse\Services\SynapseUtils;
 
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
 
 class SynAppsSetup extends Command
@@ -74,6 +75,23 @@ class SynAppsSetup extends Command
         $appDesc = text(
             label: 'Application Description',
         );
+
+        $multiLanguage = confirm(
+            label: 'Enable Multi-Language Support?',
+            default: false,
+        );
+
+        $enabledLanguages = ['en'];
+        if ($multiLanguage) {
+            $languagesInput = text(
+                label: 'Enabled Languages',
+                placeholder: 'en,id,es',
+                default: 'en',
+                hint: 'Comma-separated language codes (e.g., en,id,es)',
+            );
+            $enabledLanguages = array_map('trim', explode(',', $languagesInput));
+        }
+
         $appsJson = [
             'app_code' => $appCode,
             'app_name' => $appName,
@@ -91,6 +109,8 @@ class SynAppsSetup extends Command
             ],
             'title' => $appTitle,
             'description' => $appDesc,
+            'multi_language' => $multiLanguage,
+            'enabled_languages' => $enabledLanguages,
             'dependencies' => [
                 'npm' => [
                     'main' => [

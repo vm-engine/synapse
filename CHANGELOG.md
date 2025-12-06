@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-06
+
+### Added
+
+**Database Services:**
+- DbConfig service for runtime configuration storage with automatic caching
+- DbLang service for multi-language translation system with auto-creation
+- Database migrations for `configs` and `languages` tables
+- Facades: `DbConfig` and `DbLang` with service container bindings
+- Helper functions: `dbconf()` for config management and `___()` for translations
+- Artisan commands: `synapse:db-config` and `synapse:db-lang`
+
+**Security:**
+- WithDeleteToken trait for secure delete operations with encrypted tokens
+- Session-bound token validation to prevent unauthorized deletions
+- Complete trait documentation in docs/TRAITS.md
+
+**Configuration System:**
+- Environment variable support in JSON config files using `env::` prefix
+- Works in apps.json, system.json, modules.json, and module.json files
+- Configuration override system in `synapps/config/override/`
+- Automatic deep merging of override files with Laravel config files
+- Complete documentation in docs/CONFIGURATION.md
+
+**Commands:**
+- `synapps:publish-settings` - Publish Settings module stub (requires SynAuth)
+- `synapse:db-config` - Manage database configuration values
+- `synapse:db-lang` - Manage database translations
+
+**Documentation:**
+- Created organized docs/ directory structure
+- docs/INSTALLATION.md - Complete installation guide
+- docs/SERVICES.md - Database services documentation
+- docs/COMMANDS.md - All Artisan commands reference
+- docs/COMPONENTS.md - Blade components documentation
+- docs/HELPERS.md - Helper functions reference
+- docs/MODULES.md - Module creation guide
+- docs/CONFIGURATION.md - Advanced configuration features
+- docs/TRAITS.md - WithDeleteToken trait guide
+- Completely rewritten README.md with quick start guide
+- Updated CLAUDE.md with all new features
+
+### Changed
+- Enhanced SynapseServiceProvider to register DbConfig and DbLang services
+- Updated configuration builder to process `env::` prefixed values
+- Improved service provider to apply configuration overrides automatically
+- Reorganized documentation into focused, topic-specific files
+- Updated README.md to be more concise with clear documentation links
+- Enhanced CLAUDE.md with comprehensive technical reference
+
+### Fixed
+- Seeder file existence check to prevent errors with missing seeders
+- Configuration override file discovery and merging logic
+
 ## [1.0.6] - 2025-11-29
 
 ### Added
@@ -45,6 +99,7 @@ Previous releases (see git tags for history)
 
 Initial stable release
 
+[1.1.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.6...v1.1.0
 [1.0.6]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.5...v1.0.6
 [1.0.5]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.4...v1.0.5
 [1.0.4]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.3...v1.0.4

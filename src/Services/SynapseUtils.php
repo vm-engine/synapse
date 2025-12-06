@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
 /**
- * @SuppressWarnings(PHPMD.StaticAccess)
+ * @SuppressWarnings PHPMD.StaticAccess
  */
 class SynapseUtils
 {

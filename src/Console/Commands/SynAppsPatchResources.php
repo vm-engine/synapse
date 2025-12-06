@@ -411,6 +411,7 @@ PLUGIN;
                         // If already commented, skip
                         if ($this->isCommented($nextLine)) {
                             $checkIndex++;
+
                             continue;
                         }
 

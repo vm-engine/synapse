@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
-/** @SuppressWarnings(PHPMD.StaticAccess) */
+/** @SuppressWarnings PHPMD.StaticAccess */
 
 /**
  * Class for generating config arrays, by reading the module paths for specific patterns
@@ -160,7 +160,8 @@ class SynapseConfigGenerator
                 return [$path, Str::slug($moduleName, '-')];
             }
         );
-        $langPaths[] = synapps_path('lang', 'synapps');
+        $langPaths[] = [synapps_path('lang'), 'synapps'];
+        $langPaths[] = [realpath(__DIR__.DS.'..'.DS.'..'.DS.'lang'), 'synapse'];
 
         $viewPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
@@ -192,6 +193,9 @@ class SynapseConfigGenerator
                 return $resourcePath.DS.'seeders.php';
             }
         );
+
+        $migrationPaths[] = realpath(__DIR__.DS.'..'.DS.'..'.DS.'database'.DS.'migrations');
+        $seedPaths[] = realpath(__DIR__.DS.'..'.DS.'..'.DS.'database'.DS.'seeders');
 
         $config['migration_path'] = ['general' => $migrationPaths];
         $config['seed_path'] = ['general' => $seedPaths];

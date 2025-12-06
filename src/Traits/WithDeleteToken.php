@@ -4,6 +4,9 @@ namespace VmEngine\Synapse\Traits;
 
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * @phpstan-ignore trait.unused
+ */
 trait WithDeleteToken
 {
     protected static function booted(): void

@@ -2,6 +2,7 @@
 
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
+use Illuminate\Support\Str;
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Modules extends BuilderBase
@@ -43,6 +44,14 @@ class Modules extends BuilderBase
             $moduleConfig['is_package'] = 0;
             if (strpos($modulePath, base_path('vendor')) !== false) {
                 $moduleConfig['is_package'] = 1;
+            }
+
+            // Check if module is discovered
+            if (Str::contains($modulePath, 'synapps'.DS.'modules')) {
+                $mainComposer = file_get_contents(base_path('composer.json'));
+                if (strpos($mainComposer, 'synapps'.DS.'modules'.DS.$moduleConfig['id']) === false) {
+                    continue;
+                }
             }
 
             $this->synapps->config['modules'][$moduleConfig['id']] = $moduleConfig;

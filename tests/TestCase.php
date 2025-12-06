@@ -18,6 +18,17 @@ abstract class TestCase extends Orchestra
     }
 
     /**
+     * Get package aliases.
+     */
+    protected function getPackageAliases($app): array
+    {
+        return [
+            'DbConfig' => \VmEngine\Synapse\Facades\DbConfig::class,
+            'DbLang' => \VmEngine\Synapse\Facades\DbLang::class,
+        ];
+    }
+
+    /**
      * Define environment setup.
      */
     protected function defineEnvironment($app): void
@@ -29,6 +40,14 @@ abstract class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
+    }
+
+    /**
+     * Define database migrations.
+     */
+    protected function defineDatabaseMigrations(): void
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     /**

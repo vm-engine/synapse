@@ -16,7 +16,10 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 **vm-engine/synapse** provides modular architecture for Laravel apps via:
 - Directory-based modules (`synapps/modules/`)
 - Package-based modules (`synmod-*`, `synmodule-*`, `synapps-*` in vendor)
-- Configuration generators with Builder pattern
+- Configuration generators with Builder pattern and `env::` prefix support
+- Database services (DbConfig, DbLang) for runtime configuration and translations
+- Security traits (WithDeleteToken) for secure operations
+- Configuration override system for Laravel config files
 - Livewire components and helpers
 - Automatic route/provider registration
 
@@ -30,6 +33,9 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
+| `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
+| `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
+| `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
 
 ### synapps:setup
 Interactive wizard that:
@@ -182,7 +188,17 @@ return SynAppsConfigGenerator::generate();
 2. `preLoop()` - Execute before module iteration
 3. `loop($name, $config)` - Process each module
 4. `postLoop()` - Execute after all modules
-5. `finalize()` - Write compiled configs to disk
+5. `finalize()` - Write compiled configs to disk, process `env::` values
+
+**Environment Variables in JSON:**
+All JSON config files support `env::` prefix for environment variables:
+```json
+{
+    "app_name": "env::APP_NAME",
+    "api_key": "env::API_KEY"
+}
+```
+During `finalize()`, values starting with `env::` are replaced with actual env values.
 
 **Configuration Files:**
 
@@ -214,8 +230,9 @@ return SynAppsConfigGenerator::generate();
 - Registers commands
 - **Auto-registers module ServiceProviders** (directory modules only)
 - Pattern: `SynApps\Modules\{ModuleName}\{ModuleName}ServiceProvider`
-- Binds aliases/classes/interfaces
+- Binds aliases/classes/interfaces (`dbconf`, `dblang`, `synav`)
 - Loads migrations, seeders, languages
+- **Applies config overrides** from `synapps/config/override/`
 
 **2. SynapseLangServiceProvider**: Language files
 
@@ -227,9 +244,88 @@ return SynAppsConfigGenerator::generate();
 
 **4. SynapseViewServiceProvider**: Views and components
 
+### Configuration Override System
+
+**Location:** `synapps/config/override/*.php`
+
+Automatically merges PHP config files with Laravel's config files:
+- Override files must match Laravel config file names (`app.php`, `database.php`, etc.)
+- Deep recursive array merging
+- Applied during service provider boot
+- Safe - only affects existing config files
+
+Example `synapps/config/override/app.php`:
+```php
+return [
+    'timezone' => 'Asia/Jakarta',
+    'locale' => 'id',
+];
+```
+Merged into `config('app')` automatically.
+
 ---
 
 ## Helper Services
+
+### DbConfig
+
+Database configuration service with automatic caching.
+
+```php
+use VmEngine\Synapse\Facades\DbConfig;
+
+// Get config value
+$value = DbConfig::get('app', 'maintenance_mode', false);
+
+// Set config value
+DbConfig::set('app', 'maintenance_mode', true, 'Maintenance Mode');
+
+// Force refresh from database
+$value = DbConfig::get('app', 'maintenance_mode', false, true);
+
+// Using helper function
+$value = dbconf('app.maintenance_mode', false);
+dbconf(['app.maintenance_mode' => true]);
+$value = dbconf('!app.maintenance_mode'); // Force bypass cache
+```
+
+**Service binding:** `'dbconf'`
+**Database table:** `configs` (group, key, value, label)
+**Command:** `php artisan synapse:db-config group.key value --label="Label"`
+
+### DbLang
+
+Multi-language translation service with automatic caching.
+
+```php
+use VmEngine\Synapse\Facades\DbLang;
+
+// Get translation for current language
+$text = DbLang::get('welcome.title');
+
+// Get translation for specific language
+$text = DbLang::get('welcome.title', 'id');
+
+// Set translation
+DbLang::set('welcome.title', 'Welcome!', 'Welcome Title');
+
+// Set translation for specific language
+DbLang::set('welcome.title', 'Selamat datang', 'Welcome Title', 'id');
+
+// Change current language
+DbLang::setLanguage('id');
+
+// Using helper function
+$text = ___('welcome.title');
+$text = ___('welcome.title', 'id');
+```
+
+**Service binding:** `'dblang'`
+**Database table:** `languages` (language_code, key, value, label)
+**Command:** `php artisan synapse:db-lang key value --label="Label" --language=en`
+
+**Multi-language auto-creation:**
+When `synapps.apps.multi_language` is `true`, setting a translation auto-creates empty entries for all `enabled_languages`.
 
 ### Breadcrumbs
 ```php
@@ -247,6 +343,10 @@ $breadcrumbs = Breadcrumbs::make('Home', '/')
 **isSynAppsAutoloaded()** - Check autoload registration
 
 ### Helper Functions
+
+**Database:**
+- `dbconf($configString, $default, $force)` - Get/set database config. Use `!` prefix to bypass cache
+- `___($key, $languageCode)` - Get database translation
 
 **Path:**
 - `synapps_path($path)` - Absolute path to synapps
@@ -271,6 +371,45 @@ $breadcrumbs = Breadcrumbs::make('Home', '/')
 **Number:**
 - `is_decimal($value)` - Check if has decimals
 - `clean_number_format($value, $precision, $decimal, $thousand)` - Format number
+
+---
+
+## Traits
+
+### WithDeleteToken
+
+Security trait for generating encrypted delete tokens to prevent unauthorized delete operations.
+
+```php
+use VmEngine\Synapse\Traits\WithDeleteToken;
+
+class Post extends Model
+{
+    use WithDeleteToken;
+}
+
+// Usage
+$post = Post::find(1);
+$token = $post->delete_token; // Auto-appended attribute
+
+// Validate in controller/Livewire
+$id = Post::validateDeleteToken($request->delete_token);
+if ($id === false || $id != $post->id) {
+    // Invalid token
+}
+```
+
+**Methods:**
+- `getDeleteTokenAttribute()` - Auto-appended accessor for encrypted token
+- `generateDeleteToken($id)` - Generate token for specific ID
+- `validateDeleteToken($token)` - Static method, returns ID or false
+
+**Security:**
+- Session-bound with unique salt
+- Encrypted using Laravel encryption
+- Prevents CSRF-like attacks on delete operations
+
+See [docs/TRAITS.md](docs/TRAITS.md) for complete documentation.
 
 ---
 
