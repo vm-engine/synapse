@@ -19,7 +19,7 @@ class SynAppsDiscover extends Command
      *
      * @var string
      */
-    protected $description = 'Discover Modules in synapps folder';
+    protected $description = 'Discover modules and dependencies, update composer.json/package.json autoload entries';
 
     protected $packageJson = [];
 

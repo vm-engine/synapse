@@ -51,7 +51,6 @@ if (! function_exists('dbconf')) {
      *                                      Associative Array to set config ['group.key' => 'value']
      * @param  mixed  $default  Default value
      * @param  bool  $force  Force get from database directly
-     * @return mixed
      */
     function dbconf(string|array $configString, $default = null, $force = false): mixed
     {
@@ -80,7 +79,6 @@ if (! function_exists('___')) {
      *
      * @param  string  $key  Translation key
      * @param  string|null  $languageCode  Optional language code (defaults to current language)
-     * @return string
      */
     function ___(string $key, ?string $languageCode = null): string
     {

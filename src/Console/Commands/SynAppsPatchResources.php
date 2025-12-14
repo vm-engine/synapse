@@ -18,7 +18,7 @@ class SynAppsPatchResources extends Command
      *
      * @var string
      */
-    protected $description = 'Patch CSS, JS, Vite config, routes, and seeders to add Synapse resources';
+    protected $description = 'Integrate Synapse resources into app.js, app.css, vite.config.js, and clean default Laravel files';
 
     /**
      * Execute the console command.

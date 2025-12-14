@@ -81,6 +81,7 @@ DbConfig::set('app.site_name', 'My Site');
 ### Technical Documentation
 
 - **[CLAUDE.md](CLAUDE.md)** - Architecture, config generators, and internals
+- **[Laravel Boost Integration](docs/LARAVEL_BOOST.md)** - Using Laravel Boost MCP tools with Synapse
 - **[Changelog](CHANGELOG.md)** - Version history and changes
 - **[Upgrade Guide](UPGRADE.md)** - Migration instructions between versions
 

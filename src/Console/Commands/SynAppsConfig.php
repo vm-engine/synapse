@@ -20,7 +20,7 @@ class SynAppsConfig extends Command
      *
      * @var string
      */
-    protected $description = 'Regenerate SynApps & Synapse Configuration File';
+    protected $description = 'Regenerate configuration files from JSON sources (config/synapps.php, config/synapse.php)';
 
     /**
      * Execute the console command.

@@ -18,7 +18,7 @@ class SynAppsLinkErrors extends Command
      *
      * @var string
      */
-    protected $description = 'Create symlink from resources/views/errors to synapps/resources/views/errors';
+    protected $description = 'Link custom error views from synapps/resources/views/errors';
 
     public function handle(): int
     {

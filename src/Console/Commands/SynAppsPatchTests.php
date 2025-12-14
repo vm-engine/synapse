@@ -18,7 +18,7 @@ class SynAppsPatchTests extends Command
      *
      * @var string
      */
-    protected $description = 'Patch tests/Pest.php, .env.testing, composer.json, and phpunit.xml for proper test configuration';
+    protected $description = 'Configure testing infrastructure (Pest.php, .env.testing, phpunit.xml) for module tests';
 
     private array $pathsToAdd = [
         'Browser', // Add Browser directory for Pest Browser Testing

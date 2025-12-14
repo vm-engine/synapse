@@ -309,3 +309,62 @@ ___('translation.key', 'language_code')
 // Breadcrumbs - Direct class usage
 use VmEngine\Synapse\Services\Helper\Breadcrumbs;
 ```
+
+## Interactive Testing with Tinker
+
+You can test all Synapse services interactively using Laravel tinker and Laravel Boost's `tinker` tool:
+
+### DbConfig Service
+```php
+// Test getting and setting configs
+tinker: dbconf(['app.site_name' => 'My Laravel App']);
+tinker: dbconf('app.site_name');
+tinker: dbconf('!app.site_name'); // Bypass cache
+
+// Using facade
+tinker: use VmEngine\Synapse\Facades\DbConfig;
+tinker: DbConfig::set('app', 'maintenance_mode', true, 'Maintenance Mode');
+tinker: DbConfig::get('app', 'maintenance_mode', false);
+```
+
+### DbLang Service
+```php
+// Test translations
+tinker: ___('welcome.title');
+tinker: ___('welcome.title', 'id');
+
+// Using facade
+tinker: use VmEngine\Synapse\Facades\DbLang;
+tinker: DbLang::set('welcome.title', 'Welcome!', 'Welcome Title');
+tinker: DbLang::setLanguage('id');
+tinker: DbLang::getLanguage();
+```
+
+### Breadcrumbs Service
+```php
+// Test breadcrumbs
+tinker: use VmEngine\Synapse\Services\Helper\Breadcrumbs;
+tinker: $breadcrumbs = Breadcrumbs::make('Home', '/')->add('Users', '/users');
+tinker: $breadcrumbs->items();
+tinker: $breadcrumbs->count();
+```
+
+For more Laravel Boost integration examples, see the [Laravel Boost Integration Guide](LARAVEL_BOOST.md).
+
+## Database Queries
+
+You can also inspect service data using Laravel Boost's `database-query` tool:
+
+```sql
+-- View all configurations
+SELECT * FROM configs;
+
+-- Find specific config
+SELECT * FROM configs WHERE `group` = 'app' AND `key` = 'site_name';
+
+-- View all translations
+SELECT * FROM languages;
+
+-- Find translation by language
+SELECT * FROM languages WHERE language_code = 'en' AND `key` = 'welcome.title';
+```

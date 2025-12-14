@@ -22,7 +22,7 @@ class SynapseDbLang extends Command
      *
      * @var string
      */
-    protected $description = 'Create or Update Language from Database';
+    protected $description = 'Manage translations stored in database (DbLang service)';
 
     /**
      * Execute the console command.

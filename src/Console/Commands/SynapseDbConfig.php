@@ -21,7 +21,7 @@ class SynapseDbConfig extends Command
      *
      * @var string
      */
-    protected $description = 'Create or Update Config from Database';
+    protected $description = 'Manage runtime configuration stored in database (DbConfig service)';
 
     /**
      * Execute the console command.

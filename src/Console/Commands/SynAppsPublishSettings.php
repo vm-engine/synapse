@@ -19,7 +19,7 @@ class SynAppsPublishSettings extends Command
      *
      * @var string
      */
-    protected $description = 'Publish Settings Module to synapps';
+    protected $description = 'Publish Settings module to synapps/modules (requires vm-engine/synapps-auth)';
 
     /**
      * Execute the console command.

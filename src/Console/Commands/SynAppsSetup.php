@@ -24,7 +24,7 @@ class SynAppsSetup extends Command
      *
      * @var string
      */
-    protected $description = 'Setup SynApps folder';
+    protected $description = 'Interactive setup wizard to initialize Synapse modular architecture';
 
     public function handle(): int
     {
