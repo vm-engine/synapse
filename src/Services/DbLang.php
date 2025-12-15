@@ -47,7 +47,7 @@ class DbLang
                 ->where('key', $key)
                 ->first();
 
-            return $translation?->value ?? $key;
+            return $translation->value ?? $key;
         }
 
         return $this->cache[$key] ?? $key;
@@ -101,6 +101,7 @@ class DbLang
 
     private function loadLanguage(string $languageCode): void
     {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Language> $langs */
         $langs = Language::where('language_code', $languageCode)->get();
 
         foreach ($langs as $lang) {

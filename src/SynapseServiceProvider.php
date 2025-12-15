@@ -160,7 +160,6 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
-            // @phpstan-ignore-next-line DatabaseSeeder exists in the consuming Laravel application
             $this->callAfterResolving(DatabaseSeeder::class, function ($seeder) {
                 $seedList = config('synapse.seed_path.general');
                 foreach ($seedList as $seederFile) {
