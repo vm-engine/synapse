@@ -43,7 +43,7 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
         foreach ($modulePaths as $id => $path) {
             $modulePrefix = config(
                 'synapps.modules.'.$id.'.url_prefix',
-                Str::slug($id, '-')
+                ($id == 'home' ? '' : Str::slug($id, '-'))
             );
             $routesPath = rtrim($path, DS).DS.'routes'.DS;
             Route::middleware('web')

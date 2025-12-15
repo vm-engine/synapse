@@ -49,7 +49,7 @@ class Modules extends BuilderBase
             // Check if module is discovered
             if (Str::contains($modulePath, 'synapps'.DS.'modules')) {
                 $mainComposer = file_get_contents(base_path('composer.json'));
-                if (strpos($mainComposer, 'synapps'.DS.'modules'.DS.$moduleConfig['id']) === false) {
+                if (strpos($mainComposer, addcslashes('synapps'.DS.'modules'.DS.$moduleConfig['id'], '\\')) === false) {
                     continue;
                 }
             }
