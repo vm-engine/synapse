@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-12-15
+
+### Fixed
+- Fixed typo in `Builder.php`: Changed `'apps' >` to `'apps' =>` for correct array syntax
+- Fixed Windows path handling in `Modules.php` with `addcslashes()` to properly escape backslashes
+- Fixed home module routing to have no URL prefix in `SynapseRouteServiceProvider.php`
+- Added PHPDoc `@method create()` annotation to `Language` model for PHPStan compliance
+- Added type hint for Language collection in `DbLang` service
+- Removed unnecessary nullsafe operator in `DbLang::get()` method
+
+### Changed
+- Applied Laravel Pint code formatting fixes (unary operator spacing, braces positioning)
+- All PHPStan level 5 checks now pass successfully
+
 ## [1.1.0] - 2025-12-06
 
 ### Added
