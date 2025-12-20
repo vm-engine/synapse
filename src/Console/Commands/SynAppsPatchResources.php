@@ -25,8 +25,6 @@ class SynAppsPatchResources extends Command
      */
     public function handle()
     {
-        // $jsLine = "import '" . addslashes(synapps_path('resources' . DS . 'js' . DS . 'synapps.js')) . "';";
-        // $cssLine = "@import '" . addslashes(synapps_path('resources' . DS . 'css' . DS . 'synapps.css')) . "';";
         $jsLine = "import '../../synapps/resources/js/synapps.js';";
         $cssLine = "@import '../../synapps/resources/css/synapps.css';";
 
@@ -472,8 +470,11 @@ PLUGIN;
         }
 
         // Check if watch script already exists
-        if (isset($packageJson['scripts']['watch'])) {
-            return false;
+        if (
+            isset($packageJson['scripts']['watch'])
+            && $packageJson['scripts']['watch'] === 'vite build --watch'
+        ) {
+            return true;
         }
 
         // Add watch script (compile only, no dev server)
