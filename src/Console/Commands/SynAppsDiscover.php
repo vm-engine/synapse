@@ -132,10 +132,40 @@ class SynAppsDiscover extends Command
 
     private function updateComposer()
     {
+        // Clean up deleted module namespaces
+        $existingAutoload = $this->composerJson['autoload']['psr-4'] ?? [];
+        $cleanedAutoload = [];
+        $removedCount = 0;
+
+        foreach ($existingAutoload as $namespace => $path) {
+            // Check if this is a SynApps or SynDB module namespace
+            if (
+                preg_match('/^SynApps\\\\Modules\\\\/', $namespace) ||
+                preg_match('/^SynDB\\\\Modules\\\\/', $namespace)
+            ) {
+                // Check if this namespace is still in our discovered namespaces
+                if (! isset($this->namespaces[$namespace])) {
+                    // Module was deleted, skip this namespace
+                    $this->components->warn("Removing deleted module namespace: {$namespace}");
+                    $removedCount++;
+
+                    continue;
+                }
+            }
+
+            // Keep this namespace
+            $cleanedAutoload[$namespace] = $path;
+        }
+
+        // Merge discovered namespaces with cleaned autoload
         $this->composerJson['autoload']['psr-4'] = array_merge(
-            $this->composerJson['autoload']['psr-4'],
+            $cleanedAutoload,
             $this->namespaces
         );
+
+        if ($removedCount > 0) {
+            $this->components->info("Removed {$removedCount} namespace(s) from deleted modules");
+        }
 
         $this->components->info('Updating composer.json');
         file_put_contents(
@@ -143,7 +173,7 @@ class SynAppsDiscover extends Command
             json_encode($this->composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
         );
 
-        if ($this->composerDeps || $this->composerDevDeps) {
+        if ($this->composerDeps || $this->composerDevDeps || $removedCount > 0) {
             $this->components->info('Running composer update');
             exec('composer update');
 

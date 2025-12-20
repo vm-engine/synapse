@@ -80,7 +80,10 @@ class SynAppsPatchResources extends Command
         // Patch DatabaseSeeder to comment out default user seeder
         $seederPatched = $this->patchDatabaseSeeder();
 
-        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched || $routePatched || $seederPatched) {
+        // Patch package.json to add 'npm run watch' script
+        $packageJsonPatched = $this->patchPackageJson();
+
+        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched || $routePatched || $seederPatched || $packageJsonPatched) {
             $this->components->info('Resource files patched.');
         }
     }
@@ -441,5 +444,47 @@ PLUGIN;
         }
 
         return $patched;
+    }
+
+    /**
+     * Patch package.json to add 'npm run watch' script.
+     * Adds a watch script if it doesn't already exist.
+     *
+     * @return bool True if the file was patched, false otherwise.
+     */
+    protected function patchPackageJson(): bool
+    {
+        $packageJsonPath = base_path('package.json');
+
+        if (! file_exists($packageJsonPath)) {
+            return false;
+        }
+
+        $packageJson = json_decode(file_get_contents($packageJsonPath), true);
+
+        if (! is_array($packageJson)) {
+            return false;
+        }
+
+        // Ensure scripts section exists
+        if (! isset($packageJson['scripts'])) {
+            $packageJson['scripts'] = [];
+        }
+
+        // Check if watch script already exists
+        if (isset($packageJson['scripts']['watch'])) {
+            return false;
+        }
+
+        // Add watch script
+        $packageJson['scripts']['watch'] = 'vite';
+
+        // Write back to package.json with pretty formatting
+        file_put_contents(
+            $packageJsonPath,
+            json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n"
+        );
+
+        return true;
     }
 }
