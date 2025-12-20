@@ -476,8 +476,8 @@ PLUGIN;
             return false;
         }
 
-        // Add watch script
-        $packageJson['scripts']['watch'] = 'vite';
+        // Add watch script (compile only, no dev server)
+        $packageJson['scripts']['watch'] = 'vite build --watch';
 
         // Write back to package.json with pretty formatting
         file_put_contents(
