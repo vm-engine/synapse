@@ -28,7 +28,7 @@ class SynAppsSetup extends Command
 
     public function handle(): int
     {
-        $key = env('APP_KEY');
+        $key = config('app.key');
         if (! $key) {
             $this->components->error('Pleasee run `key:generate` before continue');
 

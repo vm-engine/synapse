@@ -198,8 +198,31 @@ class SynapseServiceProvider extends ServiceProvider
         foreach ($configs as $config) {
             $configName = basename($config, '.php');
             if (file_exists(base_path('config'.DS.$configName.'.php'))) {
-                $this->mergeConfigFrom($config, $configName);
+                $overrideConfig = require $config;
+                $currentConfig = config($configName, []);
+
+                // Deep merge arrays
+                $mergedConfig = $this->deepMergeConfig($currentConfig, $overrideConfig);
+
+                // Set the merged config back
+                config()->set($configName, $mergedConfig);
             }
         }
+    }
+
+    /**
+     * Deep merge configuration arrays
+     */
+    private function deepMergeConfig(array $base, array $override): array
+    {
+        foreach ($override as $key => $value) {
+            if (isset($base[$key]) && is_array($base[$key]) && is_array($value)) {
+                $base[$key] = $this->deepMergeConfig($base[$key], $value);
+            } else {
+                $base[$key] = $value;
+            }
+        }
+
+        return $base;
     }
 }

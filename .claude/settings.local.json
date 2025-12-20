@@ -14,7 +14,20 @@
       "Bash(cat:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(if [ -f \"vendor/bin/phpstan\" ])",
+      "Bash(then echo \"installed\")",
+      "Bash(else echo \"not_installed\")",
+      "Bash(fi)",
+      "Bash(composer require:*)",
+      "Bash(if [ -f \"phpstan.neon\" ])",
+      "Bash([ -f \"phpstan.neon.dist\" ])",
+      "Bash(then echo \"exists\")",
+      "Bash(else echo \"not_exists\")",
+      "Bash(composer install:*)",
+      "Bash(vendor/bin/phpstan:*)",
+      "Bash(vendor/bin/pint:*)",
+      "Bash(vendor/bin/pest:*)"
     ],
     "deny": [],
     "ask": []

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-12-20
+
+### Fixed
+- Configuration override system now properly deep merges with Laravel config files
+- Added `deepMergeConfig()` method in `SynapseServiceProvider` for recursive array merging
+- Changed `env('APP_KEY')` to `config('app.key')` in `SynAppsSetup` command for better Laravel practices
+
+### Added
+- PHPStan static analysis configuration (`phpstan.neon`) with Larastan integration at level 5
+- PHPStan ignore rules for legitimate cases (config generation `env()` calls, component view-strings)
+- PHPStan and Larastan as dev dependencies
+
+### Changed
+- Configuration override system now uses proper deep merge instead of `mergeConfigFrom()`
+- All PHPStan level 5 checks pass successfully (213 tests passing)
+
 ## [1.1.1] - 2025-12-15
 
 ### Fixed

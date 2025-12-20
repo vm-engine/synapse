@@ -1,0 +1,28 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+
+    # Level 9 is the highest level
+    level: 5
+
+    ignoreErrors:
+        # Intentional env() call for config generation in Builder
+        -
+            message: "#Called 'env' outside of the config directory#"
+            path: src/Services/ConfigGenerator/Builder.php
+
+        # DatabaseSeeder is from the Laravel app, not package
+        -
+            message: "#Class Database\\\\Seeders\\\\DatabaseSeeder not found#"
+            path: src/SynapseServiceProvider.php
+
+        # View component render methods - false positive
+        -
+            message: "#Parameter .* of function view expects view-string#"
+            paths:
+                - src/Components/*.php
+
+    excludePaths:
