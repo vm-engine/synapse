@@ -254,7 +254,7 @@
 }
 
 @utility menu-dropdown-item {
-    @apply text-theme-sm relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium;
+    @apply text-theme-sm relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium cursor-pointer;
 }
 
 @utility menu-dropdown-item-active {

@@ -61,83 +61,10 @@
                 </h3>
                 <ul class="menu">
                     @foreach (synav()->backend() as $key => $menu)
-                        @canAccess($menu['acl'] ?? null)
-                        <li class="{{ $menu['class'] ?? '' }}">
-                            <a
-                                class="menu-item {{ synav()->is($key) ? 'menu-item-active' : 'menu-item-inactive' }} group"
-                                @isset($menu['sub'])
-                                @click.prevent="selected = selected === '{{ $key }}' ? '' : '{{ $key }}'"
-                                @else
-                                href="{{ backend_route($menu['route']) }}"
-                                @endisset
-                                wire:navigate
-                            >
-                                @if (!empty($menu['icon']))
-                                    <span
-                                        class="{{ $menu['icon'] . ' ' . (synav()->is($key) ? 'menu-item-icon-active' : 'menu-item-icon-inactive') }}"
-                                    ></span>
-                                @endif
-                                @if (isset($menu['sub']))
-                                    <svg
-                                        class="menu-item-arrow"
-                                        :class="[selected.startsWith('{{ $key }}') ? 'menu-item-arrow-active' :
-                                            'menu-item-arrow-inactive',
-                                            sidebarToggle ? 'xl:hidden' : ''
-                                        ]"
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 20 20"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585"
-                                            stroke="currentColor"
-                                            stroke-width="1.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        ></path>
-                                    </svg>
-                                @endif
-                                <span
-                                    class="menu-item-text"
-                                    :class="sidebarToggle ? 'lg:hidden' : ''"
-                                >
-                                    {{ synav()->translate($menu['name']) }}
-                                </span>
-                            </a>
-                            @isset($menu['sub'])
-                                <div
-                                    class="translate block transform overflow-hidden"
-                                    :class="(selected.startsWith('{{ $key }}')) ? 'block' : 'hidden'"
-                                >
-                                    <ul
-                                        class="menu-dropdown mt-2 flex flex-col gap-1 pl-9"
-                                        :class="sidebarToggle ? 'xl:hidden' : 'flex'"
-                                    >
-                                        @foreach ($menu['sub'] as $sub => $subMenu)
-                                            @canAccess($submenu['acl'] ?? null)
-                                            <li class="{{ $subMenu['class'] }}">
-                                                <a
-                                                    class="menu-dropdown-item group"
-                                                    href="{{ backend_route($subMenu['route']) }}"
-                                                    :class="page === '{{ $key . '.' . $sub }}' ? 'menu-dropdown-item-active' :
-                                                        'menu-dropdown-item-inactive'"
-                                                    wire:navigate
-                                                >
-                                                    @if (!empty($subMenu['icon']))
-                                                        <span class="{{ $subMenu['icon'] }}"></span>
-                                                    @endif
-                                                    {{ synav()->translate($subMenu['name']) }}
-                                                </a>
-                                            </li>
-                                            @endcanAccess
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endisset
-                        </li>
-                        @endcanAccess
+                        <x-synapps::nav.menu-item
+                            :item="$menu"
+                            :itemKey="$key"
+                        />
                     @endforeach
                 </ul>
             </div>
