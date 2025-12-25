@@ -18,7 +18,7 @@ class SynAppsPatchResources extends Command
      *
      * @var string
      */
-    protected $description = 'Integrate Synapse resources into app.js, app.css, vite.config.js, and clean default Laravel files';
+    protected $description = 'Integrate Synapse resources into app.js, app.css, vite.config.js (with watch ignore), and clean default Laravel files';
 
     /**
      * Execute the console command.
@@ -161,63 +161,115 @@ class SynAppsPatchResources extends Command
 
         $content = file_get_contents($viteConfigPath);
 
-        // Check if already patched
-        if (strpos($content, 'vite-plugin-static-copy') !== false) {
-            return false;
-        }
+        $patched = false;
 
-        // Add imports after existing imports
-        $importLines = [
-            "import { viteStaticCopy } from 'vite-plugin-static-copy';",
-            "import { glob } from 'glob';",
-        ];
+        // Check if vite-plugin-static-copy needs to be added
+        if (strpos($content, 'vite-plugin-static-copy') === false) {
+            // Add imports after existing imports
+            $importLines = [
+                "import { viteStaticCopy } from 'vite-plugin-static-copy';",
+                "import { glob } from 'glob';",
+            ];
 
-        // Find the last import line
-        $lines = explode("\n", $content);
-        $lastImportIndex = 0;
-        foreach ($lines as $index => $line) {
-            if (preg_match('/^import\s+/', trim($line))) {
-                $lastImportIndex = $index;
+            // Find the last import line
+            $lines = explode("\n", $content);
+            $lastImportIndex = 0;
+            foreach ($lines as $index => $line) {
+                if (preg_match('/^import\s+/', trim($line))) {
+                    $lastImportIndex = $index;
+                }
             }
-        }
 
-        // Insert imports after last import
-        array_splice($lines, $lastImportIndex + 1, 0, $importLines);
+            // Insert imports after last import
+            array_splice($lines, $lastImportIndex + 1, 0, $importLines);
 
-        // Find the plugins array and add viteStaticCopy
-        $pluginConfig = <<<'PLUGIN'
+            // Find the plugins array and add viteStaticCopy
+            $pluginConfig = <<<'PLUGIN'
 viteStaticCopy({
             targets: [
                 // Copy from synapps/resources/assets
                 {
                     src: 'synapps/resources/assets/**/*',
-                    dest: 'assets'
+                    dest: '../assets'
                 },
                 // Copy from vendor/*/synmod-*/resources/assets
                 ...glob.sync('vendor/*/synmod-*/resources/assets').map(dir => ({
                     src: `${dir}/**/*`,
-                    dest: 'assets'
+                    dest: '../assets'
                 })),
                 // Copy from vendor/vm-engine/synapps-*/resources/assets
                 ...glob.sync('vendor/vm-engine/synapps-*/resources/assets').map(dir => ({
                     src: `${dir}/**/*`,
-                    dest: 'assets'
+                    dest: '../assets'
                 }))
             ]
         })
 PLUGIN;
 
-        // Find tailwindcss() line and add viteStaticCopy after it
-        $updatedContent = implode("\n", $lines);
-        $updatedContent = preg_replace(
-            '/(tailwindcss\(\),)/',
-            "$1\n        ".$pluginConfig.',',
-            $updatedContent
-        );
+            // Find tailwindcss() line and add viteStaticCopy after it
+            $content = implode("\n", $lines);
+            $content = preg_replace(
+                '/(tailwindcss\(\),)/',
+                "$1\n        ".$pluginConfig.',',
+                $content
+            );
 
-        file_put_contents($viteConfigPath, $updatedContent);
+            $patched = true;
+        }
 
-        return true;
+        // Check if build.watch needs to be patched to prevent infinite rebuild loop
+        if (strpos($content, 'build:') === false || strpos($content, 'build.watch') === false) {
+            // Add build.watch configuration before server configuration
+            $buildWatchConfig = <<<'BUILD'
+build: {
+        watch: {
+            chokidar: {
+                ignored: [
+                    '**/storage/framework/views/**',
+                    '**/public/build/**',
+                    '**/public/assets/**',
+                    '**/public/**'
+                ],
+            },
+        },
+    },
+
+BUILD;
+
+            $content = preg_replace(
+                '/(server:\s*\{)/',
+                $buildWatchConfig.'$1',
+                $content,
+                1,
+                $count
+            );
+
+            if ($count > 0) {
+                $patched = true;
+            }
+        }
+
+        // Check if server.watch.ignored needs to be patched
+        if (strpos($content, '**/public/build/**') === false || strpos($content, '**/public/assets/**') === false) {
+            // Patch the watch.ignored array to include public directories
+            $content = preg_replace(
+                "/(ignored:\s*\[\s*['\"].*?['\"])\s*\]/s",
+                "$1,\n                '**/public/build/**',\n                '**/public/assets/**'\n            ]",
+                $content,
+                1,
+                $count
+            );
+
+            if ($count > 0) {
+                $patched = true;
+            }
+        }
+
+        if ($patched) {
+            file_put_contents($viteConfigPath, $content);
+        }
+
+        return $patched;
     }
 
     /**
