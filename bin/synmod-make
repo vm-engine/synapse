@@ -1,0 +1,173 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Synapse Module Generator Binary
+ * For package developers working on synmod-* packages
+ */
+
+// Display usage information
+function showHelp() {
+    echo "Synapse Module Generator\n\n";
+    echo "Usage: synmod-make <command> [arguments]\n\n";
+    echo "Available commands:\n";
+    echo "  model <name>          Create a new model\n";
+    echo "  controller <name>     Create a new controller\n";
+    echo "  migration <name>      Create a new migration\n";
+    echo "  factory <name>        Create a new factory\n";
+    echo "  seeder <name>         Create a new seeder\n";
+    echo "  livewire <name>       Create a new Livewire component\n";
+    echo "  request <name>        Create a new form request\n";
+    echo "  middleware <name>     Create a new middleware\n";
+    echo "  event <name>          Create a new event\n";
+    echo "  listener <name>       Create a new listener\n";
+    echo "  job <name>            Create a new job\n";
+    echo "  provider <name>       Create a new service provider\n";
+    echo "  policy <name>         Create a new policy\n";
+    echo "  notification <name>   Create a new notification\n";
+    echo "  mail <name>           Create a new mailable\n";
+    echo "  test <name>           Create a new test\n\n";
+    echo "Examples:\n";
+    echo "  synmod-make model Post\n";
+    echo "  synmod-make livewire PostList\n";
+    echo "  synmod-make controller PostController --resource\n\n";
+}
+
+// Parse command line arguments
+$command = $argv[1] ?? 'help';
+$name = $argv[2] ?? null;
+
+if ($command === 'help' || $command === '--help' || $command === '-h') {
+    showHelp();
+    exit(0);
+}
+
+if (!$name) {
+    echo "Error: Component name is required.\n\n";
+    showHelp();
+    exit(1);
+}
+
+// Map commands to artisan commands
+$commandMap = [
+    'model' => 'synapps:make-model',
+    'controller' => 'synapps:make-controller',
+    'migration' => 'synapps:make-migration',
+    'factory' => 'synapps:make-factory',
+    'seeder' => 'synapps:make-seeder',
+    'livewire' => 'synapps:make-livewire',
+    'request' => 'synapps:make-request',
+    'middleware' => 'synapps:make-middleware',
+    'event' => 'synapps:make-event',
+    'listener' => 'synapps:make-listener',
+    'job' => 'synapps:make-job',
+    'provider' => 'synapps:make-provider',
+    'policy' => 'synapps:make-policy',
+    'notification' => 'synapps:make-notification',
+    'mail' => 'synapps:make-mail',
+    'test' => 'synapps:make-test',
+];
+
+if (!isset($commandMap[$command])) {
+    echo "Error: Unknown command '{$command}'.\n\n";
+    showHelp();
+    exit(1);
+}
+
+// Detect module name from composer.json
+$composerPath = getcwd() . '/composer.json';
+if (!file_exists($composerPath)) {
+    echo "Error: composer.json not found in current directory.\n";
+    echo "Please run this command from the root of your package.\n";
+    exit(1);
+}
+
+$composer = json_decode(file_get_contents($composerPath), true);
+$packageName = $composer['name'] ?? null;
+
+if (!$packageName) {
+    echo "Error: Package name not found in composer.json.\n";
+    exit(1);
+}
+
+// Extract module name from package name (e.g., vm-engine/synmod-blog => blog)
+$parts = explode('/', $packageName);
+$moduleSlug = $parts[1] ?? 'module';
+$moduleSlug = preg_replace('/^(synmod-|synmodule-|synapps-)/', '', $moduleSlug);
+$moduleName = str_replace('-', '_', $moduleSlug);
+
+// Build artisan command
+$artisanCommand = $commandMap[$command];
+$basePath = getcwd();
+
+// Collect additional arguments
+$additionalArgs = array_slice($argv, 3);
+$options = implode(' ', $additionalArgs);
+
+// Check if Synapse package is installed
+$synapsePath = $basePath . '/vendor/vm-engine/synapse';
+if (!file_exists($synapsePath)) {
+    echo "Error: Synapse package not found.\n";
+    echo "Please ensure vm-engine/synapse is installed: composer require vm-engine/synapse\n";
+    exit(1);
+}
+
+// Bootstrap Synapse autoloader
+$autoloadPath = $basePath . '/vendor/autoload.php';
+if (!file_exists($autoloadPath)) {
+    echo "Error: Composer autoload not found.\n";
+    echo "Please run: composer install\n";
+    exit(1);
+}
+
+require $autoloadPath;
+
+// Import required classes
+use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
+use VmEngine\Synapse\Services\ModuleGenerator\NamespaceResolver;
+use VmEngine\Synapse\Services\ModuleGenerator\StubRenderer;
+
+echo "Creating {$command}: {$name}\n";
+echo "Module: {$moduleName}\n";
+echo "Path: {$basePath}\n\n";
+
+try {
+    // Initialize generator service
+    $namespaceResolver = new NamespaceResolver();
+    $stubRenderer = new StubRenderer();
+    $generator = new ModuleGeneratorService($namespaceResolver, $stubRenderer);
+
+    // Set base path to current package directory
+    $generator->setBasePath($basePath);
+
+    // Detect vendor from composer.json
+    $vendor = explode('/', $packageName)[0] ?? 'VmEngine';
+    $vendor = str_replace('-', '', ucwords($vendor, '-'));
+    $generator->setVendor($vendor);
+
+    // Parse options from additional arguments
+    $parsedOptions = ['module' => $moduleName];
+    foreach ($additionalArgs as $arg) {
+        if (strpos($arg, '--') === 0) {
+            $optName = ltrim($arg, '-');
+            if (strpos($optName, '=') !== false) {
+                list($key, $value) = explode('=', $optName, 2);
+                $parsedOptions[$key] = $value;
+            } else {
+                $parsedOptions[$optName] = true;
+            }
+        }
+    }
+
+    // Execute component generation
+    $componentPath = $generator->generateComponent($command, $name, $parsedOptions);
+
+    echo "\n✓ {$command} created successfully!\n";
+    echo "Location: " . str_replace($basePath . '/', '', $componentPath) . "\n";
+
+    exit(0);
+} catch (\Exception $e) {
+    echo "\n✗ Error: " . $e->getMessage() . "\n";
+    echo "Trace: " . $e->getTraceAsString() . "\n";
+    exit(1);
+}

@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-27
+
+### Added
+
+**Module Generator System:**
+- 17 Laravel-style artisan commands for generating module components
+  - `synapps:make-module` - Create complete module structure
+  - `synapps:make-model` - Generate models with optional migration/factory/seeder
+  - `synapps:make-controller` - Create controllers (plain/resource/API/invokable)
+  - `synapps:make-migration` - Generate migrations (create/update table)
+  - `synapps:make-factory` - Create model factories
+  - `synapps:make-seeder` - Generate database seeders
+  - `synapps:make-livewire` - Create Livewire components (standard/inline)
+  - `synapps:make-request` - Generate form request validation
+  - `synapps:make-middleware` - Create HTTP middleware
+  - `synapps:make-event` - Generate event classes
+  - `synapps:make-listener` - Create event listeners
+  - `synapps:make-job` - Generate queued jobs
+  - `synapps:make-provider` - Create service providers
+  - `synapps:make-policy` - Generate authorization policies
+  - `synapps:make-notification` - Create notifications
+  - `synapps:make-mail` - Generate mailable classes
+  - `synapps:make-test` - Create feature/unit tests
+
+**Standalone Executable:**
+- `bin/synmod-make` - Composer binary for package developers
+- Works without Laravel installation (only requires Synapse package)
+- Supports all 17 component generators
+- Auto-detects module from composer.json
+- Full Windows compatibility via Composer's automatic batch file creation
+
+**Core Services:**
+- `ModuleGeneratorService` - Main orchestrator for code generation
+- `NamespaceResolver` - Handles complex 3-namespace structure (App/Factories/Seeders)
+- `StubRenderer` - Template rendering engine with variable replacement
+
+**Stub System:**
+- 30+ template files covering all component types
+- Support for multiple variants (resource/API/invokable controllers, create/update migrations, etc.)
+- Smart namespace resolution for directory and package modules
+- Automatic view name generation with kebab-case conversion
+
+**Documentation:**
+- Complete MODULE-GENERATOR.md documentation
+- Quick reference guide included
+- Updated README.md with module generator links
+- Examples for both directory and package module workflows
+
+### Fixed
+- PHPStan level 5 compliance issues in module generator services
+- Boolean operator precedence in controller stub detection
+- Namespace resolution for package vendor names
+
+### Changed
+- All 17 commands tested and working for directory modules (`synapps/modules/`)
+- All 16 component commands tested and working for package modules (standalone)
+- Proper file paths for all generated components
+- Correct namespace references between models, factories, and seeders
+- Windows-compatible executable via Composer bin configuration
+
 ## [1.1.2] - 2025-12-20
 
 ### Fixed

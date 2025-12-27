@@ -73,6 +73,7 @@ DbConfig::set('app.site_name', 'My Site');
 ### Module Development
 
 - **[Creating Modules](docs/MODULES.md)** - Guide to building your own modules
+- **[Module Generator](docs/MODULE-GENERATOR.md)** - Laravel-style make commands for generating module components
 - **[Configuration](docs/CONFIGURATION.md)** - Advanced config features, env:: prefix, and overrides
 - **[Traits](docs/TRAITS.md)** - WithDeleteToken and other useful traits
 - **[Testing Guide](TESTING.md)** - Comprehensive testing documentation
@@ -106,6 +107,12 @@ php artisan synapps:discover
 
 # Regenerate configs
 php artisan synapps:config
+
+# Generate module components
+php artisan synapps:make-module blog --author="Your Name"
+php artisan synapps:make-model blog Post -mfs
+php artisan synapps:make-controller blog PostController --resource
+php artisan synapps:make-livewire blog PostList
 
 # Manage database config
 php artisan synapse:db-config app.maintenance_mode true

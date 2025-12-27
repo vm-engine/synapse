@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Livewire\Form;
+
+class {{ class }} extends Form
+{
+    public function rules(): array
+    {
+        return [
+            //
+        ];
+    }
+}

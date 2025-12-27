@@ -5,6 +5,23 @@ namespace VmEngine\Synapse;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Console\Commands\Generators\MakeControllerCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeEventCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeFactoryCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeJobCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeListenerCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeLivewireCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeMailCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeMiddlewareCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeMigrationCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeModelCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeModuleCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeNotificationCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakePolicyCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeProviderCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeRequestCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeSeederCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeTestCommand;
 use VmEngine\Synapse\Console\Commands\SynAppsConfig;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
@@ -51,6 +68,24 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsPublishSettings::class,
                 SynapseDbConfig::class,
                 SynapseDbLang::class,
+                // Generator Commands
+                MakeModuleCommand::class,
+                MakeModelCommand::class,
+                MakeControllerCommand::class,
+                MakeMigrationCommand::class,
+                MakeFactoryCommand::class,
+                MakeSeederCommand::class,
+                MakeLivewireCommand::class,
+                MakeRequestCommand::class,
+                MakeMiddlewareCommand::class,
+                MakeEventCommand::class,
+                MakeListenerCommand::class,
+                MakeJobCommand::class,
+                MakeProviderCommand::class,
+                MakePolicyCommand::class,
+                MakeNotificationCommand::class,
+                MakeMailCommand::class,
+                MakeTestCommand::class,
             ]);
         }
 

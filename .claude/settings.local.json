@@ -27,7 +27,15 @@
       "Bash(composer install:*)",
       "Bash(vendor/bin/phpstan:*)",
       "Bash(vendor/bin/pint:*)",
-      "Bash(vendor/bin/pest:*)"
+      "Bash(vendor/bin/pest:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)",
+      "Bash(composer dump-autoload:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(test:*)",
+      "Bash(./vendor/bin/synmod-make:*)"
     ],
     "deny": [],
     "ask": []

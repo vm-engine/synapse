@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace VmEngine\Synapse\Console\Commands\Generators;
+
+class MakeEventCommand extends BaseGeneratorCommand
+{
+    protected $signature = 'synapps:make-event
+                            {module : The module name}
+                            {name? : The name of the event}
+                            {--path= : Custom base path for module}
+                            ';
+
+    protected $description = 'Create a new event class for a module';
+
+    protected string $componentType = 'event';
+}
