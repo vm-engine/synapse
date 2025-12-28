@@ -376,6 +376,51 @@ $breadcrumbs = Breadcrumbs::make('Home', '/')
 
 ## Traits
 
+### AutoRegistersComponents
+
+Auto-register Livewire and Blade components for module ServiceProviders without manual registration.
+
+```php
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function register(): void
+    {
+        // Auto-register all Livewire and Blade components
+        $this->registerComponents();
+    }
+}
+```
+
+**Features:**
+- Auto-discovers Livewire components from `src/Livewire/`
+- Auto-discovers Blade components from `src/View/Components/`
+- Automatic prefix detection from namespace
+- Supports nested components with kebab-case naming
+
+**Example Registration:**
+- `src/Livewire/ExampleForm.php` → `example.example-form`
+- `src/Livewire/Components/ButtonSample.php` → `example.components.button-sample`
+- `src/View/Components/Alert.php` → `example::alert`
+
+**Methods:**
+- `registerComponents()` - Register all components (Livewire + Blade)
+- `registerLivewireComponents()` - Register only Livewire components
+- `registerBladeComponents()` - Register only Blade components
+- `getComponentPrefix()` - Get the auto-detected prefix
+
+**Properties:**
+- `$componentPrefix` - Custom prefix (auto-detected if null)
+- `$autoRegisterLivewireComponents` - Enable Livewire auto-registration (default: true)
+- `$autoRegisterBladeComponents` - Enable Blade auto-registration (default: true)
+
+See [docs/TRAITS.md#autoregisterscomponents](docs/TRAITS.md#autoregisterscomponents) for complete documentation.
+
+---
+
 ### WithDeleteToken
 
 Security trait for generating encrypted delete tokens to prevent unauthorized delete operations.
@@ -409,7 +454,7 @@ if ($id === false || $id != $post->id) {
 - Encrypted using Laravel encryption
 - Prevents CSRF-like attacks on delete operations
 
-See [docs/TRAITS.md](docs/TRAITS.md) for complete documentation.
+See [docs/TRAITS.md#withdeletetoken](docs/TRAITS.md#withdeletetoken) for complete documentation.
 
 ---
 

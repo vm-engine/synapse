@@ -1,0 +1,200 @@
+<?php
+
+declare(strict_types=1);
+
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+test('gets component prefix from namespace automatically', function () {
+    $code = <<<'PHP'
+<?php
+namespace VmEngine\TestModule;
+
+use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class TestModuleProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function getPrefix(): string
+    {
+        return $this->getComponentPrefix();
+    }
+}
+PHP;
+
+    eval(str_replace('<?php', '', $code));
+
+    $provider = new \VmEngine\TestModule\TestModuleProvider(app());
+    expect($provider->getPrefix())->toBe('test-module');
+});
+
+test('custom component prefix can be set', function () {
+    // Test that prefix property exists and can be customized
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+
+        public function setCustomPrefix(string $prefix): void
+        {
+            $this->componentPrefix = $prefix;
+        }
+
+        public function getPrefix(): string
+        {
+            return $this->getComponentPrefix();
+        }
+    };
+
+    $provider->setCustomPrefix('custom-prefix');
+    expect($provider->getPrefix())->toBe('custom-prefix');
+});
+
+test('converts pascal case to kebab case for prefix', function () {
+    $code = <<<'PHP'
+<?php
+namespace VmEngine\ExampleModule;
+
+use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class TestServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function getPrefix(): string
+    {
+        return $this->getComponentPrefix();
+    }
+}
+PHP;
+
+    eval(str_replace('<?php', '', $code));
+
+    $provider = new \VmEngine\ExampleModule\TestServiceProvider(app());
+    expect($provider->getPrefix())->toBe('example-module');
+});
+
+test('registers components safely when directories do not exist', function () {
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+
+        public function register(): void
+        {
+            $this->registerComponents();
+        }
+    };
+
+    // Should not throw errors when Livewire and View/Components directories don't exist
+    expect(fn () => $provider->register())->not->toThrow(Exception::class);
+});
+
+test('trait has required methods', function () {
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+    };
+
+    $reflection = new ReflectionClass($provider);
+
+    expect($reflection->hasMethod('registerComponents'))->toBeTrue()
+        ->and($reflection->hasMethod('registerLivewireComponents'))->toBeTrue()
+        ->and($reflection->hasMethod('registerBladeComponents'))->toBeTrue()
+        ->and($reflection->hasMethod('getComponentPrefix'))->toBeTrue();
+});
+
+test('prefix detection handles SynApps modules namespace', function () {
+    $code = <<<'PHP'
+<?php
+namespace SynApps\Modules\TestModule;
+
+use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class TestModuleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function getPrefix(): string
+    {
+        return $this->getComponentPrefix();
+    }
+}
+PHP;
+
+    eval(str_replace('<?php', '', $code));
+
+    $provider = new \SynApps\Modules\TestModule\TestModuleServiceProvider(app());
+    expect($provider->getPrefix())->toBe('test-module');
+});
+
+test('prefix detection handles VmEngine package namespace', function () {
+    $code = <<<'PHP'
+<?php
+namespace VmEngine\MyPackage;
+
+use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class MyPackageServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function getPrefix(): string
+    {
+        return $this->getComponentPrefix();
+    }
+}
+PHP;
+
+    eval(str_replace('<?php', '', $code));
+
+    $provider = new \VmEngine\MyPackage\MyPackageServiceProvider(app());
+    expect($provider->getPrefix())->toBe('my-package');
+});
+
+test('can toggle component registration flags', function () {
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+
+        public function toggleLivewire(bool $value): void
+        {
+            $this->autoRegisterLivewireComponents = $value;
+        }
+
+        public function toggleBlade(bool $value): void
+        {
+            $this->autoRegisterBladeComponents = $value;
+        }
+
+        public function getLivewireFlag(): bool
+        {
+            return $this->autoRegisterLivewireComponents;
+        }
+
+        public function getBladeFlag(): bool
+        {
+            return $this->autoRegisterBladeComponents;
+        }
+    };
+
+    // Default values
+    expect($provider->getLivewireFlag())->toBeTrue()
+        ->and($provider->getBladeFlag())->toBeTrue();
+
+    // Toggle off
+    $provider->toggleLivewire(false);
+    $provider->toggleBlade(false);
+
+    expect($provider->getLivewireFlag())->toBeFalse()
+        ->and($provider->getBladeFlag())->toBeFalse();
+
+    // Toggle on
+    $provider->toggleLivewire(true);
+    $provider->toggleBlade(true);
+
+    expect($provider->getLivewireFlag())->toBeTrue()
+        ->and($provider->getBladeFlag())->toBeTrue();
+});

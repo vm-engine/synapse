@@ -1,6 +1,251 @@
 # Traits
 
-Synapse provides useful traits to enhance your models with common functionality.
+Synapse provides useful traits to enhance your models and service providers with common functionality.
+
+## AutoRegistersComponents
+
+Auto-register Livewire and Blade components for Synapse modules without manual registration.
+
+### Features
+
+- **Auto-discovers Livewire components** from `src/Livewire/` directory
+- **Auto-discovers class-based Blade components** from `src/View/Components/` directory
+- **Automatic prefix detection** from module namespace
+- **Supports nested components** with kebab-case naming
+- **Works for both directory and package modules**
+- **Customizable via properties**
+
+### Directory Structure
+
+The trait expects your module to follow this structure:
+
+```
+YourModule/
+├── YourModuleServiceProvider.php
+├── Livewire/
+│   ├── Dashboard.php
+│   ├── UserProfile.php
+│   ├── Components/
+│   │   └── ButtonSample.php
+│   └── Forms/
+│       └── ContactForm.php
+└── View/
+    └── Components/             # Optional - for class-based Blade components
+        ├── Alert.php
+        └── Forms/
+            └── Input.php
+```
+
+### Usage
+
+**Basic Usage:**
+
+```php
+<?php
+
+namespace VmEngine\Example;
+
+use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function register(): void
+    {
+        // Auto-register all Livewire and Blade components
+        $this->registerComponents();
+    }
+}
+```
+
+That's it! All components are now auto-registered with the correct prefix.
+
+### Component Registration Patterns
+
+**Livewire Components:**
+
+| File Path | Registered As | Usage |
+|-----------|---------------|-------|
+| `src/Livewire/Dashboard.php` | `example.dashboard` | `<livewire:example.dashboard />` |
+| `src/Livewire/UserProfile.php` | `example.user-profile` | `<livewire:example.user-profile />` |
+| `src/Livewire/Components/ButtonSample.php` | `example.components.button-sample` | `<livewire:example.components.button-sample />` |
+| `src/Livewire/Forms/ContactForm.php` | `example.forms.contact-form` | `<livewire:example.forms.contact-form />` |
+
+**Blade Components:**
+
+| File Path | Registered As | Usage |
+|-----------|---------------|-------|
+| `src/View/Components/Alert.php` | `example::alert` | `<x-example::alert />` |
+| `src/View/Components/Forms/Input.php` | `example::forms.input` | `<x-example::forms.input />` |
+
+### Automatic Prefix Detection
+
+The trait automatically detects the module prefix from your ServiceProvider namespace:
+
+| Namespace | Detected Prefix |
+|-----------|-----------------|
+| `VmEngine\Example\ExampleServiceProvider` | `example` |
+| `VmEngine\MyPackage\MyPackageServiceProvider` | `my-package` |
+| `SynApps\Modules\Home\HomeServiceProvider` | `home` |
+| `SynApps\Modules\UserAuth\UserAuthServiceProvider` | `user-auth` |
+
+### Customization Options
+
+**Custom Prefix:**
+
+```php
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    protected ?string $componentPrefix = 'custom-prefix';
+
+    public function register(): void
+    {
+        $this->registerComponents();
+    }
+}
+```
+
+**Disable Livewire Registration:**
+
+```php
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    protected bool $autoRegisterLivewireComponents = false;
+
+    public function register(): void
+    {
+        // Only registers Blade components
+        $this->registerComponents();
+    }
+}
+```
+
+**Disable Blade Components Registration:**
+
+```php
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    protected bool $autoRegisterBladeComponents = false;
+
+    public function register(): void
+    {
+        // Only registers Livewire components
+        $this->registerComponents();
+    }
+}
+```
+
+**Selective Registration:**
+
+```php
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function register(): void
+    {
+        // Register only Livewire components
+        $this->registerLivewireComponents();
+
+        // Custom logic here...
+    }
+
+    public function boot(): void
+    {
+        // Register only Blade components
+        $this->registerBladeComponents();
+    }
+}
+```
+
+### Before/After Comparison
+
+**Before (Manual Registration):**
+
+```php
+use Livewire\Livewire;
+use VmEngine\Example\Livewire\CategoryForm;
+use VmEngine\Example\Livewire\CategoryList;
+use VmEngine\Example\Livewire\Components\ButtonSample;
+use VmEngine\Example\Livewire\ExampleForm;
+use VmEngine\Example\Livewire\ExampleList;
+
+class ExampleServiceProvider extends ServiceProvider
+{
+    public function register()
+    {
+        Livewire::component('example::button-sample', ButtonSample::class);
+        Livewire::component('example-list', ExampleList::class);
+        Livewire::component('example-form', ExampleForm::class);
+        Livewire::component('category-list', CategoryList::class);
+        Livewire::component('category-form', CategoryForm::class);
+    }
+}
+```
+
+**After (Auto Registration):**
+
+```php
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
+
+class ExampleServiceProvider extends ServiceProvider
+{
+    use AutoRegistersComponents;
+
+    public function register()
+    {
+        $this->registerComponents();
+    }
+}
+```
+
+### Available Methods
+
+| Method | Description |
+|--------|-------------|
+| `registerComponents()` | Register all components (Livewire + Blade) |
+| `registerLivewireComponents()` | Register only Livewire components |
+| `registerBladeComponents()` | Register only class-based Blade components |
+| `getComponentPrefix()` | Get the detected/custom prefix |
+
+### Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `$componentPrefix` | `?string` | `null` | Custom prefix (auto-detected if null) |
+| `$autoRegisterLivewireComponents` | `bool` | `true` | Enable Livewire auto-registration |
+| `$autoRegisterBladeComponents` | `bool` | `true` | Enable Blade auto-registration |
+
+### Notes
+
+- **Anonymous Blade components** in `resources/views/components/` are auto-discovered by Laravel and don't need registration
+- **Livewire views** in `resources/views/livewire/` follow standard Livewire conventions
+- The trait uses `RecursiveDirectoryIterator` to scan nested directories
+- Component names are converted to kebab-case automatically
+- The trait safely handles missing directories (no errors if `src/Livewire/` or `src/View/Components/` don't exist)
+
+### When to Use
+
+✅ **Use the trait when:**
+- You have multiple Livewire components to register
+- You want consistent component naming
+- You're building a reusable package module
+- You want to reduce boilerplate code
+
+❌ **Skip the trait when:**
+- You have only 1-2 components
+- You need custom component names that don't follow conventions
+- You're using only anonymous Blade components
+
+---
 
 ## WithDeleteToken
 

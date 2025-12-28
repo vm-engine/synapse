@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-12-28
+
+### Added
+
+**AutoRegistersComponents Trait:**
+- New `AutoRegistersComponents` trait for automatic component registration in module ServiceProviders
+- Auto-discovers Livewire components from `src/Livewire/` directory
+- Auto-discovers class-based Blade components from `src/View/Components/` directory
+- Automatic prefix detection from module namespace (e.g., `VmEngine\Example` → `example`)
+- Support for nested components with kebab-case naming
+- Customizable via properties (`$componentPrefix`, `$autoRegisterLivewireComponents`, `$autoRegisterBladeComponents`)
+- Selective registration methods: `registerComponents()`, `registerLivewireComponents()`, `registerBladeComponents()`
+- Works for both directory-based and package-based modules
+- Comprehensive test coverage (8 tests, all passing)
+
+**Documentation:**
+- Complete trait documentation in `docs/TRAITS.md`
+- Usage examples and before/after comparisons
+- Updated main `CLAUDE.md` with trait reference
+
+**Code Quality:**
+- Added PHPStan ignore rule for unused library traits
+- Pint formatting applied to new trait code
+
+### Benefits
+
+- **Eliminates boilerplate:** No more manual `Livewire::component()` registration
+- **Convention over configuration:** Components automatically registered with consistent naming
+- **Reduces errors:** No typos in component names or missing registrations
+- **Developer experience:** Just add trait and call `$this->registerComponents()`
+
 ## [1.2.0] - 2025-12-27
 
 ### Added

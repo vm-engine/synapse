@@ -25,4 +25,10 @@ parameters:
             paths:
                 - src/Components/*.php
 
+        # Traits are library code meant to be used by consuming packages
+        -
+            message: "#Trait .* is used zero times and is not analysed#"
+            paths:
+                - src/Traits/*.php
+
     excludePaths:
