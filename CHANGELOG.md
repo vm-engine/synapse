@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2025-12-28
+
+### Changed
+
+**Refactoring:**
+- Removed document management Blade components from Synapse core
+  - Components were too specific to PM (Project Management) module's document structure
+  - Moved `document-group-card.blade.php`, `document-revision-list.blade.php`, and `document-multiple-files-list.blade.php` to synmod-pm package
+  - Removed component registrations from SynapseViewServiceProvider
+  - Improves module encapsulation - each module can define its own document components
+
+### Benefits
+
+- **Better separation of concerns:** Core package no longer contains module-specific components
+- **Improved maintainability:** Document components maintained within their respective modules
+- **Module independence:** Each module can customize document components to match their specific requirements
+
 ## [1.3.0] - 2025-12-28
 
 ### Added
