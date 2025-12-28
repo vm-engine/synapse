@@ -108,8 +108,10 @@ trait AutoRegistersComponents
 
                 if (class_exists($componentClass)) {
                     // Convert to kebab-case with dots for nested: components.button-sample
-                    $componentName = str_replace('\\', '.', $relativePath);
-                    $componentName = Str::kebab($componentName);
+                    // Split by namespace separator, convert each segment to kebab-case, then join with dots
+                    $segments = explode('\\', $relativePath);
+                    $segments = array_map(fn ($segment) => Str::kebab($segment), $segments);
+                    $componentName = implode('.', $segments);
 
                     // Register with prefix: example.components.button-sample
                     Livewire::component($prefix.'.'.$componentName, $componentClass);
@@ -156,8 +158,10 @@ trait AutoRegistersComponents
 
                 if (class_exists($componentClass)) {
                     // Convert to kebab-case with dots for nested: forms.input
-                    $componentTag = str_replace('\\', '.', $relativePath);
-                    $componentTag = Str::kebab($componentTag);
+                    // Split by namespace separator, convert each segment to kebab-case, then join with dots
+                    $segments = explode('\\', $relativePath);
+                    $segments = array_map(fn ($segment) => Str::kebab($segment), $segments);
+                    $componentTag = implode('.', $segments);
 
                     // Register with prefix: <x-example::alert />
                     Blade::component($componentClass, $prefix.'::'.$componentTag);

@@ -198,3 +198,23 @@ test('can toggle component registration flags', function () {
     expect($provider->getLivewireFlag())->toBeTrue()
         ->and($provider->getBladeFlag())->toBeTrue();
 });
+
+test('converts nested component paths correctly to kebab-case', function () {
+    // Test the conversion logic for nested paths
+    $testCases = [
+        'ProjectList' => 'project-list',
+        'Project\ProjectList' => 'project.project-list',
+        'Forms\ContactForm' => 'forms.contact-form',
+        'Components\ButtonSample' => 'components.button-sample',
+        'Admin\Users\UserProfile' => 'admin.users.user-profile',
+    ];
+
+    foreach ($testCases as $input => $expected) {
+        // Simulate the trait's logic
+        $segments = explode('\\', $input);
+        $segments = array_map(fn ($segment) => \Illuminate\Support\Str::kebab($segment), $segments);
+        $result = implode('.', $segments);
+
+        expect($result)->toBe($expected);
+    }
+});

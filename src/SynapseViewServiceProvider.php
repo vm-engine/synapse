@@ -56,10 +56,5 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         Blade::component(ConfirmDialog::class, 'synapse-confirm-dialog');
         Blade::component(Toastr::class, 'synapse-toastr');
         Blade::component(DragNDrop::class, 'synapse-drag-n-drop');
-
-        // Document management components
-        Blade::component('synapse::components.document-group-card', 'synapse-document-group-card');
-        Blade::component('synapse::components.document-revision-list', 'synapse-document-revision-list');
-        Blade::component('synapse::components.document-multiple-files-list', 'synapse-document-multiple-files-list');
     }
 }
