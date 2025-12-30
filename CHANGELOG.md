@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-12-30
+
+### Fixed
+
+**SecureHeaders Middleware:**
+- Fixed SecureHeaders middleware namespace from `App\Http\Middleware` to `VmEngine\Synapse\Http\Middlewares`
+- Corrected import statement in SynapseServiceProvider to match proper namespace
+- Middleware now properly registers globally via `$router->appendMiddleware()`
+
+**Code Quality:**
+- Applied Laravel Pint code formatting across 130 files
+- Fixed 4 style issues in SecureHeaders, SynapseServiceProvider, SynapseRouteServiceProvider, and helper.php
+- Improved import ordering and spacing consistency
+
+### Added
+
+**Security Headers:**
+- SecureHeaders middleware now applies comprehensive HTTP security headers:
+  - Strict-Transport-Security (HSTS with preload)
+  - X-Content-Type-Options (nosniff)
+  - X-Frame-Options (SAMEORIGIN)
+  - Referrer-Policy (strict-origin-when-cross-origin)
+  - Permissions-Policy and Feature-Policy
+  - Content-Security-Policy
+  - X-XSS-Protection
+  - X-Permitted-Cross-Domain-Policies
+  - Expect-CT
+- Auto-disabled in local environment for development convenience
+
 ## [1.3.1] - 2025-12-28
 
 ### Changed

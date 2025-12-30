@@ -31,6 +31,23 @@ if (! function_exists('is_decimal')) {
     }
 }
 
+if (! function_exists('human_filesize')) {
+    /**
+     * Convert bytes to human readable filesize
+     *
+     * @param  int  $bytes  Size in bytes
+     * @param  int  $decimals  Number of decimals
+     * @return string
+     */
+    function human_filesize($bytes, $decimals = 2)
+    {
+        $sz = 'BKMGTP';
+        $factor = (int) floor((strlen($bytes) - 1) / 3);
+
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
+    }
+}
+
 if (! function_exists('synav')) {
     /**
      * SyNav Helper function
