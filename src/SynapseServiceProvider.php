@@ -3,7 +3,7 @@
 namespace VmEngine\Synapse;
 
 use Database\Seeders\DatabaseSeeder;
-use Illuminate\Routing\Router;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Console\Commands\Generators\MakeControllerCommand;
@@ -48,7 +48,7 @@ class SynapseServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot(Router $router)
+    public function boot()
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -98,7 +98,11 @@ class SynapseServiceProvider extends ServiceProvider
             $this->bootDbOverride();
         }
 
-        $router->appendMiddleware(SecureHeaders::class);
+        // Register SecureHeaders middleware globally (Laravel 12 compatible)
+        $this->app->booted(function () {
+            $kernel = $this->app->make(Kernel::class);
+            $kernel->pushMiddleware(SecureHeaders::class);
+        });
 
         Schema::defaultStringLength(191);
         bcscale(8);

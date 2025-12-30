@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2025-12-30
+
+### Fixed
+
+**Middleware Registration:**
+- Fixed SecureHeaders middleware registration for Laravel 12 compatibility
+- Replaced deprecated `$router->appendMiddleware()` with proper `$kernel->pushMiddleware()` method
+- Middleware now registers correctly using `$this->app->booted()` callback with Kernel contract
+- Added `Illuminate\Contracts\Http\Kernel` import for proper dependency injection
+
+**Code Quality:**
+- Applied Laravel Pint formatting to ensure PSR-12 compliance
+- Fixed import ordering and spacing in SynapseServiceProvider
+
+### Changed
+
+**Laravel 12 Compatibility:**
+- Updated middleware registration to use Laravel 12 recommended approach
+- Service provider now uses Kernel contract for global middleware registration
+- Improved compatibility with Laravel 12's new application structure
+
 ## [1.3.2] - 2025-12-30
 
 ### Fixed
