@@ -24,6 +24,7 @@ use VmEngine\Synapse\Console\Commands\Generators\MakeRequestCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeSeederCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeTestCommand;
 use VmEngine\Synapse\Console\Commands\SynAppsConfig;
+use VmEngine\Synapse\Console\Commands\SynAppsCopyResources;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
@@ -63,6 +64,7 @@ class SynapseServiceProvider extends ServiceProvider
             $this->commands([
                 SynAppsSetup::class,
                 SynAppsDiscover::class,
+                SynAppsCopyResources::class,
                 SynAppsPatchResources::class,
                 SynAppsPatchTests::class,
                 SynAppsLinkErrors::class,
