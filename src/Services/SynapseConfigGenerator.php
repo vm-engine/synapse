@@ -2,7 +2,6 @@
 
 namespace VmEngine\Synapse\Services;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
@@ -146,8 +145,6 @@ class SynapseConfigGenerator
             $modulePaths['general'][$val[0]] = $val[1];
         }
 
-        // Log::debug('tmp module path', $tmpModulePaths);
-        // Log::debug('module path', $modulePaths);
         $config['module_path'] = $modulePaths;
     }
 
