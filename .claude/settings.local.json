@@ -37,7 +37,8 @@
       "Bash(test:*)",
       "Bash(./vendor/bin/synmod-make:*)",
       "Bash(dir:*)",
-      "Skill(commit-and-push)"
+      "Skill(commit-and-push)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
