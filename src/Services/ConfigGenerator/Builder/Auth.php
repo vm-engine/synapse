@@ -15,8 +15,22 @@ class Auth extends BuilderBase
             file_get_contents(synapps_path('config/auth.json')),
             true
         );
+
         $this->synapps->config['auth'] = $authJson;
         $this->synapps->config['acl'] = [];
+
+        if (! file_exists(synapps_path('config/auth.dev.json'))) {
+            file_put_contents(synapps_path('config/auth.dev.json'), '{}');
+        }
+
+        $tmpEnvAuth = json_decode(
+            file_get_contents(synapps_path('config/auth.dev.json')),
+            true
+        );
+        $this->synapps->config['auth'] = array_replace_recursive(
+            $this->synapps->config['auth'],
+            $tmpEnvAuth
+        );
     }
 
     public function loop($packageNamespace, $packageConfig)

@@ -16,10 +16,7 @@ class System extends BuilderBase
         );
 
         if (! file_exists($synappsPath.'/config/system.dev.json')) {
-            file_put_contents(
-                $synappsPath.'/config/system.dev.json',
-                json_encode($this->synapps->config['system'], JSON_PRETTY_PRINT)
-            );
+            file_put_contents($synappsPath.'/config/system.dev.json', '{}');
         }
 
         $tmpEnvSystem = json_decode(

@@ -188,6 +188,27 @@ class ModuleGeneratorService
             return $modulePath.'/resources/views/livewire/'.$viewName.'.blade.php';
         }
 
+        // Handle component view special case
+        if ($type === 'component-view') {
+            $viewName = strtolower(str_replace(['\\', '/'], '.', $name));
+
+            return $modulePath.'/'.$subdir.'/'.$viewName.'.blade.php';
+        }
+
+        // Handle view special case
+        if ($type === 'view') {
+            $viewName = strtolower(str_replace(['\\', '/'], '/', $name));
+
+            return $modulePath.'/'.$subdir.'/'.$viewName.'.blade.php';
+        }
+
+        // Handle config special case
+        if ($type === 'config') {
+            $configName = strtolower(str_replace(['\\', '/'], '/', $name));
+
+            return $modulePath.'/'.$subdir.'/'.$configName.'.php';
+        }
+
         // Generate class name
         $className = $this->namespaceResolver->generateClassName($name, $type);
 
@@ -377,6 +398,22 @@ class ModuleGeneratorService
             'notification' => 'notification/notification',
             'mail' => 'mail/mail',
             'test' => $options['unit'] ?? false ? 'test/test.unit' : 'test/test.feature',
+            // New component types
+            'cast' => 'cast/cast',
+            'channel' => 'channel/channel',
+            'command' => 'command/command',
+            'component' => 'component/component',
+            'component-view' => 'component/component-view',
+            'config' => 'config/config',
+            'enum' => 'enum/enum',
+            'interface' => 'interface/interface',
+            'job-middleware' => 'job-middleware/job-middleware',
+            'observer' => 'observer/observer',
+            'resource' => $options['collection'] ?? false ? 'resource/resource-collection' : 'resource/resource',
+            'rule' => 'rule/rule',
+            'scope' => 'scope/scope',
+            'trait' => 'trait/trait',
+            'view' => 'view/view',
         ];
 
         return $stubMap[$type] ?? $type.'/'.$type;
@@ -482,7 +519,8 @@ class ModuleGeneratorService
             'seederNamespace' => $seederNamespace,
         ];
 
-        return $variables;
+        // Merge with custom options (allows commands to pass additional variables)
+        return array_merge($variables, $options);
     }
 
     /**

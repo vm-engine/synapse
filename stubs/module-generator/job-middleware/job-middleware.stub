@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+class {{ class }}
+{
+    /**
+     * Process the queued job.
+     */
+    public function handle(object $job, callable $next): void
+    {
+        $next($job);
+    }
+}

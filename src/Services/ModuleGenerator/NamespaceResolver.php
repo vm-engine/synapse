@@ -98,6 +98,22 @@ class NamespaceResolver
             'seeder' => 'database/seeders',
             'migration' => 'database/migrations',
             'test' => 'tests/Feature',
+            // New component types
+            'cast' => 'src/Casts',
+            'channel' => 'src/Broadcasting',
+            'command' => 'src/Console/Commands',
+            'component' => 'src/View/Components',
+            'component-view' => 'resources/views/components',
+            'config' => 'config',
+            'enum' => 'src/Enums',
+            'interface' => 'src/Contracts',
+            'job-middleware' => 'src/Jobs/Middleware',
+            'observer' => 'src/Observers',
+            'resource' => 'src/Http/Resources',
+            'rule' => 'src/Rules',
+            'scope' => 'src/Models/Scopes',
+            'trait' => 'src/Traits',
+            'view' => 'resources/views',
         ];
 
         return $map[strtolower($type)] ?? '';
@@ -122,6 +138,19 @@ class NamespaceResolver
             'policy' => 'Policies',
             'notification' => 'Notifications',
             'mail' => 'Mail',
+            // New component types
+            'cast' => 'Casts',
+            'channel' => 'Broadcasting',
+            'command' => 'Console\\Commands',
+            'component' => 'View\\Components',
+            'enum' => 'Enums',
+            'interface' => 'Contracts',
+            'job-middleware' => 'Jobs\\Middleware',
+            'observer' => 'Observers',
+            'resource' => 'Http\\Resources',
+            'rule' => 'Rules',
+            'scope' => 'Models\\Scopes',
+            'trait' => 'Traits',
         ];
 
         return $map[strtolower($type)] ?? '';
@@ -162,6 +191,14 @@ class NamespaceResolver
             'mail' => 'Mail',
             'factory' => 'Factory',
             'seeder' => 'Seeder',
+            // New component types
+            'cast' => 'Cast',
+            'channel' => 'Channel',
+            'command' => 'Command',
+            'observer' => 'Observer',
+            'resource' => 'Resource',
+            'rule' => 'Rule',
+            'scope' => 'Scope',
         ];
 
         $suffix = $suffixes[strtolower($type)] ?? '';

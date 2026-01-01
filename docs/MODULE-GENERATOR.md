@@ -4,11 +4,11 @@ Complete Laravel-style code generator for Synapse modular architecture.
 
 ## Features
 
-- ✅ **17 Artisan Commands** - Mirror all Laravel make commands
+- ✅ **31 Artisan Commands** - Complete Laravel make command coverage + unified `synmod-make`
 - ✅ **Dual Module Support** - Directory modules (`synapps/modules/`) and package modules (`vendor/*/synmod-*`)
-- ✅ **Standalone Executable** - `synmod-make` for package developers (no Laravel required)
+- ✅ **Unified Interface** - `synmod-make` command with interactive menu for all component types
 - ✅ **Smart Namespacing** - Auto-detects module type and generates correct namespaces
-- ✅ **30+ Stubs** - Complete template library for all component types
+- ✅ **45+ Stubs** - Complete template library for all component types
 - ✅ **Cross-Platform** - Works on Windows, Linux, and macOS
 
 ## Table of Contents
@@ -131,6 +131,11 @@ For package `vm-engine/synmod-blog`:
 
 ## Available Commands
 
+### Unified Command
+| Command | Description |
+|---------|-------------|
+| `synmod-make` | **Standalone bin executable** - Create any component type with interactive menu (use `./vendor/bin/synmod-make`) |
+
 ### Module Creation
 | Command | Description |
 |---------|-------------|
@@ -139,22 +144,36 @@ For package `vm-engine/synmod-blog`:
 ### Component Generators
 | Command | Description | Options |
 |---------|-------------|---------|
-| `synapps:make-model` | Create model | `-m` migration, `-f` factory, `-s` seeder, `-a` all |
+| `synapps:make-cast` | Create custom Eloquent cast | |
+| `synapps:make-channel` | Create broadcasting channel | |
+| `synapps:make-command` | Create Artisan command | `--command={name}` |
+| `synapps:make-component` | Create Blade view component | `--inline` |
+| `synapps:make-config` | Create config file | |
 | `synapps:make-controller` | Create controller | `--resource`, `--api`, `--invokable` |
-| `synapps:make-migration` | Create migration | `--create={table}`, `--table={table}` |
-| `synapps:make-factory` | Create factory | |
-| `synapps:make-seeder` | Create seeder | |
-| `synapps:make-livewire` | Create Livewire component | `--inline` |
-| `synapps:make-request` | Create form request | |
-| `synapps:make-middleware` | Create middleware | |
+| `synapps:make-enum` | Create PHP enum | |
 | `synapps:make-event` | Create event | |
-| `synapps:make-listener` | Create listener | |
+| `synapps:make-factory` | Create factory | |
+| `synapps:make-interface` | Create interface | |
 | `synapps:make-job` | Create job | |
-| `synapps:make-provider` | Create service provider | |
-| `synapps:make-policy` | Create policy | |
-| `synapps:make-notification` | Create notification | |
+| `synapps:make-job-middleware` | Create job middleware | |
+| `synapps:make-listener` | Create listener | |
+| `synapps:make-livewire` | Create Livewire component | `--inline`, `--test` |
 | `synapps:make-mail` | Create mailable | |
+| `synapps:make-middleware` | Create middleware | |
+| `synapps:make-migration` | Create migration | `--create={table}`, `--table={table}` |
+| `synapps:make-model` | Create model | `-m` migration, `-f` factory, `-s` seeder, `-a` all, `--pivot` |
+| `synapps:make-notification` | Create notification | |
+| `synapps:make-observer` | Create observer | `--model={Model}` |
+| `synapps:make-policy` | Create policy | |
+| `synapps:make-provider` | Create service provider | |
+| `synapps:make-request` | Create form request | |
+| `synapps:make-resource` | Create API resource | `--collection` |
+| `synapps:make-rule` | Create validation rule | |
+| `synapps:make-scope` | Create query scope | |
+| `synapps:make-seeder` | Create seeder | |
 | `synapps:make-test` | Create test | `--unit` |
+| `synapps:make-trait` | Create trait | |
+| `synapps:make-view` | Create Blade view | |
 
 ---
 
@@ -162,6 +181,7 @@ For package `vm-engine/synmod-blog`:
 
 ```
 {module}/
+├── config/              # Configuration files
 ├── database/
 │   ├── factories/       # Model factories
 │   ├── migrations/      # Database migrations
@@ -172,25 +192,40 @@ For package `vm-engine/synmod-blog`:
 │       └── menu.php
 ├── resources/
 │   └── views/           # Blade views
+│       ├── components/  # View components (Blade)
 │       └── livewire/    # Livewire views
 ├── routes/
 │   ├── web.php          # Frontend routes
 │   ├── web.backend.php  # Backend routes (auto-auth)
 │   └── api.php          # API routes
 ├── src/
+│   ├── Broadcasting/    # Broadcasting channels
+│   ├── Casts/           # Custom Eloquent casts
+│   ├── Console/
+│   │   └── Commands/    # Artisan commands
+│   ├── Contracts/       # Interfaces
+│   ├── Enums/           # PHP enums
 │   ├── Events/          # Event classes
 │   ├── Http/
 │   │   ├── Controllers/ # HTTP controllers
 │   │   ├── Middleware/  # Middleware
-│   │   └── Requests/    # Form requests
-│   ├── Jobs/            # Queue jobs
+│   │   ├── Requests/    # Form requests
+│   │   └── Resources/   # API resources
+│   ├── Jobs/
+│   │   └── Middleware/  # Job middleware
 │   ├── Listeners/       # Event listeners
 │   ├── Livewire/        # Livewire components
 │   ├── Mail/            # Mailable classes
-│   ├── Models/          # Eloquent models
+│   ├── Models/
+│   │   └── Scopes/      # Query scopes
 │   ├── Notifications/   # Notifications
+│   ├── Observers/       # Model observers
 │   ├── Policies/        # Authorization policies
-│   └── Providers/       # Service providers
+│   ├── Providers/       # Service providers
+│   ├── Rules/           # Validation rules
+│   ├── Traits/          # PHP traits
+│   └── View/
+│       └── Components/  # Blade component classes
 ├── tests/
 │   ├── Feature/         # Feature tests
 │   └── Unit/            # Unit tests
@@ -205,32 +240,114 @@ For package `vm-engine/synmod-blog`:
 ### Directory Modules
 
 ```
-Base:       SynApps\Modules\{ModuleName}
-Models:     SynApps\Modules\{ModuleName}\Models
-Controllers: SynApps\Modules\{ModuleName}\Http\Controllers
-Livewire:   SynApps\Modules\{ModuleName}\Livewire
-Events:     SynApps\Modules\{ModuleName}\Events
-Jobs:       SynApps\Modules\{ModuleName}\Jobs
-Factories:  SynDB\Modules\{ModuleName}\Factories
-Seeders:    SynDB\Modules\{ModuleName}\Seeders
+Base:         SynApps\Modules\{ModuleName}
+Models:       SynApps\Modules\{ModuleName}\Models
+Controllers:  SynApps\Modules\{ModuleName}\Http\Controllers
+Livewire:     SynApps\Modules\{ModuleName}\Livewire
+Events:       SynApps\Modules\{ModuleName}\Events
+Jobs:         SynApps\Modules\{ModuleName}\Jobs
+Factories:    SynDB\Modules\{ModuleName}\Factories
+Seeders:      SynDB\Modules\{ModuleName}\Seeders
+Casts:        SynApps\Modules\{ModuleName}\Casts
+Channels:     SynApps\Modules\{ModuleName}\Broadcasting
+Commands:     SynApps\Modules\{ModuleName}\Console\Commands
+Components:   SynApps\Modules\{ModuleName}\View\Components
+Enums:        SynApps\Modules\{ModuleName}\Enums
+Interfaces:   SynApps\Modules\{ModuleName}\Contracts
+JobMiddleware: SynApps\Modules\{ModuleName}\Jobs\Middleware
+Observers:    SynApps\Modules\{ModuleName}\Observers
+Resources:    SynApps\Modules\{ModuleName}\Http\Resources
+Rules:        SynApps\Modules\{ModuleName}\Rules
+Scopes:       SynApps\Modules\{ModuleName}\Models\Scopes
+Traits:       SynApps\Modules\{ModuleName}\Traits
 ```
 
 ### Package Modules
 
 ```
-Base:       {Vendor}\{ModuleName}
-Models:     {Vendor}\{ModuleName}\Models
-Controllers: {Vendor}\{ModuleName}\Http\Controllers
-Livewire:   {Vendor}\{ModuleName}\Livewire
-Events:     {Vendor}\{ModuleName}\Events
-Jobs:       {Vendor}\{ModuleName}\Jobs
-Factories:  {Vendor}\{ModuleName}\Factories
-Seeders:    {Vendor}\{ModuleName}\Seeders
+Base:         {Vendor}\{ModuleName}
+Models:       {Vendor}\{ModuleName}\Models
+Controllers:  {Vendor}\{ModuleName}\Http\Controllers
+Livewire:     {Vendor}\{ModuleName}\Livewire
+Events:       {Vendor}\{ModuleName}\Events
+Jobs:         {Vendor}\{ModuleName}\Jobs
+Factories:    {Vendor}\{ModuleName}\Factories
+Seeders:      {Vendor}\{ModuleName}\Seeders
+Casts:        {Vendor}\{ModuleName}\Casts
+Channels:     {Vendor}\{ModuleName}\Broadcasting
+Commands:     {Vendor}\{ModuleName}\Console\Commands
+Components:   {Vendor}\{ModuleName}\View\Components
+Enums:        {Vendor}\{ModuleName}\Enums
+Interfaces:   {Vendor}\{ModuleName}\Contracts
+JobMiddleware: {Vendor}\{ModuleName}\Jobs\Middleware
+Observers:    {Vendor}\{ModuleName}\Observers
+Resources:    {Vendor}\{ModuleName}\Http\Resources
+Rules:        {Vendor}\{ModuleName}\Rules
+Scopes:       {Vendor}\{ModuleName}\Models\Scopes
+Traits:       {Vendor}\{ModuleName}\Traits
 ```
 
 **Vendor Conversion:**
 - `vm-engine/synmod-blog` → Vendor: `VmEngine`, Module: `Blog`
 - `acme-corp/synmod-shop` → Vendor: `AcmeCorp`, Module: `Shop`
+
+---
+
+## Unified synmod-make Command
+
+The `synmod-make` command is a **standalone bin executable** that provides a unified interface for generating any component type with an interactive menu.
+
+> **⚠️ Important:** `synmod-make` is a **bin executable** (`./vendor/bin/synmod-make`), **NOT** an artisan command. Use `php artisan synapps:make-*` for artisan-based commands.
+
+### Features
+
+- 🎯 **Interactive Menu** - Shows all 30 component types to choose from
+- 🚀 **Direct Usage** - Skip menu by specifying component type
+- 📦 **Standalone Executable** - No Laravel required (works in packages)
+- ⚡ **Fast & Intuitive** - Same options as individual commands
+- 🔧 **Cross-Platform** - Works on Windows, Linux, and macOS
+
+### Usage
+
+**Interactive Mode (with menu):**
+```bash
+# Shows interactive menu to select component type
+./vendor/bin/synmod-make
+
+# Windows
+vendor\bin\synmod-make
+```
+
+**Direct Mode (skip menu):**
+```bash
+# Format: synmod-make {type} {module} {name} [options]
+
+# Examples
+./vendor/bin/synmod-make enum todos TodoStatus
+./vendor/bin/synmod-make trait todos HasUuid
+./vendor/bin/synmod-make cast todos Json
+./vendor/bin/synmod-make observer todos PostObserver --model=Post
+./vendor/bin/synmod-make resource todos PostResource --collection
+./vendor/bin/synmod-make component todos Alert
+./vendor/bin/synmod-make interface todos Searchable
+./vendor/bin/synmod-make scope todos ActiveScope
+```
+
+**Package Modules:**
+```bash
+# Using synmod-make with package modules
+./vendor/bin/synmod-make enum example PriorityLevel --path=packages/synmod-example
+./vendor/bin/synmod-make trait example Cacheable --path=packages/synmod-example
+```
+
+### Available Types
+
+All 30 component types are supported:
+- cast, channel, command, component, config, controller
+- enum, event, factory, interface, job, job-middleware
+- listener, livewire, mail, middleware, migration, model
+- notification, observer, policy, provider, request, resource
+- rule, scope, seeder, test, trait, view
 
 ---
 
@@ -347,6 +464,100 @@ php artisan synapps:make-listener orders UpdateInventory
 php artisan synapps:make-job orders ProcessOrder
 php artisan synapps:make-notification orders OrderShipped
 php artisan synapps:make-mail orders OrderConfirmationMail
+php artisan synapps:make-channel orders OrderChannel
+```
+
+### Advanced Components
+
+```bash
+# Custom casts for model attributes
+php artisan synapps:make-cast blog Money
+php artisan synapps:make-cast blog Json
+
+# Enums for typed constants
+php artisan synapps:make-enum blog PostStatus
+php artisan synapps:make-enum blog Priority
+
+# Traits for reusable functionality
+php artisan synapps:make-trait blog HasSlug
+php artisan synapps:make-trait blog Publishable
+
+# Interfaces for contracts
+php artisan synapps:make-interface blog Searchable
+php artisan synapps:make-interface blog Cacheable
+
+# Observers for model events
+php artisan synapps:make-observer blog PostObserver --model=Post
+php artisan synapps:make-observer blog CommentObserver --model=Comment
+
+# Query scopes
+php artisan synapps:make-scope blog PublishedScope
+php artisan synapps:make-scope blog ActiveScope
+
+# Validation rules
+php artisan synapps:make-rule blog ValidSlug
+php artisan synapps:make-rule blog UniqueEmail
+```
+
+### API Resources
+
+```bash
+# Single resource
+php artisan synapps:make-resource api PostResource
+php artisan synapps:make-resource api UserResource
+
+# Resource collections
+php artisan synapps:make-resource api PostCollection --collection
+php artisan synapps:make-resource api UserCollection --collection
+```
+
+### Blade Components
+
+```bash
+# View components (class + view)
+php artisan synapps:make-component ui Alert
+php artisan synapps:make-component ui Modal
+php artisan synapps:make-component ui Card
+
+# Inline components (class only)
+php artisan synapps:make-component ui Badge --inline
+
+# Standalone views
+php artisan synapps:make-view blog posts/list
+php artisan synapps:make-view blog partials/sidebar
+```
+
+### Console Commands
+
+```bash
+# Artisan commands
+php artisan synapps:make-command blog PublishPosts --command=blog:publish
+php artisan synapps:make-command blog CleanupOldPosts --command=blog:cleanup
+
+# Job middleware
+php artisan synapps:make-job-middleware queue RateLimitJobs
+php artisan synapps:make-job-middleware queue SkipIfBatchCancelled
+```
+
+### Configuration Files
+
+```bash
+# Module configuration
+php artisan synapps:make-config blog blog
+php artisan synapps:make-config api api
+```
+
+### Using synmod-make for Quick Generation
+
+```bash
+# Interactive menu - select from all types
+./vendor/bin/synmod-make
+
+# Quick generation with type parameter
+./vendor/bin/synmod-make enum todos TodoStatus
+./vendor/bin/synmod-make trait users HasAvatar
+./vendor/bin/synmod-make cast products Price
+./vendor/bin/synmod-make observer posts PostObserver --model=Post
 ```
 
 ---
@@ -399,6 +610,18 @@ php artisan synapps:make-model blog PostCategory --pivot # Pivot model
 # Tests
 php artisan synapps:make-test blog PostFeatureTest      # Feature test
 php artisan synapps:make-test blog PostTest --unit      # Unit test
+
+# Components
+php artisan synapps:make-component ui Button            # With view
+php artisan synapps:make-component ui Icon --inline     # Inline (no view)
+
+# Resources
+php artisan synapps:make-resource api PostResource      # Single resource
+php artisan synapps:make-resource api PostCollection --collection  # Collection
+
+# Observers
+php artisan synapps:make-observer blog PostObserver     # Generic observer
+php artisan synapps:make-observer blog PostObserver --model="App\Models\Post"  # With model
 ```
 
 ---

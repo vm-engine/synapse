@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace VmEngine\Synapse\Console\Commands\Generators;
+
+class MakeEnumCommand extends BaseGeneratorCommand
+{
+    protected $signature = 'synapps:make-enum
+                            {module : The module name}
+                            {name? : The name of the enum}
+                            {--path= : Custom base path for module}
+                            ';
+
+    protected $description = 'Create a new enum for a module';
+
+    protected string $componentType = 'enum';
+}

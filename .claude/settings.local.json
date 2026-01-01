@@ -35,7 +35,9 @@
       "Bash(find:*)",
       "Bash(tree:*)",
       "Bash(test:*)",
-      "Bash(./vendor/bin/synmod-make:*)"
+      "Bash(./vendor/bin/synmod-make:*)",
+      "Bash(dir:*)",
+      "Skill(commit-and-push)"
     ],
     "deny": [],
     "ask": []

@@ -21,16 +21,17 @@ class SynAppsPatchTests extends Command
     protected $description = 'Configure testing infrastructure (Pest.php, .env.testing, phpunit.xml) for module tests';
 
     private array $pathsToAdd = [
-        'Browser', // Add Browser directory for Pest Browser Testing
+        'Unit', // Add Unit directory for unit tests
         '../vendor/vm-engine/synapse/tests/Feature', // Synapse Feature tests
         '../synapps/modules/*/tests/Feature',
         '../vendor/*/synmod-*/tests/Feature',
         '../vendor/*/synmodule-*/tests/Feature',
         '../vendor/*/synapps-*/tests/Feature',
-        '../synapps/modules/*/tests/Browser',
-        '../vendor/*/synmod-*/tests/Browser',
-        '../vendor/*/synmodule-*/tests/Browser',
-        '../vendor/*/synapps-*/tests/Browser',
+        '../vendor/vm-engine/synapse/tests/Unit', // Synapse Unit tests
+        '../synapps/modules/*/tests/Unit',
+        '../vendor/*/synmod-*/tests/Unit',
+        '../vendor/*/synmodule-*/tests/Unit',
+        '../vendor/*/synapps-*/tests/Unit',
     ];
 
     public function handle(): int
@@ -228,9 +229,14 @@ ENV;
 
     private function isAlreadyPatched(string $content): bool
     {
-        // Check if any of our module paths already exist
-        return str_contains($content, 'synapps/modules/*/tests/Feature')
-            || str_contains($content, 'synmod-*/tests/Feature');
+        // Check if ALL paths we want to add are already present
+        foreach ($this->pathsToAdd as $path) {
+            if (! str_contains($content, $path)) {
+                return false; // At least one path is missing
+            }
+        }
+
+        return true; // All paths are present
     }
 
     private function patchContent(string $content): ?string

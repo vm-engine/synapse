@@ -6,10 +6,18 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use VmEngine\Synapse\Console\Commands\Generators\MakeCastCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeChannelCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeCommandCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeComponentCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeConfigCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeControllerCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeEnumCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeEventCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeFactoryCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeInterfaceCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeJobCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeJobMiddlewareCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeListenerCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeLivewireCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeMailCommand;
@@ -18,11 +26,18 @@ use VmEngine\Synapse\Console\Commands\Generators\MakeMigrationCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeModelCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeModuleCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeNotificationCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeObserverCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakePolicyCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeProviderCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeRequestCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeResourceCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeRuleCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeScopeCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeSeederCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeTestCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeTraitCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeViewCommand;
+use VmEngine\Synapse\Console\Commands\Generators\SynmodMakeCommand;
 use VmEngine\Synapse\Console\Commands\SynAppsConfig;
 use VmEngine\Synapse\Console\Commands\SynAppsCopyResources;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
@@ -90,6 +105,23 @@ class SynapseServiceProvider extends ServiceProvider
                 MakeNotificationCommand::class,
                 MakeMailCommand::class,
                 MakeTestCommand::class,
+                // New Generator Commands
+                MakeCastCommand::class,
+                MakeChannelCommand::class,
+                MakeCommandCommand::class,
+                MakeComponentCommand::class,
+                MakeConfigCommand::class,
+                MakeEnumCommand::class,
+                MakeInterfaceCommand::class,
+                MakeJobMiddlewareCommand::class,
+                MakeObserverCommand::class,
+                MakeResourceCommand::class,
+                MakeRuleCommand::class,
+                MakeScopeCommand::class,
+                MakeTraitCommand::class,
+                MakeViewCommand::class,
+                // Unified Make Command
+                SynmodMakeCommand::class,
             ]);
         }
 
