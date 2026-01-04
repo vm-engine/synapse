@@ -102,3 +102,20 @@ if (! function_exists('___')) {
         return app('dblang')->get($key, $languageCode);
     }
 }
+
+if (! function_exists('page_title')) {
+    /**
+     * Add Title to Main App Title
+     *
+     * @param  string  $title
+     * @param  string  $separator
+     */
+    function page_title($title, $separator = '-'): string
+    {
+        if (is_array($title)) {
+            $title = implode(' '.$separator.' ', $title);
+        }
+
+        return $title.' '.$separator.' '.config('synapps.apps.title', config('app.name'));
+    }
+}

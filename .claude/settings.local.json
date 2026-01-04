@@ -38,7 +38,8 @@
       "Bash(./vendor/bin/synmod-make:*)",
       "Bash(dir:*)",
       "Skill(commit-and-push)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(COMPOSER_PLATFORM_CHECK=0 vendor/bin/phpstan:*)"
     ],
     "deny": [],
     "ask": []

@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.5] - 2026-01-04
+
+### Added
+
+**Helper Functions:**
+- Added `page_title()` helper function for managing page titles
+  - Supports string and array inputs
+  - Automatically appends app title from config
+  - Customizable separator (default: '-')
+
+**LTA CSS Framework:**
+- Added button size variants: `.btn.xs`, `.btn.sm`, `.btn.lg`, `.btn.xl`
+- Enhanced button component flexibility with predefined size utilities
+
+### Fixed
+
+**Code Quality:**
+- Applied Laravel Pint formatting for PSR-12 compliance
+- Fixed PHPDoc formatting and spacing issues in helper.php
+- Removed unused imports in TodoCompletedChannel.php
+
 ## [1.3.3] - 2025-12-30
 
 ### Fixed
