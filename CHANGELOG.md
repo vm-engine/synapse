@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.6] - 2026-01-08
+
+### Fixed
+
+**Blade Components:**
+- Improved Modal component styling and structure
+  - Moved inline `style="display: none;"` to root element for better organization
+  - Enhanced modal container positioning and overflow handling
+  - Optimized CSS class ordering for consistency
+- Cleaned up Toastr component
+  - Commented out example trigger buttons to reduce clutter
+  - Applied consistent Pint formatting to CSS class order
+
+**Code Quality:**
+- Resolved all PHPStan level 5 static analysis errors
+  - Added missing `$componentName` property to MakeCommandCommand
+  - Fixed boolean operator logic in SynAppsCopyResources (using `|=` operator)
+  - Improved `human_filesize()` function to use `log()` instead of `strlen()` on integers
+  - Updated `page_title()` PHPDoc to correctly accept `string|array` parameter
+- Applied Laravel Pint code formatting
+  - Converted `array()` to `[]` syntax in `int2roman()` helper
+  - Removed redundant PHPDoc tags covered by type hints
+  - Fixed array formatting and spacing consistency
+
 ## [1.3.5] - 2026-01-04
 
 ### Added
