@@ -104,12 +104,12 @@
 
     <!-- Dialog Container -->
     <div
-        class="fixed inset-0 z-[51] flex items-center justify-center p-4 overflow-y-auto"
+        class="fixed inset-0 z-[51] flex items-center justify-center overflow-y-auto p-4"
         x-show="show"
         @click.self="cancel()"
     >
         <div
-            class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl"
+            class="relative w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -118,10 +118,10 @@
             x-transition:leave-end="opacity-0 scale-95"
         >
             <!-- Header -->
-            <div class="flex items-start justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-start justify-between border-b border-gray-200 p-5 dark:border-gray-700">
                 <div class="flex items-center gap-3">
                     <div
-                        class="flex items-center justify-center w-10 h-10 rounded-full"
+                        class="flex h-10 w-10 items-center justify-center rounded-full"
                         :class="{
                             'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400': confirmColor === 'danger',
                             'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400': confirmColor === 'warning',
@@ -146,7 +146,7 @@
                 >
                     <span class="sr-only">Close</span>
                     <svg
-                        class="w-5 h-5"
+                        class="h-5 w-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -165,20 +165,20 @@
             <div class="p-5">
                 <p
                     class="text-sm text-gray-600 dark:text-gray-300"
-                    x-text="message"
+                    x-html="message"
                 ></p>
             </div>
 
             <!-- Footer -->
-            <div class="flex items-center justify-end gap-3 p-5 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-200 p-5 dark:border-gray-700">
                 <button
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                     type="button"
                     @click="cancel()"
                     x-text="cancelText"
                 ></button>
                 <button
-                    class="px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    class="rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2"
                     type="button"
                     :class="{
                         'bg-red-600 hover:bg-red-700 focus:ring-red-500': confirmColor === 'danger',
