@@ -1,6 +1,6 @@
-<!-- Triggers  -->
+{{-- <!-- Triggers  -->
 
-<!-- Message Trigger
+Message Trigger
 <button
 class="whitespace-nowrap rounded-radius bg-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark" type="button" x-on:click="$dispatch('notify', {
         variant: 'message',
@@ -9,35 +9,35 @@ class="whitespace-nowrap rounded-radius bg-primary px-4 py-2 text-center text-sm
             avatar:'https://penguinui.s3.amazonaws.com/component-assets/avatar-2.webp'},
             message: 'Hey, can you review the PR I just submitted? Let me know if you spot any issues!'
         }
-    )">Message</button> -->
-<!-- Info Trigger
+    )">Message</button>
+Info Trigger
 <button
 class="whitespace-nowrap rounded-radius bg-info px-4 py-2 text-center text-sm font-medium tracking-wide text-on-info transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75" type="button" x-on:click="$dispatch('notify', {
         variant: 'info',
         title: 'Update Available',
         message: 'A new version of the app is ready for you. Update now to enjoy the latest features!'
-    })">Info</button>-->
-<!-- Success Trigger
+    })">Info</button>
+Success Trigger
 <button
 class="whitespace-nowrap rounded-radius bg-success px-4 py-2 text-center text-sm font-medium tracking-wide text-on-success transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75" type="button" x-on:click="$dispatch('notify', {
         variant: 'success',
         title: 'Success!',
         message: 'Your changes have been saved. Keep up the great work!'
-    })">Success</button>-->
-<!-- Danger Trigger
+    })">Success</button>
+Danger Trigger
 <button
 class="whitespace-nowrap rounded-radius bg-danger px-4 py-2 text-center text-sm font-medium tracking-wide text-on-danger transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75" type="button" x-on:click="$dispatch('notify', {
         variant: 'danger',
         title: 'Oops!',
         message: 'Something went wrong. Please try again. If the problem persists, we’re here to help!'
-    })">Danger</button>-->
-<!-- Warning Trigger
+    })">Danger</button>
+Warning Trigger
 <button
 class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm font-medium tracking-wide text-on-warning transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75" type="button" x-on:click="$dispatch('notify', {
         variant: 'warning',
         title: 'Action Needed',
         message: 'Your storage is getting low. Consider upgrading your plan.'
-    })">Warning</button>-->
+    })">Warning</button> --}}
 
 <!-- Notifications -->
 <div
@@ -98,7 +98,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 >
 
     <div
-        class="group pointer-events-none fixed inset-x-8 top-0 z-999 flex max-w-full flex-col gap-2 bg-transparent px-6 py-6 md:bottom-0 md:left-[unset] md:right-0 md:top-[unset] md:max-w-sm"
+        class="z-999 group pointer-events-none fixed inset-x-8 top-0 flex max-w-full flex-col gap-2 bg-transparent px-6 py-6 md:bottom-0 md:left-[unset] md:right-0 md:top-[unset] md:max-w-sm"
         x-on:mouseenter="$dispatch('pause-auto-dismiss')"
         x-on:mouseleave="$dispatch('resume-auto-dismiss')"
     >
@@ -111,7 +111,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Info Notification  -->
                 <template x-if="notification.variant === 'info'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
+                        class="rounded-radius border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -127,11 +127,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
                         <div
-                            class="flex w-full items-center gap-2.5 bg-info/10 rounded-radius p-4 transition-all duration-300">
+                            class="bg-info/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
 
                             <!-- Icon -->
                             <div
-                                class="rounded-full bg-info/15 p-0.5 text-info"
+                                class="bg-info/15 text-info rounded-full p-0.5"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -152,7 +152,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <!-- Title & Message -->
                             <div class="flex flex-col gap-2">
                                 <h3
-                                    class="text-sm font-semibold text-info"
+                                    class="text-info text-sm font-semibold"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
@@ -195,7 +195,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Success Notification  -->
                 <template x-if="notification.variant === 'success'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
+                        class="rounded-radius border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -211,11 +211,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
                         <div
-                            class="flex w-full items-center gap-2.5 bg-success/10 rounded-radius p-4 transition-all duration-300">
+                            class="bg-success/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
 
                             <!-- Icon -->
                             <div
-                                class="rounded-full bg-success/15 p-0.5 text-success"
+                                class="bg-success/15 text-success rounded-full p-0.5"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -236,7 +236,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <!-- Title & Message -->
                             <div class="flex flex-col gap-2">
                                 <h3
-                                    class="text-sm font-semibold text-success"
+                                    class="text-success text-sm font-semibold"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
@@ -279,7 +279,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Warning Notification  -->
                 <template x-if="notification.variant === 'warning'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
+                        class="rounded-radius border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -295,11 +295,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
                         <div
-                            class="flex w-full items-center gap-2.5 bg-warning/10 rounded-radius p-4 transition-all duration-300">
+                            class="bg-warning/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
 
                             <!-- Icon -->
                             <div
-                                class="rounded-full bg-warning/15 p-0.5 text-warning"
+                                class="bg-warning/15 text-warning rounded-full p-0.5"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -320,7 +320,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <!-- Title & Message -->
                             <div class="flex flex-col gap-2">
                                 <h3
-                                    class="text-sm font-semibold text-warning"
+                                    class="text-warning text-sm font-semibold"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
@@ -363,7 +363,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Danger Notification  -->
                 <template x-if="notification.variant === 'danger'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
+                        class="rounded-radius border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -379,11 +379,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
                         <div
-                            class="flex w-full items-center gap-2.5 bg-danger/10 rounded-radius p-4 transition-all duration-300">
+                            class="bg-danger/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
 
                             <!-- Icon -->
                             <div
-                                class="rounded-full bg-danger/15 p-0.5 text-danger"
+                                class="bg-danger/15 text-danger rounded-full p-0.5"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -404,7 +404,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <!-- Title & Message -->
                             <div class="flex flex-col gap-2">
                                 <h3
-                                    class="text-sm font-semibold text-danger"
+                                    class="text-danger text-sm font-semibold"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
@@ -447,7 +447,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Message Notification  -->
                 <template x-if="notification.variant === 'message'">
                     <div
-                        class="pointer-events-auto relative rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark toastr-notification"
+                        class="rounded-radius border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
                         x-data="{ isVisible: false, timeout: null }"
                         x-cloak
@@ -463,7 +463,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
                         <div
-                            class="flex w-full rounded-radius items-center gap-2.5 bg-surface-alt p-4 transition-all duration-300 dark:bg-surface-dark-alt">
+                            class="rounded-radius bg-surface-alt dark:bg-surface-dark-alt flex w-full items-center gap-2.5 p-4 transition-all duration-300">
                             <div class="flex w-full items-center gap-2.5">
 
                                 <!-- Avatar -->
@@ -478,7 +478,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                 <div class="flex flex-col items-start gap-2">
                                     <!-- Title & Message -->
                                     <h3
-                                        class="text-sm font-semibold text-on-surface-strong dark:text-on-surface-dark-strong"
+                                        class="text-on-surface-strong dark:text-on-surface-dark-strong text-sm font-semibold"
                                         x-cloak
                                         x-show="notification.sender.name"
                                         x-text="notification.sender.name"
@@ -493,11 +493,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                     <!-- Action Buttons -->
                                     <div class="flex items-center gap-4">
                                         <button
-                                            class="whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide text-primary transition hover:opacity-75 active:opacity-100 dark:text-primary-dark"
+                                            class="text-primary dark:text-primary-dark whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide transition hover:opacity-75 active:opacity-100"
                                             type="button"
                                         >Reply</button>
                                         <button
-                                            class="whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide text-on-surface transition hover:opacity-75 active:opacity-100 dark:text-on-surface-dark"
+                                            class="text-on-surface dark:text-on-surface-dark whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide transition hover:opacity-75 active:opacity-100"
                                             type="button"
                                             x-on:click=" (isVisible = false), setTimeout(() => { removeNotification(notification.id) }, 400)"
                                         >Dismiss</button>
