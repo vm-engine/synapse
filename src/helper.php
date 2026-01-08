@@ -42,7 +42,7 @@ if (! function_exists('human_filesize')) {
     function human_filesize($bytes, $decimals = 2)
     {
         $sz = 'BKMGTP';
-        $factor = (int) floor((strlen($bytes) - 1) / 3);
+        $factor = $bytes > 0 ? (int) floor(log($bytes, 1024)) : 0;
 
         return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
     }
@@ -107,7 +107,7 @@ if (! function_exists('page_title')) {
     /**
      * Add Title to Main App Title
      *
-     * @param  string  $title
+     * @param  string|array  $title
      * @param  string  $separator
      */
     function page_title($title, $separator = '-'): string

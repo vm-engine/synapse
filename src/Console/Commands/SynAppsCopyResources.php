@@ -67,56 +67,56 @@ class SynAppsCopyResources extends Command
 
         // Copy CSS files
         if ($copyCss) {
-            $copied = $this->copyResource(
+            $copied |= $this->copyResource(
                 $stubsPath.DS.'css',
                 $destPath.DS.'css',
                 'CSS files',
                 $force
-            ) || $copied;
+            );
         }
 
         // Copy JS files
         if ($copyJs) {
-            $copied = $this->copyResource(
+            $copied |= $this->copyResource(
                 $stubsPath.DS.'js',
                 $destPath.DS.'js',
                 'JavaScript files',
                 $force
-            ) || $copied;
+            );
         }
 
         // Copy layout files (includes nav components)
         if ($copyLayouts) {
-            $copied = $this->copyResource(
+            $copied |= $this->copyResource(
                 $stubsPath.DS.'views'.DS.'layouts',
                 $destPath.DS.'views'.DS.'layouts',
                 'Layout files',
                 $force
-            ) || $copied;
+            );
 
-            $copied = $this->copyResource(
+            $copied |= $this->copyResource(
                 $stubsPath.DS.'views'.DS.'components'.DS.'layouts',
                 $destPath.DS.'views'.DS.'components'.DS.'layouts',
                 'Component layout files',
                 $force
-            ) || $copied;
+            );
 
-            $copied = $this->copyResource(
+            $copied |= $this->copyResource(
                 $stubsPath.DS.'views'.DS.'components'.DS.'nav',
                 $destPath.DS.'views'.DS.'components'.DS.'nav',
                 'Navigation components',
                 $force
-            ) || $copied;
+            );
         }
 
         // Copy assets
         if ($copyAssets) {
-            $copied = $this->copyResource(
+            $copied |= $this->copyResource(
                 $stubsPath.DS.'assets',
                 $destPath.DS.'assets',
                 'Static assets',
                 $force
-            ) || $copied;
+            );
         }
 
         if ($copied) {
