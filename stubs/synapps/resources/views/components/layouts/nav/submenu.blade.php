@@ -10,7 +10,7 @@
         :class="sidebarToggle ? 'xl:hidden' : 'flex'"
     >
         @foreach ($items as $key => $item)
-            <x-synapps::nav.submenu-item
+            <x-synapps::layouts.nav.submenu-item
                 :item="$item"
                 :itemKey="$parentKey . '.' . $key"
             />

@@ -139,6 +139,28 @@ class SynAppsSetup extends Command
                     'dev' => new stdClass,
                 ],
             ],
+            'themes' => [
+                'active' => 'default',
+                'fallback' => 'default',
+                'css' => [
+                    'all' => [],
+                    'app' => [],
+                    'guest' => [],
+                    'frontend' => [],
+                ],
+                'js' => [
+                    'all' => [],
+                    'app' => [],
+                    'guest' => [],
+                    'frontend' => [],
+                ],
+                'headers' => [
+                    'all' => [],
+                    'app' => [],
+                    'guest' => [],
+                    'frontend' => [],
+                ],
+            ],
         ];
 
         if (! file_exists(base_path('synapps'))) {
@@ -169,6 +191,9 @@ class SynAppsSetup extends Command
             json_encode($jsonSystem, JSON_PRETTY_PRINT)
         );
 
+        // Setup default theme
+        $this->setupThemes();
+
         $this->call('vendor:publish', [
             '--tag' => 'synapse-config',
             '--force' => true,
@@ -183,5 +208,27 @@ class SynAppsSetup extends Command
         $this->components->warn("Don't forget to init Git Repository in synapps folder or your project root.");
 
         return 0;
+    }
+
+    /**
+     * Setup default theme
+     */
+    protected function setupThemes(): void
+    {
+        $themesPath = base_path('synapps/resources/themes');
+
+        if (! is_dir($themesPath)) {
+            mkdir($themesPath, 0755, true);
+        }
+
+        // Copy default theme from package stubs
+        $defaultThemeStub = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'themes'.DS.'default');
+        $defaultThemeDest = $themesPath.'/default';
+
+        if (is_dir($defaultThemeStub) && ! is_dir($defaultThemeDest)) {
+            if (SynapseUtils::copyDirectory($defaultThemeStub, $defaultThemeDest)) {
+                $this->components->info('Default theme installed.');
+            }
+        }
     }
 }

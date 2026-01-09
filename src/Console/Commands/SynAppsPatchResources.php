@@ -69,6 +69,9 @@ class SynAppsPatchResources extends Command
         // Patch CSS @source directives for module files
         $cssSourcePatched = $this->patchCssSource();
 
+        // Patch theme assets (CSS/JS)
+        $themePatched = $this->patchThemeAssets();
+
         // Patch vite.config.js
         $vitePatched = $this->patchViteConfig();
 
@@ -81,7 +84,7 @@ class SynAppsPatchResources extends Command
         // Patch package.json to add 'npm run watch' script
         $packageJsonPatched = $this->patchPackageJson();
 
-        if ($jsPatched || $cssPatched || $cssSourcePatched || $vitePatched || $routePatched || $seederPatched || $packageJsonPatched) {
+        if ($jsPatched || $cssPatched || $cssSourcePatched || $themePatched || $vitePatched || $routePatched || $seederPatched || $packageJsonPatched) {
             $this->components->info('Resource files patched.');
         }
     }
@@ -103,6 +106,8 @@ class SynAppsPatchResources extends Command
         $sourceDirectives = [
             "@source '../../synapps/**/*.blade.php';",
             "@source '../../synapps/**/*.js';",
+            "@source '../../synapps/resources/themes/**/*.blade.php';",
+            "@source '../../synapps/resources/themes/**/*.js';",
             "@source '../../vendor/vm-engine/*/**/*.blade.php';",
             "@source '../../vendor/vm-engine/*/**/*.js';",
             "@source '../../vendor/*/synmod-*/**/*.blade.php';",
@@ -149,6 +154,86 @@ class SynAppsPatchResources extends Command
     }
 
     /**
+     * Patch app.css and app.js to include active theme files
+     */
+    protected function patchThemeAssets(): bool
+    {
+        // Get active theme from config (fallback to default if config not loaded)
+        $activeTheme = config('synapps.apps.themes.active', 'default');
+        $themePath = synapps_path("resources/themes/{$activeTheme}");
+
+        if (! is_dir($themePath)) {
+            return false;
+        }
+
+        $patched = false;
+
+        // Patch CSS
+        if (file_exists($themePath.'/css/theme.css')) {
+            $cssPath = resource_path('css/app.css');
+            $cssLine = "@import '../../synapps/resources/themes/{$activeTheme}/css/theme.css';";
+
+            $content = file_get_contents($cssPath);
+
+            // Remove old theme imports
+            $content = preg_replace(
+                "/@import\s+['\"]\.\.\/\.\.\/synapps\/resources\/themes\/.*?\/css\/theme\.css['\"]\s*;?\n?/",
+                '',
+                $content
+            );
+
+            // Add new theme import after synapps.css import
+            if (strpos($content, $cssLine) === false) {
+                $content = preg_replace(
+                    "/(@import\s+['\"]\.\.\/\.\.\/synapps\/resources\/css\/synapps\.css['\"]\s*;)/",
+                    "$1\n{$cssLine}",
+                    $content,
+                    1,
+                    $count
+                );
+
+                if ($count > 0) {
+                    file_put_contents($cssPath, $content);
+                    $patched = true;
+                }
+            }
+        }
+
+        // Patch JS
+        if (file_exists($themePath.'/js/theme.js')) {
+            $jsPath = resource_path('js/app.js');
+            $jsLine = "import '../../synapps/resources/themes/{$activeTheme}/js/theme.js';";
+
+            $content = file_get_contents($jsPath);
+
+            // Remove old theme imports
+            $content = preg_replace(
+                "/import\s+['\"]\.\.\/\.\.\/synapps\/resources\/themes\/.*?\/js\/theme\.js['\"]\s*;?\n?/",
+                '',
+                $content
+            );
+
+            // Add new theme import after synapps.js import
+            if (strpos($content, $jsLine) === false) {
+                $content = preg_replace(
+                    "/(import\s+['\"]\.\.\/\.\.\/synapps\/resources\/js\/synapps\.js['\"]\s*;)/",
+                    "$1\n{$jsLine}",
+                    $content,
+                    1,
+                    $count
+                );
+
+                if ($count > 0) {
+                    file_put_contents($jsPath, $content);
+                    $patched = true;
+                }
+            }
+        }
+
+        return $patched;
+    }
+
+    /**
      * Patch vite.config.js to add static asset copying
      */
     protected function patchViteConfig(): bool
@@ -192,16 +277,30 @@ viteStaticCopy({
                     src: 'synapps/resources/assets/**/*',
                     dest: '../assets'
                 },
+                // Copy theme assets
+                ...glob.sync('synapps/resources/themes/*/assets').map(dir => {
+                    const normalizedDir = dir.replace(/\\/g, '/');
+                    return {
+                        src: `${normalizedDir}/**/*`,
+                        dest: `../assets/themes/${normalizedDir.split('/')[3]}`
+                    };
+                }),
                 // Copy from vendor/*/synmod-*/resources/assets
-                ...glob.sync('vendor/*/synmod-*/resources/assets').map(dir => ({
-                    src: `${dir}/**/*`,
-                    dest: '../assets'
-                })),
+                ...glob.sync('vendor/*/synmod-*/resources/assets').map(dir => {
+                    const normalizedDir = dir.replace(/\\/g, '/');
+                    return {
+                        src: `${normalizedDir}/**/*`,
+                        dest: '../assets'
+                    };
+                }),
                 // Copy from vendor/vm-engine/synapps-*/resources/assets
-                ...glob.sync('vendor/vm-engine/synapps-*/resources/assets').map(dir => ({
-                    src: `${dir}/**/*`,
-                    dest: '../assets'
-                }))
+                ...glob.sync('vendor/vm-engine/synapps-*/resources/assets').map(dir => {
+                    const normalizedDir = dir.replace(/\\/g, '/');
+                    return {
+                        src: `${normalizedDir}/**/*`,
+                        dest: '../assets'
+                    };
+                })
             ]
         })
 PLUGIN;
@@ -215,37 +314,36 @@ PLUGIN;
             );
 
             $patched = true;
-        }
+        } else {
+            // viteStaticCopy already exists, check if theme assets line is missing
+            if (strpos($content, 'synapps/resources/themes/*/assets') === false) {
+                // Find the targets array and add theme assets line
+                $themeAssetsLine = <<<'THEME'
+                // Copy theme assets
+                ...glob.sync('synapps/resources/themes/*/assets').map(dir => {
+                    const normalizedDir = dir.replace(/\\/g, '/');
+                    return {
+                        src: `${normalizedDir}/**/*`,
+                        dest: `../assets/themes/${normalizedDir.split('/')[3]}`
+                    };
+                }),
+THEME;
 
-        // Check if build.watch needs to be patched to prevent infinite rebuild loop
-        if (strpos($content, 'build:') === false || strpos($content, 'build.watch') === false) {
-            // Add build.watch configuration before server configuration
-            $buildWatchConfig = <<<'BUILD'
-build: {
-        watch: {
-            chokidar: {
-                ignored: [
-                    '**/storage/framework/views/**',
-                    '**/public/build/**',
-                    '**/public/assets/**',
-                    '**/public/**'
-                ],
-            },
-        },
-    },
+                // Try to add after the synapps/resources/assets entry
+                $pattern = '/(src:\s*[\'"]synapps\/resources\/assets\/\*\*\/\*[\'"],?\s*dest:\s*[\'"]\.\.\/assets[\'"].*?\},?)/s';
+                $replacement = "$1\n".$themeAssetsLine;
 
-BUILD;
+                $content = preg_replace(
+                    $pattern,
+                    $replacement,
+                    $content,
+                    1,
+                    $count
+                );
 
-            $content = preg_replace(
-                '/(server:\s*\{)/',
-                $buildWatchConfig.'$1',
-                $content,
-                1,
-                $count
-            );
-
-            if ($count > 0) {
-                $patched = true;
+                if ($count > 0) {
+                    $patched = true;
+                }
             }
         }
 

@@ -119,3 +119,54 @@ if (! function_exists('page_title')) {
         return $title.' '.$separator.' '.config('synapps.apps.title', config('app.name'));
     }
 }
+
+if (! function_exists('theme_asset')) {
+    /**
+     * Get URL to theme asset
+     *
+     * @param  string  $path  Path relative to theme assets folder (e.g., 'images/logo.svg')
+     * @param  string|null  $theme  Theme name (null = active theme)
+     */
+    function theme_asset(string $path, ?string $theme = null): string
+    {
+        $theme = $theme ?? config('synapps.apps.themes.active', 'default');
+        $path = ltrim($path, '/');
+
+        return asset("assets/themes/{$theme}/{$path}");
+    }
+}
+
+if (! function_exists('theme_path')) {
+    /**
+     * Get absolute path to theme directory
+     *
+     * @param  string  $path  Path relative to theme folder
+     * @param  string|null  $theme  Theme name (null = active theme)
+     */
+    function theme_path(string $path = '', ?string $theme = null): string
+    {
+        $theme = $theme ?? config('synapps.apps.themes.active', 'default');
+
+        return synapps_path('resources/themes/'.$theme.($path ? '/'.ltrim($path, '/') : ''));
+    }
+}
+
+if (! function_exists('active_theme')) {
+    /**
+     * Get active theme name
+     */
+    function active_theme(): string
+    {
+        return config('synapps.apps.themes.active', 'default');
+    }
+}
+
+if (! function_exists('theme_service')) {
+    /**
+     * Get ThemeService instance
+     */
+    function theme_service(): \VmEngine\Synapse\Services\ThemeService
+    {
+        return app('synapse.theme');
+    }
+}

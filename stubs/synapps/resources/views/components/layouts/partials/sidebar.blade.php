@@ -61,7 +61,7 @@
                 </h3>
                 <ul class="menu">
                     @foreach (synav()->backend() as $key => $menu)
-                        <x-synapps::nav.menu-item
+                        <x-synapps::layouts.nav.menu-item
                             :item="$menu"
                             :itemKey="$key"
                         />

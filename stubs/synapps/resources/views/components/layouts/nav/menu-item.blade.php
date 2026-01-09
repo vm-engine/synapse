@@ -19,7 +19,7 @@
         @endif
 
         @isset($item['sub'])
-            <x-synapps::nav.arrow :itemKey="$itemKey" />
+            <x-synapps::layouts.nav.arrow :itemKey="$itemKey" />
         @endisset
 
         <span
@@ -31,7 +31,7 @@
     </a>
 
     @isset($item['sub'])
-        <x-synapps::nav.submenu
+        <x-synapps::layouts.nav.submenu
             :items="$item['sub']"
             :parentKey="$itemKey"
         />

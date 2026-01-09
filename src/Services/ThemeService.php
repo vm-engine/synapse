@@ -1,0 +1,93 @@
+<?php
+
+namespace VmEngine\Synapse\Services;
+
+class ThemeService
+{
+    /**
+     * Render theme CDN stylesheets for a specific layout type
+     */
+    public function renderStyles(?string $layoutType = null): string
+    {
+        $layoutType = $layoutType ?? $this->getCurrentLayoutType();
+        $styles = $this->getResources('css', $layoutType);
+
+        return collect($styles)
+            ->map(fn ($url) => '<link rel="stylesheet" href="'.e($url).'">')
+            ->join("\n    ");
+    }
+
+    /**
+     * Render theme CDN scripts for a specific layout type
+     */
+    public function renderScripts(?string $layoutType = null): string
+    {
+        $layoutType = $layoutType ?? $this->getCurrentLayoutType();
+        $scripts = $this->getResources('js', $layoutType);
+
+        return collect($scripts)
+            ->map(fn ($url) => '<script src="'.e($url).'"></script>')
+            ->join("\n    ");
+    }
+
+    /**
+     * Render theme CDN headers for a specific layout type
+     */
+    public function renderHeaders(?string $layoutType = null): string
+    {
+        $layoutType = $layoutType ?? $this->getCurrentLayoutType();
+
+        return collect($this->getResources('headers', $layoutType))
+            ->join("\n    ");
+    }
+
+    /**
+     * Get CDN resources (css/js/headers) for a specific layout type
+     */
+    protected function getResources(string $type, string $layoutType): array
+    {
+        $config = config("synapps.apps.themes.{$type}", []);
+
+        // Merge 'all' resources with layout-specific resources
+        return array_merge(
+            $config['all'] ?? [],
+            $config[$layoutType] ?? []
+        );
+    }
+
+    /**
+     * Detect current layout type based on URL prefix
+     */
+    public function getCurrentLayoutType(): string
+    {
+        $path = request()->path();
+
+        // Check if URL starts with backend prefix (from synapps-auth config)
+        $backendPrefix = ltrim(config('synapps.auth.routes.backend_prefix', '/apps'), '/');
+
+        if ($backendPrefix && str_starts_with($path, $backendPrefix)) {
+            return 'app';
+        }
+
+        // Default to frontend layout
+        return 'frontend';
+    }
+
+    /**
+     * Get active theme name
+     */
+    public function getActiveTheme(): string
+    {
+        return config('synapps.apps.themes.active', 'default');
+    }
+
+    /**
+     * Get absolute path to theme file/directory
+     */
+    public function getThemePath(string $path = '', ?string $theme = null): string
+    {
+        $theme = $theme ?? $this->getActiveTheme();
+
+        return synapps_path('resources/themes/'.$theme.($path ? '/'.ltrim($path, '/') : ''));
+    }
+}

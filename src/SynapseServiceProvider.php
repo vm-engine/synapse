@@ -42,9 +42,11 @@ use VmEngine\Synapse\Console\Commands\SynAppsConfig;
 use VmEngine\Synapse\Console\Commands\SynAppsCopyResources;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
+use VmEngine\Synapse\Console\Commands\SynAppsMakeTheme;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchTests;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
+use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Console\Commands\SynapseDbConfig;
 use VmEngine\Synapse\Console\Commands\SynapseDbLang;
@@ -76,6 +78,10 @@ class SynapseServiceProvider extends ServiceProvider
                 synapps_path('resources/assets') => public_path('assets'),
             ], 'synapse-assets');
 
+            $this->publishes([
+                __DIR__.'/../stubs/themes/default' => base_path('synapps/resources/themes/default'),
+            ], 'synapse-theme');
+
             $this->commands([
                 SynAppsSetup::class,
                 SynAppsDiscover::class,
@@ -84,7 +90,9 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsPatchTests::class,
                 SynAppsLinkErrors::class,
                 SynAppsConfig::class,
+                SynAppsReconfig::class,
                 SynAppsPublishSettings::class,
+                SynAppsMakeTheme::class,
                 SynapseDbConfig::class,
                 SynapseDbLang::class,
                 // Generator Commands
@@ -157,6 +165,9 @@ class SynapseServiceProvider extends ServiceProvider
         });
         $this->app->singleton('dblang', function ($app) {
             return new DbLang;
+        });
+        $this->app->singleton('synapse.theme', function ($app) {
+            return new Services\ThemeService;
         });
         if (SynapseUtils::isSynAppsAutoloaded()) {
             $this->bindAlias();
