@@ -60,7 +60,7 @@ class SynAppsMakeTheme extends Command
         $this->line("  1. Edit {$themePath}/theme.json");
         $this->line("  2. Customize {$themePath}/css/theme.css");
         $this->line("  3. Update {$themePath}/layouts/*.blade.php");
-        $this->line("  4. Update synapps/config/apps.json to set active theme:");
+        $this->line('  4. Update synapps/config/apps.json to set active theme:');
         $this->line('     { "themes": { "active": "'.$name.'" } }');
         $this->line('  5. Run: php artisan synapps:config');
         $this->line('  6. Run: npm run build');
