@@ -42,7 +42,7 @@ if (! function_exists('human_filesize')) {
     function human_filesize($bytes, $decimals = 2)
     {
         $sz = 'BKMGTP';
-        $factor = (int) floor((strlen($bytes) - 1) / 3);
+        $factor = $bytes > 0 ? (int) floor(log($bytes, 1024)) : 0;
 
         return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
     }
@@ -107,7 +107,7 @@ if (! function_exists('page_title')) {
     /**
      * Add Title to Main App Title
      *
-     * @param  string  $title
+     * @param  string|array  $title
      * @param  string  $separator
      */
     function page_title($title, $separator = '-'): string
@@ -168,5 +168,45 @@ if (! function_exists('theme_service')) {
     function theme_service(): \VmEngine\Synapse\Services\ThemeService
     {
         return app('synapse.theme');
+    }
+}
+
+if (! function_exists('int2roman')) {
+    /**
+     * Convert Integer to Roman Numerical
+     */
+    function int2roman(int $integer): string
+    {
+        // Create a lookup array that contains all of the Roman numerals and their values
+        $lookup = [
+            'M' => 1000,
+            'CM' => 900,
+            'D' => 500,
+            'CD' => 400,
+            'C' => 100,
+            'XC' => 90,
+            'L' => 50,
+            'XL' => 40,
+            'X' => 10,
+            'IX' => 9,
+            'V' => 5,
+            'IV' => 4,
+            'I' => 1,
+        ];
+
+        $result = '';
+        // Ensure the input is an integer
+        $integer = intval($integer);
+
+        foreach ($lookup as $roman => $value) {
+            // Determine the number of matches
+            $matches = intval($integer / $value);
+            // Add the same number of characters to the result string
+            $result .= str_repeat($roman, $matches);
+            // Set the integer to be the remainder
+            $integer = $integer % $value;
+        }
+
+        return $result;
     }
 }

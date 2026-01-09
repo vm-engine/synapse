@@ -36,6 +36,7 @@
       "Bash(tree:*)",
       "Bash(test:*)",
       "Bash(./vendor/bin/synmod-make:*)",
+      "Bash(git log:*)",
       "Bash(dir:*)",
       "Skill(commit-and-push)",
       "Bash(git pull:*)",

@@ -4,21 +4,23 @@
 ])
 
 @php
-    $maxWidthClass = [
-        'sm' => 'max-w-sm',
-        'md' => 'max-w-md',
-        'lg' => 'max-w-lg',
-        'xl' => 'max-w-xl',
-        '2xl' => 'max-w-2xl',
-        '3xl' => 'max-w-3xl',
-        '4xl' => 'max-w-4xl',
-        '5xl' => 'max-w-5xl',
-        '6xl' => 'max-w-6xl',
-        '7xl' => 'max-w-7xl',
-    ][$maxWidth] ?? 'max-w-xl';
+    $maxWidthClass =
+        [
+            'sm' => 'max-w-sm',
+            'md' => 'max-w-md',
+            'lg' => 'max-w-lg',
+            'xl' => 'max-w-xl',
+            '2xl' => 'max-w-2xl',
+            '3xl' => 'max-w-3xl',
+            '4xl' => 'max-w-4xl',
+            '5xl' => 'max-w-5xl',
+            '6xl' => 'max-w-6xl',
+            '7xl' => 'max-w-7xl',
+        ][$maxWidth] ?? 'max-w-xl';
 @endphp
 
 <div
+    style="display: none;"
     x-data="{
         show: false,
         open() {
@@ -32,7 +34,6 @@
     @close-modal-{{ $name }}.window="close()"
     @keydown.escape.window="show && close()"
     x-show="show"
-    style="display: none;"
     x-cloak
     {{ $attributes }}
 >
@@ -51,12 +52,12 @@
 
     <!-- Modal Container -->
     <div
-        class="fixed inset-0 z-[51] flex items-center justify-center p-4 overflow-y-auto"
+        class="max-h-11/12 fixed inset-0 z-[51] flex items-center justify-center overflow-y-auto p-4"
         x-show="show"
         @click.self="close()"
     >
         <div
-            class="relative w-full {{ $maxWidthClass }} bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+            class="{{ $maxWidthClass }} relative w-full rounded-2xl bg-white shadow-xl dark:bg-gray-800"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
