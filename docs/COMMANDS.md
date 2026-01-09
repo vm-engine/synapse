@@ -12,6 +12,7 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
+| `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
 | `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
@@ -204,6 +205,105 @@ php artisan synapps:link-errors
 - After fresh installation
 - After customizing error pages
 - **Automatically called by `synapps:setup`**
+
+---
+
+## synapps:make-theme
+
+Create a new theme from an existing theme template.
+
+```bash
+php artisan synapps:make-theme {name} {--copy-from=default}
+```
+
+### Arguments
+
+- `name` - Theme name (will be converted to slug format)
+
+### Options
+
+- `--copy-from=default` - Source theme to copy from (default: `default`)
+
+### What it does
+
+1. Creates new theme directory at `synapps/resources/themes/{name}/`
+2. Copies entire theme structure from source theme
+3. Updates `theme.json` with new theme metadata:
+   - Sets `id` to theme name
+   - Sets `name` to human-readable title
+   - Resets `version` to 1.0.0
+   - Clears `author` field for customization
+
+### Examples
+
+```bash
+# Create theme from default template
+php artisan synapps:make-theme my-theme
+
+# Create theme based on another custom theme
+php artisan synapps:make-theme dark-theme --copy-from=custom-theme
+```
+
+### Next Steps
+
+After creating a theme:
+
+1. **Edit theme metadata**: `synapps/resources/themes/{name}/theme.json`
+2. **Customize styles**: `synapps/resources/themes/{name}/css/theme.css`
+3. **Update layouts**: `synapps/resources/themes/{name}/layouts/*.blade.php`
+4. **Add Alpine.js components**: `synapps/resources/themes/{name}/js/theme.js`
+5. **Replace logo**: `synapps/resources/themes/{name}/assets/images/logo.svg`
+6. **Activate theme** in `synapps/config/apps.json`:
+   ```json
+   {
+     "themes": {
+       "active": "my-theme",
+       "fallback": "default"
+     }
+   }
+   ```
+7. **Regenerate config**: `php artisan synapps:config`
+8. **Build assets**: `npm run build`
+
+### Theme Structure
+
+The command creates this directory structure:
+
+```
+synapps/resources/themes/{name}/
+├── theme.json              # Theme metadata and CDN resources
+├── README.md               # Theme documentation
+├── assets/
+│   ├── images/
+│   │   ├── logo.svg       # Light mode logo
+│   │   └── logo-dark.svg  # Dark mode logo
+│   └── fonts/             # Custom web fonts (optional)
+├── css/
+│   └── theme.css          # Custom Tailwind v4 styles
+├── js/
+│   └── theme.js           # Alpine.js components and utilities
+└── layouts/
+    ├── app.blade.php      # Backend/admin layout
+    ├── frontend.blade.php # Public website layout
+    └── guest.blade.php    # Authentication pages layout
+```
+
+### When to run
+
+- When creating a new custom theme
+- When duplicating an existing theme for modification
+- When setting up a multi-tenant application with theme per tenant
+
+### Related Commands
+
+- `php artisan synapps:config` - Regenerate config after activating theme
+- `npm run build` - Build theme assets for production
+- `npm run dev` - Build theme assets with hot reload
+
+### See Also
+
+- [Theme System Documentation](../docs/THEMES.md) - Complete theming guide
+- [Configuration](../docs/CONFIGURATION.md) - Theme configuration options
 
 ---
 

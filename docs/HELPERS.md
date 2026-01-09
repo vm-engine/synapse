@@ -58,6 +58,144 @@ See [Database Services](SERVICES.md#dblang-service) for more details.
 
 ---
 
+## Theme Helpers
+
+### theme_asset()
+
+Get URL to theme asset file (images, fonts, CSS, JS, etc.).
+
+```php
+// Get logo URL from active theme
+$logo = theme_asset('images/logo.svg');
+// Returns: http://localhost/assets/themes/default/images/logo.svg
+
+// Get dark mode logo
+$darkLogo = theme_asset('images/logo-dark.svg');
+// Returns: http://localhost/assets/themes/default/images/logo-dark.svg
+
+// Get asset from specific theme
+$customBanner = theme_asset('images/banner.jpg', 'custom-theme');
+// Returns: http://localhost/assets/themes/custom-theme/images/banner.jpg
+
+// Get font file
+$font = theme_asset('fonts/custom-font.woff2');
+// Returns: http://localhost/assets/themes/default/fonts/custom-font.woff2
+```
+
+**Parameters:**
+- `$path` (string) - Path relative to theme assets folder
+- `$theme` (string|null) - Theme name (null = active theme)
+
+**Returns:** string - Public URL to theme asset
+
+**Usage in Blade:**
+```blade
+<img src="{{ theme_asset('images/logo.svg') }}" alt="Logo">
+
+<!-- Dark mode logo variant -->
+<img src="{{ theme_asset('images/logo-dark.svg') }}"
+     alt="Logo"
+     class="hidden dark:block">
+```
+
+---
+
+### theme_path()
+
+Get absolute filesystem path to theme directory or file.
+
+```php
+// Get theme root path
+$themePath = theme_path();
+// Returns: /app/synapps/resources/themes/default
+
+// Get specific file path
+$cssPath = theme_path('css/theme.css');
+// Returns: /app/synapps/resources/themes/default/css/theme.css
+
+// Get path from specific theme
+$layoutPath = theme_path('layouts/app.blade.php', 'custom-theme');
+// Returns: /app/synapps/resources/themes/custom-theme/layouts/app.blade.php
+
+// Check if theme file exists
+if (file_exists(theme_path('css/custom.css'))) {
+    // Theme has custom CSS
+}
+
+// Load theme configuration
+$config = json_decode(file_get_contents(theme_path('theme.json')), true);
+```
+
+**Parameters:**
+- `$path` (string) - Path relative to theme folder (empty = theme root)
+- `$theme` (string|null) - Theme name (null = active theme)
+
+**Returns:** string - Absolute filesystem path
+
+---
+
+### active_theme()
+
+Get the currently active theme name.
+
+```php
+// Get active theme
+$theme = active_theme();
+// Returns: 'default' or 'custom-theme'
+
+// Conditional rendering based on theme
+if (active_theme() === 'dark-theme') {
+    // Load extra dark mode styles
+}
+
+// Use in Blade
+@if(active_theme() === 'custom-theme')
+    <link rel="stylesheet" href="/extra-styles.css">
+@endif
+```
+
+**Parameters:** None
+
+**Returns:** string - Active theme name
+
+---
+
+### theme_service()
+
+Get the ThemeService instance.
+
+```php
+// Get theme service
+$themeService = theme_service();
+
+// Get active theme name
+$theme = theme_service()->getActiveTheme();
+
+// Get current layout type (auto-detected from URL)
+$layoutType = theme_service()->getCurrentLayoutType();
+// Returns: 'app', 'frontend', or 'guest'
+
+// Resolve theme layout with fallback
+$view = theme_service()->resolveThemeLayout('app');
+// Returns: 'theme::app' or 'theme-fallback::app' or 'synapps::components.layouts.app'
+
+// Render CDN styles
+$styles = theme_service()->renderStyles('app');
+// Returns: '<link rel="stylesheet" href="...">...'
+
+// Render CDN scripts
+$scripts = theme_service()->renderScripts('app');
+// Returns: '<script src="..."></script>...'
+```
+
+**Parameters:** None
+
+**Returns:** ThemeService - Theme service instance
+
+See [Theme Service](SERVICES.md#themeservice) and [Theme System](THEMES.md) for more details.
+
+---
+
 ## Path Helpers
 
 ### synapps_path()
@@ -411,6 +549,26 @@ $maintenanceMode = dbconf('app.maintenance_mode', false);
 
 // Use ___() for all user-facing text that needs translation
 echo ___('welcome.message');
+```
+
+### Theme Helpers
+
+```php
+// ✅ Good - Uses helper function
+<img src="{{ theme_asset('images/logo.svg') }}" alt="Logo">
+
+// ❌ Bad - Hardcoded path
+<img src="/assets/themes/default/images/logo.svg" alt="Logo">
+
+// ✅ Good - Checks file existence
+if (file_exists(theme_path('css/custom.css'))) {
+    echo '<link rel="stylesheet" href="'.theme_asset('css/custom.css').'">';
+}
+
+// ✅ Good - Theme-specific behavior
+if (active_theme() === 'dark-theme') {
+    // Load additional dark mode scripts
+}
 ```
 
 ### Path Helpers

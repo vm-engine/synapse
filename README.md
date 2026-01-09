@@ -7,6 +7,7 @@ A sophisticated modular architecture system for Laravel applications that enable
 - **Dual Module System**: Support for directory-based (`synapps/modules/`) and package-based (`vendor/*/synmod-*`) modules
 - **Automatic Discovery**: Intelligent module and dependency detection
 - **Configuration Management**: Builder pattern with lifecycle hooks, `env::` prefix support, and override system
+- **Theme System**: Customizable themes with multiple layouts, CDN resources, and fallback support
 - **Database Services**: DbConfig and DbLang for runtime configuration and multi-language support
 - **Blade Components**: Pre-built UI components for forms and common patterns
 - **Security Traits**: WithDeleteToken for secure delete operations
@@ -66,6 +67,7 @@ DbConfig::set('app.site_name', 'My Site');
 
 ### Core Features
 
+- **[Theme System](docs/THEMES.md)** - Customizable themes with layouts, CDN resources, and dark mode
 - **[Database Services](docs/SERVICES.md)** - DbConfig, DbLang, and Breadcrumbs services
 - **[Blade Components](docs/COMPONENTS.md)** - UI components for forms, alerts, and more
 - **[Helper Functions](docs/HELPERS.md)** - Global helpers for common tasks
@@ -120,6 +122,9 @@ php artisan synapse:db-config app.maintenance_mode true
 # Manage translations
 php artisan synapse:db-lang welcome.title "Welcome!" --language=en
 
+# Create and manage themes
+php artisan synapps:make-theme my-theme --copy-from=default
+
 # Publish settings module
 php artisan synapps:publish-settings
 ```
@@ -141,6 +146,11 @@ $url = template_assets('css', 'style.css');
 
 // Routing
 <a href="/" class="{{ is_route('home') }}">Home</a>
+
+// Themes
+$theme = active_theme();
+$logoUrl = theme_asset('images/logo.svg');
+$cssPath = theme_path('css/theme.css');
 ```
 
 ### Blade Components

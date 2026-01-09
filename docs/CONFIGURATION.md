@@ -454,8 +454,144 @@ Located in `synapps/config/override/`:
 
 ---
 
+---
+
+## Theme Configuration
+
+Synapse provides a comprehensive theme system with configuration at both application and theme levels.
+
+### Application-Level Configuration
+
+Configure themes in `synapps/config/apps.json`:
+
+```json
+{
+  "themes": {
+    "active": "default",
+    "fallback": "default",
+    "css": {
+      "all": [],
+      "app": [],
+      "frontend": [],
+      "guest": []
+    },
+    "js": {
+      "all": [],
+      "app": [],
+      "frontend": [],
+      "guest": []
+    },
+    "headers": {
+      "all": [],
+      "app": [],
+      "frontend": [],
+      "guest": []
+    }
+  }
+}
+```
+
+**Configuration Keys:**
+
+- `active` - Currently active theme name
+- `fallback` - Fallback theme when active theme is missing
+- `css` - Additional CSS files to load (CDN URLs)
+- `js` - Additional JavaScript files to load (CDN URLs)
+- `headers` - Additional HTML headers (meta tags, etc.)
+
+**Layout Types:**
+
+- `all` - Loaded on every page
+- `app` - Backend/admin pages (URL matches backend prefix)
+- `frontend` - Public website pages
+- `guest` - Authentication pages (login, register)
+
+### Theme-Level Configuration
+
+Each theme has its own `theme.json` file in `synapps/resources/themes/{theme-name}/`:
+
+```json
+{
+  "id": "my-theme",
+  "name": "My Custom Theme",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "A custom theme",
+  "framework": "tailwind",
+  "tailwind_version": "4.x",
+  "alpine_version": "3.x",
+  "layouts": ["app", "guest", "frontend"],
+
+  "css": {
+    "all": ["https://fonts.googleapis.com/css2?family=Inter"],
+    "app": [],
+    "frontend": []
+  },
+
+  "js": {
+    "all": [],
+    "app": []
+  },
+
+  "headers": {
+    "all": ["<meta name=\"theme-color\" content=\"#4F46E5\">"]
+  }
+}
+```
+
+### Resource Merging
+
+During config generation, Synapse automatically:
+
+1. Loads active theme's `theme.json`
+2. Merges theme resources with application-level resources
+3. Stores merged configuration in compiled `apps.json`
+
+**Merge Order:**
+```
+Application resources (apps.json)
+  + Theme resources (theme.json)
+  = Final configuration (compiled/apps.json)
+```
+
+### Accessing Theme Configuration
+
+```php
+// Get active theme name
+$theme = config('synapps.apps.themes.active');
+
+// Get theme metadata
+$metadata = config('synapps.apps.themes.metadata');
+
+// Get CSS resources for specific layout
+$appCss = config('synapps.apps.themes.css.app', []);
+
+// Get JS resources for all layouts
+$allJs = config('synapps.apps.themes.js.all', []);
+```
+
+### Environment Variables in Theme Config
+
+Theme configuration supports `env::` prefix:
+
+```json
+{
+  "css": {
+    "all": ["env::CDN_FONT_URL"],
+    "app": ["env::ADMIN_CSS_URL"]
+  },
+  "headers": {
+    "all": ["<meta name=\"api-key\" content=\"env::API_KEY\">"]
+  }
+}
+```
+
+---
+
 ## See Also
 
-- [Artisan Commands](COMMANDS.md) - `synapps:config` command
+- [Theme System Documentation](THEMES.md) - Complete theming guide
+- [Artisan Commands](COMMANDS.md) - `synapps:config` and `synapps:make-theme` commands
 - [Installation Guide](INSTALLATION.md) - Initial configuration setup
 - [Creating Modules](MODULES.md) - Module configuration with `module.json`
+- [Helper Functions](HELPERS.md) - Theme helper functions

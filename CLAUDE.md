@@ -327,6 +327,80 @@ $text = ___('welcome.title', 'id');
 **Multi-language auto-creation:**
 When `synapps.apps.multi_language` is `true`, setting a translation auto-creates empty entries for all `enabled_languages`.
 
+### ThemeService
+
+Theme management service for customizable application themes with multiple layouts and CDN resource support.
+
+```php
+use VmEngine\Synapse\Services\ThemeService;
+
+$themeService = app('synapse.theme');
+
+// Get active theme name
+$theme = $themeService->getActiveTheme();
+// → 'default'
+
+// Get current layout type (auto-detected from URL)
+$layoutType = $themeService->getCurrentLayoutType();
+// → 'app', 'frontend', or 'guest'
+
+// Resolve theme layout with fallback chain
+$view = $themeService->resolveThemeLayout('app');
+// → 'theme::app' or 'theme-fallback::app' or 'synapps::components.layouts.app'
+
+// Get theme path
+$path = $themeService->getThemePath('css/theme.css');
+// → '/path/to/synapps/resources/themes/default/css/theme.css'
+
+// Render CDN styles for specific layout
+$styles = $themeService->renderStyles('app');
+// → '<link rel="stylesheet" href="...">...'
+
+// Render CDN scripts
+$scripts = $themeService->renderScripts('app');
+// → '<script src="..."></script>...'
+
+// Render CDN headers
+$headers = $themeService->renderHeaders('app');
+// → '<meta name="theme-color" content="...">...'
+```
+
+**Service binding:** `'synapse.theme'`
+**Layout types:** `'app'` (backend), `'frontend'` (public), `'guest'` (auth)
+**Theme location:** `synapps/resources/themes/{theme-name}/`
+**Command:** `php artisan synapps:make-theme theme-name --copy-from=default`
+
+**Theme Structure:**
+```
+themes/{name}/
+├── theme.json          # Metadata and CDN resources
+├── layouts/
+│   ├── app.blade.php
+│   ├── frontend.blade.php
+│   └── guest.blade.php
+├── css/theme.css       # Custom Tailwind v4 styles
+├── js/theme.js         # Alpine.js components
+└── assets/             # Images, fonts, etc.
+```
+
+**Fallback Chain:**
+1. Active theme layouts (`synapps/resources/themes/{active}/`)
+2. Fallback theme layouts (`synapps/resources/themes/{fallback}/`)
+3. Synapse default layouts (`synapps::components.layouts.*`)
+
+**Blade Directives:**
+- `@themeStyles('app')` - Render CDN stylesheet links
+- `@themeScripts('app')` - Render CDN script tags
+- `@themeHeaders('app')` - Render CDN headers (meta tags)
+
+**Helper Functions:**
+- `theme_asset($path, $theme)` - Get theme asset URL
+- `theme_path($path, $theme)` - Get theme filesystem path
+- `active_theme()` - Get active theme name
+- `theme_service()` - Get ThemeService instance
+
+See [docs/THEMES.md](docs/THEMES.md) for complete theming guide.
+
 ### Breadcrumbs
 ```php
 $breadcrumbs = Breadcrumbs::make('Home', '/')
@@ -347,6 +421,12 @@ $breadcrumbs = Breadcrumbs::make('Home', '/')
 **Database:**
 - `dbconf($configString, $default, $force)` - Get/set database config. Use `!` prefix to bypass cache
 - `___($key, $languageCode)` - Get database translation
+
+**Theme:**
+- `theme_asset($path, $theme)` - Get URL to theme asset (e.g., images, fonts)
+- `theme_path($path, $theme)` - Get absolute filesystem path to theme file/directory
+- `active_theme()` - Get active theme name
+- `theme_service()` - Get ThemeService instance
 
 **Path:**
 - `synapps_path($path)` - Absolute path to synapps
