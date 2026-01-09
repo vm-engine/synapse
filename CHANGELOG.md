@@ -5,6 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-01-09
+
+### Added
+
+**Documentation:**
+- Comprehensive theme system documentation (700+ lines)
+  - New `docs/THEMES.md` - Complete theming guide with examples
+  - Theme structure and file organization
+  - ThemeService API reference with all methods
+  - Helper functions documentation (`theme_asset`, `theme_path`, `active_theme`, `theme_service`)
+  - Blade directives (`@themeStyles`, `@themeScripts`, `@themeHeaders`)
+  - Step-by-step guide for creating custom themes
+  - Theme fallback system explanation
+  - Asset management with Vite
+  - Component library and Alpine.js components
+  - Dark mode support and troubleshooting
+  - Best practices and real-world examples
+- Updated `README.md` with theme system features and quick reference
+- Updated `CLAUDE.md` with ThemeService architecture and helpers
+- Updated `docs/COMMANDS.md` with `synapps:make-theme` command documentation
+- Updated `docs/CONFIGURATION.md` with theme configuration sections
+- Updated `docs/HELPERS.md` with theme helper function examples
+
+**Theme Templates:**
+- New "Application" theme template added to stubs
+  - Modern application-focused layout
+  - Complete component library (buttons, cards, forms, etc.)
+  - Sidebar menu with dark mode toggle
+  - Header navigation with user menu
+  - Guest authentication layouts
+  - Fully customizable CSS and JavaScript
+
+### Fixed
+
+**Code Quality:**
+- Fixed missing return statement in `ThemeService::getLayoutView()` method
+- Resolved PHPStan level 5 analysis error
+- Applied Pint formatting to `StubRenderer.php`
+- All 222 tests passing
+
+**Component Updates:**
+- Improved `adv-select.blade.php` component structure
+- Enhanced `select.blade.php` component styling
+- Updated `SynapseViewServiceProvider` for better theme support
+
+### Changed
+
+**Documentation:**
+- All documentation now cross-referenced with proper links
+- Consistent formatting and style across all docs
+- Designer-friendly examples (no PHP knowledge required for basic customization)
+- Developer-friendly API and architecture documentation
+
+### Benefits
+
+- **Complete Documentation:** Developers and designers have comprehensive guides
+- **Better Developer Experience:** Clear examples and API references
+- **Easier Theming:** Step-by-step instructions for creating custom themes
+- **Code Quality:** All static analysis checks passing
+- **Stability:** Full test coverage with 222 passing tests
+
 ## [1.4.0] - 2026-01-09
 
 ### Added
