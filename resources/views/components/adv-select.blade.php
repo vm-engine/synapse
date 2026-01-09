@@ -90,7 +90,7 @@ Version: 1.0.0
 --}}
 
 <div
-    class="relative w-full"
+    class="adv-select-container relative w-full"
     x-data="{
         search: '',
         results: [],
@@ -112,7 +112,7 @@ Version: 1.0.0
             if (this.selected && this.selected.length > 0) {
                 this.syncWithWire();
             }
-
+    
             // Reopen dropdown after Livewire updates
             Livewire.hook('message.processed', () => {
                 if (document.activeElement === this.$refs.search && this.search
@@ -121,7 +121,7 @@ Version: 1.0.0
                     this.open = true;
                 }
             });
-
+    
             // Listen for reset event
             window.addEventListener('reset-tag-input', () => {
                 this.clearSelection();
@@ -182,22 +182,22 @@ Version: 1.0.0
             this.open = false;
             this.syncWithWire();
         },
-
+    
         createNew() {
             if (!this.allowCreate || !this.search.trim()) return;
-
+    
             const newItem = {
                 [this.valueField]: this.search.trim(),
                 [this.labelField]: this.search.trim()
             };
-
+    
             // Add to static options for future searches
             this.staticOptions.push(newItem);
-
+    
             // Select the new item
             this.select(newItem);
         },
-
+    
         handleKeydown(e) {
             if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
                 e.preventDefault();
@@ -235,7 +235,7 @@ Version: 1.0.0
 >
     {{-- Select box --}}
     <div
-        class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 flex flex-wrap gap-1"
+        class="adv-select-input-box shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 focus:ring-3 focus:outline-hidden flex w-full flex-wrap gap-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
         @click="focusInput"
         @click.away="open = false"
     >
@@ -245,7 +245,9 @@ Version: 1.0.0
                 x-for="(item, index) in selected"
                 :key="item[valueField]"
             >
-                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md flex items-center space-x-1">
+                <span
+                    class="adv-select-item-multiple flex items-center space-x-1 rounded-md bg-blue-100 px-2 py-1 text-blue-700"
+                >
                     <span x-text="item[labelField]"></span>
                     <button
                         class="ml-1 text-sm"
@@ -261,14 +263,14 @@ Version: 1.0.0
         {{-- Single select display --}}
         <template x-if="!multiple && selected.length">
             <span
-                class="text-gray-800"
+                class="adv-select-item-single text-gray-800"
                 x-text="selected[0][labelField]"
             ></span>
         </template>
 
         {{-- Input --}}
         <input
-            class="flex-1 focus:outline-none"
+            class="adv-select-input flex-1 focus:outline-none"
             type="text"
             x-ref="search"
             x-model="search"
@@ -282,7 +284,7 @@ Version: 1.0.0
         {{-- Clear button for single select --}}
         <template x-if="!multiple && selected.length">
             <button
-                class="text-gray-400 hover:text-gray-700 ml-auto text-sm"
+                class="adv-select-clear ml-auto text-sm text-gray-400 hover:text-gray-700"
                 type="button"
                 @click.stop="clearSelection"
             >
@@ -293,7 +295,7 @@ Version: 1.0.0
 
     {{-- Dropdown --}}
     <div
-        class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-md max-h-60 overflow-y-auto dark:bg-gray-900 dark:border-gray-700"
+        class="adv-select-dropdown absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-md dark:border-gray-700 dark:bg-gray-900"
         x-show="open && (results.length > 0 || (allowCreate && search.trim()))"
         x-transition
     >
@@ -302,7 +304,7 @@ Version: 1.0.0
             :key="item[valueField]"
         >
             <div
-                class="p-2 hover:bg-blue-100 cursor-pointer dark:hover:bg-gray-800"
+                class="adv-select-option cursor-pointer p-2 hover:bg-blue-100 dark:hover:bg-gray-800"
                 x-text="item[labelField]"
                 @click="select(item)"
             ></div>
@@ -311,7 +313,7 @@ Version: 1.0.0
         {{-- Create new option hint --}}
         <template x-if="allowCreate && search.trim() && results.length === 0">
             <div
-                class="p-2 hover:bg-green-100 cursor-pointer border-t border-gray-200 dark:border-gray-700 dark:hover:bg-green-900/20"
+                class="adv-select-option-create cursor-pointer border-t border-gray-200 p-2 hover:bg-green-100 dark:border-gray-700 dark:hover:bg-green-900/20"
                 @click="createNew()"
             >
                 <span class="text-green-600 dark:text-green-400">

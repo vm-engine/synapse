@@ -85,39 +85,9 @@ class SynapseViewServiceProvider extends ViewServiceProvider
     protected function setDynamicLayout()
     {
         // Always use 'app' layout as default
-        $layoutView = $this->resolveThemeLayout('app');
+        $layoutView = theme_service()->resolveThemeLayout('app');
 
         config(['livewire.layout' => $layoutView]);
-    }
-
-    /**
-     * Resolve theme layout with fallback chain
-     */
-    protected function resolveThemeLayout(string $layoutType): string
-    {
-        $activeTheme = config('synapps.apps.themes.active', 'default');
-        $themePath = synapps_path('resources/themes/'.$activeTheme.'/layouts/'.$layoutType.'.blade.php');
-
-        // Check if active theme has the layout
-        if (file_exists($themePath)) {
-            return 'theme::'.$layoutType;
-        }
-
-        // Fallback to fallback theme
-        $fallbackTheme = config('synapps.apps.themes.fallback', 'default');
-        $fallbackPath = synapps_path('resources/themes/'.$fallbackTheme.'/layouts/'.$layoutType.'.blade.php');
-
-        if ($activeTheme !== $fallbackTheme && file_exists($fallbackPath)) {
-            return 'theme-fallback::'.$layoutType;
-        }
-
-        // Ultimate fallback to synapps default layouts
-        $defaultLayouts = [
-            'app' => 'synapps::components.layouts.app',
-            'frontend' => 'synapps::components.layouts.layout',
-        ];
-
-        return $defaultLayouts[$layoutType] ?? 'synapps::components.layouts.app';
     }
 
     private function registerSynapseComponents()

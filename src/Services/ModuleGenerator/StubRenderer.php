@@ -54,6 +54,9 @@ class StubRenderer
     {
         foreach ($variables as $key => $value) {
             // Handle both {{ key }} and {{key}} patterns
+            if ($value === false) {
+                continue;
+            }
             $content = str_replace(
                 ['{{ '.$key.' }}', '{{'.$key.'}}'],
                 $value,

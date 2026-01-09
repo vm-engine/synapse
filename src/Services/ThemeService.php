@@ -74,6 +74,37 @@ class ThemeService
     }
 
     /**
+     * Resolve theme layout with fallback chain
+     */
+    public function resolveThemeLayout(string $layoutType): string
+    {
+        $activeTheme = config('synapps.apps.themes.active', 'default');
+        $themePath = synapps_path('resources/themes/'.$activeTheme.'/layouts/'.$layoutType.'.blade.php');
+
+        // Check if active theme has the layout
+        if (file_exists($themePath)) {
+            return 'theme::'.$layoutType;
+        }
+
+        // Fallback to fallback theme
+        $fallbackTheme = config('synapps.apps.themes.fallback', 'default');
+        $fallbackPath = synapps_path('resources/themes/'.$fallbackTheme.'/layouts/'.$layoutType.'.blade.php');
+
+        if ($activeTheme !== $fallbackTheme && file_exists($fallbackPath)) {
+            return 'theme-fallback::'.$layoutType;
+        }
+
+        // Ultimate fallback to synapps default layouts
+        $defaultLayouts = [
+            'app' => 'synapps::components.layouts.app',
+            'frontend' => 'synapps::components.layouts.layout',
+            'guest' => 'synapps::components.layouts.guest',
+        ];
+
+        return $defaultLayouts[$layoutType] ?? 'synapps::components.layouts.app';
+    }
+
+    /**
      * Get active theme name
      */
     public function getActiveTheme(): string
@@ -89,5 +120,10 @@ class ThemeService
         $theme = $theme ?? $this->getActiveTheme();
 
         return synapps_path('resources/themes/'.$theme.($path ? '/'.ltrim($path, '/') : ''));
+    }
+
+    public function getLayoutView(string $layoutType): string
+    {
+        return $this->resolveThemeLayout($layoutType);
     }
 }

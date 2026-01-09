@@ -1,0 +1,17 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- M4VM Logo - Light Mode -->
+  <rect x="2" y="2" width="36" height="36" rx="8" fill="url(#gradient-light)" />
+  <path d="M12 26V14L16 20L20 14V26H18V18L16 22L14 18V26H12Z" fill="white" />
+  <path d="M22 20V26H24V22H26V26H28V20C28 18.9 27.1 18 26 18H24C22.9 18 22 18.9 22 20Z" fill="white" />
+
+  <text x="45" y="28" font-family="Poppins, sans-serif" font-size="20" font-weight="600" fill="#0F172A">
+    Member<tspan fill="#3B82F6">4VM</tspan>
+  </text>
+
+  <defs>
+    <linearGradient id="gradient-light" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6" />
+      <stop offset="1" stop-color="#1D4ED8" />
+    </linearGradient>
+  </defs>
+</svg>
