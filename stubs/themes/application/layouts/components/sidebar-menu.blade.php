@@ -81,11 +81,12 @@
         >
             @foreach (synav()->backend() as $key => $menu)
                 @canAccess($menu['acl'] ?? null)
-                <li @isset($menu['sub']) x-data="{ open: selected.startsWith('{{ $key }}') }" @endisset>
+                <li
+                    @isset($menu['sub']) x-data="{ open: selected.startsWith('{{ $key }}') }" @endisset>
                     @isset($menu['sub'])
                         {{-- Menu item with submenu --}}
                         <button
-                            class="menu-item w-full {{ synav()->is($key) ? 'menu-item-active' : '' }} group relative"
+                            class="menu-item {{ synav()->is($key) ? 'menu-item-active' : '' }} group relative w-full"
                             @click="open = !open; selected = selected === '{{ $key }}' ? '' : '{{ $key }}'"
                             :class="{ 'justify-center': sidebarCollapsed }"
                         >
@@ -134,11 +135,12 @@
                         >
                             @foreach ($menu['sub'] as $subKey => $subMenu)
                                 @canAccess($subMenu['acl'] ?? null)
-                                <li @isset($subMenu['sub']) x-data="{ openSub: selected.startsWith('{{ $key }}.{{ $subKey }}') }" @endisset>
+                                <li
+                                    @isset($subMenu['sub']) x-data="{ openSub: selected.startsWith('{{ $key }}.{{ $subKey }}') }" @endisset>
                                     @isset($subMenu['sub'])
                                         {{-- Submenu item with sub-submenu --}}
                                         <button
-                                            class="submenu-item w-full text-left {{ synav()->is($key . '.' . $subKey) ? 'submenu-item-active' : '' }}"
+                                            class="submenu-item {{ synav()->is($key . '.' . $subKey) ? 'submenu-item-active' : '' }} w-full text-left"
                                             @click="openSub = !openSub"
                                         >
                                             <div class="flex min-w-0 flex-1 items-center justify-between">
@@ -174,7 +176,7 @@
                                                 @canAccess($subSubMenu['acl'] ?? null)
                                                 <li>
                                                     <a
-                                                        class="submenu-item block py-1.5 text-sm {{ synav()->is($key . '.' . $subKey . '.' . $subSubKey) ? 'submenu-item-active' : '' }}"
+                                                        class="submenu-item {{ synav()->is($key . '.' . $subKey . '.' . $subSubKey) ? 'submenu-item-active' : '' }} block py-1.5 text-sm"
                                                         href="{{ backend_route($subSubMenu['route']) }}"
                                                         wire:navigate
                                                     >

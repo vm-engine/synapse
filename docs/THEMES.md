@@ -4,13 +4,13 @@ Synapse provides a powerful theme system that allows you to customize the look a
 
 ## Features
 
-- **Multiple Layout Support**: Different layouts for app (backend), frontend, and guest (auth) pages
-- **CDN Resource Management**: Load external CSS/JS per layout type
-- **Theme Fallback System**: Graceful fallback to default theme if active theme is missing
-- **Hot Reloading**: Automatic asset compilation with Vite
-- **Designer-Friendly**: Customize themes without PHP knowledge
-- **Alpine.js Integration**: Interactive components out of the box
-- **Dark Mode Support**: Built-in dark mode with system preference detection
+-   **Multiple Layout Support**: Different layouts for app (backend), frontend, and guest (auth) pages
+-   **CDN Resource Management**: Load external CSS/JS per layout type
+-   **Theme Fallback System**: Graceful fallback to default theme if active theme is missing
+-   **Hot Reloading**: Automatic asset compilation with Vite
+-   **Designer-Friendly**: Customize themes without PHP knowledge
+-   **Alpine.js Integration**: Interactive components out of the box
+-   **Dark Mode Support**: Built-in dark mode with system preference detection
 
 ---
 
@@ -68,40 +68,40 @@ Theme metadata and CDN resources configuration.
 
 ```json
 {
-  "id": "my-theme",
-  "name": "My Custom Theme",
-  "version": "1.0.0",
-  "author": "Your Name",
-  "description": "A custom theme for my application",
-  "framework": "tailwind",
-  "tailwind_version": "4.x",
-  "alpine_version": "3.x",
-  "layouts": ["app", "guest", "frontend"],
+    "id": "my-theme",
+    "name": "My Custom Theme",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "description": "A custom theme for my application",
+    "framework": "tailwind",
+    "tailwind_version": "4.x",
+    "alpine_version": "3.x",
+    "layouts": ["app", "guest", "frontend"],
 
-  "css": {
-    "all": ["https://fonts.googleapis.com/css2?family=Inter"],
-    "app": ["https://cdn.example.com/admin-styles.css"],
-    "frontend": ["https://cdn.example.com/frontend-styles.css"]
-  },
+    "css": {
+        "all": ["https://fonts.googleapis.com/css2?family=Inter"],
+        "app": ["https://cdn.example.com/admin-styles.css"],
+        "frontend": ["https://cdn.example.com/frontend-styles.css"]
+    },
 
-  "js": {
-    "all": ["https://cdn.example.com/analytics.js"],
-    "app": []
-  },
+    "js": {
+        "all": ["https://cdn.example.com/analytics.js"],
+        "app": []
+    },
 
-  "headers": {
-    "all": ["<meta name=\"theme-color\" content=\"#4F46E5\">"],
-    "app": []
-  }
+    "headers": {
+        "all": ["<meta name=\"theme-color\" content=\"#4F46E5\">"],
+        "app": []
+    }
 }
 ```
 
 #### Layout Types
 
-- **all** - Loaded on every page
-- **app** - Backend/admin pages (URL starts with backend prefix from `synapps-auth` config)
-- **guest** - Authentication pages (login, register, forgot password)
-- **frontend** - Public website pages
+-   **all** - Loaded on every page
+-   **app** - Backend/admin pages (URL starts with backend prefix from `synapps-auth` config)
+-   **guest** - Authentication pages (login, register, forgot password)
+-   **frontend** - Public website pages
 
 ### apps.json
 
@@ -109,25 +109,25 @@ Application-level theme configuration in `synapps/config/apps.json`:
 
 ```json
 {
-  "themes": {
-    "active": "my-theme",
-    "fallback": "default",
-    "css": {
-      "all": [],
-      "app": [],
-      "frontend": []
-    },
-    "js": {
-      "all": [],
-      "app": [],
-      "frontend": []
-    },
-    "headers": {
-      "all": [],
-      "app": [],
-      "frontend": []
+    "themes": {
+        "active": "my-theme",
+        "fallback": "default",
+        "css": {
+            "all": [],
+            "app": [],
+            "frontend": []
+        },
+        "js": {
+            "all": [],
+            "app": [],
+            "frontend": []
+        },
+        "headers": {
+            "all": [],
+            "app": [],
+            "frontend": []
+        }
     }
-  }
 }
 ```
 
@@ -205,6 +205,7 @@ theme_asset(string $path, ?string $theme = null): string
 ```
 
 **Output:**
+
 ```
 http://localhost/assets/themes/my-theme/images/logo.svg
 ```
@@ -288,9 +289,10 @@ Render CDN stylesheet links for a specific layout type.
 ```
 
 **Output:**
+
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter">
-<link rel="stylesheet" href="https://cdn.example.com/admin-styles.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter" />
+<link rel="stylesheet" href="https://cdn.example.com/admin-styles.css" />
 ```
 
 ### @themeScripts
@@ -306,6 +308,7 @@ Render CDN script tags for a specific layout type.
 ```
 
 **Output:**
+
 ```html
 <script src="https://cdn.example.com/analytics.js"></script>
 ```
@@ -323,8 +326,9 @@ Render CDN headers (meta tags, etc.) for a specific layout type.
 ```
 
 **Output:**
+
 ```html
-<meta name="theme-color" content="#4F46E5">
+<meta name="theme-color" content="#4F46E5" />
 ```
 
 ---
@@ -345,11 +349,11 @@ Edit `synapps/resources/themes/my-theme/theme.json`:
 
 ```json
 {
-  "id": "my-theme",
-  "name": "My Awesome Theme",
-  "version": "1.0.0",
-  "author": "Your Name",
-  "description": "A custom theme for my application"
+    "id": "my-theme",
+    "name": "My Awesome Theme",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "description": "A custom theme for my application"
 }
 ```
 
@@ -361,32 +365,33 @@ Edit `css/theme.css` using Tailwind v4 syntax:
 @import "tailwindcss";
 
 @theme {
-  /* Custom colors */
-  --color-brand-500: oklch(0.55 0.20 240);
-  --color-brand-600: oklch(0.45 0.18 240);
+    /* Custom colors */
+    --color-brand-500: oklch(0.55 0.2 240);
+    --color-brand-600: oklch(0.45 0.18 240);
 
-  /* Custom spacing */
-  --spacing-sidebar-width: 16rem;
-  --spacing-header-height: 4rem;
+    /* Custom spacing */
+    --spacing-sidebar-width: 16rem;
+    --spacing-header-height: 4rem;
 }
 
 /* Custom component styles */
 .my-card {
-  @apply bg-white rounded-xl shadow-lg p-6;
+    @apply bg-white rounded-xl shadow-lg p-6;
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .my-card {
-    @apply bg-gray-800 border border-gray-700;
-  }
+    .my-card {
+        @apply bg-gray-800 border border-gray-700;
+    }
 }
 ```
 
 **OKLCH Color System:**
-- **L** (Lightness): 0-1 (0 = black, 1 = white)
-- **C** (Chroma): 0-0.4 (saturation/intensity)
-- **H** (Hue): 0-360 (color angle)
+
+-   **L** (Lightness): 0-1 (0 = black, 1 = white)
+-   **C** (Chroma): 0-0.4 (saturation/intensity)
+-   **H** (Hue): 0-360 (color angle)
 
 [OKLCH Color Picker Tool](https://oklch.com/)
 
@@ -396,21 +401,21 @@ Edit `js/theme.js`:
 
 ```javascript
 // Custom Alpine.js components
-Alpine.data('myCounter', () => ({
-  count: 0,
-  increment() {
-    this.count++;
-  }
+Alpine.data("myCounter", () => ({
+    count: 0,
+    increment() {
+        this.count++;
+    },
 }));
 
 // Custom utility functions
 window.myUtils = {
-  formatCurrency(value) {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  }
+    formatCurrency(value) {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+        }).format(value);
+    },
 };
 ```
 
@@ -419,6 +424,7 @@ window.myUtils = {
 Edit layout files in `layouts/`:
 
 **layouts/app.blade.php** - Backend/admin layout
+
 ```blade
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -452,8 +458,9 @@ Edit layout files in `layouts/`:
 ### Step 6: Update Assets
 
 Replace logo files in `assets/images/`:
-- `logo.svg` - Light mode logo
-- `logo-dark.svg` - Dark mode logo (optional)
+
+-   `logo.svg` - Light mode logo
+-   `logo-dark.svg` - Dark mode logo (optional)
 
 ### Step 7: Activate Theme
 
@@ -461,10 +468,10 @@ Edit `synapps/config/apps.json`:
 
 ```json
 {
-  "themes": {
-    "active": "my-theme",
-    "fallback": "default"
-  }
+    "themes": {
+        "active": "my-theme",
+        "fallback": "default"
+    }
 }
 ```
 
@@ -522,24 +529,24 @@ Theme assets are automatically copied to `public/assets/themes/` during build. T
 **vite.config.js** includes:
 
 ```javascript
-import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { glob } from 'glob';
+import { viteStaticCopy } from "vite-plugin-static-copy";
+import { glob } from "glob";
 
 export default {
-  plugins: [
-    viteStaticCopy({
-      targets: [
-        // Copy theme assets
-        {
-          src: 'synapps/resources/themes/*/assets/**/*',
-          dest: 'assets/themes',
-          rename: (name, ext, fullPath) => {
-            // Preserves theme directory structure
-          }
-        }
-      ]
-    })
-  ]
+    plugins: [
+        viteStaticCopy({
+            targets: [
+                // Copy theme assets
+                {
+                    src: "synapps/resources/themes/*/assets/**/*",
+                    dest: "assets/themes",
+                    rename: (name, ext, fullPath) => {
+                        // Preserves theme directory structure
+                    },
+                },
+            ],
+        }),
+    ],
 };
 ```
 
@@ -552,6 +559,7 @@ public/assets/themes/{theme-name}/{path}
 ```
 
 **Examples:**
+
 ```
 public/assets/themes/default/images/logo.svg
 public/assets/themes/default/css/theme.css
@@ -566,22 +574,26 @@ public/assets/themes/my-theme/fonts/custom-font.woff2
 
 Theme components use a `.theme-*` prefix to avoid conflicts:
 
-- `.theme-sidebar-*` - Sidebar components
-- `.theme-header-*` - Header components
-- `.theme-card-*` - Card components
-- `.theme-btn-*` - Button variants
-- `.theme-form-*` - Form components
-- `.theme-badge-*` - Badge variants
-- `.theme-table` - Table component
+-   `.theme-sidebar-*` - Sidebar components
+-   `.theme-header-*` - Header components
+-   `.theme-card-*` - Card components
+-   `.theme-btn-*` - Button variants
+-   `.theme-form-*` - Form components
+-   `.theme-badge-*` - Badge variants
+-   `.theme-table` - Table component
 
 ### Common Components
 
 #### Sidebar
 
 ```html
-<div x-data="themeSidebar" class="theme-sidebar" :class="{ 'collapsed': collapsed }">
+<div
+    x-data="themeSidebar"
+    class="theme-sidebar"
+    :class="{ 'collapsed': collapsed }"
+>
     <div class="theme-sidebar-logo">
-        <img src="{{ theme_asset('images/logo.svg') }}" alt="Logo">
+        <img src="{{ theme_asset('images/logo.svg') }}" alt="Logo" />
         <span>App Name</span>
     </div>
 
@@ -602,9 +614,7 @@ Theme components use a `.theme-*` prefix to avoid conflicts:
         <h3 class="theme-card-title">Card Title</h3>
         <button class="theme-btn-secondary">Action</button>
     </div>
-    <div class="theme-card-body">
-        Card content...
-    </div>
+    <div class="theme-card-body">Card content...</div>
 </div>
 ```
 
@@ -622,7 +632,11 @@ Theme components use a `.theme-*` prefix to avoid conflicts:
 ```html
 <div class="theme-form-group">
     <label class="theme-form-label">Email</label>
-    <input type="email" class="theme-form-input" placeholder="you@example.com">
+    <input
+        type="email"
+        class="theme-form-input"
+        placeholder="you@example.com"
+    />
     <div class="theme-form-error">This field is required</div>
 </div>
 ```
@@ -645,67 +659,67 @@ Theme components use a `.theme-*` prefix to avoid conflicts:
 #### themeSidebar
 
 ```javascript
-Alpine.data('themeSidebar', () => ({
-  collapsed: false,
-  toggle() {
-    this.collapsed = !this.collapsed;
-  }
+Alpine.data("themeSidebar", () => ({
+    collapsed: false,
+    toggle() {
+        this.collapsed = !this.collapsed;
+    },
 }));
 ```
 
 #### modal
 
 ```javascript
-Alpine.data('modal', () => ({
-  isOpen: false,
-  open() {
-    this.isOpen = true;
-  },
-  close() {
-    this.isOpen = false;
-  }
+Alpine.data("modal", () => ({
+    isOpen: false,
+    open() {
+        this.isOpen = true;
+    },
+    close() {
+        this.isOpen = false;
+    },
 }));
 ```
 
 #### dropdown
 
 ```javascript
-Alpine.data('dropdown', () => ({
-  isOpen: false,
-  toggle() {
-    this.isOpen = !this.isOpen;
-  },
-  close() {
-    this.isOpen = false;
-  }
+Alpine.data("dropdown", () => ({
+    isOpen: false,
+    toggle() {
+        this.isOpen = !this.isOpen;
+    },
+    close() {
+        this.isOpen = false;
+    },
 }));
 ```
 
 #### toasts
 
 ```javascript
-Alpine.data('toasts', () => ({
-  items: [],
-  success(message) {
-    this.add('success', message);
-  },
-  error(message) {
-    this.add('error', message);
-  },
-  add(type, message) {
-    const id = Date.now();
-    this.items.push({ id, type, message, visible: true });
-    setTimeout(() => this.remove(id), 5000);
-  },
-  remove(id) {
-    const index = this.items.findIndex(item => item.id === id);
-    if (index > -1) {
-      this.items[index].visible = false;
-      setTimeout(() => {
-        this.items.splice(index, 1);
-      }, 300);
-    }
-  }
+Alpine.data("toasts", () => ({
+    items: [],
+    success(message) {
+        this.add("success", message);
+    },
+    error(message) {
+        this.add("error", message);
+    },
+    add(type, message) {
+        const id = Date.now();
+        this.items.push({ id, type, message, visible: true });
+        setTimeout(() => this.remove(id), 5000);
+    },
+    remove(id) {
+        const index = this.items.findIndex((item) => item.id === id);
+        if (index > -1) {
+            this.items[index].visible = false;
+            setTimeout(() => {
+                this.items.splice(index, 1);
+            }, 300);
+        }
+    },
 }));
 ```
 
@@ -719,40 +733,41 @@ Dark mode automatically activates based on system preference:
 
 ```css
 @media (prefers-color-scheme: dark) {
-  body {
-    @apply bg-gray-900 text-gray-100;
-  }
+    body {
+        @apply bg-gray-900 text-gray-100;
+    }
 
-  .theme-card {
-    @apply bg-gray-800 border-gray-700;
-  }
+    .theme-card {
+        @apply bg-gray-800 border-gray-700;
+    }
 }
 ```
 
 ### Manual Toggle
 
 ```javascript
-Alpine.data('themeToggle', () => ({
-  dark: false,
-  init() {
-    this.dark = localStorage.getItem('theme') === 'dark' ||
-      (!localStorage.getItem('theme') &&
-       window.matchMedia('(prefers-color-scheme: dark)').matches);
-    this.updateTheme();
-  },
-  toggle() {
-    this.dark = !this.dark;
-    this.updateTheme();
-  },
-  updateTheme() {
-    if (this.dark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }
+Alpine.data("themeToggle", () => ({
+    dark: false,
+    init() {
+        this.dark =
+            localStorage.getItem("theme") === "dark" ||
+            (!localStorage.getItem("theme") &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches);
+        this.updateTheme();
+    },
+    toggle() {
+        this.dark = !this.dark;
+        this.updateTheme();
+    },
+    updateTheme() {
+        if (this.dark) {
+            document.documentElement.classList.add("dark");
+            localStorage.setItem("theme", "dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+            localStorage.setItem("theme", "light");
+        }
+    },
 }));
 ```
 
@@ -774,9 +789,9 @@ Alpine.data('themeToggle', () => ({
 
 1. Check theme exists: `synapps/resources/themes/{theme-name}/`
 2. Verify `apps.json` configuration:
-   ```json
-   { "themes": { "active": "my-theme" } }
-   ```
+    ```json
+    { "themes": { "active": "my-theme" } }
+    ```
 3. Regenerate config: `php artisan synapps:config`
 4. Clear cache: `php artisan cache:clear`
 
@@ -789,6 +804,7 @@ Alpine.data('themeToggle', () => ({
 ### Layout not found
 
 Theme layouts use a fallback system. Check:
+
 1. Active theme has layout: `synapps/resources/themes/{active}/layouts/{layout}.blade.php`
 2. Fallback theme has layout: `synapps/resources/themes/{fallback}/layouts/{layout}.blade.php`
 3. Synapse default exists: `vendor/vm-engine/synapse/resources/views/components/layouts/{layout}.blade.php`
@@ -814,67 +830,77 @@ Theme layouts use a fallback system. Check:
 ### Theme Development
 
 1. **Always create themes from existing templates**
-   ```bash
-   php artisan synapps:make-theme my-theme --copy-from=default
-   ```
+
+    ```bash
+    php artisan synapps:make-theme my-theme --copy-from=default
+    ```
 
 2. **Use fallback theme for safety**
-   ```json
-   {
-     "themes": {
-       "active": "custom-theme",
-       "fallback": "default"
-     }
-   }
-   ```
+
+    ```json
+    {
+        "themes": {
+            "active": "custom-theme",
+            "fallback": "default"
+        }
+    }
+    ```
 
 3. **Test all layout types**
-   - Backend/admin (`/apps/*` or configured backend prefix)
-   - Frontend (public pages)
-   - Guest (auth pages)
+
+    - Backend/admin (`/apps/*` or configured backend prefix)
+    - Frontend (public pages)
+    - Guest (auth pages)
 
 4. **Maintain theme.json metadata**
-   - Keep version updated
-   - Document features and components
-   - List all external dependencies
+
+    - Keep version updated
+    - Document features and components
+    - List all external dependencies
 
 5. **Use theme prefixes for CSS classes**
-   ```css
-   .theme-card { }        /* Good */
-   .card { }              /* Bad - conflicts possible */
-   ```
+    ```css
+    .theme-card {
+    } /* Good */
+    .card {
+    } /* Bad - conflicts possible */
+    ```
 
 ### Performance
 
 1. **Minimize CDN resources**
-   - Only load what's needed per layout
-   - Use `all` sparingly for truly global resources
+
+    - Only load what's needed per layout
+    - Use `all` sparingly for truly global resources
 
 2. **Optimize assets**
-   - Compress images
-   - Minify custom CSS/JS in production
-   - Use modern image formats (WebP, AVIF)
+
+    - Compress images
+    - Minify custom CSS/JS in production
+    - Use modern image formats (WebP, AVIF)
 
 3. **Leverage caching**
-   ```bash
-   php artisan config:cache
-   php artisan view:cache
-   ```
+    ```bash
+    php artisan config:cache
+    php artisan view:cache
+    ```
 
 ### Maintenance
 
 1. **Version your themes**
-   - Update `version` in `theme.json`
-   - Keep changelog of theme changes
+
+    - Update `version` in `theme.json`
+    - Keep changelog of theme changes
 
 2. **Document customizations**
-   - Update theme `README.md`
-   - Comment complex CSS/JS
+
+    - Update theme `README.md`
+    - Comment complex CSS/JS
 
 3. **Test after updates**
-   - Run `php artisan synapps:config`
-   - Build and test: `npm run build`
-   - Clear caches: `php artisan cache:clear`
+    - Run `php artisan synapps:config`
+    - Build and test: `npm run build`
+    - Clear caches: `php artisan cache:clear`
 
 ---
 
@@ -884,10 +910,10 @@ Theme layouts use a fallback system. Check:
 
 ```json
 {
-  "themes": {
-    "active": "{{ $tenant->theme ?? 'default' }}",
-    "fallback": "default"
-  }
+    "themes": {
+        "active": "{{ $tenant->theme ?? 'default' }}",
+        "fallback": "default"
+    }
 }
 ```
 
@@ -922,7 +948,7 @@ public function setTheme(Request $request)
 // In middleware
 public function handle($request, $next)
 {
-    $theme = session('theme') ?? auth()->user()?->theme ?? 'default';
+    $theme = session('theme') ?? Auth::user()?->theme ?? 'default';
     config(['synapps.apps.themes.active' => $theme]);
 
     return $next($request);
@@ -933,10 +959,10 @@ public function handle($request, $next)
 
 ## Related Documentation
 
-- [Commands](COMMANDS.md) - `synapps:make-theme` command reference
-- [Configuration](CONFIGURATION.md) - Theme configuration details
-- [Helpers](HELPERS.md) - `theme_asset()`, `theme_path()`, `active_theme()` helpers
-- [Services](SERVICES.md) - ThemeService API reference
+-   [Commands](COMMANDS.md) - `synapps:make-theme` command reference
+-   [Configuration](CONFIGURATION.md) - Theme configuration details
+-   [Helpers](HELPERS.md) - `theme_asset()`, `theme_path()`, `active_theme()` helpers
+-   [Services](SERVICES.md) - ThemeService API reference
 
 ---
 

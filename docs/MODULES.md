@@ -9,30 +9,34 @@ Synapse supports two types of modules: directory-based and package-based.
 Located in `synapps/modules/{module-name}/`. Best for application-specific features.
 
 **Advantages:**
-- Easy to create and modify
-- Part of your main application repository
-- No need for separate Composer package
-- Ideal for project-specific features
+
+-   Easy to create and modify
+-   Part of your main application repository
+-   No need for separate Composer package
+-   Ideal for project-specific features
 
 **Requirements:**
-- PSR-4 autoload configuration (handled by `synapps:discover`)
-- Module service provider
-- `module.json` configuration file
+
+-   PSR-4 autoload configuration (handled by `synapps:discover`)
+-   Module service provider
+-   `module.json` configuration file
 
 ### Package-based Modules
 
 Composer packages with `synmod-*`, `synmodule-*`, or `synapps-*` prefix.
 
 **Advantages:**
-- Reusable across multiple projects
-- Version controlled separately
-- Can be published to Packagist or private repositories
-- Laravel package auto-discovery support
+
+-   Reusable across multiple projects
+-   Version controlled separately
+-   Can be published to Packagist or private repositories
+-   Laravel package auto-discovery support
 
 **Requirements:**
-- Standard Composer package structure
-- `module.json` in package root
-- Laravel service provider with auto-discovery
+
+-   Standard Composer package structure
+-   `module.json` in package root
+-   Laravel service provider with auto-discovery
 
 ---
 
@@ -131,20 +135,20 @@ The `module.json` file is required for all modules and defines module metadata a
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | ✅ | Module identifier (snake_case) |
-| `id_case` | object | ✅ | ID variants (snake, pascal, slug, studly) |
-| `name` | string | ✅ | Display name |
-| `version` | string | ✅ | Semantic version |
-| `url_prefix` | string | ✅ | URL prefix for routes (use "" for root) |
-| `description` | string | ❌ | Module description |
-| `author` | string | ❌ | Author name |
-| `email` | string | ❌ | Author email |
-| `load_priority` | int | ❌ | Load order (lower = earlier, default: 99) |
-| `nav` | object | ❌ | Navigation configuration |
-| `acl` | object | ❌ | Access control configuration |
-| `dependencies` | object | ❌ | npm and Composer dependencies |
+| Field           | Type   | Required | Description                               |
+| --------------- | ------ | -------- | ----------------------------------------- |
+| `id`            | string | ✅       | Module identifier (snake_case)            |
+| `id_case`       | object | ✅       | ID variants (snake, pascal, slug, studly) |
+| `name`          | string | ✅       | Display name                              |
+| `version`       | string | ✅       | Semantic version                          |
+| `url_prefix`    | string | ✅       | URL prefix for routes (use "" for root)   |
+| `description`   | string | ❌       | Module description                        |
+| `author`        | string | ❌       | Author name                               |
+| `email`         | string | ❌       | Author email                              |
+| `load_priority` | int    | ❌       | Load order (lower = earlier, default: 99) |
+| `nav`           | object | ❌       | Navigation configuration                  |
+| `acl`           | object | ❌       | Access control configuration              |
+| `dependencies`  | object | ❌       | npm and Composer dependencies             |
 
 ---
 
@@ -180,10 +184,11 @@ Create `synapps/modules/example/module.json`:
 ```
 
 **Important Notes:**
-- `id` must be unique across all modules
-- `id_case` must include all four variants (snake, pascal, slug, studly)
-- `url_prefix` is required (use `""` for root-level routes)
-- `version` should follow semantic versioning (MAJOR.MINOR.PATCH)
+
+-   `id` must be unique across all modules
+-   `id_case` must include all four variants (snake, pascal, slug, studly)
+-   `url_prefix` is required (use `""` for root-level routes)
+-   `version` should follow semantic versioning (MAJOR.MINOR.PATCH)
 
 ### Step 3: Create Service Provider
 
@@ -222,10 +227,11 @@ php artisan synapps:discover
 ```
 
 This command will:
-- Add PSR-4 autoload entries to `composer.json`
-- Register module namespaces
-- Merge module dependencies
-- Run `composer dump-autoload`
+
+-   Add PSR-4 autoload entries to `composer.json`
+-   Register module namespaces
+-   Merge module dependencies
+-   Run `composer dump-autoload`
 
 ### Step 5: Create Routes
 
@@ -272,9 +278,10 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 ```
 
 **Characteristics:**
-- URL prefixed with module's `url_prefix`
-- Route name prefixed with module ID
-- No automatic authentication
+
+-   URL prefixed with module's `url_prefix`
+-   Route name prefixed with module ID
+-   No automatic authentication
 
 ### 2. web.backend.php - Backend Routes
 
@@ -286,10 +293,11 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 ```
 
 **Characteristics:**
-- URL prefixed with system `backend_prefix` (usually `/admin`)
-- Route name prefixed with `backend.`
-- Automatic authentication middleware
-- Ideal for admin panels
+
+-   URL prefixed with system `backend_prefix` (usually `/admin`)
+-   Route name prefixed with `backend.`
+-   Automatic authentication middleware
+-   Ideal for admin panels
 
 ### 3. web.override.php - Override Routes
 
@@ -300,10 +308,11 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 ```
 
 **Characteristics:**
-- No URL prefix (root level)
-- Route name prefixed with module ID
-- Use for routes like login, register, homepage
-- Be careful of route conflicts
+
+-   No URL prefix (root level)
+-   Route name prefixed with module ID
+-   Use for routes like login, register, homepage
+-   Be careful of route conflicts
 
 ### 4. api.php - API Routes
 
@@ -314,9 +323,10 @@ Route::get('/users', [ApiController::class, 'index'])->name('users.index');
 ```
 
 **Characteristics:**
-- URL prefixed with `/api`
-- Route name prefixed with module ID
-- No automatic authentication (add manually if needed)
+
+-   URL prefixed with `/api`
+-   Route name prefixed with module ID
+-   No automatic authentication (add manually if needed)
 
 ---
 
@@ -421,7 +431,7 @@ Define permissions in `module.json`:
 Check permissions in code:
 
 ```php
-if (auth()->user()->can('example.users.create')) {
+if (Auth::user()->can('example.users.create')) {
     // User can create users
 }
 ```
@@ -466,6 +476,7 @@ Modules can declare their own npm and Composer dependencies in `module.json`:
 ```
 
 When you run `synapps:discover`, these dependencies are:
+
 1. Aggregated from all modules
 2. Smart-merged using semver (only upgrades)
 3. Added to project's `package.json` and `composer.json`
@@ -510,9 +521,7 @@ vendor/your-org/synmod-example/
     },
     "extra": {
         "laravel": {
-            "providers": [
-                "YourOrg\\SynmodExample\\ExampleServiceProvider"
-            ]
+            "providers": ["YourOrg\\SynmodExample\\ExampleServiceProvider"]
         }
     }
 }
