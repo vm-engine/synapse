@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-01-09
+
+### Added
+
+**Theme System:**
+- New `ThemeService` for centralized theme management
+- `synapps:make-theme` command to generate new themes from templates
+- `synapps:reconfig` command for system reconfiguration
+- Theme helper functions:
+  - `theme_asset()` - Get URL to theme assets
+  - `theme_path()` - Get absolute path to theme directory
+  - `active_theme()` - Get active theme name
+  - `theme_service()` - Get ThemeService instance
+- Default theme stubs with complete layout templates:
+  - `app.blade.php` - Main application layout
+  - `frontend.blade.php` - Frontend layout
+  - `guest.blade.php` - Guest/authentication layout
+- Theme asset structure (CSS, JS, images, SVG logos)
+- Support for theme-specific configuration via `theme.json`
+
+**Helper Functions:**
+- `int2roman()` - Convert integers to Roman numerals (I, II, III, IV, etc.)
+
+**Navigation Components:**
+- Refactored navigation components into `layouts/nav/` structure:
+  - `arrow.blade.php` - Navigation arrow indicators
+  - `menu-item.blade.php` - Individual menu items
+  - `submenu-item.blade.php` - Submenu items
+  - `submenu.blade.php` - Submenu container
+- Improved component organization and reusability
+- Updated sidebar to use new navigation component structure
+
+### Changed
+
+**Architecture:**
+- Enhanced `Apps` configuration builder to support theme settings
+- Updated `SynAppsPatchResources` to handle theme assets
+- Updated `SynAppsSetup` to initialize theme configuration
+- Improved service provider registration for theme support
+
+**Documentation:**
+- Removed outdated `RELEASE_CHECKLIST.md`
+- Removed `SYNTHEME_IMPLEMENTATION.md` (implementation complete)
+
+### Fixed
+
+**Code Quality:**
+- Applied Laravel Pint formatting to new theme commands
+- All PHPStan level 5 checks passing
+- Improved code organization and structure
+
+### Benefits
+
+- **Theming Support:** Apps can now have multiple themes with easy switching
+- **Better Organization:** Navigation components properly structured in layouts
+- **Developer Experience:** Simple theme generation with artisan commands
+- **Flexibility:** Theme-specific assets and configurations
+- **Maintainability:** Centralized theme management through ThemeService
+
 ## [1.3.6] - 2026-01-08
 
 ### Fixed
