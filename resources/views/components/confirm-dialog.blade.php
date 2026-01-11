@@ -76,7 +76,7 @@
             else if (this.onConfirm && typeof this.onConfirm === 'function') {
                 this.onConfirm();
             }
-            this.close();
+            // this.close();
         },
         cancel() {
             if (this.onCancel && typeof this.onCancel === 'function') {
@@ -89,6 +89,7 @@
     @keydown.escape.window="show && close()"
     x-show="show"
     x-cloak
+    x-on:synapse-confirmed.window="close()"
 >
     <!-- Backdrop -->
     <div
@@ -187,8 +188,13 @@
                         'bg-green-600 hover:bg-green-700 focus:ring-green-500': confirmColor === 'success'
                     }"
                     @click="confirm()"
-                    x-text="confirmText"
-                ></button>
+                >
+                    <span
+                        class="fa-solid fa-spinner fa-spin"
+                        wire:loading
+                    ></span>
+                    {{ $confirmText }}
+                </button>
             </div>
         </div>
     </div>

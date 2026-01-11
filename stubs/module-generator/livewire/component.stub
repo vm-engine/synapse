@@ -10,6 +10,6 @@ class {{ class }} extends Component
 {
     public function render()
     {
-        return view('{{ moduleSlug }}::livewire.{{ view }}');
+        return view('{{ moduleSlug }}.livewire.{{ view }}');
     }
 }

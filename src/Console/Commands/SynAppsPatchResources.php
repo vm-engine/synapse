@@ -234,7 +234,7 @@ class SynAppsPatchResources extends Command
     }
 
     /**
-     * Patch vite.config.js to add static asset copying
+     * Patch vite.config.js to add static asset copying with watch mode optimization
      */
     protected function patchViteConfig(): bool
     {
@@ -248,7 +248,28 @@ class SynAppsPatchResources extends Command
 
         $patched = false;
 
-        // Check if vite-plugin-static-copy needs to be added
+        // Step 1: Convert to function-based config if not already (for watch mode detection)
+        if (strpos($content, "process.argv.includes('--watch')") === false) {
+            // Check if using object-based config
+            if (preg_match('/export\s+default\s+defineConfig\s*\(\s*\{/', $content)) {
+                // Convert to function-based config
+                $content = preg_replace(
+                    '/export\s+default\s+defineConfig\s*\(\s*\{/',
+                    "export default defineConfig(({ command, mode }) => {\n    const isWatch = process.argv.includes('--watch');\n\n    return {",
+                    $content,
+                    1,
+                    $count
+                );
+
+                if ($count > 0) {
+                    // Update closing parenthesis
+                    $content = preg_replace('/\}\);(\s*)$/', '}});$1', $content, 1);
+                    $patched = true;
+                }
+            }
+        }
+
+        // Step 2: Check if vite-plugin-static-copy needs to be added
         if (strpos($content, 'vite-plugin-static-copy') === false) {
             // Add imports after existing imports
             $importLines = [
@@ -267,66 +288,100 @@ class SynAppsPatchResources extends Command
 
             // Insert imports after last import
             array_splice($lines, $lastImportIndex + 1, 0, $importLines);
+            $content = implode("\n", $lines);
+            $patched = true;
+        }
 
-            // Find the plugins array and add viteStaticCopy
+        // Step 3: Add viteStaticCopy plugin with conditional watch mode handling
+        if (strpos($content, 'viteStaticCopy') === false) {
+            // Plugin config wrapped in conditional for watch mode
             $pluginConfig = <<<'PLUGIN'
-viteStaticCopy({
-            targets: [
-                // Copy from synapps/resources/assets
-                {
-                    src: 'synapps/resources/assets/**/*',
-                    dest: '../assets'
-                },
-                // Copy theme assets
-                ...glob.sync('synapps/resources/themes/*/assets').map(dir => {
-                    const normalizedDir = dir.replace(/\\/g, '/');
-                    return {
-                        src: `${normalizedDir}/**/*`,
-                        dest: `../assets/themes/${normalizedDir.split('/')[3]}`
-                    };
-                }),
-                // Copy from vendor/*/synmod-*/resources/assets
-                ...glob.sync('vendor/*/synmod-*/resources/assets').map(dir => {
-                    const normalizedDir = dir.replace(/\\/g, '/');
-                    return {
-                        src: `${normalizedDir}/**/*`,
-                        dest: '../assets'
-                    };
-                }),
-                // Copy from vendor/vm-engine/synapps-*/resources/assets
-                ...glob.sync('vendor/vm-engine/synapps-*/resources/assets').map(dir => {
-                    const normalizedDir = dir.replace(/\\/g, '/');
-                    return {
-                        src: `${normalizedDir}/**/*`,
-                        dest: '../assets'
-                    };
-                })
-            ]
-        })
+// Only enable static copy in production builds, not in watch mode
+        ...(!isWatch ? [
+            viteStaticCopy({
+                targets: [
+                    // Copy from synapps/resources/assets
+                    {
+                        src: 'synapps/resources/assets/**/*',
+                        dest: '../assets',
+                    },
+                    // Copy theme assets (images, fonts, etc. - NOT css/js, those are compiled)
+                    ...glob.sync('synapps/resources/themes/*/assets').map(dir => {
+                        const normalizedDir = dir.replace(/\\/g, '/');
+                        return {
+                            src: `${normalizedDir}/**/*`,
+                            dest: `../assets/themes/${normalizedDir.split('/')[3]}`
+                        };
+                    }),
+                    // Copy from vendor/*/synmod-*/resources/assets
+                    ...glob.sync('vendor/*/synmod-*/resources/assets').map(dir => {
+                        const normalizedDir = dir.replace(/\\/g, '/');
+                        return {
+                            src: `${normalizedDir}/**/*`,
+                            dest: '../assets',
+                        };
+                    }),
+                    // Copy from vendor/vm-engine/synapps-*/resources/assets
+                    ...glob.sync('vendor/vm-engine/synapps-*/resources/assets').map(dir => {
+                        const normalizedDir = dir.replace(/\\/g, '/');
+                        return {
+                            src: `${normalizedDir}/**/*`,
+                            dest: '../assets',
+                        };
+                    }),
+                ],
+            })
+        ] : []),
 PLUGIN;
 
             // Find tailwindcss() line and add viteStaticCopy after it
-            $content = implode("\n", $lines);
             $content = preg_replace(
                 '/(tailwindcss\(\),)/',
-                "$1\n        ".$pluginConfig.',',
-                $content
+                "$1\n$pluginConfig",
+                $content,
+                1,
+                $count
             );
 
-            $patched = true;
+            if ($count > 0) {
+                $patched = true;
+            }
         } else {
-            // viteStaticCopy already exists, check if theme assets line is missing
+            // Step 4: viteStaticCopy exists - ensure it's wrapped in watch mode conditional
+            if (! str_contains($content, '...(!isWatch ? [') && str_contains($content, 'viteStaticCopy')) {
+                // Wrap existing viteStaticCopy in conditional
+                $content = preg_replace(
+                    '/(tailwindcss\(\),)\s*\n\s*(viteStaticCopy\(\{)/s',
+                    "$1\n        // Only enable static copy in production builds, not in watch mode\n        ...(!isWatch ? [\n            $2",
+                    $content,
+                    1,
+                    $count
+                );
+
+                if ($count > 0) {
+                    // Find the closing of viteStaticCopy and add the closing bracket
+                    $content = preg_replace(
+                        '/(viteStaticCopy\(\{.*?\}\)\s*),/s',
+                        "$1\n        ] : []),",
+                        $content,
+                        1
+                    );
+                    $patched = true;
+                }
+            }
+
+            // Step 5: Ensure theme assets line exists
             if (strpos($content, 'synapps/resources/themes/*/assets') === false) {
                 // Find the targets array and add theme assets line
                 $themeAssetsLine = <<<'THEME'
-                // Copy theme assets
-                ...glob.sync('synapps/resources/themes/*/assets').map(dir => {
-                    const normalizedDir = dir.replace(/\\/g, '/');
-                    return {
-                        src: `${normalizedDir}/**/*`,
-                        dest: `../assets/themes/${normalizedDir.split('/')[3]}`
-                    };
-                }),
+                    // Copy theme assets (images, fonts, etc. - NOT css/js, those are compiled)
+                    ...glob.sync('synapps/resources/themes/*/assets').map(dir => {
+                        const normalizedDir = dir.replace(/\\/g, '/');
+                        return {
+                            src: `${normalizedDir}/**/*`,
+                            dest: `../assets/themes/${normalizedDir.split('/')[3]}`
+                        };
+                    }),
 THEME;
 
                 // Try to add after the synapps/resources/assets entry
@@ -347,12 +402,31 @@ THEME;
             }
         }
 
-        // Check if server.watch.ignored needs to be patched
-        if (strpos($content, '**/public/build/**') === false || strpos($content, '**/public/assets/**') === false) {
-            // Patch the watch.ignored array to include public directories
+        // Step 6: Ensure server.watch config exists with proper ignored paths
+        if (strpos($content, 'server:') === false) {
+            // Add complete server.watch config
+            $serverConfig = <<<'SERVER'
+    server: {
+        cors: true,
+        watch: {
+            usePolling: true,
+            interval: 1000,
+            ignored: [
+                "**/storage/framework/views/**",
+                "**/public/build/**",
+                "**/public/assets/**",
+                "**/vendor/**",
+                "**/node_modules/**",
+                "**/.git/**",
+            ],
+        },
+    },
+SERVER;
+
+            // Add before the closing brace of the config
             $content = preg_replace(
-                "/(ignored:\s*\[\s*['\"].*?['\"])\s*\]/s",
-                "$1,\n                '**/public/build/**',\n                '**/public/assets/**'\n            ]",
+                '/(\n\s*}\s*\}\);?\s*)$/s',
+                "\n$serverConfig\$1",
                 $content,
                 1,
                 $count
@@ -360,6 +434,48 @@ THEME;
 
             if ($count > 0) {
                 $patched = true;
+            }
+        } else {
+            // Server config exists, ensure watch.ignored has all necessary paths
+            $requiredPaths = [
+                '**/public/build/**',
+                '**/public/assets/**',
+                '**/vendor/**',
+                '**/node_modules/**',
+                '**/.git/**',
+            ];
+
+            foreach ($requiredPaths as $path) {
+                $escapedPath = preg_quote($path, '/');
+                if (! preg_match("/$escapedPath/", $content)) {
+                    // Try to add to existing ignored array
+                    $content = preg_replace(
+                        "/(ignored:\s*\[)/",
+                        "$1\n                \"$path\",",
+                        $content,
+                        1,
+                        $count
+                    );
+
+                    if ($count > 0) {
+                        $patched = true;
+                    }
+                }
+            }
+
+            // Ensure usePolling and interval exist for Windows compatibility
+            if (strpos($content, 'usePolling') === false) {
+                $content = preg_replace(
+                    '/(watch:\s*\{)/',
+                    "$1\n            usePolling: true,\n            interval: 1000,",
+                    $content,
+                    1,
+                    $count
+                );
+
+                if ($count > 0) {
+                    $patched = true;
+                }
             }
         }
 

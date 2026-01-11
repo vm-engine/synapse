@@ -52,12 +52,12 @@
 
     <!-- Modal Container -->
     <div
-        class="max-h-11/12 fixed inset-0 z-[51] flex items-center justify-center overflow-y-auto p-4"
+        class="fixed inset-0 z-[51] flex items-center justify-center p-4"
         x-show="show"
         @click.self="close()"
     >
         <div
-            class="{{ $maxWidthClass }} relative w-full rounded-2xl bg-white shadow-xl dark:bg-gray-800"
+            class="{{ $maxWidthClass }} relative flex max-h-[calc(100vh-2rem)] w-full flex-col rounded-2xl bg-white shadow-xl dark:bg-gray-800"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"

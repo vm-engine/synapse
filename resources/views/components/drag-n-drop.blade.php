@@ -21,6 +21,7 @@
 @endphp
 
 <div
+    class="w-full"
     x-data="{
         fileName: '',
         fileSize: '',
@@ -147,74 +148,101 @@
             this.removeFile();
         }
     }"
-    x-init="
-        // Watch for wire:model changes to clear preview
-        @if($wireModel)
-        $watch('$wire.{{ $wireModel }}', value => {
-            if (value === null || value === '') {
-                // Only clear the UI, don't touch the file input during upload
-                this.fileName = '';
-                this.fileSize = '';
-                this.previewUrl = null;
-            }
-        });
-        @endif
-    "
-    class="w-full"
+    x-init="// Watch for wire:model changes to clear preview
+    @if($wireModel)
+    $watch('$wire.{{ $wireModel }}', value => {
+        if (value === null || value === '') {
+            // Only clear the UI, don't touch the file input during upload
+            this.fileName = '';
+            this.fileSize = '';
+            this.previewUrl = null;
+        }
+    });
+    @endif"
+    x-on:dragndrop-clear-input.window="removeFile()"
 >
     <!-- Hidden File Input -->
     <input
+        class="hidden"
+        name="{{ $name }}"
         type="file"
         x-ref="fileInput"
-        name="{{ $name }}"
         accept="{{ $acceptTypes }}"
-        @if(!$wireModel)
-        @change="handleFiles($event.target.files)"
-        @endif
+        @if (!$wireModel) @change="handleFiles($event.target.files)" @endif
         {!! $wireModelDirective !!}
-        class="hidden"
         {{ $attributes->except(['class']) }}
-        @if($wireModel)
-        x-on:livewire-upload-start="handleLivewireUploadStart()"
+        @if ($wireModel) x-on:livewire-upload-start="handleLivewireUploadStart()"
         x-on:livewire-upload-finish="handleLivewireUploadFinish($event)"
-        x-on:livewire-upload-error="handleLivewireUploadError()"
-        @endif
+        x-on:livewire-upload-error="handleLivewireUploadError()" @endif
     />
 
     <!-- Dropzone Area -->
     <div
+        class="relative cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors duration-200 hover:border-gray-400"
         @click="triggerFileInput()"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
-        @drop.prevent="isDragging = false; @if($wireModel) handleDrop($event) @else handleFiles($event.dataTransfer.files) @endif"
+        @drop.prevent="isDragging = false; @if ($wireModel) handleDrop($event) @else handleFiles($event.dataTransfer.files) @endif"
         :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'"
-        class="relative cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors duration-200 hover:border-gray-400"
     >
         <!-- Preview Area -->
-        <div x-show="previewUrl && {{ $preview ? 'true' : 'false' }}" x-cloak class="mb-4">
+        <div
+            class="mb-4"
+            x-show="previewUrl && {{ $preview ? 'true' : 'false' }}"
+            x-cloak
+        >
             <div class="relative mx-auto inline-block">
-                <img :src="previewUrl" alt="Preview" class="max-h-48 rounded-lg shadow-md">
+                <img
+                    class="max-h-48 rounded-lg shadow-md"
+                    alt="Preview"
+                    :src="previewUrl"
+                >
                 <button
+                    class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600"
                     type="button"
                     @click.stop="removeFile()"
-                    class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600"
                 >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        ></path>
                     </svg>
                 </button>
             </div>
-            <p class="mt-2 text-sm text-gray-600" x-text="fileName"></p>
-            <p class="text-xs text-gray-500" x-text="fileSize"></p>
+            <p
+                class="mt-2 text-sm text-gray-600"
+                x-text="fileName"
+            ></p>
+            <p
+                class="text-xs text-gray-500"
+                x-text="fileSize"
+            ></p>
         </div>
 
         <!-- Upload Icon and Text -->
         <div x-show="!previewUrl">
             <div class="mb-6 flex justify-center">
                 <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                    <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                    <svg
+                        class="h-8 w-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        >
                         </path>
                     </svg>
                 </div>
@@ -231,13 +259,22 @@
             </span>
 
             <!-- File Info (when file selected but no preview) -->
-            <div x-show="fileName && !previewUrl" class="mt-4">
-                <p class="text-sm font-medium text-gray-700" x-text="fileName"></p>
-                <p class="text-xs text-gray-500" x-text="fileSize"></p>
+            <div
+                class="mt-4"
+                x-show="fileName && !previewUrl"
+            >
+                <p
+                    class="text-sm font-medium text-gray-700"
+                    x-text="fileName"
+                ></p>
+                <p
+                    class="text-xs text-gray-500"
+                    x-text="fileSize"
+                ></p>
                 <button
+                    class="mt-2 text-xs text-red-600 hover:text-red-700"
                     type="button"
                     @click.stop="removeFile()"
-                    class="mt-2 text-xs text-red-600 hover:text-red-700"
                 >
                     Remove
                 </button>
@@ -246,13 +283,20 @@
     </div>
 
     <!-- Error Message -->
-    <div x-show="error" x-cloak class="mt-2 text-sm text-red-600" x-text="error"></div>
+    <div
+        class="mt-2 text-sm text-red-600"
+        x-show="error"
+        x-cloak
+        x-text="error"
+    ></div>
 
-    @if($error)
-    <p class="mt-2 text-sm text-red-600">{{ $error }}</p>
+    @if ($error)
+        <p class="mt-2 text-sm text-red-600">{{ $error }}</p>
     @endif
 </div>
 
 <style>
-    [x-cloak] { display: none !important; }
+    [x-cloak] {
+        display: none !important;
+    }
 </style>

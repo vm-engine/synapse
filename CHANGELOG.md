@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2026-01-11
+
+### Fixed
+
+**Blade Components:**
+- Enhanced confirm-dialog component with loading state and event handling
+  - Added loading spinner during confirmation action
+  - Added `x-on:synapse-confirmed.window` event listener for external close trigger
+  - Commented out automatic close after confirm to allow wire:loading states
+  - Fixed confirm button to show loading state during async operations
+- Improved modal component overflow handling
+  - Fixed modal container height to use `max-h-[calc(100vh-2rem)]` for better viewport handling
+  - Added flexbox layout with `flex flex-col` for proper content distribution
+  - Removed redundant `max-h-11/12` class that caused overflow issues
+- Enhanced drag-n-drop component structure
+  - Added `x-on:dragndrop-clear-input.window` event for programmatic clearing
+  - Improved Alpine.js initialization formatting for better readability
+  - Applied Pint formatting for consistent code style
+
+**Vite Configuration:**
+- Significantly improved `synapps:patch-resources` command for Vite config patching
+  - Added watch mode optimization - static asset copying now disabled in `--watch` mode for faster HMR
+  - Converts object-based config to function-based config automatically for watch detection
+  - Wraps viteStaticCopy in conditional `...(!isWatch ? [...] : [])` to skip in watch mode
+  - Improves development experience with faster hot reloads
+  - Production builds still copy all static assets correctly
+  - Added comprehensive comments explaining watch mode behavior
+  - Enhanced theme assets comment to clarify compiled vs static assets
+
+**Module Generator:**
+- Fixed Livewire component stub view path syntax
+  - Changed from `{{ moduleSlug }}::livewire.{{ view }}` to `{{ moduleSlug }}.livewire.{{ view }}`
+  - Ensures consistent view path format across generated components
+
+**Code Quality:**
+- Fixed PHPStan level 5 analysis error in SynAppsPatchResources
+  - Replaced `strpos() !== false` with `str_contains()` for cleaner comparison
+  - Resolved strict comparison warning for string position checks
+- Applied Laravel Pint formatting across all modified files
+- All 222 tests passing
+
+### Benefits
+
+- **Better UX:** Confirm dialogs now show loading states during async operations
+- **Improved DX:** Vite watch mode is significantly faster without unnecessary static copying
+- **Production Ready:** All assets still copy correctly in production builds
+- **Cleaner Code:** Consistent formatting and modern PHP 8+ functions
+- **Type Safety:** PHPStan level 5 compliance maintained
+
 ## [1.5.1] - 2026-01-11
 
 ### Fixed
