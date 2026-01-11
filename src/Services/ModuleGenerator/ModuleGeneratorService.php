@@ -157,7 +157,38 @@ class ModuleGeneratorService
         // Write file
         $this->files->put($componentPath, $content);
 
+        // Auto-generate view file for non-inline Livewire components
+        if ($type === 'livewire' && ! ($options['inline'] ?? false)) {
+            $this->generateLivewireView($name, $moduleName, $modulePath);
+        }
+
         return $componentPath;
+    }
+
+    /**
+     * Generate view file for Livewire component
+     */
+    protected function generateLivewireView(string $name, string $moduleName, string $modulePath): void
+    {
+        try {
+            // Generate variables for view
+            $variables = $this->prepareVariables($moduleName, 'livewire-view', $name, []);
+
+            // Render view stub
+            $content = $this->stubRenderer->render('livewire/view', $variables);
+
+            // Get view path
+            $viewPath = $this->getComponentPath('livewire-view', $name, $modulePath, $moduleName);
+
+            // Ensure directory exists
+            $this->ensureDirectoryExists(dirname($viewPath));
+
+            // Write view file
+            $this->files->put($viewPath, $content);
+        } catch (\Exception $e) {
+            // Silent fail - view generation is optional
+            // The component class is the critical part
+        }
     }
 
     /**

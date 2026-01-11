@@ -10,27 +10,56 @@
 function showHelp() {
     echo "Synapse Module Generator\n\n";
     echo "Usage: synmod-make <command> [arguments]\n\n";
-    echo "Available commands:\n";
-    echo "  model <name>          Create a new model\n";
-    echo "  controller <name>     Create a new controller\n";
-    echo "  migration <name>      Create a new migration\n";
-    echo "  factory <name>        Create a new factory\n";
-    echo "  seeder <name>         Create a new seeder\n";
-    echo "  livewire <name>       Create a new Livewire component\n";
-    echo "  request <name>        Create a new form request\n";
-    echo "  middleware <name>     Create a new middleware\n";
-    echo "  event <name>          Create a new event\n";
-    echo "  listener <name>       Create a new listener\n";
-    echo "  job <name>            Create a new job\n";
-    echo "  provider <name>       Create a new service provider\n";
-    echo "  policy <name>         Create a new policy\n";
-    echo "  notification <name>   Create a new notification\n";
-    echo "  mail <name>           Create a new mailable\n";
-    echo "  test <name>           Create a new test\n\n";
+    echo "Available commands:\n\n";
+
+    echo "Core Components:\n";
+    echo "  model <name>              Create a new model\n";
+    echo "  controller <name>         Create a new controller\n";
+    echo "  migration <name>          Create a new migration\n";
+    echo "  factory <name>            Create a new factory\n";
+    echo "  seeder <name>             Create a new seeder\n";
+    echo "  livewire <name>           Create a new Livewire component\n";
+    echo "  component <name>          Create a new Blade component\n";
+    echo "  view <name>               Create a new view\n\n";
+
+    echo "Request & Validation:\n";
+    echo "  request <name>            Create a new form request\n";
+    echo "  rule <name>               Create a new validation rule\n\n";
+
+    echo "Events & Jobs:\n";
+    echo "  event <name>              Create a new event\n";
+    echo "  listener <name>           Create a new listener\n";
+    echo "  job <name>                Create a new job\n";
+    echo "  job-middleware <name>     Create a new job middleware\n\n";
+
+    echo "API & Resources:\n";
+    echo "  resource <name>           Create a new API resource\n";
+    echo "  mail <name>               Create a new mailable\n";
+    echo "  notification <name>       Create a new notification\n";
+    echo "  channel <name>            Create a new channel\n\n";
+
+    echo "Advanced:\n";
+    echo "  middleware <name>         Create a new middleware\n";
+    echo "  provider <name>           Create a new service provider\n";
+    echo "  policy <name>             Create a new policy\n";
+    echo "  observer <name>           Create a new observer\n";
+    echo "  scope <name>              Create a new scope\n";
+    echo "  cast <name>               Create a new cast\n";
+    echo "  command <name>            Create a new artisan command\n\n";
+
+    echo "Utilities:\n";
+    echo "  enum <name>               Create a new enum\n";
+    echo "  interface <name>          Create a new interface\n";
+    echo "  trait <name>              Create a new trait\n";
+    echo "  config <name>             Create a new config file\n";
+    echo "  test <name>               Create a new test\n\n";
+
     echo "Examples:\n";
     echo "  synmod-make model Post\n";
     echo "  synmod-make livewire PostList\n";
-    echo "  synmod-make controller PostController --resource\n\n";
+    echo "  synmod-make controller PostController --resource\n";
+    echo "  synmod-make migration create_posts_table --create=posts\n";
+    echo "  synmod-make resource PostResource --collection\n\n";
 }
 
 // Parse command line arguments
@@ -50,21 +79,46 @@ if (!$name) {
 
 // Map commands to artisan commands
 $commandMap = [
+    // Core Components
     'model' => 'synapps:make-model',
     'controller' => 'synapps:make-controller',
     'migration' => 'synapps:make-migration',
     'factory' => 'synapps:make-factory',
     'seeder' => 'synapps:make-seeder',
     'livewire' => 'synapps:make-livewire',
+    'component' => 'synapps:make-component',
+    'view' => 'synapps:make-view',
+
+    // Request & Validation
     'request' => 'synapps:make-request',
-    'middleware' => 'synapps:make-middleware',
+    'rule' => 'synapps:make-rule',
+
+    // Events & Jobs
     'event' => 'synapps:make-event',
     'listener' => 'synapps:make-listener',
     'job' => 'synapps:make-job',
+    'job-middleware' => 'synapps:make-job-middleware',
+
+    // API & Resources
+    'resource' => 'synapps:make-resource',
+    'mail' => 'synapps:make-mail',
+    'notification' => 'synapps:make-notification',
+    'channel' => 'synapps:make-channel',
+
+    // Advanced
+    'middleware' => 'synapps:make-middleware',
     'provider' => 'synapps:make-provider',
     'policy' => 'synapps:make-policy',
-    'notification' => 'synapps:make-notification',
-    'mail' => 'synapps:make-mail',
+    'observer' => 'synapps:make-observer',
+    'scope' => 'synapps:make-scope',
+    'cast' => 'synapps:make-cast',
+    'command' => 'synapps:make-command',
+
+    // Utilities
+    'enum' => 'synapps:make-enum',
+    'interface' => 'synapps:make-interface',
+    'trait' => 'synapps:make-trait',
+    'config' => 'synapps:make-config',
     'test' => 'synapps:make-test',
 ];
 

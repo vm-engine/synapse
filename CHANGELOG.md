@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-01-11
+
+### Fixed
+
+**Module Generator:**
+- Fixed Livewire view file not being created when using `synmod-make livewire` command
+  - Added automatic view generation for non-inline Livewire components in `ModuleGeneratorService`
+  - View files are now properly created in `resources/views/livewire/` directory
+  - Inline components (using `--inline` flag) correctly skip view generation
+
+**CLI Tool:**
+- Enhanced `synmod-make` help command to show all 33 available commands
+  - Organized commands into logical categories:
+    - Core Components (8 commands)
+    - Request & Validation (2 commands)
+    - Events & Jobs (4 commands)
+    - API & Resources (4 commands)
+    - Advanced (7 commands)
+    - Utilities (5 commands)
+  - Added previously undocumented commands: component, view, rule, job-middleware, resource, channel, observer, scope, cast, command, enum, interface, trait, config
+  - Improved help output formatting with better alignment and categorization
+  - Added more comprehensive usage examples
+
 ## [1.5.0] - 2026-01-09
 
 ### Added
