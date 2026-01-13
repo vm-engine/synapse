@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.4] - 2026-01-13
+
+### Fixed
+
+**Blade Components:**
+- Enhanced `<x-synapse::adv-select>` component value comparison logic
+  - Changed strict equality (`===`) to loose equality (`==`) for value field comparisons
+  - Fixes issues where numeric IDs stored as strings fail to match in static options
+  - Improved null/undefined check: `!currentValue` → `currentValue === null || currentValue === undefined`
+  - Fixed `syncWithWire()` to properly handle empty selection: `ids[0] || null` → `ids.length > 0 ? ids[0] : null`
+  - Applied consistent code formatting and spacing
+
+### Benefits
+
+**Type Safety:**
+- Component now correctly handles type mismatches between numeric and string IDs
+- More robust value matching across different data sources (static options, AJAX responses)
+- Prevents false negatives when comparing database integers with form string values
+
+**Reliability:**
+- Empty selections no longer incorrectly sync `undefined` to Livewire
+- More explicit null/undefined checks prevent edge case bugs
+
 ## [1.5.3] - 2026-01-13
 
 ### Added

@@ -174,7 +174,7 @@ Version: 1.0.0
                 // Get current value from Livewire model
                 const currentValue = this.$wire.get(this.wireModel);
 
-                if (!currentValue || (Array.isArray(currentValue) && currentValue.length === 0)) {
+                if (currentValue === null || currentValue === undefined || (Array.isArray(currentValue) && currentValue.length === 0)) {
                     return; // No value to load
                 }
 
@@ -183,7 +183,8 @@ Version: 1.0.0
                 // Try to find values in static options first
                 const foundInStatic = [];
                 for (const val of values) {
-                    const found = this.staticOptions.find(o => o[this.valueField] === val);
+                    // Use loose equality to handle type mismatches (string vs number)
+                    const found = this.staticOptions.find(o => o[this.valueField] == val);
                     if (found) {
                         foundInStatic.push(found);
                     }
@@ -237,7 +238,7 @@ Version: 1.0.0
                     // merge while avoiding duplicates by valueField
                     const merged = [...staticResults];
                     for (const r of remoteResults) {
-                        if (!merged.find(o => o[this.valueField] === r[this.valueField])) {
+                        if (!merged.find(o => o[this.valueField] == r[this.valueField])) {
                             merged.push(r);
                         }
                     }
@@ -256,7 +257,7 @@ Version: 1.0.0
     
         select(item) {
             if (this.multiple) {
-                if (!this.selected.find(i => i[this.valueField] === item[this
+                if (!this.selected.find(i => i[this.valueField] == item[this
                         .valueField])) {
                     this.selected.push(item);
                 }
@@ -305,16 +306,16 @@ Version: 1.0.0
     
         syncWithWire() {
             if (!this.$wire) return; // safety check
-    
+
             const ids = this.selected.map(i => i[this.valueField]);
-    
+
             // Prevent sending [] on init unless already synced once
             if (!this._initialized) {
                 this._initialized = true;
                 if (ids.length === 0) return; // skip initial empty sync
             }
-    
-            this.$wire.set(this.wireModel, this.multiple ? ids : (ids[0] || null), this.live);
+
+            this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] : null), this.live);
         },
     }"
     x-init="init()"
