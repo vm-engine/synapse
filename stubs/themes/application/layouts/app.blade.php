@@ -110,7 +110,7 @@
     >
         <div class="flex items-start gap-3">
             <!-- Icon -->
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 <!-- Success Icon -->
                 <svg
                     class="h-6 w-6 text-green-500"
@@ -178,7 +178,7 @@
 
             <!-- Close Button -->
             <button
-                class="flex-shrink-0 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                class="shrink-0 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
                 @click="hide()"
             >
                 <svg

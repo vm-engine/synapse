@@ -90,7 +90,7 @@
 @endphp
 
 <div
-    class="relative rounded-lg p-4 {{ $colors['bg'] }} {{ $borderClass }}"
+    class="{{ $colors['bg'] }} {{ $borderClass }} relative rounded-lg p-4"
     role="alert"
     x-data="{ show: true }"
     x-show="show"
@@ -105,15 +105,15 @@
     <div class="flex items-start gap-3">
         {{-- Icon --}}
         @if ($icon)
-            <div class="flex-shrink-0 mt-0.5">
+            <div class="mt-0.5 shrink-0">
                 <i class="{{ $icon }} {{ $colors['icon'] }} text-lg"></i>
             </div>
         @endif
 
         {{-- Content --}}
-        <div class="flex-1 min-w-0">
+        <div class="min-w-0 flex-1">
             @if ($title)
-                <h3 class="font-semibold {{ $colors['text'] }} mb-1">
+                <h3 class="{{ $colors['text'] }} mb-1 font-semibold">
                     {{ $title }}
                 </h3>
             @endif
@@ -134,13 +134,13 @@
         {{-- Dismiss Button --}}
         @if ($dismissible)
             <button
-                class="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md {{ $colors['close'] }} transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-{{ $type === 'danger' ? 'red' : ($type === 'warning' ? 'yellow' : ($type === 'success' ? 'green' : 'blue')) }}-500"
+                class="{{ $colors['close'] }} focus:ring-{{ $type === 'danger' ? 'red' : ($type === 'warning' ? 'yellow' : ($type === 'success' ? 'green' : 'blue')) }}-500 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                 type="button"
                 aria-label="Close alert"
                 @click="show = false"
             >
                 <svg
-                    class="w-4 h-4"
+                    class="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

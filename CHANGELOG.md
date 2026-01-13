@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.5] - 2026-01-13
+
+### Added
+
+**Theme System:**
+- Badge utility classes in Application theme CSS
+  - Added `.badge` base class with gray styling
+  - Added size variants: `.badge.sm`, `.badge.xl`
+  - Added color variants: `.badge.info`, `.badge.success`, `.badge.danger`, `.badge.warning`, `.badge.primary`, `.badge.secondary`
+  - Consistent styling with rounded corners, padding, and font-medium weight
+
+### Changed
+
+**Code Quality:**
+- Applied Laravel Pint formatting across theme files and components
+  - Updated Tailwind CSS class ordering to follow Pint conventions
+  - Changed deprecated `flex-shrink-0` to modern `shrink-0` utility class
+  - Improved code consistency across all Blade components and theme layouts
+
+**Blade Components:**
+- Reformatted Alert component with proper Tailwind class ordering
+- Applied consistent class ordering in theme layouts (app, guest, header-nav, sidebar-menu)
+
+**Theme Stubs:**
+- Modernized class names in Application theme layouts
+- Updated Default theme CSS with current Tailwind utilities
+- Consistent use of modern flexbox utilities throughout theme files
+
+### Benefits
+
+- **Better Styling Options:** New badge classes provide consistent visual indicators
+- **Modern CSS:** Using current Tailwind v4 utility classes (`shrink-0` vs `flex-shrink-0`)
+- **Code Consistency:** All files follow Laravel Pint formatting standards
+- **Maintainability:** Proper class ordering makes templates easier to read and maintain
+
 ## [1.5.4] - 2026-01-13
 
 ### Fixed

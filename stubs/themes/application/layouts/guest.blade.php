@@ -27,48 +27,48 @@
 </head>
 
 <body
+    class="font-sans antialiased"
     x-data="{ darkMode: $persist(false).as('m4vm_dark_mode_guest') }"
     :class="{ 'dark': darkMode }"
     x-init="darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')"
-    class="font-sans antialiased"
 >
-    <div class="min-h-screen flex">
+    <div class="flex min-h-screen">
         <!-- LEFT: Banner Column (Hidden on mobile, visible on lg+) -->
         <div
-            class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 relative overflow-hidden">
+            class="from-primary-600 via-primary-700 to-primary-900 relative hidden overflow-hidden bg-gradient-to-br lg:flex lg:w-1/2">
             <!-- Decorative gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-transparent"></div>
+            <div class="from-primary-500/20 absolute inset-0 bg-gradient-to-br to-transparent"></div>
 
             <!-- Decorative circles -->
-            <div class="absolute top-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-20 -right-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+            <div class="absolute -left-20 top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute -right-20 bottom-20 h-96 w-96 rounded-full bg-white/5 blur-3xl"></div>
 
-            <div class="relative z-10 flex flex-col justify-center items-center p-12 text-white w-full">
+            <div class="relative z-10 flex w-full flex-col items-center justify-center p-12 text-white">
                 <!-- Logo -->
-                <div class="mb-8 animate-fade-in">
+                <div class="animate-fade-in mb-8">
                     <img
-                        src="{{ theme_asset('images/logo-dark.svg') }}"
                         class="h-16"
+                        src="{{ theme_asset('images/logo-dark.svg') }}"
                         alt="Member4VM Logo"
                     >
                 </div>
 
                 <!-- App Name -->
-                <h1 class="text-5xl font-bold mb-4 text-center animate-fade-in">
+                <h1 class="animate-fade-in mb-4 text-center text-5xl font-bold">
                     Member4VM
                 </h1>
 
                 <!-- Description -->
-                <p class="text-xl text-primary-100 text-center max-w-md leading-relaxed mb-12 animate-fade-in">
+                <p class="text-primary-100 animate-fade-in mb-12 max-w-md text-center text-xl leading-relaxed">
                     Powerful membership management platform for virtual machine services
                 </p>
 
                 <!-- Features List -->
-                <ul class="space-y-4 text-lg animate-fade-in">
+                <ul class="animate-fade-in space-y-4 text-lg">
                     <li class="flex items-center gap-3">
-                        <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                             <svg
-                                class="w-5 h-5 text-success"
+                                class="text-success h-5 w-5"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                             >
@@ -82,9 +82,9 @@
                         <span>Secure Authentication</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                             <svg
-                                class="w-5 h-5 text-success"
+                                class="text-success h-5 w-5"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                             >
@@ -98,9 +98,9 @@
                         <span>Real-time Monitoring</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                             <svg
-                                class="w-5 h-5 text-success"
+                                class="text-success h-5 w-5"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                             >
@@ -114,9 +114,9 @@
                         <span>Advanced Resource Management</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
                             <svg
-                                class="w-5 h-5 text-success"
+                                class="text-success h-5 w-5"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                             >
@@ -132,7 +132,7 @@
                 </ul>
 
                 <!-- Footer Text -->
-                <div class="mt-auto pt-12 text-center text-primary-200 text-sm">
+                <div class="text-primary-200 mt-auto pt-12 text-center text-sm">
                     &copy; {{ date('Y') }} Member4VM. All rights reserved.
                 </div>
             </div>
@@ -140,23 +140,23 @@
 
         <!-- RIGHT: Form Column -->
         <div
-            class="flex-1 flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+            class="flex flex-1 items-center justify-center bg-gray-50 p-6 transition-colors duration-300 dark:bg-gray-900">
             <div class="w-full max-w-md">
                 <!-- Dark Mode Toggle (Top Right) -->
-                <div class="flex justify-end mb-6">
+                <div class="mb-6 flex justify-end">
                     <button
-                        @click="darkMode = !darkMode; darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')"
+                        class="group relative rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                         type="button"
-                        class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group relative"
                         aria-label="Toggle dark mode"
+                        @click="darkMode = !darkMode; darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')"
                     >
                         <!-- Sun Icon (Light Mode) -->
                         <svg
+                            class="h-6 w-6"
                             x-show="!darkMode"
                             x-transition:enter="transition-transform duration-200"
                             x-transition:enter-start="rotate-90 scale-0"
                             x-transition:enter-end="rotate-0 scale-100"
-                            class="w-6 h-6"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -171,11 +171,11 @@
 
                         <!-- Moon Icon (Dark Mode) -->
                         <svg
+                            class="h-6 w-6"
                             x-show="darkMode"
                             x-transition:enter="transition-transform duration-200"
                             x-transition:enter-start="-rotate-90 scale-0"
                             x-transition:enter-end="rotate-0 scale-100"
-                            class="w-6 h-6"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -190,7 +190,7 @@
 
                         <!-- Tooltip -->
                         <span
-                            class="absolute -bottom-10 right-0 bg-gray-900 dark:bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none"
+                            class="pointer-events-none absolute -bottom-10 right-0 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700"
                         >
                             Toggle theme
                         </span>
@@ -199,20 +199,20 @@
 
                 <!-- Glass Card Wrapper -->
                 <div
-                    class="glass-strong rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8 animate-fade-in">
+                    class="glass-strong animate-fade-in rounded-2xl border border-gray-200 p-8 shadow-2xl dark:border-gray-700">
                     <!-- Logo for Mobile -->
-                    <div class="lg:hidden flex justify-center mb-6">
+                    <div class="mb-6 flex justify-center lg:hidden">
                         <img
-                            x-show="!darkMode"
-                            src="{{ theme_asset('images/logo.svg') }}"
                             class="h-12"
+                            src="{{ theme_asset('images/logo.svg') }}"
                             alt="Member4VM"
+                            x-show="!darkMode"
                         >
                         <img
-                            x-show="darkMode"
-                            src="{{ theme_asset('images/logo-dark.svg') }}"
                             class="h-12"
+                            src="{{ theme_asset('images/logo-dark.svg') }}"
                             alt="Member4VM"
+                            x-show="darkMode"
                         >
                     </div>
 
@@ -225,8 +225,8 @@
                     <p>
                         Need help?
                         <a
-                            href="#"
                             class="text-primary-600 dark:text-primary-400 hover:underline"
+                            href="#"
                         >Contact Support</a>
                     </p>
                 </div>

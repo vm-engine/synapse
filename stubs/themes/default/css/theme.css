@@ -655,12 +655,12 @@ input[type="radio"] {
 
 /* Menu icons */
 .menu-item-icon-active {
-    @apply w-5 h-5 flex-shrink-0;
+    @apply w-5 h-5 shrink-0;
     color: oklch(0.38 0.15 240) !important; /* brand-700 forced */
 }
 
 .menu-item-icon-inactive {
-    @apply w-5 h-5 flex-shrink-0 text-white;
+    @apply w-5 h-5 shrink-0 text-white;
 }
 
 .menu a:hover svg,

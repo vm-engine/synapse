@@ -108,7 +108,7 @@
                         href="#"
                     >
                         <div class="flex gap-3">
-                            <div class="flex-shrink-0">
+                            <div class="shrink-0">
                                 <div
                                     class="bg-primary-100 dark:bg-primary-900 flex h-10 w-10 items-center justify-center rounded-full">
                                     <svg
@@ -137,7 +137,7 @@
                         href="#"
                     >
                         <div class="flex gap-3">
-                            <div class="flex-shrink-0">
+                            <div class="shrink-0">
                                 <div
                                     class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
                                     <svg

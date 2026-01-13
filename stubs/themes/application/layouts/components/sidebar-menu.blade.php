@@ -15,7 +15,7 @@
     <div class="sidebar-header">
         <div class="flex min-w-0 items-center gap-3">
             <img
-                class="h-8 flex-shrink-0"
+                class="h-8 shrink-0"
                 src="{{ theme_asset('images/logo-dark.svg') }}"
                 alt="Logo"
             >
@@ -30,7 +30,7 @@
 
         {{-- Collapse Toggle (Desktop Only) --}}
         <button
-            class="hidden flex-shrink-0 text-gray-400 transition-colors hover:text-white lg:block"
+            class="hidden shrink-0 text-gray-400 transition-colors hover:text-white lg:block"
             @click="sidebarCollapsed = !sidebarCollapsed"
             x-show="!sidebarCollapsed"
             x-transition
@@ -92,7 +92,7 @@
                         >
                             <div class="flex min-w-0 flex-1 items-center gap-3">
                                 @if (!empty($menu['icon']))
-                                    <span class="{{ $menu['icon'] }} h-5 w-5 flex-shrink-0"></span>
+                                    <span class="{{ $menu['icon'] }} h-5 w-5 shrink-0"></span>
                                 @endif
                                 <span
                                     class="font-medium"
@@ -103,7 +103,7 @@
                                 </span>
                             </div>
                             <svg
-                                class="h-4 w-4 flex-shrink-0 transition-transform"
+                                class="h-4 w-4 shrink-0 transition-transform"
                                 x-show="!sidebarCollapsed"
                                 :class="{ 'rotate-180': open }"
                                 fill="currentColor"
@@ -151,7 +151,7 @@
                                                     <span>{{ synav()->translate($subMenu['name']) }}</span>
                                                 </div>
                                                 <svg
-                                                    class="h-3 w-3 flex-shrink-0 transition-transform"
+                                                    class="h-3 w-3 shrink-0 transition-transform"
                                                     :class="{ 'rotate-180': openSub }"
                                                     fill="currentColor"
                                                     viewBox="0 0 20 20"
@@ -215,7 +215,7 @@
                             wire:navigate
                         >
                             @if (!empty($menu['icon']))
-                                <span class="{{ $menu['icon'] }} h-5 w-5 flex-shrink-0"></span>
+                                <span class="{{ $menu['icon'] }} h-5 w-5 shrink-0"></span>
                             @endif
                             <span
                                 class="font-medium"
@@ -248,7 +248,7 @@
             :class="{ 'justify-center': sidebarCollapsed }"
         >
             <img
-                class="h-10 w-10 flex-shrink-0 rounded-full"
+                class="h-10 w-10 shrink-0 rounded-full"
                 src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&background=3B82F6&color=fff"
                 alt="User"
             >
