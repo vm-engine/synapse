@@ -282,7 +282,9 @@ Supports:
 - ✅ Single or multiple selection
 - ✅ Searchable dropdown (static or remote)
 - ✅ Static or dynamic data
+- ✅ Auto-loads selected values from wireModel (with AJAX support)
 - ✅ Preloaded default values
+- ✅ Create new options on-the-fly
 - ✅ Optional "live" syncing with Livewire
 - ✅ Works with Livewire SPA navigation
 
@@ -292,6 +294,7 @@ Supports:
 |------|------|----------|-------------|
 | `wireModel` | `string` | — | The Livewire property to bind to. |
 | `searchMethod` | `string\|null` | `null` | Name of a Livewire method for remote searching. |
+| `loadMethod` | `string\|null` | `null` | Name of a Livewire method to load initial values by ID(s). |
 | `multiple` | `bool` | `false` | Enables multiple selection mode. |
 | `placeholder` | `string` | `'Select an option'` | Placeholder text shown in the input. |
 | `labelField` | `string` | `'label'` | The field name used for option labels. |
@@ -300,6 +303,8 @@ Supports:
 | `options` | `array` | `[]` | Static options for client-side use. |
 | `minSearchLength` | `int` | `2` | Minimum characters before triggering remote search. |
 | `live` | `bool` | `false` | If `true`, updates Livewire instantly as user selects. |
+| `allowCreate` | `bool` | `false` | If `true`, allows creating new options by pressing Enter. |
+| `autoLoad` | `bool` | `true` | If `true`, auto-loads selected values from wireModel on init. |
 
 ### Usage Examples
 
@@ -356,7 +361,62 @@ public function searchUsers($query)
 }
 ```
 
-#### Preloaded Values (Edit Forms)
+#### Auto-Load with AJAX (Edit Forms)
+
+**New in v1.5:** The component now automatically loads selected values from the wireModel!
+
+```blade
+{{-- Static options: auto-finds labels from options --}}
+<x-adv-select
+    wire-model="category_id"
+    :options="$categories"
+/>
+
+{{-- AJAX mode: uses loadMethod to fetch label by ID --}}
+<x-adv-select
+    wire-model="user_id"
+    search-method="searchUsers"
+    load-method="loadUser"
+    placeholder="Select user..."
+/>
+
+{{-- Multiple with auto-load --}}
+<x-adv-select
+    wire-model="tags"
+    :multiple="true"
+    :allow-create="true"
+/>
+```
+
+In your Livewire component:
+
+```php
+public $user_id = 5; // Component auto-loads user #5 on init
+
+// Load method for fetching initial values by ID
+public function loadUser(int|array $ids): array
+{
+    $query = User::query();
+
+    if (is_array($ids)) {
+        $query->whereIn('id', $ids);
+    } else {
+        $query->where('id', $ids);
+    }
+
+    return $query->get(['id as value', 'name as label'])->toArray();
+}
+```
+
+**How it works:**
+1. Component reads the current value from `wireModel`
+2. Tries to find labels in static `options` first
+3. If `loadMethod` is provided, calls it to fetch full objects
+4. Falls back to using value as label if neither works
+
+#### Manual Preload (Legacy)
+
+You can still manually pass preloaded values:
 
 ```blade
 <x-adv-select

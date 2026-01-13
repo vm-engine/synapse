@@ -69,17 +69,12 @@
         {{-- Tags --}}
         <div class="form-box">
             <label for="tag">{{ __('todos::todos.form.tags') }}</label>
-            @php
-                // Convert tag array to format expected by adv-select
-                $tagPreload = collect($tag)->map(fn($t) => ['value' => $t, 'label' => $t])->toArray();
-            @endphp
+            {{-- Component auto-loads values from wire-model="tag" --}}
             <x-synapse-adv-select
                 wire-model="tag"
                 :multiple="true"
                 :allow-create="true"
                 :placeholder="__('todos::todos.form.tags_placeholder')"
-                :preload="$tagPreload"
-                :options="[]"
             />
             @error('tag')
                 <p class="form-error-message">{{ $message }}</p>

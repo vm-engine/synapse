@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2026-01-13
+
+### Added
+
+**Blade Components:**
+- Enhanced `<x-synapse::adv-select>` component with automatic value loading
+  - Added `loadMethod` prop for loading initial values by ID(s) via AJAX
+  - Added `autoLoad` prop (default: `true`) to enable/disable automatic loading
+  - Component now automatically reads values from `wireModel` and displays correct labels
+  - Smart fallback chain: static options → loadMethod → value as label
+  - Supports both single and multiple selection modes
+  - No longer requires manual `preload` prop conversion in most cases
+  - Example: Component with `wire-model="user_id"` automatically loads user #5's label on init
+
+### Changed
+
+**Blade Components:**
+- `<x-synapse::adv-select>` initialization now async to support AJAX loading
+- Updated component documentation with auto-load examples and migration guide
+- Legacy `preload` prop still supported for backward compatibility
+
+**Examples:**
+- Simplified todo form example to use auto-loading instead of manual preload conversion
+- Removed boilerplate `@php` block for tag preload conversion
+
+### Benefits
+
+**Developer Experience:**
+- Eliminates boilerplate code for converting values to preload format
+- Simplifies edit forms - just pass the ID, component handles the rest
+- Works seamlessly with both static and AJAX data sources
+- Reduces code duplication across forms
+
 ## [1.5.2] - 2026-01-11
 
 ### Fixed

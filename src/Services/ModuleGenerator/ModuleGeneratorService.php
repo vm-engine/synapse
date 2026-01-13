@@ -214,9 +214,13 @@ class ModuleGeneratorService
         // Handle Livewire view special case
         if ($type === 'livewire-view') {
             $moduleSlug = Str::slug($moduleName ?? '');
-            $viewName = Str::kebab(str_replace(['Component', 'Livewire'], '', $name));
+            // Handle subdirectories: Admin/PostList => admin/post-list (filesystem paths use slashes)
+            $cleanName = str_replace(['Component', 'Livewire'], '', $name);
+            $viewParts = explode('/', $cleanName);
+            $viewParts = array_map(fn ($part) => Str::kebab($part), $viewParts);
+            $viewPath = implode('/', $viewParts);
 
-            return $modulePath.'/resources/views/livewire/'.$viewName.'.blade.php';
+            return $modulePath.'/resources/views/livewire/'.$viewPath.'.blade.php';
         }
 
         // Handle component view special case
@@ -243,7 +247,10 @@ class ModuleGeneratorService
         // Generate class name
         $className = $this->namespaceResolver->generateClassName($name, $type);
 
-        return $modulePath.'/'.$subdir.'/'.$className.'.php';
+        // Convert namespace separators to directory separators for file path
+        $classPath = str_replace('\\', '/', $className);
+
+        return $modulePath.'/'.$subdir.'/'.$classPath.'.php';
     }
 
     /**
@@ -498,6 +505,12 @@ class ModuleGeneratorService
         $idCases = $this->namespaceResolver->generateIdCases($moduleName);
         $className = $this->namespaceResolver->generateClassName($name, $type);
 
+        // Handle subdirectories in class name
+        // Extract actual class name and namespace path from className (e.g., Admin\PostList => Admin, PostList)
+        $classNameParts = explode('\\', $className);
+        $actualClassName = array_pop($classNameParts); // Get last part (PostList)
+        $subNamespace = implode('\\', $classNameParts); // Get path parts (Admin)
+
         // Base namespace for the module
         $baseNamespace = $this->isPackage
             ? $this->namespaceResolver->resolvePackageNamespace($moduleName, '', $this->vendor)
@@ -508,6 +521,11 @@ class ModuleGeneratorService
         $fullNamespace = empty($componentNamespace)
             ? $baseNamespace
             : $baseNamespace.'\\'.$componentNamespace;
+
+        // Append subdirectory namespace if exists
+        if (! empty($subNamespace)) {
+            $fullNamespace .= '\\'.$subNamespace;
+        }
 
         // Factory and seeder namespaces (special cases)
         $factoryNamespace = $this->namespaceResolver->resolveFactoryNamespace(
@@ -532,12 +550,16 @@ class ModuleGeneratorService
         $modelName = $options['model'] ?? Str::studly($baseName);
 
         // View name (for Livewire components)
-        $viewName = Str::kebab(str_replace(['Component', 'Livewire'], '', $name));
+        // Handle subdirectories: Admin/PostList => admin.post-list (dots for Blade view paths)
+        $cleanName = str_replace(['Component', 'Livewire'], '', $name);
+        $viewParts = explode('/', $cleanName);
+        $viewParts = array_map(fn ($part) => Str::kebab($part), $viewParts);
+        $viewName = implode('.', $viewParts);
 
         $variables = [
             'namespace' => $fullNamespace,
             'rootNamespace' => $baseNamespace,
-            'class' => $className,
+            'class' => $actualClassName,
             'module' => $idCases['snake'],
             'modulePascal' => $idCases['pascal'],
             'moduleSnake' => $idCases['snake'],

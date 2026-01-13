@@ -54,12 +54,13 @@ class StubRenderer
     {
         foreach ($variables as $key => $value) {
             // Handle both {{ key }} and {{key}} patterns
-            if ($value === false) {
+            // Skip non-scalar values or boolean values
+            if (! is_scalar($value) || is_bool($value)) {
                 continue;
             }
             $content = str_replace(
                 ['{{ '.$key.' }}', '{{'.$key.'}}'],
-                $value,
+                (string) $value,
                 $content
             );
         }

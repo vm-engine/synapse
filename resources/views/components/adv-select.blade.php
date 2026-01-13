@@ -19,6 +19,7 @@ A fully featured, reactive select component that supports:
 |-------------------|-------------|---------------------|--------------|
 | wireModel         | string      | —                   | The Livewire property to bind. |
 | searchMethod      | string|null | null                | Optional Livewire method name for remote search. |
+| loadMethod        | string|null | null                | Optional Livewire method to load initial values by ID(s). |
 | multiple          | bool        | false               | Enables multiple selection mode. |
 | placeholder       | string      | 'Select an option'  | Placeholder text shown in the input. |
 | labelField        | string      | 'label'             | Field name used for option labels. |
@@ -28,6 +29,7 @@ A fully featured, reactive select component that supports:
 | minSearchLength   | int         | 2                   | Minimum characters before remote search triggers. |
 | live              | bool        | false               | If true, updates Livewire immediately on change. |
 | allowCreate       | bool        | false               | If true, allows user to create new options by pressing Enter. |
+| autoLoad          | bool        | true                | If true, auto-loads selected values from wireModel on init. |
 
 --------------------------------------------------------------------
 💡 Examples
@@ -61,6 +63,14 @@ Remote search (Livewire method)
     placeholder="Search users..."
 />
 
+Auto-load with AJAX (edit mode)
+<x-adv-select
+    wire-model="userId"
+    search-method="searchUsers"
+    load-method="loadUser"
+    placeholder="Select user..."
+/>
+
 Combined static + remote
 <x-adv-select
     wire-model="selectedUser"
@@ -71,15 +81,37 @@ Combined static + remote
     ]"
 />
 
+Auto-load tags (multiple)
+<x-adv-select
+    wire-model="tags"
+    :multiple="true"
+    :allow-create="true"
+/>
+
 --------------------------------------------------------------------
-📘 Livewire search method example:
+📘 Livewire methods example:
 --------------------------------------------------------------------
+// Search method (for dropdown search)
 public function searchUsers(string $query): array
 {
     return User::where('name', 'like', "%{$query}%")
         ->limit(10)
         ->get(['id as value', 'name as label'])
         ->toArray();
+}
+
+// Load method (for auto-loading initial values by ID)
+public function loadUser(int|array $ids): array
+{
+    $query = User::query();
+
+    if (is_array($ids)) {
+        $query->whereIn('id', $ids);
+    } else {
+        $query->where('id', $ids);
+    }
+
+    return $query->get(['id as value', 'name as label'])->toArray();
 }
 --------------------------------------------------------------------
 
@@ -98,6 +130,7 @@ Version: 1.0.0
         multiple: {{ $multiple ? 'true' : 'false' }},
         open: false,
         searchMethod: {{ $searchMethod ? "'{$searchMethod}'" : 'null' }},
+        loadMethod: {{ $loadMethod ? "'{$loadMethod}'" : 'null' }},
         wireModel: '{{ $wireModel }}',
         labelField: '{{ $labelField }}',
         valueField: '{{ $valueField }}',
@@ -105,14 +138,20 @@ Version: 1.0.0
         minSearchLength: {{ $minSearchLength }},
         isLive: {{ $live ? 'true' : 'false' }},
         allowCreate: {{ $allowCreate ? 'true' : 'false' }},
+        autoLoad: {{ $autoLoad ? 'true' : 'false' }},
     
-        init() {
+        async init() {
+            // Auto-load selected values from wireModel if enabled
+            if (this.autoLoad && this.selected.length === 0) {
+                await this.loadInitialValues();
+            }
+
             // Set initial value to Livewire model
             // Only sync if preload has values (avoid empty updates on first render)
             if (this.selected && this.selected.length > 0) {
                 this.syncWithWire();
             }
-    
+
             // Reopen dropdown after Livewire updates
             Livewire.hook('message.processed', () => {
                 if (document.activeElement === this.$refs.search && this.search
@@ -121,11 +160,59 @@ Version: 1.0.0
                     this.open = true;
                 }
             });
-    
+
             // Listen for reset event
             window.addEventListener('reset-tag-input', () => {
                 this.clearSelection();
             });
+        },
+
+        async loadInitialValues() {
+            if (!this.$wire) return;
+
+            try {
+                // Get current value from Livewire model
+                const currentValue = this.$wire.get(this.wireModel);
+
+                if (!currentValue || (Array.isArray(currentValue) && currentValue.length === 0)) {
+                    return; // No value to load
+                }
+
+                const values = Array.isArray(currentValue) ? currentValue : [currentValue];
+
+                // Try to find values in static options first
+                const foundInStatic = [];
+                for (const val of values) {
+                    const found = this.staticOptions.find(o => o[this.valueField] === val);
+                    if (found) {
+                        foundInStatic.push(found);
+                    }
+                }
+
+                // If all values found in static options, use them
+                if (foundInStatic.length === values.length) {
+                    this.selected = foundInStatic;
+                    return;
+                }
+
+                // If loadMethod is provided, call it to get full objects
+                if (this.loadMethod && this.$wire?.call) {
+                    const loaded = await this.$wire.call(this.loadMethod, this.multiple ? values : values[0]);
+
+                    if (loaded) {
+                        this.selected = Array.isArray(loaded) ? loaded : [loaded];
+                        return;
+                    }
+                }
+
+                // Fallback: create simple objects with value = label
+                this.selected = values.map(val => ({
+                    [this.valueField]: val,
+                    [this.labelField]: val
+                }));
+            } catch (e) {
+                console.error('Error loading initial values:', e);
+            }
         },
     
         focusInput() {

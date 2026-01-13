@@ -9,6 +9,7 @@ class AdvSelect extends Component
     public function __construct(
         public $wireModel,
         public $searchMethod = null,
+        public $loadMethod = null,
         public $multiple = false,
         public $placeholder = 'Select an option',
         public $labelField = 'label',
@@ -18,6 +19,7 @@ class AdvSelect extends Component
         public $minSearchLength = 2,
         public $live = false,
         public $allowCreate = false,
+        public $autoLoad = true,
     ) {}
 
     public function render()

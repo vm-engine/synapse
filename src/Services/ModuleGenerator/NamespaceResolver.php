@@ -172,10 +172,14 @@ class NamespaceResolver
     /**
      * Generate class name from component name and type
      * Ensures proper suffixing (e.g., PostController, CreatePostRequest)
+     * Handles subdirectories (e.g., Admin/PostController => Admin\PostController)
      */
     public function generateClassName(string $name, string $type): string
     {
-        $name = Str::studly($name);
+        // Handle subdirectories: Admin/PostList => Admin\PostList
+        $parts = explode('/', $name);
+        $parts = array_map(fn ($part) => Str::studly($part), $parts);
+        $name = implode('\\', $parts);
 
         // Check if name already has the suffix
         $suffixes = [
