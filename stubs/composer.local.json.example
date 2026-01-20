@@ -1,0 +1,18 @@
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./packages/synapse"
+        },
+        {
+            "type": "path",
+            "url": "./packages/synapps-auth"
+        }
+    ],
+    "require": {
+        "vm-engine/synapse": "@dev",
+        "vm-engine/synapps-auth": "@dev"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

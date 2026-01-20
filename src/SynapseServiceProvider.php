@@ -50,6 +50,8 @@ use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Console\Commands\SynapseDbConfig;
 use VmEngine\Synapse\Console\Commands\SynapseDbLang;
+use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
+use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
 use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
@@ -95,6 +97,8 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsMakeTheme::class,
                 SynapseDbConfig::class,
                 SynapseDbLang::class,
+                SynapsePatchComposer::class,
+                SynapseRestoreComposer::class,
                 // Generator Commands
                 MakeModuleCommand::class,
                 MakeModelCommand::class,

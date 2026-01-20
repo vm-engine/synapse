@@ -36,6 +36,8 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
 | `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
+| `synapse:patch-composer` | Merge composer.local.json | Local dev with path repos | Yes | No |
+| `synapse:restore-composer` | Restore original composer.json | After patching | Yes | No |
 
 ### synapps:setup
 Interactive wizard that:
@@ -147,6 +149,64 @@ Creates symlink/junction from `resources/views/errors` → `synapps/resources/vi
 - Tries symlink first, falls back to Windows junction
 - Auto-removes existing link/directory
 - No admin required on Windows (uses junctions)
+
+### synapse:patch-composer
+Merges `composer.local.json` into `composer.json` for local development with path repositories.
+
+```bash
+php artisan synapse:patch-composer
+```
+
+**What it does:**
+1. Checks if `composer.local.json` exists in project root
+2. Backs up current `composer.json` to `composer.original.json`
+3. Deep merges `composer.local.json` into `composer.json`
+4. Adds both files to `.gitignore` (idempotent)
+
+**Use case:**
+Perfect for local development when testing packages via path repositories without modifying the committed `composer.json`.
+
+**Example `composer.local.json`:**
+```json
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./packages/synapse"
+        }
+    ],
+    "require": {
+        "vm-engine/synapse": "@dev"
+    },
+    "minimum-stability": "dev"
+}
+```
+
+**After patching:**
+```bash
+composer update
+```
+
+**Idempotent:** Can re-run safely. Warns if already patched and asks for confirmation.
+
+### synapse:restore-composer
+Restores original `composer.json` from backup, undoing the patch.
+
+```bash
+php artisan synapse:restore-composer
+```
+
+**What it does:**
+1. Checks if `composer.original.json` exists
+2. Deletes current (patched) `composer.json`
+3. Renames `composer.original.json` back to `composer.json`
+
+**After restoring:**
+```bash
+composer update
+```
+
+**Safe:** Prompts for confirmation before restoring.
 
 ---
 

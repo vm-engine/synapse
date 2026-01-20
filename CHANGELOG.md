@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.6] - 2026-01-20
+
+### Added
+
+**Composer Patch Commands:**
+- New `synapse:patch-composer` command for local development workflow
+  - Merges `composer.local.json` into `composer.json` for path repository development
+  - Automatically backs up original to `composer.original.json`
+  - Deep merges configuration arrays (preserves existing values)
+  - Idempotent `.gitignore` updates to exclude patch files
+  - Safe to run multiple times with confirmation prompts
+- New `synapse:restore-composer` command to undo patches
+  - Restores original `composer.json` from backup
+  - Removes backup file after restoration
+  - Confirmation prompt before destructive operations
+- Added example `stubs/composer.local.json.example` for reference
+- Comprehensive test suite with 6 tests covering all scenarios
+
+**Documentation:**
+- Updated `CLAUDE.md` with detailed command documentation
+  - Added commands to quick reference table
+  - Included usage examples and best practices
+  - Documented deep merge behavior and idempotency
+
+### Benefits
+
+- **Better Local Development:** Seamlessly work with path repositories without modifying committed `composer.json`
+- **Git-Friendly:** Patch files automatically excluded from version control
+- **Safe Operations:** Backup system ensures original configuration is never lost
+- **Team-Friendly:** Each developer can maintain their own `composer.local.json` without conflicts
+- **Well-Tested:** Full test coverage ensures reliability
+
 ## [1.5.5] - 2026-01-13
 
 ### Added
