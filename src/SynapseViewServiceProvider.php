@@ -15,6 +15,7 @@ use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\Modal;
 use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
+use VmEngine\Synapse\Components\PasswordGenerator;
 use VmEngine\Synapse\Components\RadioButtons;
 use VmEngine\Synapse\Components\Select;
 use VmEngine\Synapse\Components\Toastr;
@@ -99,6 +100,7 @@ class SynapseViewServiceProvider extends ViewServiceProvider
         Blade::component(MultiSelect::class, 'synapse-multiselect');
         Blade::component(AdvSelect::class, 'synapse-adv-select');
         Blade::component(Password::class, 'synapse-password');
+        Blade::component(PasswordGenerator::class, 'synapse-password-generator');
         Blade::component(Currency::class, 'synapse-currency');
         Blade::component(RadioButtons::class, 'synapse-radio-buttons');
         Blade::component(Checkboxes::class, 'synapse-checkboxes');

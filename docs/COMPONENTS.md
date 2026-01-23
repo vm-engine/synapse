@@ -82,6 +82,54 @@ Password field with show/hide toggle:
 
 ---
 
+### Password Generator
+
+Read-only password generator with separate generate and apply actions:
+
+```blade
+{{-- Single property --}}
+<x-synapse::password-generator
+    model="password"
+    :length="12"
+/>
+
+{{-- Multiple properties (e.g., password + confirmation) --}}
+<x-synapse::password-generator
+    :model="['password', 'password_confirmation']"
+    :length="16"
+/>
+
+{{-- Display only (no apply button) --}}
+<x-synapse::password-generator :length="20" />
+```
+
+**Props:**
+- `model` (string|array, optional) - Livewire property name(s) to set when Apply button is clicked. Accepts single string or array of strings
+- `length` (int, default: 12) - Password length (minimum: 8)
+- `...attributes` - Any additional HTML input attributes
+
+**Features:**
+- **Read-only field**: Password is always visible, cannot be manually edited
+- **Separate actions**: Generate creates password, Apply sets Livewire properties
+- Generate secure passwords with guaranteed character variety (lowercase, uppercase, numbers, symbols)
+- Copy generated password to clipboard
+- Set multiple Livewire properties at once (perfect for password + confirmation fields)
+- Generate multiple times before applying
+- Alpine.js powered with no wire:model dependency
+
+**Buttons:**
+- **Generate** (refresh icon) - Creates new password and displays in field
+- **Apply** (checkmark icon) - Sets current password to Livewire properties (only shown if `model` is provided)
+- **Copy** (copy icon) - Copies password to clipboard
+
+**Events:**
+- `password-set` - Dispatched when Apply button is clicked
+- `password-copied` - Dispatched when Copy button is clicked
+
+**See:** [Complete Usage Examples](COMPONENTS_PASSWORD_GENERATOR_EXAMPLE.md)
+
+---
+
 ### Currency Input
 
 Currency input with formatting:

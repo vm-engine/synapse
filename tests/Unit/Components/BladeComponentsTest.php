@@ -8,6 +8,7 @@ use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
+use VmEngine\Synapse\Components\PasswordGenerator;
 use VmEngine\Synapse\Components\RadioButtons;
 use VmEngine\Synapse\Components\Select;
 use VmEngine\Synapse\Components\Toastr;
@@ -615,6 +616,81 @@ describe('Toggler Component', function () {
 
     it('has render method', function () {
         $component = new Toggler;
+
+        expect(method_exists($component, 'render'))->toBeTrue();
+    });
+});
+
+describe('PasswordGenerator Component', function () {
+    it('can be instantiated with single model', function () {
+        $component = new PasswordGenerator(
+            model: 'password',
+            length: 12
+        );
+
+        expect($component)->toBeInstanceOf(PasswordGenerator::class);
+    });
+
+    it('can be instantiated with array model', function () {
+        $component = new PasswordGenerator(
+            model: ['password', 'password_confirmation'],
+            length: 16
+        );
+
+        expect($component)->toBeInstanceOf(PasswordGenerator::class);
+    });
+
+    it('can be instantiated without model', function () {
+        $component = new PasswordGenerator;
+
+        expect($component)->toBeInstanceOf(PasswordGenerator::class);
+    });
+
+    it('stores string model property', function () {
+        $component = new PasswordGenerator(model: 'password');
+
+        expect($component->model)->toBe('password');
+    });
+
+    it('stores array model property', function () {
+        $model = ['password', 'password_confirmation'];
+        $component = new PasswordGenerator(model: $model);
+
+        expect($component->model)->toBe($model);
+    });
+
+    it('stores null model property', function () {
+        $component = new PasswordGenerator;
+
+        expect($component->model)->toBeNull();
+    });
+
+    it('stores length property', function () {
+        $component = new PasswordGenerator(length: 16);
+
+        expect($component->length)->toBe(16);
+    });
+
+    it('enforces minimum length of 8', function () {
+        $component = new PasswordGenerator(length: 5);
+
+        expect($component->length)->toBe(8);
+    });
+
+    it('allows length greater than 8', function () {
+        $component = new PasswordGenerator(length: 20);
+
+        expect($component->length)->toBe(20);
+    });
+
+    it('defaults length to 12', function () {
+        $component = new PasswordGenerator;
+
+        expect($component->length)->toBe(12);
+    });
+
+    it('has render method', function () {
+        $component = new PasswordGenerator;
 
         expect(method_exists($component, 'render'))->toBeTrue();
     });

@@ -1015,3 +1015,11 @@ textarea.form-input {
 .has-tooltip > .tooltip {
     @apply group-hover:visible;
 }
+
+.icon-dropdown {
+    @apply shadow-theme-lg fixed z-[9999] w-48 rounded-lg border border-gray-200 bg-white py-1 dark:border-gray-700 dark:bg-gray-800;
+}
+
+.icon-dropdown-item {
+    @apply flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700;
+}

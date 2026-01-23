@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-01-23
+
+### Added
+
+**Password Generator Component:**
+- New `<x-synapse::password-generator>` Blade component for secure password generation
+  - Read-only text field that displays generated passwords in plain text
+  - Enforces strong password generation (prevents weak user-created passwords)
+  - Three action buttons: Generate (refresh), Apply (checkmark), Copy (clipboard)
+  - Separate generate and apply workflow for user control
+  - Supports setting single or multiple Livewire properties simultaneously
+  - Configurable password length (minimum: 8 characters, default: 12)
+  - Generates passwords with guaranteed character variety (lowercase, uppercase, numbers, symbols)
+  - Alpine.js powered with no wire:model dependency
+  - Dispatches `password-set` and `password-copied` custom events
+
+**Component Features:**
+- Password field is always visible as plain text (type="text")
+- Read-only enforcement prevents manual password entry
+- Generate button uses FontAwesome icon (`fa-solid fa-refresh`)
+- Apply button only shown when `model` prop is provided
+- Users can generate multiple passwords before applying
+- Copy to clipboard functionality with browser Clipboard API
+- Full dark mode support with Tailwind CSS
+
+**PHP Component Class:**
+- `VmEngine\Synapse\Components\PasswordGenerator` class
+- Accepts `model` (string|array|null) for Livewire property binding
+- Accepts `length` (int) with automatic minimum enforcement
+- Registered as `synapse-password-generator` in ViewServiceProvider
+
+**Documentation:**
+- Comprehensive usage guide: `docs/COMPONENTS_PASSWORD_GENERATOR_EXAMPLE.md`
+- Detailed workflow documentation: `docs/COMPONENTS_PASSWORD_GENERATOR_WORKFLOW.md`
+- Migration guide and changes overview: `docs/COMPONENTS_PASSWORD_GENERATOR_CHANGES.md`
+- Updated `docs/COMPONENTS.md` with component reference
+- Complete example form: `examples/password-generator-form.blade.php`
+
+**Tests:**
+- 11 comprehensive unit tests for PasswordGenerator component
+- Tests cover instantiation, property storage, length enforcement, and render method
+- All tests passing (239 total tests in suite)
+
+### Benefits
+
+- **Enhanced Security:** Enforces strong, generated passwords across the application
+- **Better UX:** Clear workflow - generate, review (always visible), then apply
+- **Flexible Binding:** Set password and confirmation fields simultaneously with array model
+- **Developer Friendly:** Well-documented with examples and workflow guides
+- **Type Safe:** Full type hints and PHPStan level 5 compliant
+
 ## [1.5.6] - 2026-01-20
 
 ### Added
