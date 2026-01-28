@@ -277,15 +277,246 @@ class ProductController extends Controller
 
 ---
 
-## Running Migrations
+## Excel Import/Export Service
 
-DbConfig and DbLang services require database tables. Run migrations after installation:
+Memory-efficient Excel import/export utility classes with support for background processing, progress tracking, resumability, and streaming.
+
+**Libraries:** `openspout/openspout` ^4.0 (streaming, constant memory), `phpoffice/phpspreadsheet` ^2.0 (template-based exports)
+
+### Importing Files
+
+```php
+use VmEngine\Synapse\Services\Excel\ExcelImporter;
+
+// Sync import - returns all rows
+$rows = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)                          // skip header row
+    ->mapColumns(['name', 'email', 'phone'])  // positional mapping
+    ->import();                               // Returns Collection
+
+// Associative mapping (explicit column index)
+$rows = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name' => 0, 'email' => 2, 'phone' => 4])
+    ->import();
+
+// Closure mapping (custom transformation)
+$rows = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(fn(array $row, int $i) => [
+        'full_name' => $row[0] . ' ' . $row[1],
+        'email' => strtolower($row[2]),
+    ])
+    ->import();
+
+// Chunked import (memory efficient for large files)
+$totalRows = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name', 'email'])
+    ->chunk(1000, function (Collection $rows, int $chunkIndex) {
+        User::insert($rows->toArray());
+    });
+```
+
+### Exporting Files
+
+```php
+use VmEngine\Synapse\Services\Excel\ExcelExporter;
+
+// Sync export - simple columns
+ExcelExporter::make(User::query()->where('active', true))
+    ->columns(['name', 'email', 'created_at'])
+    ->export('/path/to/output.xlsx');
+
+// Associative columns with closures
+ExcelExporter::make(User::query()->with('department'))
+    ->columns([
+        'Full Name' => 'name',
+        'Email' => 'email',
+        'Department' => fn($user) => $user->department?->name ?? 'N/A',
+        'Joined' => fn($user) => $user->created_at->format('Y-m-d'),
+    ])
+    ->sheet('Users Report')
+    ->export('/path/to/output.xlsx');
+
+// Template export (preserves formatting)
+ExcelExporter::make(Invoice::query())
+    ->columns(['invoice_number', 'client_name', 'total'])
+    ->startingRow(5)
+    ->template('/path/to/template.xlsx')
+    ->export('/path/to/output.xlsx');
+
+// Styled export with column widths and formatting
+ExcelExporter::make(User::query())
+    ->columns([
+        'Full Name' => 'name',
+        'Email' => 'email',
+        'Salary' => 'salary',
+    ])
+    ->columnStyles([
+        'Full Name' => ['font' => ['bold' => true], 'width' => 30],
+        'Email' => ['width' => 40, 'alignment' => ['horizontal' => 'center']],
+        'Salary' => [
+            'numberFormat' => ['formatCode' => '#,##0.00'],
+            'alignment' => ['horizontal' => 'right'],
+            'width' => 15,
+        ],
+    ])
+    ->headerStyle([
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '4472C4']],
+    ])
+    ->export('/path/to/output.xlsx');
+
+// Download response
+return ExcelExporter::make(User::query())
+    ->columns(['name', 'email'])
+    ->download('users-export.xlsx');
+```
+
+### Column Styling
+
+Apply professional formatting to exports using `columnStyles()` and `headerStyle()`. Styles are PhpSpreadsheet-compatible arrays:
+
+```php
+->columnStyles([
+    'Column Label' => [
+        'width' => 30,                                    // Column width
+        'autoSize' => true,                               // Auto-fit width
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FF0000']],
+        'alignment' => ['horizontal' => 'center'],
+        'numberFormat' => ['formatCode' => '#,##0.00'],   // Number/date formatting
+        'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'EEEEEE']],
+    ],
+])
+->headerStyle([
+    'font' => ['bold' => true],
+    'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '4472C4']],
+])
+```
+
+When styles are set, the header row is automatically frozen. Styles work with both sync and background exports. See [docs/EXCEL.md](EXCEL.md#column-styling) for complete style reference.
+
+### Background Processing
+
+For large files, dispatch imports/exports to the queue:
+
+```php
+use VmEngine\Synapse\Services\Excel\Contracts\ProcessesImport;
+use VmEngine\Synapse\Services\Excel\Contracts\ExportQuery;
+
+// Background import - requires ProcessesImport implementation
+class UserImportProcessor implements ProcessesImport
+{
+    public function process(Collection $rows, int $chunkIndex): void
+    {
+        DB::transaction(fn() => User::insert($rows->toArray()));
+    }
+}
+
+$importTask = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name', 'email'])
+    ->forUser(auth()->id())
+    ->onQueue('imports')
+    ->dispatch(UserImportProcessor::class, chunkSize: 1000);
+// Returns ExcelImport model
+
+// Background export - requires ExportQuery implementation
+class ActiveUsersExport implements ExportQuery
+{
+    public function __invoke(): EloquentBuilder
+    {
+        return User::query()->where('active', true);
+    }
+}
+
+$exportTask = ExcelExporter::make(ActiveUsersExport::class)
+    ->columns(['Name' => 'name', 'Email' => 'email'])
+    ->forUser(auth()->id())
+    ->onQueue('exports')
+    ->dispatch('/path/to/output.xlsx');
+// Returns ExcelExport model
+
+// Background export with user-defined filters
+class YearlyReportExport implements ExportQuery
+{
+    public function __construct(
+        public readonly ?int $year = null,
+        public readonly ?string $status = null,
+    ) {}
+
+    public function __invoke(): EloquentBuilder
+    {
+        return Report::query()
+            ->when($this->year, fn($q) => $q->whereYear('created_at', $this->year))
+            ->when($this->status, fn($q) => $q->where('status', $this->status));
+    }
+}
+
+$exportTask = ExcelExporter::make(YearlyReportExport::class)
+    ->columns(['Title' => 'title', 'Amount' => 'amount'])
+    ->withFilters(['year' => 2025, 'status' => 'approved'])
+    ->forUser(auth()->id())
+    ->dispatch('/path/to/report.xlsx');
+// Filters are passed to the ExportQuery constructor
+```
+
+### Resume Failed Tasks
+
+```php
+// Resume import from failed_at_row
+ExcelImporter::resume($importTask);
+
+// Resume export (re-runs from scratch - idempotent)
+ExcelExporter::resume($exportTask);
+```
+
+### Events
+
+Listen for completion/failure in your consuming modules:
+
+- `ExcelImportCompleted` - import task completed successfully
+- `ExcelImportFailed` - import task failed (includes exception)
+- `ExcelExportCompleted` - export task completed successfully
+- `ExcelExportFailed` - export task failed (includes exception)
+
+### Stale Task Detection
+
+Tasks stuck in `processing` status (due to OOM, crash, etc.) are detected via heartbeat:
+
+```bash
+# Mark stale tasks as failed (default timeout: 3900 seconds)
+php artisan synapse:excel-cleanup
+
+# Custom timeout
+php artisan synapse:excel-cleanup --timeout=7200
+
+# Schedule cleanup
+Schedule::command('synapse:excel-cleanup')->everyFiveMinutes();
+```
+
+### Database Tables
+
+The `excel_imports` and `excel_exports` tables track task status, progress, and heartbeat. Run migrations after installation:
 
 ```bash
 php artisan migrate
 ```
 
-This creates the `configs` and `languages` tables automatically.
+See [EXCEL.md](EXCEL.md) for complete API documentation including resume strategy, template exports, and background job details.
+
+---
+
+## Running Migrations
+
+DbConfig, DbLang, and Excel services require database tables. Run migrations after installation:
+
+```bash
+php artisan migrate
+```
+
+This creates the `configs`, `languages`, `excel_imports`, and `excel_exports` tables automatically.
 
 ## Service Registration
 

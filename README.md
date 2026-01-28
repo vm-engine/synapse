@@ -9,6 +9,7 @@ A sophisticated modular architecture system for Laravel applications that enable
 - **Configuration Management**: Builder pattern with lifecycle hooks, `env::` prefix support, and override system
 - **Theme System**: Customizable themes with multiple layouts, CDN resources, and fallback support
 - **Database Services**: DbConfig and DbLang for runtime configuration and multi-language support
+- **Excel Import/Export**: Memory-efficient streaming import/export with background processing, progress tracking, and resume support
 - **Blade Components**: Pre-built UI components for forms and common patterns
 - **Security Traits**: WithDeleteToken for secure delete operations
 - **Route Management**: Automatic route registration with module-specific prefixes
@@ -69,6 +70,7 @@ DbConfig::set('app.site_name', 'My Site');
 
 - **[Theme System](docs/THEMES.md)** - Customizable themes with layouts, CDN resources, and dark mode
 - **[Database Services](docs/SERVICES.md)** - DbConfig, DbLang, and Breadcrumbs services
+- **[Excel Import/Export](docs/EXCEL.md)** - Streaming Excel/CSV import and export with background processing
 - **[Blade Components](docs/COMPONENTS.md)** - UI components for forms, alerts, and more
 - **[Helper Functions](docs/HELPERS.md)** - Global helpers for common tasks
 

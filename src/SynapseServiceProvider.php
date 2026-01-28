@@ -50,6 +50,7 @@ use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Console\Commands\SynapseDbConfig;
 use VmEngine\Synapse\Console\Commands\SynapseDbLang;
+use VmEngine\Synapse\Console\Commands\SynapseExcelCleanup;
 use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
@@ -99,6 +100,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynapseDbLang::class,
                 SynapsePatchComposer::class,
                 SynapseRestoreComposer::class,
+                SynapseExcelCleanup::class,
                 // Generator Commands
                 MakeModuleCommand::class,
                 MakeModelCommand::class,
@@ -136,6 +138,9 @@ class SynapseServiceProvider extends ServiceProvider
                 SynmodMakeCommand::class,
             ]);
         }
+
+        // Load package migrations (configs, languages, excel tasks)
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         if (
             SynapseUtils::isSynAppsAutoloaded() &&

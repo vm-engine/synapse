@@ -5,6 +5,114 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-01-29
+
+### Added
+
+**Excel Import/Export Utility Classes:**
+- New memory-efficient Excel import/export system with streaming support
+  - `ExcelImporter` builder API for CSV/XLSX file imports
+  - `ExcelExporter` builder API for CSV/XLSX file exports
+  - Constant-memory streaming via OpenSpout ^4.0
+  - Template-based exports via PhpSpreadsheet ^2.0 (preserves formatting, formulas, charts)
+  - Background processing via Laravel queued jobs with progress tracking
+  - Resume capability for failed/stale imports and exports
+  - Heartbeat-based stale task detection
+
+**Import Features:**
+- Sync import returning all rows as a Collection
+- Three column mapping strategies: sequential array, associative array (explicit index), and closure
+- Chunked import for memory-efficient processing of large files
+- Background import via `dispatch()` with `ProcessesImport` contract
+- Resume from `failed_at_row` for imports with side effects
+- Automatic file type detection (CSV, XLSX)
+
+**Export Features:**
+- Sync export to CSV/XLSX with simple or associative column definitions
+- Closure columns for computed values (e.g., `fn($user) => $user->department?->name`)
+- Custom sheet names and starting rows
+- Template-based export preserving original formatting
+- Download response helper for browser downloads
+- Background export via `dispatch()` with `ExportQuery` contract
+- Idempotent resume (re-runs from scratch)
+
+**Column Styling (XLSX only):**
+- `columnStyles()` method for per-column styling (width, font, alignment, numberFormat, borders, fill)
+- `headerStyle()` method for uniform header row styling
+- `StyledWriter` using PhpSpreadsheet for full styling support
+- Automatic header row freeze pane when styles are applied
+- `autoSize` support for automatic column width calculation
+- Styles fully serializable for background export jobs
+- Combine styles with template exports
+
+**Background Export Filters:**
+- `withFilters()` method to pass user-defined filters to background exports
+- Filters passed to `ExportQuery` constructor via Laravel's container
+- Enables dynamic queries based on user input (year, status, department, etc.)
+
+**Background Processing:**
+- `ProcessExcelImport` queued job with `$tries = 3`, `$timeout = 3600`, `$backoff = [30, 60, 120]`
+- `ProcessExcelExport` queued job with same retry configuration
+- Heartbeat tracking via `last_heartbeat_at` column for stale detection
+- Four events: `ExcelImportCompleted`, `ExcelImportFailed`, `ExcelExportCompleted`, `ExcelExportFailed`
+- `ExcelTaskStatus` enum: Pending, Processing, Completed, Failed, Cancelled
+
+**Database:**
+- `excel_imports` migration with status, progress tracking, heartbeat, and resume support
+- `excel_exports` migration with status, progress tracking, and heartbeat support
+- `ExcelImport` and `ExcelExport` Eloquent models with stale detection methods
+
+**Contracts:**
+- `ReaderInterface` for pluggable file readers
+- `WriterInterface` for pluggable file writers
+- `ProcessesImport` contract for background import chunk processing
+- `ExportQuery` contract for serializable export queries (supports constructor filters)
+
+**Support Classes:**
+- `ColumnMapper` with sequential, associative, and closure mapping plus serialization
+- `ChunkIterator` for memory-efficient chunked row processing
+- `SpoutReader` and `SpoutWriter` for OpenSpout streaming
+- `TemplateWriter` for PhpSpreadsheet template-based exports
+- `StyledWriter` for PhpSpreadsheet styled exports with full formatting
+
+**Commands:**
+- `synapse:excel-cleanup` command to mark stale processing tasks as failed
+  - Configurable timeout via `--timeout` option (default: 3900 seconds)
+  - Schedulable via `Schedule::command('synapse:excel-cleanup')->everyFiveMinutes()`
+
+**Documentation:**
+- Complete API documentation in `docs/EXCEL.md` including Column Styling section
+- Updated `README.md` with Excel feature references
+- Updated `CLAUDE.md` with command reference and service documentation
+- Updated `docs/SERVICES.md` with Excel Import/Export service section and styling examples
+- Updated `docs/COMMANDS.md` with cleanup command reference
+
+**Tests:**
+- 92 Excel-related tests (329 total, 661 assertions)
+  - `ColumnMapperTest` - 13 tests for all mapping strategies and serialization
+  - `ChunkIteratorTest` - 6 tests for chunked iteration and skip rows
+  - `ExcelImporterTest` - 8 tests for sync CSV/XLSX import, chunked import, all mapping types
+  - `ExcelExporterTest` - 14 tests for CSV/XLSX export, template export, closure columns, styling
+  - `StyledWriterTest` - 14 tests for column widths, autoSize, header styles, data styles, freeze pane
+  - `ExcelImportTest` - 11 feature tests for model CRUD, stale detection, status casting
+  - `ExcelExportTest` - 10 feature tests for model CRUD, stale detection, resume validation
+  - `ExcelJobTest` - 16 feature tests for dispatch, resume, stale resume, cleanup, styles, filters
+
+**Dependencies:**
+- Added `openspout/openspout: ^4.0` to require (streaming CSV/XLSX)
+- Added `phpoffice/phpspreadsheet: ^2.0` to require (template-based and styled exports)
+
+### Benefits
+
+- **Memory Efficient:** Streaming imports/exports with constant memory usage via OpenSpout
+- **Background Processing:** Large files processed via queued jobs with progress tracking
+- **Resilient:** Auto-retry with backoff, heartbeat monitoring, and resume from failure point
+- **Flexible API:** Builder pattern with multiple column mapping strategies
+- **Template Support:** Export to pre-formatted Excel templates preserving styling
+- **Professional Styling:** Column widths, header formatting, number formats, freeze panes
+- **Dynamic Filters:** Pass user input filters to background export queries
+- **Well Tested:** 92 comprehensive Excel tests covering unit, feature, and job scenarios
+
 ## [1.6.0] - 2026-01-23
 
 ### Added

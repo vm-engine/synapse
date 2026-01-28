@@ -16,6 +16,7 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
 | `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
+| `synapse:excel-cleanup` | Mark stale Excel tasks as failed | Scheduled or manual | Yes | No |
 
 > **Note:** If you run `synapps:setup`, you don't need to manually run the other commands unless you're troubleshooting or have specific requirements.
 
@@ -417,6 +418,47 @@ php artisan synapse:db-lang footer.copyright "© 2025 My Company" --language=en
 - When adding new translatable strings
 - During deployment to set language-specific content
 - For runtime translation management
+
+---
+
+## synapse:excel-cleanup
+
+Mark stale Excel import/export tasks as failed. Tasks are considered stale when they remain in `processing` status but their heartbeat has not been updated within the timeout period.
+
+```bash
+php artisan synapse:excel-cleanup {--timeout=3900}
+```
+
+### Options
+
+- `--timeout=3900` - Seconds after which a processing task is considered stale (default: 3900 = job timeout + 5 min buffer)
+
+### What it does
+
+1. Scans `excel_imports` table for tasks with `processing` status and stale heartbeat
+2. Scans `excel_exports` table for tasks with `processing` status and stale heartbeat
+3. Marks stale tasks as `failed` with error message "Marked as failed by cleanup command (stale heartbeat)"
+4. Reports how many tasks were cleaned up
+
+### When to run
+
+- On a schedule to automatically recover from crashed/killed job processes:
+  ```php
+  // In your app's console.php or scheduler
+  Schedule::command('synapse:excel-cleanup')->everyFiveMinutes();
+  ```
+- Manually when you suspect tasks are stuck in `processing` status
+- After server crashes or OOM kills that terminated running jobs
+
+### How stale detection works
+
+Background import/export jobs update a `last_heartbeat_at` timestamp after each chunk. If a process is killed (OOM, crash, manual kill), the heartbeat stops updating. This command identifies those tasks and marks them as failed so they can be resumed.
+
+### Related
+
+- `ExcelImporter::resume($task)` - Resume a failed import from the last checkpoint
+- `ExcelExporter::resume($task)` - Resume a failed export (re-runs from scratch)
+- See [Excel Import/Export Documentation](EXCEL.md) for complete details
 
 ---
 

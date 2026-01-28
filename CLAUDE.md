@@ -38,6 +38,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
 | `synapse:patch-composer` | Merge composer.local.json | Local dev with path repos | Yes | No |
 | `synapse:restore-composer` | Restore original composer.json | After patching | Yes | No |
+| `synapse:excel-cleanup` | Mark stale Excel tasks as failed | Scheduled or manual | Yes | No |
 
 ### synapps:setup
 Interactive wizard that:
@@ -461,6 +462,99 @@ themes/{name}/
 
 See [docs/THEMES.md](docs/THEMES.md) for complete theming guide.
 
+### Excel Import/Export
+
+Memory-efficient Excel import/export utility with streaming support, background processing, and resume capability.
+
+**Libraries:** `openspout/openspout` ^4.0 (streaming), `phpoffice/phpspreadsheet` ^2.0 (templates)
+
+```php
+use VmEngine\Synapse\Services\Excel\ExcelImporter;
+use VmEngine\Synapse\Services\Excel\ExcelExporter;
+
+// Sync import
+$rows = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name', 'email', 'phone'])
+    ->import();
+
+// Chunked import
+ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name', 'email'])
+    ->chunk(1000, function (Collection $rows, int $chunkIndex) {
+        User::insert($rows->toArray());
+    });
+
+// Background import
+$task = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name', 'email'])
+    ->forUser(auth()->id())
+    ->onQueue('imports')
+    ->dispatch(UserImportProcessor::class, chunkSize: 1000);
+
+// Sync export
+ExcelExporter::make(User::query()->where('active', true))
+    ->columns(['Full Name' => 'name', 'Email' => 'email'])
+    ->sheet('Users Report')
+    ->export('/path/to/output.xlsx');
+
+// Styled export with column widths and formatting
+ExcelExporter::make(User::query())
+    ->columns([
+        'Full Name' => 'name',
+        'Email' => 'email',
+        'Salary' => 'salary',
+    ])
+    ->columnStyles([
+        'Full Name' => ['font' => ['bold' => true], 'width' => 30],
+        'Email' => ['width' => 40],
+        'Salary' => ['numberFormat' => ['formatCode' => '#,##0.00'], 'width' => 15],
+    ])
+    ->headerStyle([
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '4472C4']],
+    ])
+    ->export('/path/to/output.xlsx');
+
+// Template export
+ExcelExporter::make(Invoice::query())
+    ->columns(['invoice_number', 'client_name', 'total'])
+    ->startingRow(5)
+    ->template('/path/to/template.xlsx')
+    ->export('/path/to/output.xlsx');
+
+// Background export with styles
+$task = ExcelExporter::make(ActiveUsersExport::class)
+    ->columns(['Name' => 'name', 'Email' => 'email'])
+    ->columnStyles(['Name' => ['width' => 30], 'Email' => ['width' => 50]])
+    ->forUser(auth()->id())
+    ->dispatch('/path/to/output.xlsx');
+
+// Background export with user-defined filters
+$task = ExcelExporter::make(YearlyReportExport::class)
+    ->columns(['Title' => 'title', 'Amount' => 'amount'])
+    ->withFilters(['year' => 2025, 'status' => 'approved'])
+    ->forUser(auth()->id())
+    ->dispatch('/path/to/report.xlsx');
+
+// Resume failed tasks
+ExcelImporter::resume($importTask);
+ExcelExporter::resume($exportTask);
+```
+
+**Contracts:**
+- `ProcessesImport` - Implement to process import chunks in background jobs
+- `ExportQuery` - Implement to provide serializable query for background exports
+
+**Models:** `ExcelImport`, `ExcelExport` - Task tracking with status, progress, heartbeat
+**Enum:** `ExcelTaskStatus` - Pending, Processing, Completed, Failed, Cancelled
+**Events:** `ExcelImportCompleted`, `ExcelImportFailed`, `ExcelExportCompleted`, `ExcelExportFailed`
+**Command:** `php artisan synapse:excel-cleanup --timeout=3900`
+
+See [docs/EXCEL.md](docs/EXCEL.md) for complete API documentation.
+
 ### Breadcrumbs
 ```php
 $breadcrumbs = Breadcrumbs::make('Home', '/')
@@ -679,16 +773,29 @@ Output placed in **current working directory** (where command runs).
 tests/
 ├── Feature/
 │   ├── Commands/SynAppsCommandsTest.php
+│   ├── Excel/
+│   │   ├── ExcelImportTest.php
+│   │   ├── ExcelExportTest.php
+│   │   └── ExcelJobTest.php
 │   └── ModuleDiscoveryTest.php
 ├── Unit/
 │   ├── Components/BladeComponentsTest.php
 │   ├── Services/
+│   │   ├── Excel/
+│   │   │   ├── ExcelImporterTest.php
+│   │   │   ├── ExcelExporterTest.php
+│   │   │   ├── ColumnMapperTest.php
+│   │   │   └── ChunkIteratorTest.php
 │   │   ├── Helper/BreadcrumbsTest.php
 │   │   ├── ConfigGenerator/
 │   │   ├── ConfigGeneratorsTest.php
 │   │   └── SynapseUtilsTest.php
 │   ├── HelperFunctionsTest.php
 │   └── ServiceProvidersTest.php
+├── fixtures/
+│   ├── sample.csv
+│   ├── sample.xlsx
+│   └── template.xlsx
 ├── Pest.php
 └── TestCase.php
 ```
@@ -709,13 +816,14 @@ tests/
 # composer test-coverage
 ```
 
-**Coverage (400+ tests):**
+**Coverage (300+ tests):**
 - Helper functions: 195+ tests
 - Blade components: 70+ tests
+- Excel import/export: 68 tests
 - Config generators: 51 tests
 - Services: 39 tests
-- Commands: 9 tests
 - Module discovery: 23 tests
+- Commands: 9 tests
 
 **Test Infrastructure:**
 - In-memory SQLite for DB tests
@@ -775,6 +883,8 @@ tests/
 - Laravel Framework 12.x
 - Livewire 3.x
 - composer/semver ^3.0
+- openspout/openspout ^4.0
+- phpoffice/phpspreadsheet ^2.0
 
 **Dev:**
 - pestphp/pest ^3.0

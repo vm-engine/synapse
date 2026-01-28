@@ -1,0 +1,110 @@
+<?php
+
+declare(strict_types=1);
+
+namespace VmEngine\Synapse\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use VmEngine\Synapse\Enums\ExcelTaskStatus;
+
+/**
+ * @property int $id
+ * @property string $status
+ * @property string|null $output_path
+ * @property int|null $user_id
+ * @property string|null $query_class
+ * @property int|null $total_rows
+ * @property int $processed_rows
+ * @property array<string, mixed>|null $options
+ * @property string|null $error_message
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $completed_at
+ * @property \Illuminate\Support\Carbon|null $last_heartbeat_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \VmEngine\Synapse\Models\ExcelExport create(array $attributes)
+ * @method static \VmEngine\Synapse\Models\ExcelExport|null find(int|string $id, array $columns = ['*'])
+ * @method static \VmEngine\Synapse\Models\ExcelExport findOrFail(int|string $id, array $columns = ['*'])
+ */
+class ExcelExport extends Model
+{
+    protected $fillable = [
+        'status',
+        'output_path',
+        'user_id',
+        'query_class',
+        'total_rows',
+        'processed_rows',
+        'options',
+        'error_message',
+        'started_at',
+        'completed_at',
+        'last_heartbeat_at',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ExcelTaskStatus::class,
+            'options' => 'array',
+            'user_id' => 'integer',
+            'total_rows' => 'integer',
+            'processed_rows' => 'integer',
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
+            'last_heartbeat_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Check if the task is considered stale (no heartbeat within timeout).
+     */
+    public function isStale(int $timeoutSeconds = 3900): bool
+    {
+        if ($this->status !== ExcelTaskStatus::Processing) {
+            return false;
+        }
+
+        if ($this->last_heartbeat_at === null) {
+            return $this->started_at !== null
+                && $this->started_at->diffInSeconds(now()) > $timeoutSeconds;
+        }
+
+        return $this->last_heartbeat_at->diffInSeconds(now()) > $timeoutSeconds;
+    }
+
+    /**
+     * Mark the task as failed.
+     */
+    public function markFailed(string $errorMessage): void
+    {
+        $this->update([
+            'status' => ExcelTaskStatus::Failed,
+            'error_message' => $errorMessage,
+        ]);
+    }
+
+    /**
+     * Mark the task as completed.
+     */
+    public function markCompleted(): void
+    {
+        $this->update([
+            'status' => ExcelTaskStatus::Completed,
+            'completed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Update heartbeat timestamp.
+     */
+    public function heartbeat(): void
+    {
+        $this->update(['last_heartbeat_at' => now()]);
+    }
+}
