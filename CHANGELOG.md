@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-01-31
+
+### Added
+
+**Export Reference Tracking:**
+- Nullable indexed `reference` column on both `excel_exports` and `excel_imports` tables
+- `reference()` builder method on `ExcelExporter` and `ExcelImporter` for setting a tracking identifier
+- `findByReference()` static method on `ExcelExport` and `ExcelImport` models to look up tasks by reference
+- `scopeForReference()` query scope on both models for filtering by reference
+- Migration `2026_01_31_000001_add_reference_to_excel_tables.php`
+
+**Dot Notation for Export Columns:**
+- Support dotted paths (e.g., `'client.company.name'`) in column definitions for resolving nested relationships
+- Resolved via `data_get()` — works with Eloquent relationships and nested objects
+- Works in both sync and background exports (plain strings are serializable)
+- Added `resolveStringValue()` helper in `ExcelExporter` and `ProcessExcelExport`
+
+**Column Transformers:**
+- `ColumnTransformer` contract (`src/Services/Excel/Contracts/ColumnTransformer.php`) for serializable value formatters
+- Array-type column definitions: `['field' => 'attr', 'transformer' => Class::class, 'config' => [...]]`
+- Five built-in transformers:
+  - `DateFormatTransformer` — format dates (default: `Y-m-d`)
+  - `NumberFormatTransformer` — format numbers with decimals and separators
+  - `BooleanTransformer` — convert booleans to labels (default: Yes/No)
+  - `DefaultValueTransformer` — replace null/empty with a default string
+  - `UpperCaseTransformer` — uppercase string values
+- Transformer arrays are JSON-serializable and work in background export jobs
+- `applyTransformer()` helper in `ExcelExporter` and `ProcessExcelExport`
+
+**Tests:**
+- `ColumnTransformerTest` — 26 unit tests for all 5 built-in transformers
+- 6 new tests in `ExcelExporterTest` for dot notation, transformers, and serialization
+- 8 new tests in `ExcelExportTest` for reference model features (findByReference, scopeForReference)
+- 4 new tests in `ExcelJobTest` for background reference dispatch and transformer integration
+- Total: 374 tests, 744 assertions (up from 330 tests)
+
+**Documentation:**
+- Updated `docs/EXCEL.md` with Reference Tracking, Dot Notation, and Column Transformers sections
+- Updated `docs/SERVICES.md` with reference, dot notation, and transformer examples
+- Updated `CLAUDE.md` with new Excel features and contracts
+
+### Changed
+
+- PHPStan ignore list in `phpstan.neon` updated for Excel-related enum comparison and runtime guard patterns
+- Added `reportUnmatchedIgnoredErrors: false` to `phpstan.neon`
+
 ## [1.7.0] - 2026-01-29
 
 ### Added

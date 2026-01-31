@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use VmEngine\Synapse\Enums\ExcelTaskStatus;
 use VmEngine\Synapse\Jobs\ProcessExcelExport;
 use VmEngine\Synapse\Models\ExcelExport;
+use VmEngine\Synapse\Services\Excel\Contracts\ColumnTransformer;
 use VmEngine\Synapse\Services\Excel\Contracts\ExportQuery;
 use VmEngine\Synapse\Services\Excel\Contracts\WriterInterface;
 use VmEngine\Synapse\Services\Excel\Writers\SpoutWriter;
@@ -26,10 +27,12 @@ class ExcelExporter
     /** @var class-string<ExportQuery>|null */
     private ?string $queryClass = null;
 
-    /** @var array<int|string, string|Closure> */
+    /** @var array<int|string, string|Closure|array<string, mixed>> */
     private array $columns = [];
 
     private int $startingRow = 1;
+
+    private ?string $reference = null;
 
     private ?string $sheetName = null;
 
@@ -78,8 +81,10 @@ class ExcelExporter
      * Accepts:
      * - Sequential: ['name', 'email'] (attribute name = header label)
      * - Associative: ['Full Name' => 'name', 'Email' => fn($model) => $model->email]
+     * - Dot notation: ['Client' => 'client.name'] (resolves relationships via data_get)
+     * - Transformer: ['Joined' => ['field' => 'created_at', 'transformer' => DateFormatTransformer::class]]
      *
-     * @param  array<int|string, string|Closure>  $columns
+     * @param  array<int|string, string|Closure|array<string, mixed>>  $columns
      */
     public function columns(array $columns): self
     {
@@ -104,6 +109,16 @@ class ExcelExporter
     public function sheet(string $name): self
     {
         $this->sheetName = $name;
+
+        return $this;
+    }
+
+    /**
+     * Set a reference identifier for tracking the task across page refreshes.
+     */
+    public function reference(string $reference): self
+    {
+        $this->reference = $reference;
 
         return $this;
     }
@@ -281,6 +296,7 @@ class ExcelExporter
             'status' => ExcelTaskStatus::Pending,
             'output_path' => $outputPath,
             'user_id' => $this->userId,
+            'reference' => $this->reference,
             'query_class' => $this->queryClass,
             'options' => [
                 'columns' => $serializableColumns,
@@ -419,7 +435,13 @@ class ExcelExporter
         foreach ($this->columns as $key => $value) {
             if (is_int($key)) {
                 // Sequential: attribute name is the header
-                $headers[] = is_string($value) ? $value : "Column {$key}";
+                if (is_string($value)) {
+                    $headers[] = $value;
+                } elseif (is_array($value) && isset($value['field'])) {
+                    $headers[] = $value['field'];
+                } else {
+                    $headers[] = "Column {$key}";
+                }
             } else {
                 // Associative: key is the header label
                 $headers[] = $key;
@@ -449,12 +471,10 @@ class ExcelExporter
         foreach ($this->columns as $value) {
             if ($value instanceof Closure) {
                 $row[] = $value($record);
+            } elseif (is_array($value)) {
+                $row[] = $this->applyTransformer($value, $record);
             } elseif (is_string($value)) {
-                if ($record instanceof Model) {
-                    $row[] = $record->getAttribute($value);
-                } else {
-                    $row[] = $record->$value ?? null;
-                }
+                $row[] = $this->resolveStringValue($record, $value);
             }
         }
 
@@ -462,9 +482,49 @@ class ExcelExporter
     }
 
     /**
-     * Serialize columns for storage (closures become null).
+     * Resolve a string field value, supporting dot notation for relationships.
+     */
+    private function resolveStringValue(mixed $record, string $field): mixed
+    {
+        if (str_contains($field, '.')) {
+            return data_get($record, $field);
+        }
+
+        if ($record instanceof Model) {
+            return $record->getAttribute($field);
+        }
+
+        return $record->$field ?? null;
+    }
+
+    /**
+     * Apply a column transformer to extract and transform a value.
      *
-     * @return array<int|string, string|null>
+     * @param  array<string, mixed>  $definition
+     */
+    private function applyTransformer(array $definition, mixed $record): mixed
+    {
+        $field = $definition['field'] ?? null;
+        /** @var class-string<ColumnTransformer>|null $transformerClass */
+        $transformerClass = $definition['transformer'] ?? null;
+        /** @var array<string, mixed> $config */
+        $config = $definition['config'] ?? [];
+
+        $value = $field !== null ? $this->resolveStringValue($record, $field) : null;
+
+        if ($transformerClass !== null && is_subclass_of($transformerClass, ColumnTransformer::class)) {
+            $transformer = new $transformerClass(...$config);
+
+            return $transformer->transform($value, $record);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Serialize columns for storage (closures become null, arrays pass through).
+     *
+     * @return array<int|string, string|array<string, mixed>|null>
      */
     private function serializeColumns(): array
     {

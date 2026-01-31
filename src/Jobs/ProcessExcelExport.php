@@ -14,6 +14,7 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
 use VmEngine\Synapse\Events\ExcelExportCompleted;
 use VmEngine\Synapse\Events\ExcelExportFailed;
 use VmEngine\Synapse\Models\ExcelExport;
+use VmEngine\Synapse\Services\Excel\Contracts\ColumnTransformer;
 use VmEngine\Synapse\Services\Excel\Contracts\ExportQuery;
 use VmEngine\Synapse\Services\Excel\Contracts\WriterInterface;
 use VmEngine\Synapse\Services\Excel\Writers\SpoutWriter;
@@ -193,7 +194,7 @@ class ProcessExcelExport implements ShouldQueue
     /**
      * Get header labels from column configuration.
      *
-     * @param  array<int|string, string|null>  $columns
+     * @param  array<int|string, string|array<string, mixed>|null>  $columns
      * @return array<int, string>
      */
     private function getHeaderLabels(array $columns): array
@@ -202,7 +203,13 @@ class ProcessExcelExport implements ShouldQueue
 
         foreach ($columns as $key => $value) {
             if (is_int($key)) {
-                $headers[] = is_string($value) ? $value : "Column {$key}";
+                if (is_string($value)) {
+                    $headers[] = $value;
+                } elseif (is_array($value) && isset($value['field'])) {
+                    $headers[] = $value['field'];
+                } else {
+                    $headers[] = "Column {$key}";
+                }
             } else {
                 $headers[] = $key;
             }
@@ -214,7 +221,7 @@ class ProcessExcelExport implements ShouldQueue
     /**
      * Extract a row of data from a record using column config.
      *
-     * @param  array<int|string, string|null>  $columns
+     * @param  array<int|string, string|array<string, mixed>|null>  $columns
      * @return array<int, mixed>
      */
     private function extractRowData(mixed $record, array $columns): array
@@ -233,15 +240,53 @@ class ProcessExcelExport implements ShouldQueue
             if ($value === null) {
                 // Closure-based columns cannot be serialized - skip in background
                 $row[] = null;
+            } elseif (is_array($value)) {
+                $row[] = $this->applyTransformer($value, $record);
             } elseif (is_string($value)) {
-                if ($record instanceof \Illuminate\Database\Eloquent\Model) {
-                    $row[] = $record->getAttribute($value);
-                } else {
-                    $row[] = $record->$value ?? null;
-                }
+                $row[] = $this->resolveStringValue($record, $value);
             }
         }
 
         return $row;
+    }
+
+    /**
+     * Resolve a string field value, supporting dot notation for relationships.
+     */
+    private function resolveStringValue(mixed $record, string $field): mixed
+    {
+        if (str_contains($field, '.')) {
+            return data_get($record, $field);
+        }
+
+        if ($record instanceof \Illuminate\Database\Eloquent\Model) {
+            return $record->getAttribute($field);
+        }
+
+        return $record->$field ?? null;
+    }
+
+    /**
+     * Apply a column transformer to extract and transform a value.
+     *
+     * @param  array<string, mixed>  $definition
+     */
+    private function applyTransformer(array $definition, mixed $record): mixed
+    {
+        $field = $definition['field'] ?? null;
+        /** @var class-string<ColumnTransformer>|null $transformerClass */
+        $transformerClass = $definition['transformer'] ?? null;
+        /** @var array<string, mixed> $config */
+        $config = $definition['config'] ?? [];
+
+        $value = $field !== null ? $this->resolveStringValue($record, $field) : null;
+
+        if ($transformerClass !== null && is_subclass_of($transformerClass, ColumnTransformer::class)) {
+            $transformer = new $transformerClass(...$config);
+
+            return $transformer->transform($value, $record);
+        }
+
+        return $value;
     }
 }

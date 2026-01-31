@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use VmEngine\Synapse\Enums\ExcelTaskStatus;
 
@@ -12,6 +13,7 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
  * @property string $status
  * @property string|null $output_path
  * @property int|null $user_id
+ * @property string|null $reference
  * @property string|null $query_class
  * @property int|null $total_rows
  * @property int $processed_rows
@@ -27,6 +29,7 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
  * @method static \VmEngine\Synapse\Models\ExcelExport create(array $attributes)
  * @method static \VmEngine\Synapse\Models\ExcelExport|null find(int|string $id, array $columns = ['*'])
  * @method static \VmEngine\Synapse\Models\ExcelExport findOrFail(int|string $id, array $columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder forReference(string $reference)
  */
 class ExcelExport extends Model
 {
@@ -34,6 +37,7 @@ class ExcelExport extends Model
         'status',
         'output_path',
         'user_id',
+        'reference',
         'query_class',
         'total_rows',
         'processed_rows',
@@ -59,6 +63,25 @@ class ExcelExport extends Model
             'completed_at' => 'datetime',
             'last_heartbeat_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Find an export task by its reference string.
+     */
+    public static function findByReference(string $reference): ?self
+    {
+        return static::where('reference', $reference)->latest('id')->first();
+    }
+
+    /**
+     * Scope a query to tasks with the given reference.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeForReference(Builder $query, string $reference): Builder
+    {
+        return $query->where('reference', $reference);
     }
 
     /**

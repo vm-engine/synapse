@@ -17,6 +17,8 @@ use VmEngine\Synapse\Services\Excel\Contracts\ExportQuery;
 use VmEngine\Synapse\Services\Excel\Contracts\ProcessesImport;
 use VmEngine\Synapse\Services\Excel\ExcelExporter;
 use VmEngine\Synapse\Services\Excel\ExcelImporter;
+use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\UpperCaseTransformer;
 
 uses(RefreshDatabase::class);
 
@@ -405,6 +407,147 @@ describe('ExcelExporter with styles dispatch', function () {
         $spreadsheet->disconnectWorksheets();
 
         // Cleanup
+        unlink($outputPath);
+        rmdir($outputDir);
+    });
+});
+
+describe('ExcelExporter with reference dispatch', function () {
+    it('includes reference when dispatching export', function () {
+        Queue::fake();
+
+        $task = ExcelExporter::make(TestExportQuery::class)
+            ->columns(['Label' => 'key', 'Value' => 'value'])
+            ->reference('my-export-ref-42')
+            ->forUser(1)
+            ->dispatch('/tmp/ref_output.xlsx');
+
+        expect($task)->toBeInstanceOf(ExcelExport::class);
+        expect($task->reference)->toBe('my-export-ref-42');
+
+        Queue::assertPushed(ProcessExcelExport::class);
+    });
+
+    it('includes reference when dispatching import', function () {
+        Queue::fake();
+
+        $filePath = __DIR__.'/../../fixtures/sample.csv';
+
+        $task = ExcelImporter::make($filePath)
+            ->startingRow(2)
+            ->mapColumns(['name', 'email', 'phone'])
+            ->reference('my-import-ref-99')
+            ->forUser(1)
+            ->dispatch(TestImportProcessor::class);
+
+        expect($task)->toBeInstanceOf(ExcelImport::class);
+        expect($task->reference)->toBe('my-import-ref-99');
+
+        Queue::assertPushed(ProcessExcelImport::class);
+    });
+});
+
+describe('ExcelExporter background with transformers', function () {
+    it('processes background export with transformer columns', function () {
+        \VmEngine\Synapse\Models\Config::create([
+            'group' => 'test',
+            'key' => 'setting1',
+            'value' => 'hello world',
+            'label' => 'Test Setting 1',
+        ]);
+
+        $outputDir = sys_get_temp_dir().'/synapse_job_transformer_test_'.uniqid();
+        mkdir($outputDir, 0755, true);
+        $outputPath = $outputDir.'/transformer_export.xlsx';
+
+        $task = ExcelExport::create([
+            'status' => ExcelTaskStatus::Pending,
+            'output_path' => $outputPath,
+            'query_class' => TestExportQuery::class,
+            'options' => [
+                'columns' => [
+                    'Key' => [
+                        'field' => 'key',
+                        'transformer' => UpperCaseTransformer::class,
+                    ],
+                    'Value' => 'value',
+                ],
+                'starting_row' => 1,
+            ],
+        ]);
+
+        $job = new ProcessExcelExport($task->id);
+        $job->handle();
+
+        $task->refresh();
+
+        expect($task->status)->toBe(ExcelTaskStatus::Completed);
+        expect(file_exists($outputPath))->toBeTrue();
+
+        $reader = new \VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+        $reader->open($outputPath);
+        $rows = [];
+        foreach ($reader->rows() as $row) {
+            $rows[] = $row;
+        }
+        $reader->close();
+
+        // Header + 1 data row
+        expect($rows)->toHaveCount(2);
+        expect($rows[0])->toBe(['Key', 'Value']);
+        expect($rows[1][0])->toBe('SETTING1'); // Uppercased by transformer
+        expect($rows[1][1])->toBe('hello world');
+
+        unlink($outputPath);
+        rmdir($outputDir);
+    });
+
+    it('processes background export with transformer config', function () {
+        \VmEngine\Synapse\Models\Config::create([
+            'group' => 'test',
+            'key' => 'active_flag',
+            'value' => '1',
+            'label' => 'Active Flag',
+        ]);
+
+        $outputDir = sys_get_temp_dir().'/synapse_job_bool_test_'.uniqid();
+        mkdir($outputDir, 0755, true);
+        $outputPath = $outputDir.'/bool_export.xlsx';
+
+        $task = ExcelExport::create([
+            'status' => ExcelTaskStatus::Pending,
+            'output_path' => $outputPath,
+            'query_class' => TestExportQuery::class,
+            'options' => [
+                'columns' => [
+                    'Key' => 'key',
+                    'Active' => [
+                        'field' => 'value',
+                        'transformer' => BooleanTransformer::class,
+                        'config' => ['trueLabel' => 'Enabled', 'falseLabel' => 'Disabled'],
+                    ],
+                ],
+                'starting_row' => 1,
+            ],
+        ]);
+
+        $job = new ProcessExcelExport($task->id);
+        $job->handle();
+
+        $task->refresh();
+
+        expect($task->status)->toBe(ExcelTaskStatus::Completed);
+
+        $reader = new \VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+        $reader->open($outputPath);
+        $rows = [];
+        foreach ($reader->rows() as $row) {
+            $rows[] = $row;
+        }
+        $reader->close();
+
+        expect($rows[1][1])->toBe('Enabled');
+
         unlink($outputPath);
         rmdir($outputDir);
     });

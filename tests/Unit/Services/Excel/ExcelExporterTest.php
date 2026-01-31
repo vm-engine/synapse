@@ -5,6 +5,10 @@ declare(strict_types=1);
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 use VmEngine\Synapse\Services\Excel\ExcelExporter;
 use VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\DateFormatTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\NumberFormatTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\UpperCaseTransformer;
 
 describe('ExcelExporter', function () {
     beforeEach(function () {
@@ -406,4 +410,195 @@ describe('ExcelExporter', function () {
             ->columnStyles(['name' => ['width' => 30]])
             ->export($outputPath);
     })->throws(RuntimeException::class, 'not supported for CSV exports');
+
+    it('exports with dot notation for nested objects', function () {
+        $outputPath = $this->outputDir.'/dot_notation.csv';
+
+        $items = collect([
+            (object) [
+                'name' => 'Invoice #1',
+                'client' => (object) [
+                    'name' => 'Acme Corp',
+                    'company' => (object) ['name' => 'Acme Holdings'],
+                ],
+            ],
+            (object) [
+                'name' => 'Invoice #2',
+                'client' => (object) [
+                    'name' => 'Widget Co',
+                    'company' => (object) ['name' => 'Widget Holdings'],
+                ],
+            ],
+        ]);
+
+        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+
+        ExcelExporter::make($mockQuery)
+            ->columns([
+                'Invoice' => 'name',
+                'Client' => 'client.name',
+                'Company' => 'client.company.name',
+            ])
+            ->export($outputPath);
+
+        expect(file_exists($outputPath))->toBeTrue();
+
+        $reader = new SpoutReader;
+        $reader->open($outputPath);
+        $rows = [];
+        foreach ($reader->rows() as $row) {
+            $rows[] = $row;
+        }
+        $reader->close();
+
+        expect($rows)->toHaveCount(3);
+        expect($rows[0])->toBe(['Invoice', 'Client', 'Company']);
+        expect($rows[1])->toBe(['Invoice #1', 'Acme Corp', 'Acme Holdings']);
+        expect($rows[2])->toBe(['Invoice #2', 'Widget Co', 'Widget Holdings']);
+    });
+
+    it('exports with column transformers', function () {
+        $outputPath = $this->outputDir.'/transformers.csv';
+
+        $items = collect([
+            (object) [
+                'name' => 'john doe',
+                'salary' => 50000.5,
+                'is_active' => true,
+                'created_at' => new \DateTimeImmutable('2025-06-15 14:30:00'),
+            ],
+        ]);
+
+        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+
+        ExcelExporter::make($mockQuery)
+            ->columns([
+                'Name' => [
+                    'field' => 'name',
+                    'transformer' => UpperCaseTransformer::class,
+                ],
+                'Salary' => [
+                    'field' => 'salary',
+                    'transformer' => NumberFormatTransformer::class,
+                    'config' => ['decimals' => 2],
+                ],
+                'Active' => [
+                    'field' => 'is_active',
+                    'transformer' => BooleanTransformer::class,
+                ],
+                'Joined' => [
+                    'field' => 'created_at',
+                    'transformer' => DateFormatTransformer::class,
+                    'config' => ['format' => 'd/m/Y'],
+                ],
+            ])
+            ->export($outputPath);
+
+        expect(file_exists($outputPath))->toBeTrue();
+
+        $reader = new SpoutReader;
+        $reader->open($outputPath);
+        $rows = [];
+        foreach ($reader->rows() as $row) {
+            $rows[] = $row;
+        }
+        $reader->close();
+
+        expect($rows)->toHaveCount(2);
+        expect($rows[0])->toBe(['Name', 'Salary', 'Active', 'Joined']);
+        expect($rows[1][0])->toBe('JOHN DOE');
+        expect($rows[1][1])->toBe('50,000.50');
+        expect($rows[1][2])->toBe('Yes');
+        expect($rows[1][3])->toBe('15/06/2025');
+    });
+
+    it('exports with transformer using dot notation field', function () {
+        $outputPath = $this->outputDir.'/transformer_dot.csv';
+
+        $items = collect([
+            (object) [
+                'name' => 'John',
+                'profile' => (object) ['status' => true],
+            ],
+        ]);
+
+        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+
+        ExcelExporter::make($mockQuery)
+            ->columns([
+                'Name' => 'name',
+                'Status' => [
+                    'field' => 'profile.status',
+                    'transformer' => BooleanTransformer::class,
+                    'config' => ['trueLabel' => 'Active', 'falseLabel' => 'Inactive'],
+                ],
+            ])
+            ->export($outputPath);
+
+        $reader = new SpoutReader;
+        $reader->open($outputPath);
+        $rows = [];
+        foreach ($reader->rows() as $row) {
+            $rows[] = $row;
+        }
+        $reader->close();
+
+        expect($rows[1][1])->toBe('Active');
+    });
+
+    it('handles transformer array without transformer class as field-only extraction', function () {
+        $outputPath = $this->outputDir.'/array_no_transformer.csv';
+
+        $items = collect([
+            (object) ['client' => (object) ['name' => 'Acme']],
+        ]);
+
+        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+
+        ExcelExporter::make($mockQuery)
+            ->columns([
+                'Client' => ['field' => 'client.name'],
+            ])
+            ->export($outputPath);
+
+        $reader = new SpoutReader;
+        $reader->open($outputPath);
+        $rows = [];
+        foreach ($reader->rows() as $row) {
+            $rows[] = $row;
+        }
+        $reader->close();
+
+        expect($rows[1][0])->toBe('Acme');
+    });
+
+    it('serializes transformer array columns for background dispatch', function () {
+        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+
+        $columns = [
+            'Name' => 'name',
+            'Notes' => fn ($r) => $r->notes ?? 'None',
+            'Active' => [
+                'field' => 'is_active',
+                'transformer' => BooleanTransformer::class,
+            ],
+        ];
+
+        // Use reflection to test serializeColumns
+        $exporter = ExcelExporter::make($mockQuery)->columns($columns);
+        $method = new \ReflectionMethod($exporter, 'serializeColumns');
+
+        $serialized = $method->invoke($exporter);
+
+        expect($serialized['Name'])->toBe('name');
+        expect($serialized['Notes'])->toBeNull(); // Closure serialized as null
+        expect($serialized['Active'])->toBe([
+            'field' => 'is_active',
+            'transformer' => BooleanTransformer::class,
+        ]);
+    });
 });

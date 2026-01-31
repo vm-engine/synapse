@@ -870,6 +870,10 @@ span.flatpickr-weekday,
     }
 }
 
+.datatable > tfoot td {
+    @apply px-5 py-4 sm:px-6;
+}
+
 .pagination-container span[aria-current="page"] > span {
     @apply text-[#465fff]! bg-gray-200!;
 }
@@ -1022,4 +1026,16 @@ textarea.form-input {
 
 .icon-dropdown-item {
     @apply flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700;
+}
+
+.statistic-box {
+    @apply rounded-lg bg-gray-50 dark:bg-gray-800 shadow;
+}
+
+.statistic-box-label {
+    @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.statistic-box-value {
+    @apply mt-1 text-lg font-semibold;
 }

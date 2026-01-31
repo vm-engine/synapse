@@ -472,6 +472,70 @@ ExcelImporter::resume($importTask);
 ExcelExporter::resume($exportTask);
 ```
 
+### Reference Tracking
+
+Assign a reference string to look up tasks across page refreshes:
+
+```php
+$task = ExcelExporter::make(InvoiceExport::class)
+    ->columns(['Invoice #' => 'number', 'Total' => 'total'])
+    ->reference('pm-invoice-export-42')
+    ->forUser(auth()->id())
+    ->dispatch('/path/to/output.xlsx');
+
+// Later, look up the task by reference
+$task = ExcelExport::findByReference('pm-invoice-export-42');
+$tasks = ExcelExport::forReference('pm-invoice-export-42')->get();
+```
+
+### Dot Notation for Relationships
+
+Resolve nested attributes via dotted paths:
+
+```php
+ExcelExporter::make(Invoice::query()->with('client.company'))
+    ->columns([
+        'Invoice #' => 'invoice_number',
+        'Client' => 'client.name',
+        'Company' => 'client.company.name',
+    ])
+    ->export('/path/to/output.xlsx');
+```
+
+### Column Transformers
+
+Serializable value formatters that work in both sync and background exports:
+
+```php
+use VmEngine\Synapse\Services\Excel\Transformers\DateFormatTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\NumberFormatTransformer;
+
+ExcelExporter::make($query)
+    ->columns([
+        'Name' => 'name',
+        'Joined' => [
+            'field' => 'created_at',
+            'transformer' => DateFormatTransformer::class,
+            'config' => ['format' => 'd/m/Y'],
+        ],
+        'Active' => [
+            'field' => 'is_active',
+            'transformer' => BooleanTransformer::class,
+        ],
+        'Salary' => [
+            'field' => 'salary',
+            'transformer' => NumberFormatTransformer::class,
+            'config' => ['decimals' => 0],
+        ],
+    ])
+    ->export('/path/to/output.xlsx');
+```
+
+Built-in transformers: `DateFormatTransformer`, `NumberFormatTransformer`, `BooleanTransformer`, `DefaultValueTransformer`, `UpperCaseTransformer`.
+
+See [EXCEL.md](EXCEL.md) for the full transformer API and custom transformer guide.
+
 ### Events
 
 Listen for completion/failure in your consuming modules:

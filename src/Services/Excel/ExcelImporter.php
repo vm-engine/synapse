@@ -26,6 +26,8 @@ class ExcelImporter
 
     private ?int $userId = null;
 
+    private ?string $reference = null;
+
     private ?string $queue = null;
 
     private ?ReaderInterface $reader = null;
@@ -72,6 +74,16 @@ class ExcelImporter
     public function forUser(?int $userId): self
     {
         $this->userId = $userId;
+
+        return $this;
+    }
+
+    /**
+     * Set a reference identifier for tracking the task across page refreshes.
+     */
+    public function reference(string $reference): self
+    {
+        $this->reference = $reference;
 
         return $this;
     }
@@ -159,6 +171,7 @@ class ExcelImporter
             'status' => ExcelTaskStatus::Pending,
             'file_path' => $this->filePath,
             'user_id' => $this->userId,
+            'reference' => $this->reference,
             'processor_class' => $processorClass,
             'options' => [
                 'mapping' => $this->columnMapper->toSerializable(),

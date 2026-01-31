@@ -542,13 +542,48 @@ $task = ExcelExporter::make(YearlyReportExport::class)
 // Resume failed tasks
 ExcelImporter::resume($importTask);
 ExcelExporter::resume($exportTask);
+
+// Reference tracking (persist task lookup across page refreshes)
+$task = ExcelExporter::make(InvoiceExport::class)
+    ->reference('pm-invoice-export-42')
+    ->dispatch('/path/to/output.xlsx');
+$task = ExcelExport::findByReference('pm-invoice-export-42');
+
+// Dot notation for relationships
+ExcelExporter::make(Invoice::query()->with('client.company'))
+    ->columns([
+        'Invoice #' => 'invoice_number',
+        'Client' => 'client.name',
+        'Company' => 'client.company.name',
+    ])
+    ->export('/path/to/output.xlsx');
+
+// Column transformers (serializable, works in background)
+use VmEngine\Synapse\Services\Excel\Transformers\DateFormatTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
+
+ExcelExporter::make($query)
+    ->columns([
+        'Joined' => [
+            'field' => 'created_at',
+            'transformer' => DateFormatTransformer::class,
+            'config' => ['format' => 'd/m/Y'],
+        ],
+        'Active' => [
+            'field' => 'is_active',
+            'transformer' => BooleanTransformer::class,
+        ],
+    ])
+    ->export('/path/to/output.xlsx');
 ```
 
 **Contracts:**
 - `ProcessesImport` - Implement to process import chunks in background jobs
 - `ExportQuery` - Implement to provide serializable query for background exports
+- `ColumnTransformer` - Implement to create custom serializable value transformers
 
-**Models:** `ExcelImport`, `ExcelExport` - Task tracking with status, progress, heartbeat
+**Built-in Transformers:** `DateFormatTransformer`, `NumberFormatTransformer`, `BooleanTransformer`, `DefaultValueTransformer`, `UpperCaseTransformer`
+**Models:** `ExcelImport`, `ExcelExport` - Task tracking with status, progress, heartbeat, reference
 **Enum:** `ExcelTaskStatus` - Pending, Processing, Completed, Failed, Cancelled
 **Events:** `ExcelImportCompleted`, `ExcelImportFailed`, `ExcelExportCompleted`, `ExcelExportFailed`
 **Command:** `php artisan synapse:excel-cleanup --timeout=3900`

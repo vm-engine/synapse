@@ -20,7 +20,14 @@ src/
 │   │   ├── ReaderInterface.php      # Reader contract
 │   │   ├── WriterInterface.php      # Writer contract
 │   │   ├── ProcessesImport.php      # Import processor contract (for background jobs)
-│   │   └── ExportQuery.php          # Export query contract (for background jobs)
+│   │   ├── ExportQuery.php          # Export query contract (for background jobs)
+│   │   └── ColumnTransformer.php    # Column transformer contract
+│   ├── Transformers/
+│   │   ├── DateFormatTransformer.php
+│   │   ├── NumberFormatTransformer.php
+│   │   ├── BooleanTransformer.php
+│   │   ├── DefaultValueTransformer.php
+│   │   └── UpperCaseTransformer.php
 │   ├── Readers/
 │   │   └── SpoutReader.php          # OpenSpout streaming reader
 │   ├── Writers/
@@ -48,12 +55,14 @@ src/
 
 database/migrations/
 ├── 2026_01_28_000001_create_excel_imports_table.php
-└── 2026_01_28_000002_create_excel_exports_table.php
+├── 2026_01_28_000002_create_excel_exports_table.php
+└── 2026_01_31_000001_add_reference_to_excel_tables.php
 
 tests/
 ├── Unit/Services/Excel/
 │   ├── ExcelImporterTest.php
 │   ├── ExcelExporterTest.php
+│   ├── ColumnTransformerTest.php
 │   ├── StyledWriterTest.php
 │   ├── ColumnMapperTest.php
 │   └── ChunkIteratorTest.php
@@ -79,6 +88,7 @@ tests/
 | status | string(20) | ExcelTaskStatus enum |
 | file_path | string | Source file path |
 | user_id | unsignedBigInteger nullable | Who initiated |
+| reference | string nullable indexed | Module-defined tracking identifier |
 | processor_class | string nullable | FQCN of ProcessesImport implementation |
 | total_rows | unsignedInteger nullable | Total rows in file |
 | processed_rows | unsignedInteger default(0) | Rows processed so far |
@@ -98,6 +108,7 @@ tests/
 | status | string(20) | ExcelTaskStatus enum |
 | output_path | string nullable | Generated file path |
 | user_id | unsignedBigInteger nullable | Who initiated |
+| reference | string nullable indexed | Module-defined tracking identifier |
 | query_class | string nullable | FQCN of ExportQuery implementation |
 | total_rows | unsignedInteger nullable | |
 | processed_rows | unsignedInteger default(0) | |
@@ -543,3 +554,249 @@ The `column_styles` and `header_style` are stored in the task's `options` JSON a
 | Styles set (`columnStyles` or `headerStyle`) | `StyledWriter` |
 | Template set (no styles) | `TemplateWriter` |
 | Default (no template, no styles) | `SpoutWriter` |
+
+---
+
+## Reference Tracking
+
+Both `ExcelExport` and `ExcelImport` models support a `reference` column — a module-defined string identifier for looking up tasks across page refreshes without storing the task ID in the session.
+
+### Setting a Reference
+
+```php
+// Export with reference
+$task = ExcelExporter::make(InvoiceExport::class)
+    ->columns(['Invoice #' => 'number', 'Total' => 'total'])
+    ->reference('pm-invoice-export-42')
+    ->forUser(auth()->id())
+    ->dispatch('/path/to/output.xlsx');
+
+// Import with reference
+$task = ExcelImporter::make('/path/to/file.xlsx')
+    ->startingRow(2)
+    ->mapColumns(['name', 'email'])
+    ->reference('pm-user-import-99')
+    ->forUser(auth()->id())
+    ->dispatch(UserImportProcessor::class);
+```
+
+### Looking Up by Reference
+
+```php
+// Find the latest task with this reference
+$task = ExcelExport::findByReference('pm-invoice-export-42');
+$task = ExcelImport::findByReference('pm-user-import-99');
+
+// Query scope for multiple tasks
+$tasks = ExcelExport::forReference('pm-invoice-export-42')->get();
+$tasks = ExcelImport::forReference('pm-user-import-99')->get();
+```
+
+### Reference Convention
+
+References are freeform strings. A recommended pattern is `{module}-{entity}-{action}-{id}`:
+
+```
+pm-invoice-export-42
+pm-user-import-batch-7
+hr-payroll-report-2025-01
+```
+
+---
+
+## Dot Notation for Relationships
+
+Column definitions support dotted paths to resolve nested relationships without manual joins. Values are resolved via `data_get()`.
+
+```php
+ExcelExporter::make(Invoice::query()->with('client.company'))
+    ->columns([
+        'Invoice #' => 'invoice_number',
+        'Client'    => 'client.name',
+        'Company'   => 'client.company.name',
+    ])
+    ->export('/path/to/output.xlsx');
+```
+
+### How It Works
+
+- Plain strings (no dot): `$record->getAttribute('name')` (existing behavior)
+- Dotted strings: `data_get($record, 'client.name')` (traverses relationships)
+
+### Background Export Compatibility
+
+Dot notation strings are plain strings — fully serializable. They work in both sync and background exports without any special handling.
+
+> **Important:** Your `ExportQuery` class must eager-load the relationships used in dot notation to avoid N+1 queries:
+> ```php
+> class InvoiceExport implements ExportQuery
+> {
+>     public function __invoke(): EloquentBuilder
+>     {
+>         return Invoice::query()->with('client.company');
+>     }
+> }
+> ```
+
+---
+
+## Column Transformers
+
+Column transformers are serializable value formatters that work in both sync and background exports — unlike closures which are lost during serialization.
+
+### ColumnTransformer Contract
+
+```php
+interface ColumnTransformer
+{
+    public function transform(mixed $value, mixed $record): mixed;
+}
+```
+
+### Column Definition Format
+
+Transformers are specified as arrays in the `columns()` definition:
+
+```php
+ExcelExporter::make($query)
+    ->columns([
+        'Name'    => 'name',                                        // string (existing)
+        'Client'  => 'client.name',                                 // dot notation
+        'Notes'   => fn($r) => $r->notes ?? 'None',                // closure (sync only)
+        'Joined'  => [                                              // transformer (new)
+            'field' => 'created_at',
+            'transformer' => DateFormatTransformer::class,
+            'config' => ['format' => 'Y-m-d'],
+        ],
+        'Active'  => [
+            'field' => 'is_active',
+            'transformer' => BooleanTransformer::class,
+            'config' => ['trueLabel' => 'Active', 'falseLabel' => 'Inactive'],
+        ],
+    ])
+    ->export('/path/to/output.xlsx');
+```
+
+**Array keys:**
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `field` | Yes | Attribute name (supports dot notation) |
+| `transformer` | No | FQCN of a `ColumnTransformer` class |
+| `config` | No | Array of constructor arguments for the transformer |
+
+If `transformer` is omitted, the field value is returned as-is (useful for dot notation extraction via array syntax).
+
+### Built-in Transformers
+
+| Transformer | Config | Default | Purpose |
+|------------|--------|---------|---------|
+| `DateFormatTransformer` | `format` | `'Y-m-d'` | Format dates |
+| `NumberFormatTransformer` | `decimals`, `decimalSeparator`, `thousandsSeparator` | `2`, `'.'`, `','` | Format numbers |
+| `BooleanTransformer` | `trueLabel`, `falseLabel` | `'Yes'`, `'No'` | Bool to label |
+| `DefaultValueTransformer` | `default` | `'-'` | Replace null/empty |
+| `UpperCaseTransformer` | *(none)* | | Uppercase strings |
+
+### Usage Examples
+
+```php
+use VmEngine\Synapse\Services\Excel\Transformers\DateFormatTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\NumberFormatTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\DefaultValueTransformer;
+use VmEngine\Synapse\Services\Excel\Transformers\UpperCaseTransformer;
+
+ExcelExporter::make(Employee::query()->with('department'))
+    ->columns([
+        'Name' => [
+            'field' => 'name',
+            'transformer' => UpperCaseTransformer::class,
+        ],
+        'Department' => 'department.name',
+        'Salary' => [
+            'field' => 'salary',
+            'transformer' => NumberFormatTransformer::class,
+            'config' => ['decimals' => 0, 'thousandsSeparator' => '.'],
+        ],
+        'Active' => [
+            'field' => 'is_active',
+            'transformer' => BooleanTransformer::class,
+        ],
+        'Hired' => [
+            'field' => 'hired_at',
+            'transformer' => DateFormatTransformer::class,
+            'config' => ['format' => 'd/m/Y'],
+        ],
+        'Notes' => [
+            'field' => 'notes',
+            'transformer' => DefaultValueTransformer::class,
+            'config' => ['default' => 'N/A'],
+        ],
+    ])
+    ->export('/path/to/output.xlsx');
+```
+
+### Custom Transformers
+
+Create your own by implementing `ColumnTransformer`:
+
+```php
+use VmEngine\Synapse\Services\Excel\Contracts\ColumnTransformer;
+
+class CurrencyTransformer implements ColumnTransformer
+{
+    public function __construct(
+        public readonly string $prefix = 'Rp. ',
+        public readonly int $decimals = 0,
+    ) {}
+
+    public function transform(mixed $value, mixed $record): mixed
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return $this->prefix . number_format((float) $value, $this->decimals, ',', '.');
+    }
+}
+
+// Usage
+->columns([
+    'Total' => [
+        'field' => 'total',
+        'transformer' => CurrencyTransformer::class,
+        'config' => ['prefix' => 'Rp. ', 'decimals' => 0],
+    ],
+])
+```
+
+### Background Export Compatibility
+
+Transformer arrays are JSON-serializable and work in background exports:
+
+```php
+$task = ExcelExporter::make(InvoiceExport::class)
+    ->columns([
+        'Date' => [
+            'field' => 'created_at',
+            'transformer' => DateFormatTransformer::class,
+            'config' => ['format' => 'd M Y'],
+        ],
+        'Amount' => [
+            'field' => 'amount',
+            'transformer' => NumberFormatTransformer::class,
+            'config' => ['decimals' => 2],
+        ],
+    ])
+    ->forUser(auth()->id())
+    ->dispatch('/path/to/output.xlsx');
+```
+
+### Serialization Behavior
+
+| Column Type | Sync Export | Background Export |
+|-------------|-----------|-------------------|
+| `string` | Resolved directly | Resolved directly |
+| `string` (dotted) | `data_get()` | `data_get()` |
+| `Closure` | Invoked | Serialized as `null` (skipped) |
+| `array` (transformer) | Field resolved + transformer applied | Field resolved + transformer applied |
