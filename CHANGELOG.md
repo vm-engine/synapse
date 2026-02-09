@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.2] - 2026-02-09
+
+### Fixed
+
+**WithDeleteToken Trait:**
+- Renamed `booted()` to `bootWithDeleteToken()` to follow Laravel's trait boot convention, preventing conflicts when multiple traits or the model itself define `booted()`
+- Added `initializeWithDeleteToken()` to automatically hide `delete_token` from model serialization (JSON/array), preventing token leakage in API responses
+
 ## [1.7.1] - 2026-01-31
 
 ### Added

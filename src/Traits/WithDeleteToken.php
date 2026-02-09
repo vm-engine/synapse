@@ -9,11 +9,16 @@ use Illuminate\Support\Facades\Crypt;
  */
 trait WithDeleteToken
 {
-    protected static function booted(): void
+    protected static function bootWithDeleteToken(): void
     {
         static::retrieved(function ($model) {
             $model->append('delete_token');
         });
+    }
+
+    protected function initializeWithDeleteToken(): void
+    {
+        $this->mergeHidden(['delete_token']);
     }
 
     public function getDeleteTokenAttribute(): string
