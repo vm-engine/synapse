@@ -303,6 +303,11 @@ class SynapseServiceProvider extends ServiceProvider
 
                 // Set the merged config back
                 config()->set($configName, $mergedConfig);
+
+                // If app.timezone was overridden, update PHP's timezone setting
+                if ($configName === 'app' && isset($overrideConfig['timezone'])) {
+                    date_default_timezone_set(config('app.timezone'));
+                }
             }
         }
     }
