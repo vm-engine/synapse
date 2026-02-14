@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
+use Illuminate\Support\Str;
+
 class MakeLivewireCommand extends BaseGeneratorCommand
 {
     protected $signature = 'synapps:make-livewire
                             {module : The module name}
                             {name? : The name of the Livewire component}
                             {--inline : Create inline component}
+                            {--sfc : Create single-file component (Livewire v4 SFC)}
+                            {--mfc : Create multi-file component (Livewire v4 MFC)}
                             {--form : Create form object}
                             {--test : Create Pest test}
                             {--path= : Custom base path for module}
@@ -21,6 +25,15 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
     public function handle(): int
     {
+        // MFC and SFC use different generation flow
+        if ($this->option('mfc')) {
+            return $this->handleMfc();
+        }
+
+        if ($this->option('sfc')) {
+            return $this->handleSfc();
+        }
+
         $result = parent::handle();
 
         if ($result === 0 && ! $this->option('inline')) {
@@ -33,6 +46,88 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         }
 
         return $result;
+    }
+
+    protected function handleMfc(): int
+    {
+        $this->generator = app(\VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService::class);
+
+        $module = $this->getModuleName();
+        $name = $this->getComponentName();
+
+        $this->setupGenerator($module);
+
+        $modulePath = $this->resolveModulePath($module);
+        $kebabName = Str::kebab($name);
+
+        // MFC directory: resources/views/components/{component-name}/
+        $mfcDir = $modulePath.'/resources/views/components/'.$kebabName;
+
+        if (! is_dir($mfcDir)) {
+            mkdir($mfcDir, 0755, true);
+        }
+
+        // Generate PHP file from MFC stub
+        $stubRenderer = $this->generator->stubRenderer;
+        $variables = [
+            'class' => Str::studly($name),
+            'moduleSlug' => Str::slug($module),
+        ];
+
+        $phpContent = $stubRenderer->render('livewire/component.mfc', $variables);
+        $bladeContent = $stubRenderer->render('livewire/component.mfc.blade', $variables);
+
+        file_put_contents($mfcDir.'/'.$kebabName.'.php', $phpContent);
+        file_put_contents($mfcDir.'/'.$kebabName.'.blade.php', $bladeContent);
+
+        $this->components->info('MFC Livewire component created successfully.');
+        $this->components->info("Location: {$mfcDir}/");
+
+        if ($this->option('test')) {
+            $this->createTest();
+        }
+
+        return 0;
+    }
+
+    protected function handleSfc(): int
+    {
+        $this->generator = app(\VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService::class);
+
+        $module = $this->getModuleName();
+        $name = $this->getComponentName();
+
+        $this->setupGenerator($module);
+
+        $modulePath = $this->resolveModulePath($module);
+        $kebabName = Str::kebab($name);
+
+        // SFC file: resources/views/components/{component-name}.blade.php
+        $componentsDir = $modulePath.'/resources/views/components';
+
+        if (! is_dir($componentsDir)) {
+            mkdir($componentsDir, 0755, true);
+        }
+
+        $stubRenderer = $this->generator->stubRenderer;
+        $variables = [
+            'class' => Str::studly($name),
+            'moduleSlug' => Str::slug($module),
+        ];
+
+        $sfcContent = $stubRenderer->render('livewire/component.sfc', $variables);
+        $sfcPath = $componentsDir.'/'.$kebabName.'.blade.php';
+
+        file_put_contents($sfcPath, $sfcContent);
+
+        $this->components->info('SFC Livewire component created successfully.');
+        $this->components->info("Location: {$sfcPath}");
+
+        if ($this->option('test')) {
+            $this->createTest();
+        }
+
+        return 0;
     }
 
     protected function getComponentOptions(): array

@@ -69,7 +69,6 @@
         {{-- Tags --}}
         <div class="form-box">
             <label for="tag">{{ __('todos::todos.form.tags') }}</label>
-            {{-- Component auto-loads values from wire-model="tag" --}}
             <x-synapse-adv-select
                 wire-model="tag"
                 :multiple="true"

@@ -27,10 +27,10 @@
         data-checked="{{ $checkedValue }}"
         x-data="{ active: {{ $checkedValue }} }"
         x-init="active = {{ $checkedValue }};
-        Livewire.hook('morph.updated', ({ el, component }) => {
-            if (el.contains($el) || el === $el) {
+        Livewire.interceptMessage(({ onSuccess }) => {
+            onSuccess(() => {
                 active = $el.dataset.checked === 'true';
-            }
+            });
         });"
     >
         <label

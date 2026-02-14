@@ -153,12 +153,12 @@ Version: 1.0.0
             }
 
             // Reopen dropdown after Livewire updates
-            Livewire.hook('message.processed', () => {
-                if (document.activeElement === this.$refs.search && this.search
-                    .length >
-                    0) {
-                    this.open = true;
-                }
+            Livewire.interceptMessage(({ onSuccess }) => {
+                onSuccess(() => {
+                    if (document.activeElement === this.$refs.search && this.search.length > 0) {
+                        this.open = true;
+                    }
+                });
             });
 
             // Listen for reset event

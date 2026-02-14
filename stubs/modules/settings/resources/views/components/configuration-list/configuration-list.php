@@ -2,16 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SynApps\Modules\Settings\Livewire;
-
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use VmEngine\Synapse\Models\Config;
 use VmEngine\Synapse\Services\Helper\Breadcrumbs;
 
-/**
- * @property \Illuminate\Support\Collection $configs
- */
-class ConfigurationList extends Component
+new #[Layout('synapps::components.layouts.layout')] class extends Component
 {
     public string $search = '';
 
@@ -25,7 +21,7 @@ class ConfigurationList extends Component
 
     public function mount(): void
     {
-        // Initialize
+        synav()->setActiveMenu('settings.configuration');
     }
 
     public function loadMore(): void
@@ -53,27 +49,32 @@ class ConfigurationList extends Component
 
     public function getConfigsProperty()
     {
-        // Fetch one extra to check if there are more
         $configs = $this->buildQuery()->limit($this->perPage + 1)->get();
-
-        // Store whether we have more for the hasMore property
         $this->hasMoreRecords = $configs->count() > $this->perPage;
 
-        // Return only the requested amount
         return $configs->take($this->perPage);
     }
 
     public function getHasMoreProperty(): bool
     {
-        // This is set during getConfigsProperty()
         return $this->hasMoreRecords ?? false;
+    }
+
+    public function getBreadcrumbsProperty()
+    {
+        return Breadcrumbs::make(
+            label: 'Settings',
+            icon: 'fa-solid fa-gear',
+        )->add(
+            label: 'Configuration',
+            icon: 'fa-solid fa-sliders',
+        );
     }
 
     protected function buildQuery()
     {
         $query = Config::query();
 
-        // Search
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('label', 'like', '%'.$this->search.'%')
@@ -83,28 +84,9 @@ class ConfigurationList extends Component
             });
         }
 
-        // Sort by group and key
         $query->orderBy('group', 'asc')
             ->orderBy('key', 'asc');
 
         return $query;
     }
-
-    public function render()
-    {
-        $breadcrumbs = Breadcrumbs::make(
-            label: 'Settings',
-            icon: 'fa-solid fa-gear',
-        )->add(
-            label: 'Configuration',
-            icon: 'fa-solid fa-sliders',
-        );
-
-        synav()->setActiveMenu('settings.configuration');
-
-        return view('settings::livewire.configuration-list', [
-            'configs' => $this->configs,
-            'breadcrumbs' => $breadcrumbs,
-        ]);
-    }
-}
+};

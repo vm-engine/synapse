@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class SynmodMakeCommand extends Command
 {
@@ -105,9 +107,9 @@ class SynmodMakeCommand extends Command
     protected function getArguments(): array
     {
         return [
-            ['type', null, 'The type of component to create'],
-            ['module', null, 'The module name'],
-            ['name', null, 'The name of the component'],
+            ['type', InputArgument::REQUIRED, 'The type of component to create'],
+            ['module', InputArgument::REQUIRED, 'The module name'],
+            ['name', InputArgument::OPTIONAL, 'The name of the component'],
         ];
     }
 
@@ -117,7 +119,7 @@ class SynmodMakeCommand extends Command
     protected function getOptions(): array
     {
         return [
-            ['path', null, null, 'Custom base path for module'],
+            ['path', 'p', InputOption::VALUE_OPTIONAL, 'Custom base path for module'],
         ];
     }
 }

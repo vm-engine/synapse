@@ -14,19 +14,12 @@
                 this.loading = false;
             });
 
-            // For wire:click and other actions - when request starts
-            Livewire.hook('commit', () => {
+            // For wire:click and other actions - show/hide on request lifecycle
+            Livewire.interceptMessage(({ onSuccess, onError, onFailure }) => {
                 this.loading = true;
-            });
-
-            // When response is processed and DOM is updated
-            Livewire.hook('morph.updated', () => {
-                this.loading = false;
-            });
-
-            // Fallback for non-morph updates
-            Livewire.hook('message.processed', () => {
-                this.loading = false;
+                onSuccess(() => { this.loading = false; });
+                onError(() => { this.loading = false; });
+                onFailure(() => { this.loading = false; });
             });
         }
     }"

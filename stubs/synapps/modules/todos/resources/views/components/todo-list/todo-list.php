@@ -2,19 +2,17 @@
 
 declare(strict_types=1);
 
-namespace SynApps\Modules\Todos\Livewire;
-
 use Livewire\Attributes\On;
 use Livewire\Component;
 use SynApps\Modules\Todos\Models\Todo;
 
-class TodoList extends Component
+new class extends Component
 {
     public string $search = '';
 
-    public string $sortBy = 'created_desc'; // created_desc, due_date
+    public string $sortBy = 'created_desc';
 
-    public string $filterCompleted = 'all'; // all, completed, pending
+    public string $filterCompleted = 'all';
 
     public bool $filterOverdue = false;
 
@@ -96,7 +94,6 @@ class TodoList extends Component
 
     public function updated($property): void
     {
-        // Reset pagination when filters change
         if (in_array($property, ['filterCompleted', 'filterOverdue', 'filterByDate', 'sortBy'])) {
             $this->perPage = 20;
         }
@@ -104,19 +101,14 @@ class TodoList extends Component
 
     public function getTodosProperty()
     {
-        // Fetch one extra to check if there are more
         $todos = $this->buildQuery()->limit($this->perPage + 1)->get();
-
-        // Store whether we have more for the hasMore property
         $this->hasMoreRecords = $todos->count() > $this->perPage;
 
-        // Return only the requested amount
         return $todos->take($this->perPage);
     }
 
     public function getHasMoreProperty(): bool
     {
-        // This is set during getTodosProperty()
         return $this->hasMoreRecords ?? false;
     }
 
@@ -124,29 +116,24 @@ class TodoList extends Component
     {
         $query = Todo::query();
 
-        // Search
         if ($this->search) {
             $query->search($this->search);
         }
 
-        // Filter by completion status
         if ($this->filterCompleted === 'completed') {
             $query->completed();
         } elseif ($this->filterCompleted === 'pending') {
             $query->pending();
         }
 
-        // Filter overdue
         if ($this->filterOverdue) {
             $query->overdue();
         }
 
-        // Filter by date
         if ($this->filterByDate) {
             $query->whereDate('due_date', $this->filterByDate);
         }
 
-        // Sort
         match ($this->sortBy) {
             'created_desc' => $query->orderBy('created_at', 'desc'),
             'created_asc' => $query->orderBy('created_at', 'asc'),
@@ -156,11 +143,4 @@ class TodoList extends Component
 
         return $query;
     }
-
-    public function render()
-    {
-        return view('todos::livewire.todo-list', [
-            'todos' => $this->todos,
-        ]);
-    }
-}
+};

@@ -23,7 +23,7 @@
 
         {{-- Configuration List --}}
         <div class="space-y-3">
-            @forelse ($configs as $config)
+            @forelse ($this->configs as $config)
                 <div
                     class="card"
                     wire:key="config-{{ $config->id }}"
@@ -58,7 +58,6 @@
                                     class="form-input min-h-20"
                                     id="config-value-{{ $config->id }}"
                                     rows="3"
-                                    wire:model.blur="configs.{{ $loop->index }}.value"
                                     wire:change="updateConfig({{ $config->id }}, $event.target.value)"
                                 >{{ $config->value }}</textarea>
                             </div>

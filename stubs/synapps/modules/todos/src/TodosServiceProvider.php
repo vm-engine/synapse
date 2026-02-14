@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace SynApps\Modules\Todos;
 
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
-use SynApps\Modules\Todos\Livewire\TodoForm;
-use SynApps\Modules\Todos\Livewire\TodoIndex;
-use SynApps\Modules\Todos\Livewire\TodoList;
+use VmEngine\Synapse\Traits\AutoRegistersComponents;
 
 class TodosServiceProvider extends ServiceProvider
 {
+    use AutoRegistersComponents;
+
     /**
      * Register services.
      */
     public function register(): void
     {
-        //
+        $this->registerComponents();
     }
 
     /**
@@ -25,11 +24,6 @@ class TodosServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register Livewire components
-        Livewire::component('todos::todo-index', TodoIndex::class);
-        Livewire::component('todos::todo-form', TodoForm::class);
-        Livewire::component('todos::todo-list', TodoList::class);
-
         // Load views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'todos');
 

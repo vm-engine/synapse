@@ -42,7 +42,7 @@
 
         {{-- Languages List --}}
         <div class="space-y-3">
-            @forelse ($languages as $language)
+            @forelse ($this->languages as $language)
                 <div
                     class="card"
                     wire:key="language-{{ $language->id }}"
@@ -79,7 +79,6 @@
                                     class="form-input min-h-20"
                                     id="language-value-{{ $language->id }}"
                                     rows="3"
-                                    wire:model.blur="languages.{{ $loop->index }}.value"
                                     wire:change="updateLanguage({{ $language->id }}, $event.target.value)"
                                 >{{ $language->value }}</textarea>
                             </div>

@@ -213,6 +213,43 @@ try {
         }
     }
 
+    // Handle Livewire SFC/MFC generation
+    if ($command === 'livewire' && (($parsedOptions['sfc'] ?? false) || ($parsedOptions['mfc'] ?? false))) {
+        $isMfc = $parsedOptions['mfc'] ?? false;
+        $kebabName = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $name));
+
+        if ($isMfc) {
+            // MFC: directory with .php + .blade.php
+            $mfcDir = $basePath . '/resources/views/components/' . $kebabName;
+            if (!is_dir($mfcDir)) {
+                mkdir($mfcDir, 0755, true);
+            }
+
+            $phpContent = $stubRenderer->render('livewire/component.mfc', ['class' => $name, 'moduleSlug' => $moduleSlug]);
+            $bladeContent = $stubRenderer->render('livewire/component.mfc.blade', ['class' => $name, 'moduleSlug' => $moduleSlug]);
+
+            file_put_contents($mfcDir . '/' . $kebabName . '.php', $phpContent);
+            file_put_contents($mfcDir . '/' . $kebabName . '.blade.php', $bladeContent);
+
+            echo "\n✓ MFC livewire component created successfully!\n";
+            echo "Location: resources/views/components/{$kebabName}/\n";
+        } else {
+            // SFC: single .blade.php file
+            $componentsDir = $basePath . '/resources/views/components';
+            if (!is_dir($componentsDir)) {
+                mkdir($componentsDir, 0755, true);
+            }
+
+            $sfcContent = $stubRenderer->render('livewire/component.sfc', ['class' => $name, 'moduleSlug' => $moduleSlug]);
+            file_put_contents($componentsDir . '/' . $kebabName . '.blade.php', $sfcContent);
+
+            echo "\n✓ SFC livewire component created successfully!\n";
+            echo "Location: resources/views/components/{$kebabName}.blade.php\n";
+        }
+
+        exit(0);
+    }
+
     // Execute component generation
     $componentPath = $generator->generateComponent($command, $name, $parsedOptions);
 
