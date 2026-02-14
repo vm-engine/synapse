@@ -3,7 +3,7 @@
 namespace VmEngine\Synapse;
 
 use Illuminate\Support\Facades\Blade;
-use Illuminate\View\ViewServiceProvider;
+use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Components\AdvSelect;
 use VmEngine\Synapse\Components\Alert;
 use VmEngine\Synapse\Components\Checkboxes;
@@ -22,7 +22,7 @@ use VmEngine\Synapse\Components\Toastr;
 use VmEngine\Synapse\Components\Toggler;
 use VmEngine\Synapse\Services\SynapseUtils;
 
-class SynapseViewServiceProvider extends ViewServiceProvider
+class SynapseViewServiceProvider extends ServiceProvider
 {
     public function register()
     {
@@ -34,7 +34,6 @@ class SynapseViewServiceProvider extends ViewServiceProvider
                 $this->loadViewsFrom($path[0], $path[1]);
             }
         }
-        parent::register();
         if (config('livewire.layout') && SynapseUtils::isSynAppsAutoloaded()) {
             // Set dynamic layout based on URL prefix
             $this->setDynamicLayout();
