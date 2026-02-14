@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-02-14
+
+### Breaking Changes
+
+**Livewire v4 Upgrade:**
+- Livewire dependency changed from `3.x` to `^4.0` — all consuming packages must upgrade to Livewire v4
+- Stub components converted from class-based (`src/Livewire/`) to MFC format (`resources/views/components/`)
+- Stub routes migrated from `Route::get(Component::class)` to `Route::livewire(Component::class)`
+- JavaScript hooks migrated from Livewire v3 API to v4 interceptor pattern
+
+### Added
+
+**Livewire v4 MFC/SFC Component Generation:**
+- New `--mfc` flag for `synapps:make-livewire` command to generate Multi-File Components
+  - Creates directory structure: `resources/views/components/{name}/{name}.php` + `{name}.blade.php`
+  - Uses anonymous class format (`new class extends Component {}`)
+- New `--sfc` flag for `synapps:make-livewire` command to generate Single-File Components
+  - Creates single `.blade.php` file with embedded PHP anonymous class
+- Three new stub templates:
+  - `stubs/module-generator/livewire/component.mfc.stub` — MFC PHP class
+  - `stubs/module-generator/livewire/component.mfc.blade.stub` — MFC Blade template
+  - `stubs/module-generator/livewire/component.sfc.stub` — SFC combined file
+- Updated `bin/synmod-make` standalone executable with `--sfc` and `--mfc` support for package modules
+
+**AutoRegistersComponents Trait:**
+- Added `registerMfcComponents()` method for automatic MFC component discovery
+- Scans `resources/views/components/` for directories containing matching `.php` + `.blade.php` pairs
+- MFC components registered alongside traditional class-based components
+
+### Changed
+
+**Livewire v4 JS Hook Migration:**
+- `stubs/.../loader.blade.php`: Replaced `Livewire.hook('commit')`, `morph.updated`, `message.processed` with `Livewire.interceptMessage()` using `onSuccess`/`onError`/`onFailure` callbacks
+- `resources/views/components/toggler.blade.php`: Replaced `Livewire.hook('morph.updated')` with `Livewire.interceptMessage()`
+- `resources/views/components/adv-select.blade.php`: Replaced `Livewire.hook('message.processed')` with `Livewire.interceptMessage()`
+
+**Stub Component Conversion (5 components to MFC):**
+- Settings module: `ConfigurationList`, `LanguagesList` — moved from `src/Livewire/` + `resources/views/livewire/` to `resources/views/components/{name}/`
+- Todos module: `TodoForm`, `TodoIndex`, `TodoList` — same MFC conversion
+- Stub service providers updated to use `AutoRegistersComponents` trait instead of manual registration
+
+**Route Migration:**
+- `stubs/modules/settings/routes/web.backend.php`: `Route::get()` → `Route::livewire()` for 2 routes
+- `stubs/synapps/modules/todos/routes/web.php`: `Route::get()` → `Route::livewire()` for 1 route
+
+### Fixed
+
+- PHPStan errors in `SynmodMakeCommand.php`: Replaced null values with proper `InputArgument`/`InputOption` constants
+- `ModuleGeneratorService::$stubRenderer` visibility changed to public for MFC generation access
+
+### Migration Guide
+
+1. Update your `composer.json` to require `"livewire/livewire": "^4.0"`
+2. Replace any `Livewire.hook('commit')`, `morph.updated`, or `message.processed` JS hooks with `Livewire.interceptMessage()` pattern
+3. Replace `Route::get('/path', Component::class)` with `Route::livewire('/path', Component::class)` in route files
+4. Optionally convert class-based components to MFC format using `--mfc` flag
+5. Run `composer update` to install Livewire v4
+
 ## [1.7.3] - 2026-02-11
 
 ### Fixed
@@ -867,6 +925,7 @@ Previous releases (see git tags for history)
 
 Initial stable release
 
+[2.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.7.3...v2.0.0
 [1.1.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.6...v1.1.0
 [1.0.6]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.5...v1.0.6
 [1.0.5]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.4...v1.0.5
