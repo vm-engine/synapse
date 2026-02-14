@@ -13,10 +13,10 @@
     </div>
 
     {{-- Todo Form --}}
-    <livewire:todos::todo-form />
+    <livewire:todos.todo-form />
 
     {{-- Todo List --}}
-    <livewire:todos::todo-list />
+    <livewire:todos.todo-list />
 
     {{-- Toastr Notifications --}}
     <x-synapse-toastr />

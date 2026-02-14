@@ -75,7 +75,7 @@
 
     {{-- Todos List --}}
     <div class="space-y-3">
-        @forelse ($todos as $todo)
+        @forelse ($this->todos as $todo)
             <div
                 class="card"
                 wire:key="todo-{{ $todo->id }}"

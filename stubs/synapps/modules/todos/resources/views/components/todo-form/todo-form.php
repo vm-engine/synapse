@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SynApps\Modules\Todos\Livewire;
-
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use SynApps\Modules\Todos\Models\Todo;
 
-class TodoForm extends Component
+new class extends Component
 {
     public ?int $todoId = null;
 
@@ -40,7 +38,6 @@ class TodoForm extends Component
         if ($this->isEditing && $this->todoId) {
             $this->updateTodo();
         } else {
-            // Rate limiting: 1 submission per 5 seconds per session (only for creation)
             $key = 'todo-create-'.session()->getId();
 
             if (RateLimiter::tooManyAttempts($key, 1)) {
@@ -54,7 +51,7 @@ class TodoForm extends Component
                 return;
             }
 
-            RateLimiter::hit($key, 5); // Lock for 5 seconds
+            RateLimiter::hit($key, 5);
             $this->createTodo();
         }
     }
@@ -111,17 +108,14 @@ class TodoForm extends Component
         $this->due_date = $todo->due_date?->format('Y-m-d H:i');
         $this->isEditing = true;
 
-        // Dispatch event to scroll to form and focus
         $this->dispatch('scroll-to-form');
     }
 
     public function resetForm(): void
     {
         if ($this->isEditing) {
-            // Reset to original values when editing
             $this->editTodo($this->todoId);
         } else {
-            // Clear form when adding new
             $this->reset();
         }
     }
@@ -131,9 +125,4 @@ class TodoForm extends Component
         $this->reset();
         $this->isEditing = false;
     }
-
-    public function render()
-    {
-        return view('todos::livewire.todo-form');
-    }
-}
+};

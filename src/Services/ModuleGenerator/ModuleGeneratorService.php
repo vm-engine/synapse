@@ -22,7 +22,7 @@ class ModuleGeneratorService
 
     public function __construct(
         public NamespaceResolver $namespaceResolver,
-        protected StubRenderer $stubRenderer
+        public StubRenderer $stubRenderer
     ) {
         $this->files = new Filesystem;
 

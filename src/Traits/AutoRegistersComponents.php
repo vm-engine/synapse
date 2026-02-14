@@ -13,7 +13,8 @@ use ReflectionClass;
  * Auto-register Livewire and Blade components for Synapse modules
  *
  * This trait automatically discovers and registers:
- * - Livewire components from src/Livewire/ directory
+ * - Livewire MFC components from resources/views/components/ directory (Livewire v4)
+ * - Livewire class-based components from src/Livewire/ directory (legacy)
  * - Class-based Blade components from src/View/Components/ directory
  *
  * Usage in module ServiceProvider:
@@ -62,11 +63,55 @@ trait AutoRegistersComponents
     protected function registerComponents(): void
     {
         if ($this->autoRegisterLivewireComponents) {
+            $this->registerMfcComponents();
             $this->registerLivewireComponents();
         }
 
         if ($this->autoRegisterBladeComponents) {
             $this->registerBladeComponents();
+        }
+    }
+
+    /**
+     * Auto-register Livewire v4 MFC components from resources/views/components/ directory
+     *
+     * Scans for directories containing a .php file (anonymous class) alongside a .blade.php file:
+     * - resources/views/components/todo-form/todo-form.php → 'todos.todo-form'
+     * - resources/views/components/config-list/config-list.php → 'todos.config-list'
+     */
+    protected function registerMfcComponents(): void
+    {
+        $reflection = new ReflectionClass($this);
+        $basePath = dirname($reflection->getFileName());
+
+        // MFC components live in resources/views/components/ relative to the module's src/ dir
+        $componentsPath = dirname($basePath).'/resources/views/components';
+
+        if (! is_dir($componentsPath)) {
+            return;
+        }
+
+        $prefix = $this->getComponentPrefix();
+
+        // Scan for MFC directories (directories containing a .php + .blade.php pair)
+        $iterator = new \DirectoryIterator($componentsPath);
+
+        foreach ($iterator as $item) {
+            if (! $item->isDir() || $item->isDot()) {
+                continue;
+            }
+
+            $dirName = $item->getFilename();
+            $phpFile = $item->getPathname().'/'.$dirName.'.php';
+            $bladeFile = $item->getPathname().'/'.$dirName.'.blade.php';
+
+            // MFC component: directory with both .php and .blade.php files
+            if (file_exists($phpFile) && file_exists($bladeFile)) {
+                $componentName = $prefix.'.'.$dirName;
+
+                // Register the MFC component path with Livewire
+                Livewire::component($componentName, $phpFile);
+            }
         }
     }
 

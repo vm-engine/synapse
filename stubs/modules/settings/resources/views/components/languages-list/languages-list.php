@@ -2,16 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SynApps\Modules\Settings\Livewire;
-
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use VmEngine\Synapse\Models\Language;
 use VmEngine\Synapse\Services\Helper\Breadcrumbs;
 
-/**
- * @property \Illuminate\Support\Collection $languages
- */
-class LanguagesList extends Component
+new #[Layout('synapps::components.layouts.layout')] class extends Component
 {
     public string $search = '';
 
@@ -35,10 +31,11 @@ class LanguagesList extends Component
         $this->multiLanguageEnabled = config('synapps.apps.multi_language', false);
         $this->enabledLanguages = config('synapps.apps.enabled_languages', ['en']);
 
-        // Set current language to first enabled language if not set or invalid
         if (! in_array($this->currentLanguage, $this->enabledLanguages)) {
             $this->currentLanguage = $this->enabledLanguages[0] ?? 'en';
         }
+
+        synav()->setActiveMenu('settings.languages');
     }
 
     public function setLanguage(string $languageCode): void
@@ -72,30 +69,34 @@ class LanguagesList extends Component
 
     public function getLanguagesProperty()
     {
-        // Fetch one extra to check if there are more
         $languages = $this->buildQuery()->limit($this->perPage + 1)->get();
-
-        // Store whether we have more for the hasMore property
         $this->hasMoreRecords = $languages->count() > $this->perPage;
 
-        // Return only the requested amount
         return $languages->take($this->perPage);
     }
 
     public function getHasMoreProperty(): bool
     {
-        // This is set during getLanguagesProperty()
         return $this->hasMoreRecords ?? false;
+    }
+
+    public function getBreadcrumbsProperty()
+    {
+        return Breadcrumbs::make(
+            label: 'Settings',
+            icon: 'fa-solid fa-gear',
+        )->add(
+            label: 'Languages',
+            icon: 'fa-solid fa-language',
+        );
     }
 
     protected function buildQuery()
     {
         $query = Language::query();
 
-        // Filter by current language
         $query->where('language_code', $this->currentLanguage);
 
-        // Search
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('label', 'like', '%'.$this->search.'%')
@@ -104,27 +105,8 @@ class LanguagesList extends Component
             });
         }
 
-        // Sort by key
         $query->orderBy('key', 'asc');
 
         return $query;
     }
-
-    public function render()
-    {
-        $breadcrumbs = Breadcrumbs::make(
-            label: 'Settings',
-            icon: 'fa-solid fa-gear',
-        )->add(
-            label: 'Languages',
-            icon: 'fa-solid fa-language',
-        );
-
-        synav()->setActiveMenu('settings.languages');
-
-        return view('settings::livewire.languages-list', [
-            'languages' => $this->languages,
-            'breadcrumbs' => $breadcrumbs,
-        ]);
-    }
-}
+};
