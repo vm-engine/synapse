@@ -209,7 +209,7 @@ trait AutoRegistersComponents
                     $componentTag = implode('.', $segments);
 
                     // Register with prefix: <x-example::alert />
-                    Blade::component($componentClass, $prefix.'::'.$componentTag);
+                    app('blade.compiler')->component($componentClass, $prefix.'::'.$componentTag);
                 }
             }
         }

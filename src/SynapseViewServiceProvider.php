@@ -43,16 +43,18 @@ class SynapseViewServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $blade = app('blade.compiler');
+
         // Register Blade directives for theme resources
-        Blade::directive('themeStyles', function ($layoutType) {
+        $blade->directive('themeStyles', function ($layoutType) {
             return "<?php echo app('synapse.theme')->renderStyles({$layoutType}); ?>";
         });
 
-        Blade::directive('themeScripts', function ($layoutType) {
+        $blade->directive('themeScripts', function ($layoutType) {
             return "<?php echo app('synapse.theme')->renderScripts({$layoutType}); ?>";
         });
 
-        Blade::directive('themeHeaders', function ($layoutType) {
+        $blade->directive('themeHeaders', function ($layoutType) {
             return "<?php echo app('synapse.theme')->renderHeaders({$layoutType}); ?>";
         });
     }
@@ -92,21 +94,25 @@ class SynapseViewServiceProvider extends ServiceProvider
 
     private function registerSynapseComponents()
     {
-        Blade::component(Alert::class, 'synapse-alert');
-        Blade::component(Drawer::class, 'synapse-drawer');
-        Blade::component(Modal::class, 'synapse-modal');
-        Blade::component(Select::class, 'synapse-select');
-        Blade::component(MultiSelect::class, 'synapse-multiselect');
-        Blade::component(AdvSelect::class, 'synapse-adv-select');
-        Blade::component(Password::class, 'synapse-password');
-        Blade::component(PasswordGenerator::class, 'synapse-password-generator');
-        Blade::component(Currency::class, 'synapse-currency');
-        Blade::component(RadioButtons::class, 'synapse-radio-buttons');
-        Blade::component(Checkboxes::class, 'synapse-checkboxes');
-        Blade::component(Datepicker::class, 'synapse-datepicker');
-        Blade::component(Toggler::class, 'synapse-toggler');
-        Blade::component(ConfirmDialog::class, 'synapse-confirm-dialog');
-        Blade::component(Toastr::class, 'synapse-toastr');
-        Blade::component(DragNDrop::class, 'synapse-drag-n-drop');
+        // Use app('blade.compiler') directly instead of the Blade facade to avoid
+        // stale facade instance issue where the Facade root and the container-resolved
+        // BladeCompiler diverge (especially during testing with Livewire v4).
+        $blade = app('blade.compiler');
+        $blade->component(Alert::class, 'synapse-alert');
+        $blade->component(Drawer::class, 'synapse-drawer');
+        $blade->component(Modal::class, 'synapse-modal');
+        $blade->component(Select::class, 'synapse-select');
+        $blade->component(MultiSelect::class, 'synapse-multiselect');
+        $blade->component(AdvSelect::class, 'synapse-adv-select');
+        $blade->component(Password::class, 'synapse-password');
+        $blade->component(PasswordGenerator::class, 'synapse-password-generator');
+        $blade->component(Currency::class, 'synapse-currency');
+        $blade->component(RadioButtons::class, 'synapse-radio-buttons');
+        $blade->component(Checkboxes::class, 'synapse-checkboxes');
+        $blade->component(Datepicker::class, 'synapse-datepicker');
+        $blade->component(Toggler::class, 'synapse-toggler');
+        $blade->component(ConfirmDialog::class, 'synapse-confirm-dialog');
+        $blade->component(Toastr::class, 'synapse-toastr');
+        $blade->component(DragNDrop::class, 'synapse-drag-n-drop');
     }
 }

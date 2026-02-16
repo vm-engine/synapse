@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-02-16
+
+### Fixed
+
+**Blade Facade Instance Divergence:**
+- Replaced all `Blade::` facade calls with `app('blade.compiler')` direct calls in `SynapseViewServiceProvider` and `AutoRegistersComponents` trait
+- Fixes component registration failures where the Blade facade root and the container-resolved BladeCompiler diverge (especially during testing with Livewire v4)
+- `SynapseViewServiceProvider::boot()`: Changed `Blade::directive()` to `$blade->directive()` for theme directives (themeStyles, themeScripts, themeHeaders)
+- `SynapseViewServiceProvider::registerSynapseComponents()`: Changed all 16 `Blade::component()` calls to `$blade->component()`
+- `AutoRegistersComponents::registerBladeComponents()`: Changed `Blade::component()` to `app('blade.compiler')->component()`
+
 ## [2.0.0] - 2026-02-14
 
 ### Breaking Changes
@@ -925,6 +936,7 @@ Previous releases (see git tags for history)
 
 Initial stable release
 
+[2.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v2.0.0...v2.0.1
 [2.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.7.3...v2.0.0
 [1.1.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.6...v1.1.0
 [1.0.6]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.5...v1.0.6
