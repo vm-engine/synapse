@@ -43,6 +43,7 @@ class SynAppsPatchResources extends Command
         }
         if ($jsPatched || empty($jsLines)) {
             array_splice($jsLines, $lastImportJs + 1, 0, $jsLine."\n");
+            $this->createBackup(resource_path('js/app.js'));
             file_put_contents(resource_path('js/app.js'), implode("\n", $jsLines));
             $jsPatched = true;
         }
@@ -62,6 +63,7 @@ class SynAppsPatchResources extends Command
         }
         if ($cssPatched || empty($cssLines)) {
             array_splice($cssLines, $lastImportCss + 1, 0, $cssLine."\n");
+            $this->createBackup(resource_path('css/app.css'));
             file_put_contents(resource_path('css/app.css'), implode("\n", $cssLines));
             $cssPatched = true;
         }
@@ -84,8 +86,25 @@ class SynAppsPatchResources extends Command
         // Patch package.json to add 'npm run watch' script
         $packageJsonPatched = $this->patchPackageJson();
 
-        if ($jsPatched || $cssPatched || $cssSourcePatched || $themePatched || $vitePatched || $routePatched || $seederPatched || $packageJsonPatched) {
-            $this->components->info('Resource files patched.');
+        // Patch app.js to add global JS helper functions
+        $globalsPatched = $this->patchAppJsGlobals();
+
+        $patches = [
+            'app.js — synapps import' => $jsPatched,
+            'app.css — synapps import' => $cssPatched,
+            'app.css — @source directives' => $cssSourcePatched,
+            'app.css / app.js — theme assets' => $themePatched,
+            'vite.config.js' => $vitePatched,
+            'routes/web.php' => $routePatched,
+            'database/seeders/DatabaseSeeder.php' => $seederPatched,
+            'package.json — watch script' => $packageJsonPatched,
+            'app.js — global helpers' => $globalsPatched,
+        ];
+
+        foreach ($patches as $label => $patched) {
+            if ($patched) {
+                $this->components->info("Patched: {$label}");
+            }
         }
     }
 
@@ -147,6 +166,7 @@ class SynAppsPatchResources extends Command
         }
 
         if ($anyPatched) {
+            $this->createBackup($cssPath);
             file_put_contents($cssPath, implode("\n", $lines));
         }
 
@@ -193,6 +213,7 @@ class SynAppsPatchResources extends Command
                 );
 
                 if ($count > 0) {
+                    $this->createBackup($cssPath);
                     file_put_contents($cssPath, $content);
                     $patched = true;
                 }
@@ -224,6 +245,7 @@ class SynAppsPatchResources extends Command
                 );
 
                 if ($count > 0) {
+                    $this->createBackup($jsPath);
                     file_put_contents($jsPath, $content);
                     $patched = true;
                 }
@@ -293,7 +315,7 @@ class SynAppsPatchResources extends Command
         }
 
         // Step 3: Add viteStaticCopy plugin with conditional watch mode handling
-        if (strpos($content, 'viteStaticCopy') === false) {
+        if (strpos($content, 'viteStaticCopy({') === false) {
             // Plugin config wrapped in conditional for watch mode
             $pluginConfig = <<<'PLUGIN'
 // Only enable static copy in production builds, not in watch mode
@@ -335,9 +357,14 @@ class SynAppsPatchResources extends Command
 PLUGIN;
 
             // Find tailwindcss() line and add viteStaticCopy after it
-            $content = preg_replace(
+            // Use preg_replace_callback to prevent preg_replace from processing backslashes
+            // in $pluginConfig (which contains JS regex literals like /\\/g)
+            $count = 0;
+            $content = preg_replace_callback(
                 '/(tailwindcss\(\),)/',
-                "$1\n$pluginConfig",
+                static function (array $matches) use ($pluginConfig): string {
+                    return $matches[1]."\n".$pluginConfig;
+                },
                 $content,
                 1,
                 $count
@@ -348,7 +375,7 @@ PLUGIN;
             }
         } else {
             // Step 4: viteStaticCopy exists - ensure it's wrapped in watch mode conditional
-            if (! str_contains($content, '...(!isWatch ? [') && str_contains($content, 'viteStaticCopy')) {
+            if (! str_contains($content, '...(!isWatch ? [') && str_contains($content, 'viteStaticCopy({')) {
                 // Wrap existing viteStaticCopy in conditional
                 $content = preg_replace(
                     '/(tailwindcss\(\),)\s*\n\s*(viteStaticCopy\(\{)/s',
@@ -480,6 +507,7 @@ SERVER;
         }
 
         if ($patched) {
+            $this->createBackup($viteConfigPath);
             file_put_contents($viteConfigPath, $content);
         }
 
@@ -530,6 +558,7 @@ SERVER;
         $patched = $this->commentOutDefaultRoute($lines, $defaultRoutePattern);
 
         if ($patched) {
+            $this->createBackup($webRoutesPath);
             file_put_contents($webRoutesPath, implode("\n", $lines)."\n");
 
             return true;
@@ -704,10 +733,60 @@ SERVER;
         }
 
         if ($patched) {
+            $this->createBackup($seederPath);
             file_put_contents($seederPath, implode("\n", $lines)."\n");
         }
 
         return $patched;
+    }
+
+    /**
+     * Create a backup of a file before patching.
+     * Only creates the backup once — skips if a .bak already exists.
+     */
+    protected function createBackup(string $path): void
+    {
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $backupPath = $path.'.bak';
+
+        if (! file_exists($backupPath)) {
+            copy($path, $backupPath);
+        }
+    }
+
+    /**
+     * Patch app.js to add global Synapse JS helper functions (e.g. withBack).
+     * Idempotent — skips if the marker comment already exists.
+     */
+    protected function patchAppJsGlobals(): bool
+    {
+        $jsPath = resource_path('js/app.js');
+
+        if (! file_exists($jsPath)) {
+            return false;
+        }
+
+        $marker = '// Synapse global helpers';
+
+        $content = file_get_contents($jsPath);
+
+        if (str_contains($content, $marker)) {
+            return false;
+        }
+
+        $snippet = <<<'JS'
+
+// Synapse global helpers
+window.withBack = (url) => url + '?back=' + encodeURIComponent(window.location.href);
+JS;
+
+        $this->createBackup($jsPath);
+        file_put_contents($jsPath, $content.$snippet);
+
+        return true;
     }
 
     /**
@@ -747,6 +826,7 @@ SERVER;
         $packageJson['scripts']['watch'] = 'vite build --watch';
 
         // Write back to package.json with pretty formatting
+        $this->createBackup($packageJsonPath);
         file_put_contents(
             $packageJsonPath,
             json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n"

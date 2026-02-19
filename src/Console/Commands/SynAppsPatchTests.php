@@ -70,6 +70,23 @@ class SynAppsPatchTests extends Command
         return $success ? 0 : 1;
     }
 
+    /**
+     * Create a backup of a file before patching.
+     * Only creates the backup once — skips if a .bak already exists.
+     */
+    private function createBackup(string $path): void
+    {
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $backupPath = $path.'.bak';
+
+        if (! file_exists($backupPath)) {
+            copy($path, $backupPath);
+        }
+    }
+
     private function patchPestFile(): bool
     {
         $pestPath = base_path('tests/Pest.php');
@@ -104,6 +121,7 @@ class SynAppsPatchTests extends Command
         }
 
         // Write back to file
+        $this->createBackup($pestPath);
         if (! file_put_contents($pestPath, $patchedContent)) {
             $this->components->error('Failed to write to tests/Pest.php.');
 
@@ -151,6 +169,7 @@ ENV;
         }
 
         // Create or update the file
+        $this->createBackup($envTestingPath);
         if (! file_put_contents($envTestingPath, $envTestingContent)) {
             $this->components->error('Failed to create/update .env.testing.');
 
@@ -216,6 +235,7 @@ ENV;
         // Write back to composer.json with pretty print
         $newComposerContent = json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
+        $this->createBackup($composerPath);
         if (! file_put_contents($composerPath, $newComposerContent)) {
             $this->components->error('Failed to update composer.json.');
 
@@ -339,6 +359,7 @@ ENV;
 
         // Save if modified
         if ($modified) {
+            $this->createBackup($phpunitPath);
             if (! $dom->save($phpunitPath)) {
                 $this->components->error('Failed to save phpunit.xml.');
 
