@@ -15,6 +15,10 @@ class SynmodMakeCommand extends Command
                             {module? : The module name}
                             {name? : The name of the component}
                             {--path= : Custom base path for module}
+                            {--mfc : Create multi-file component (livewire type only)}
+                            {--sfc : Create single-file component (livewire type only)}
+                            {--inline : Create inline component (livewire type only)}
+                            {--test : Create Pest test alongside the component (livewire type only)}
                             ';
 
     protected $description = 'Unified command to create any component type for a module';
@@ -94,6 +98,25 @@ class SynmodMakeCommand extends Command
             $arguments['--path'] = $this->option('path');
         }
 
+        // Pass livewire-specific flags through when the type is livewire
+        if ($type === 'livewire') {
+            if ($this->option('mfc')) {
+                $arguments['--mfc'] = true;
+            }
+
+            if ($this->option('sfc')) {
+                $arguments['--sfc'] = true;
+            }
+
+            if ($this->option('inline')) {
+                $arguments['--inline'] = true;
+            }
+
+            if ($this->option('test')) {
+                $arguments['--test'] = true;
+            }
+        }
+
         // Call the specific make command
         $command = $this->componentTypes[$type];
         $this->components->info("Running: {$command}");
@@ -119,7 +142,11 @@ class SynmodMakeCommand extends Command
     protected function getOptions(): array
     {
         return [
-            ['path', 'p', InputOption::VALUE_OPTIONAL, 'Custom base path for module'],
+            new InputOption('path', 'p', InputOption::VALUE_OPTIONAL, 'Custom base path for module'),
+            new InputOption('mfc', null, InputOption::VALUE_NONE, 'Create multi-file component (livewire type only)'),
+            new InputOption('sfc', null, InputOption::VALUE_NONE, 'Create single-file component (livewire type only)'),
+            new InputOption('inline', null, InputOption::VALUE_NONE, 'Create inline component (livewire type only)'),
+            new InputOption('test', null, InputOption::VALUE_NONE, 'Create Pest test alongside the component (livewire type only)'),
         ];
     }
 }

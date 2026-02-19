@@ -26,12 +26,11 @@
     <div
         data-checked="{{ $checkedValue }}"
         x-data="{ active: {{ $checkedValue }} }"
-        x-init="active = {{ $checkedValue }};
-        Livewire.interceptMessage(({ onSuccess }) => {
-            onSuccess(() => {
-                active = $el.dataset.checked === 'true';
-            });
-        });"
+        x-init="
+            active = $el.dataset.checked === 'true';
+            new MutationObserver(() => { active = $el.dataset.checked === 'true'; })
+                .observe($el, { attributes: true, attributeFilter: ['data-checked'] });
+        "
     >
         <label
             class="flex cursor-pointer select-none items-center gap-2 text-sm font-medium"

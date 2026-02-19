@@ -80,6 +80,8 @@ new class extends Component
         $todo = Todo::findOrFail($id);
         $todo->delete();
 
+        $this->dispatch('synapse-confirmed');
+
         $this->dispatch('notify',
             variant: 'success',
             title: __('todos::todos.notifications.success'),

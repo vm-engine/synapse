@@ -34,7 +34,7 @@ class SynapseViewServiceProvider extends ServiceProvider
                 $this->loadViewsFrom($path[0], $path[1]);
             }
         }
-        if (config('livewire.layout') && SynapseUtils::isSynAppsAutoloaded()) {
+        if (config('livewire.component_layout') && SynapseUtils::isSynAppsAutoloaded()) {
             // Set dynamic layout based on URL prefix
             $this->setDynamicLayout();
         }
@@ -89,7 +89,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         // Always use 'app' layout as default
         $layoutView = theme_service()->resolveThemeLayout('app');
 
-        config(['livewire.layout' => $layoutView]);
+        config(['livewire.component_layout' => $layoutView]);
     }
 
     private function registerSynapseComponents()

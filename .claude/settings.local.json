@@ -45,7 +45,8 @@
       "Bash(npm run build:*)",
       "Bash(findstr:*)",
       "Skill(ui-ux-pro-max)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

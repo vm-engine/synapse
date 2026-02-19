@@ -1,7 +1,6 @@
 <?php
 
 use Livewire\Livewire;
-use SynApps\Modules\Todos\Livewire\TodoIndex;
 
 use function Pest\Laravel\get;
 
@@ -12,7 +11,7 @@ test('can access todos index page', function () {
 });
 
 test('can render todo index component', function () {
-    Livewire::test(TodoIndex::class)
+    Livewire::test('todos.todo-index')
         ->assertStatus(200);
 });
 

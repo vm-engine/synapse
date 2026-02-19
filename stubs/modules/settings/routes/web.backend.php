@@ -1,13 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use SynApps\Modules\Settings\Livewire\ConfigurationList;
-use SynApps\Modules\Settings\Livewire\LanguagesList;
 
 Route::group([], function () {
-    Route::livewire('configuration', ConfigurationList::class)
+    Route::livewire('configuration', 'settings.configuration-list')
         ->name('configuration');
 
-    Route::livewire('languages', LanguagesList::class)
+    Route::livewire('languages', 'settings.languages-list')
         ->name('languages');
 });

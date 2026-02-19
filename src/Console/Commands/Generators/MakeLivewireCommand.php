@@ -59,9 +59,11 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
         $modulePath = $this->resolveModulePath($module);
         $kebabName = Str::kebab($name);
+        $dirPrefix = $this->shouldUseEmoji() ? "\u{26A1}" : '';
 
-        // MFC directory: resources/views/components/{component-name}/
-        $mfcDir = $modulePath.'/resources/views/components/'.$kebabName;
+        // MFC directory: resources/views/components/[⚡]{component-name}/
+        // Emoji applies to the folder; files inside use the plain name.
+        $mfcDir = $modulePath.'/resources/views/components/'.$dirPrefix.$kebabName;
 
         if (! is_dir($mfcDir)) {
             mkdir($mfcDir, 0755, true);
@@ -101,8 +103,9 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
         $modulePath = $this->resolveModulePath($module);
         $kebabName = Str::kebab($name);
+        $filePrefix = $this->shouldUseEmoji() ? "\u{26A1}" : '';
 
-        // SFC file: resources/views/components/{component-name}.blade.php
+        // SFC file: resources/views/components/[⚡]{component-name}.blade.php
         $componentsDir = $modulePath.'/resources/views/components';
 
         if (! is_dir($componentsDir)) {
@@ -116,7 +119,7 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         ];
 
         $sfcContent = $stubRenderer->render('livewire/component.sfc', $variables);
-        $sfcPath = $componentsDir.'/'.$kebabName.'.blade.php';
+        $sfcPath = $componentsDir.'/'.$filePrefix.$kebabName.'.blade.php';
 
         file_put_contents($sfcPath, $sfcContent);
 
@@ -128,6 +131,11 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         }
 
         return 0;
+    }
+
+    protected function shouldUseEmoji(): bool
+    {
+        return (bool) config('livewire.make_command.emoji', true);
     }
 
     protected function getComponentOptions(): array

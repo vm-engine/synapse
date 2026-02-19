@@ -181,6 +181,40 @@ use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
 use VmEngine\Synapse\Services\ModuleGenerator\NamespaceResolver;
 use VmEngine\Synapse\Services\ModuleGenerator\StubRenderer;
 
+/**
+ * Resolve the Livewire emoji setting without a full Laravel bootstrap.
+ *
+ * Config files can call Laravel helpers like resource_path(), so we parse
+ * the raw source with a regex instead of require()-ing them.
+ *
+ * Priority:
+ *   1. Published config/livewire.php in the package root
+ *   2. Vendor livewire/livewire config (default)
+ *   3. Falls back to true (Livewire default)
+ */
+function resolveLivewireEmoji(string $basePath): bool
+{
+    $candidates = [
+        $basePath . '/config/livewire.php',
+        $basePath . '/vendor/livewire/livewire/config/livewire.php',
+    ];
+
+    foreach ($candidates as $file) {
+        if (!file_exists($file)) {
+            continue;
+        }
+
+        $source = file_get_contents($file);
+
+        // Match: 'emoji' => true|false
+        if (preg_match("/'emoji'\s*=>\s*(true|false)/i", $source, $m)) {
+            return strtolower($m[1]) === 'true';
+        }
+    }
+
+    return true; // Livewire default
+}
+
 echo "Creating {$command}: {$name}\n";
 echo "Module: {$moduleName}\n";
 echo "Path: {$basePath}\n\n";
@@ -218,9 +252,13 @@ try {
         $isMfc = $parsedOptions['mfc'] ?? false;
         $kebabName = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $name));
 
+        // Resolve emoji setting from livewire config (published or vendor default).
+        $useEmoji = resolveLivewireEmoji($basePath);
+        $emoji = $useEmoji ? "\u{26A1}" : '';
+
         if ($isMfc) {
-            // MFC: directory with .php + .blade.php
-            $mfcDir = $basePath . '/resources/views/components/' . $kebabName;
+            // MFC: emoji on the directory name; files inside use the plain kebab name.
+            $mfcDir = $basePath . '/resources/views/components/' . $emoji . $kebabName;
             if (!is_dir($mfcDir)) {
                 mkdir($mfcDir, 0755, true);
             }
@@ -232,19 +270,19 @@ try {
             file_put_contents($mfcDir . '/' . $kebabName . '.blade.php', $bladeContent);
 
             echo "\n✓ MFC livewire component created successfully!\n";
-            echo "Location: resources/views/components/{$kebabName}/\n";
+            echo "Location: resources/views/components/{$emoji}{$kebabName}/\n";
         } else {
-            // SFC: single .blade.php file
+            // SFC: emoji on the file name.
             $componentsDir = $basePath . '/resources/views/components';
             if (!is_dir($componentsDir)) {
                 mkdir($componentsDir, 0755, true);
             }
 
             $sfcContent = $stubRenderer->render('livewire/component.sfc', ['class' => $name, 'moduleSlug' => $moduleSlug]);
-            file_put_contents($componentsDir . '/' . $kebabName . '.blade.php', $sfcContent);
+            file_put_contents($componentsDir . '/' . $emoji . $kebabName . '.blade.php', $sfcContent);
 
             echo "\n✓ SFC livewire component created successfully!\n";
-            echo "Location: resources/views/components/{$kebabName}.blade.php\n";
+            echo "Location: resources/views/components/{$emoji}{$kebabName}.blade.php\n";
         }
 
         exit(0);

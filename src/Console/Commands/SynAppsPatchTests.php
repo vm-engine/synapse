@@ -371,46 +371,25 @@ ENV;
 
         // Define required testsuites
         $requiredSuites = [
-            'Browser' => [
-                'tests/Browser',
-                'synapps/modules/*/tests/Browser',
-                'vendor/*/synmod-*/tests/Browser',
-                'vendor/*/synmodule-*/tests/Browser',
-                'vendor/*/synapps-*/tests/Browser',
-            ],
             'Modules' => [
                 'synapps/modules/*/tests',
-            ],
-            'ModulesExclude' => [
-                'synapps/modules/*/tests/Browser',
             ],
             'Packages' => [
                 'vendor/*/synmod-*/tests',
                 'vendor/*/synmodule-*/tests',
                 'vendor/*/synapps-*/tests',
             ],
-            'PackagesExclude' => [
-                'vendor/*/synmod-*/tests/Browser',
-                'vendor/*/synmodule-*/tests/Browser',
-                'vendor/*/synapps-*/tests/Browser',
-            ],
         ];
-
-        // Check and add Browser testsuite
-        if (! $this->testsuiteExists($xpath, 'Browser')) {
-            $this->addTestSuite($dom, $testsuites, 'Browser', $requiredSuites['Browser'], []);
-            $modified = true;
-        }
 
         // Check and add Modules testsuite
         if (! $this->testsuiteExists($xpath, 'Modules')) {
-            $this->addTestSuite($dom, $testsuites, 'Modules', $requiredSuites['Modules'], $requiredSuites['ModulesExclude']);
+            $this->addTestSuite($dom, $testsuites, 'Modules', $requiredSuites['Modules']);
             $modified = true;
         }
 
         // Check and add Packages testsuite
         if (! $this->testsuiteExists($xpath, 'Packages')) {
-            $this->addTestSuite($dom, $testsuites, 'Packages', $requiredSuites['Packages'], $requiredSuites['PackagesExclude']);
+            $this->addTestSuite($dom, $testsuites, 'Packages', $requiredSuites['Packages']);
             $modified = true;
         }
 

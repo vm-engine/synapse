@@ -40,6 +40,7 @@ use VmEngine\Synapse\Console\Commands\Generators\MakeViewCommand;
 use VmEngine\Synapse\Console\Commands\Generators\SynmodMakeCommand;
 use VmEngine\Synapse\Console\Commands\SynAppsConfig;
 use VmEngine\Synapse\Console\Commands\SynAppsCopyResources;
+use VmEngine\Synapse\Console\Commands\SynAppsCopyStubs;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
 use VmEngine\Synapse\Console\Commands\SynAppsMakeTheme;
@@ -95,6 +96,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsConfig::class,
                 SynAppsReconfig::class,
                 SynAppsPublishSettings::class,
+                SynAppsCopyStubs::class,
                 SynAppsMakeTheme::class,
                 SynapseDbConfig::class,
                 SynapseDbLang::class,

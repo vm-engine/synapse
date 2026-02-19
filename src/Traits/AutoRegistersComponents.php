@@ -109,8 +109,9 @@ trait AutoRegistersComponents
             if (file_exists($phpFile) && file_exists($bladeFile)) {
                 $componentName = $prefix.'.'.$dirName;
 
-                // Register the MFC component path with Livewire
-                Livewire::component($componentName, $phpFile);
+                // Register the MFC component directory with Livewire's view resolver
+                // Must use viewPath (not class) so Livewire resolves it as a multi-file component
+                Livewire::addComponent($componentName, viewPath: $item->getPathname());
             }
         }
     }
