@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-02-19
+
+### Added
+
+**RemembersQueryParams Livewire Trait:**
+- New `RemembersQueryParams` trait for Livewire components that persists declared properties (search, page, filters, etc.) to the session
+- Automatically restores list state when navigating back via breadcrumbs, browser back button, or direct links
+- URL query params always take precedence over session values, so bookmarked/shared URLs work correctly
+- Works alongside Livewire's `#[Url]` attribute
+- Methods: `rememberedParams()`, `rememberKey()`, `forgetRememberedParams()`, `getRememberedParamValues()`
+- 21 tests covering all methods, edge cases, and integration scenarios
+
 ## [2.0.1] - 2026-02-16
 
 ### Fixed
