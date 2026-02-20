@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-02-20
+
+### Fixed
+
+**withBack() JS Helper — Stale URL After Livewire Pagination:**
+- Fixed `withBack()` capturing a stale URL when used with Livewire pagination
+- Root cause: Livewire updates `window.location.href` AFTER DOM morph, so Alpine's `:href` bindings evaluated `withBack()` before the URL contained the `page` parameter
+- Added a `mousedown` event interceptor that re-computes the `back` query parameter with the current `window.location.href` at interaction time, before `wire:navigate` reads the href
+- Also fixed `?` separator bug — now correctly uses `&` when the base URL already has query parameters
+
+**Documentation Updates for v2.2.0:**
+- Updated `docs/TRAITS.md` — AutoRegistersComponents section rewritten for Livewire v4 namespace system, updated directory structure, registration patterns (namespace notation), method table (`registerLivewireNamespace`), and notes
+- Updated `CLAUDE.md` — AutoRegistersComponents features, example registrations, and methods updated for namespace notation
+- Updated stub `todo-index.blade.php` — component references changed from dot notation to namespace notation (`todos::todo-form`, `todos::todo-list`)
+
 ## [2.2.0] - 2026-02-20
 
 ### Breaking Changes
@@ -981,6 +996,7 @@ Previous releases (see git tags for history)
 
 Initial stable release
 
+[2.2.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v2.2.0...v2.2.1
 [2.2.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v2.1.1...v2.2.0
 [2.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v2.0.0...v2.0.1
 [2.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.7.3...v2.0.0

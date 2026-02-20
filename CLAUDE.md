@@ -665,19 +665,22 @@ class ExampleServiceProvider extends ServiceProvider
 ```
 
 **Features:**
-- Auto-discovers Livewire components from `src/Livewire/`
-- Auto-discovers Blade components from `src/View/Components/`
+- Uses Livewire v4's `addNamespace()` for automatic component discovery
+- Auto-discovers MFC/SFC components from `resources/views/components/` (including nested)
+- Auto-discovers class-based Livewire components from `src/Livewire/`
+- Auto-discovers class-based Blade components from `src/View/Components/`
 - Automatic prefix detection from namespace
 - Supports nested components with kebab-case naming
 
-**Example Registration:**
-- `src/Livewire/ExampleForm.php` → `example.example-form`
-- `src/Livewire/Components/ButtonSample.php` → `example.components.button-sample`
-- `src/View/Components/Alert.php` → `example::alert`
+**Example Registration (namespace notation):**
+- `src/Livewire/ExampleForm.php` → `<livewire:example::example-form />`
+- `resources/views/components/todo-form/todo-form.php` → `<livewire:example::todo-form />`
+- `resources/views/components/forms/contact-form/contact-form.php` → `<livewire:example::forms.contact-form />`
+- `src/View/Components/Alert.php` → `<x-example::alert />`
 
 **Methods:**
 - `registerComponents()` - Register all components (Livewire + Blade)
-- `registerLivewireComponents()` - Register only Livewire components
+- `registerLivewireNamespace()` - Register Livewire namespace (MFC/SFC + class-based)
 - `registerBladeComponents()` - Register only Blade components
 - `getComponentPrefix()` - Get the auto-detected prefix
 

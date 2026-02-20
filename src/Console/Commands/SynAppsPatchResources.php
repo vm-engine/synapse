@@ -780,7 +780,27 @@ SERVER;
         $snippet = <<<'JS'
 
 // Synapse global helpers
-window.withBack = (url) => url + '?back=' + encodeURIComponent(window.location.href);
+window.withBack = (url) => {
+    const separator = url.includes('?') ? '&' : '?';
+    return url + separator + 'back=' + encodeURIComponent(window.location.href);
+};
+
+// Re-compute the back URL at click time.
+// Livewire updates the browser URL AFTER DOM morph, so Alpine's :href
+// bindings capture a stale URL (e.g. missing ?page=11 after pagination).
+// This handler fires before wire:navigate reads the href, ensuring the
+// back parameter always reflects the current page state.
+document.addEventListener('mousedown', (e) => {
+    const link = e.target.closest('a[href*="back="]');
+    if (!link) return;
+    try {
+        const url = new URL(link.href);
+        if (url.searchParams.has('back')) {
+            url.searchParams.set('back', window.location.href);
+            link.href = url.toString();
+        }
+    } catch { /* ignore invalid URLs */ }
+});
 JS;
 
         $this->createBackup($jsPath);

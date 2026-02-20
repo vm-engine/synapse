@@ -6,9 +6,13 @@ Synapse provides useful traits to enhance your models and service providers with
 
 Auto-register Livewire and Blade components for Synapse modules without manual registration.
 
+Uses Livewire v4's namespace system (`addNamespace()`) for automatic component discovery, supporting nested directories natively.
+
 ### Features
 
-- **Auto-discovers Livewire components** from `src/Livewire/` directory
+- **Uses Livewire v4 namespace system** — single `addNamespace()` call handles all component types
+- **Auto-discovers MFC/SFC components** from `resources/views/components/` directory (including nested)
+- **Auto-discovers class-based Livewire components** from `src/Livewire/` directory
 - **Auto-discovers class-based Blade components** from `src/View/Components/` directory
 - **Automatic prefix detection** from module namespace
 - **Supports nested components** with kebab-case naming
@@ -21,19 +25,30 @@ The trait expects your module to follow this structure:
 
 ```
 YourModule/
-├── YourModuleServiceProvider.php
-├── Livewire/
-│   ├── Dashboard.php
-│   ├── UserProfile.php
-│   ├── Components/
-│   │   └── ButtonSample.php
-│   └── Forms/
-│       └── ContactForm.php
-└── View/
-    └── Components/             # Optional - for class-based Blade components
-        ├── Alert.php
-        └── Forms/
-            └── Input.php
+├── src/
+│   ├── YourModuleServiceProvider.php
+│   ├── Livewire/                       # Class-based Livewire components
+│   │   ├── Dashboard.php
+│   │   ├── UserProfile.php
+│   │   └── Forms/
+│   │       └── ContactForm.php
+│   └── View/
+│       └── Components/                 # Class-based Blade components
+│           ├── Alert.php
+│           └── Forms/
+│               └── Input.php
+└── resources/
+    └── views/
+        ├── components/                 # MFC/SFC Livewire components
+        │   ├── todo-form/              # MFC component
+        │   │   ├── todo-form.php
+        │   │   └── todo-form.blade.php
+        │   └── forms/                  # Nested MFC components
+        │       └── contact-form/
+        │           ├── contact-form.php
+        │           └── contact-form.blade.php
+        └── livewire/                   # Views for class-based components
+            └── dashboard.blade.php
 ```
 
 ### Usage
@@ -64,21 +79,29 @@ That's it! All components are now auto-registered with the correct prefix.
 
 ### Component Registration Patterns
 
-**Livewire Components:**
+All Livewire components (both class-based and MFC/SFC) use **namespace notation** (`prefix::name`):
 
-| File Path | Registered As | Usage |
-|-----------|---------------|-------|
-| `src/Livewire/Dashboard.php` | `example.dashboard` | `<livewire:example.dashboard />` |
-| `src/Livewire/UserProfile.php` | `example.user-profile` | `<livewire:example.user-profile />` |
-| `src/Livewire/Components/ButtonSample.php` | `example.components.button-sample` | `<livewire:example.components.button-sample />` |
-| `src/Livewire/Forms/ContactForm.php` | `example.forms.contact-form` | `<livewire:example.forms.contact-form />` |
+**Class-based Livewire Components (from `src/Livewire/`):**
 
-**Blade Components:**
+| File Path | Usage |
+|-----------|-------|
+| `src/Livewire/Dashboard.php` | `<livewire:example::dashboard />` |
+| `src/Livewire/UserProfile.php` | `<livewire:example::user-profile />` |
+| `src/Livewire/Forms/ContactForm.php` | `<livewire:example::forms.contact-form />` |
 
-| File Path | Registered As | Usage |
-|-----------|---------------|-------|
-| `src/View/Components/Alert.php` | `example::alert` | `<x-example::alert />` |
-| `src/View/Components/Forms/Input.php` | `example::forms.input` | `<x-example::forms.input />` |
+**MFC Livewire Components (from `resources/views/components/`):**
+
+| File Path | Usage |
+|-----------|-------|
+| `resources/views/components/todo-form/todo-form.php` | `<livewire:example::todo-form />` |
+| `resources/views/components/forms/contact-form/contact-form.php` | `<livewire:example::forms.contact-form />` |
+
+**Blade Components (from `src/View/Components/`):**
+
+| File Path | Usage |
+|-----------|-------|
+| `src/View/Components/Alert.php` | `<x-example::alert />` |
+| `src/View/Components/Forms/Input.php` | `<x-example::forms.input />` |
 
 ### Automatic Prefix Detection
 
@@ -152,8 +175,8 @@ class ExampleServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        // Register only Livewire components
-        $this->registerLivewireComponents();
+        // Register only Livewire namespace (MFC/SFC + class-based)
+        $this->registerLivewireNamespace();
 
         // Custom logic here...
     }
@@ -212,7 +235,7 @@ class ExampleServiceProvider extends ServiceProvider
 | Method | Description |
 |--------|-------------|
 | `registerComponents()` | Register all components (Livewire + Blade) |
-| `registerLivewireComponents()` | Register only Livewire components |
+| `registerLivewireNamespace()` | Register Livewire namespace (MFC/SFC + class-based) |
 | `registerBladeComponents()` | Register only class-based Blade components |
 | `getComponentPrefix()` | Get the detected/custom prefix |
 
@@ -226,11 +249,13 @@ class ExampleServiceProvider extends ServiceProvider
 
 ### Notes
 
-- **Anonymous Blade components** in `resources/views/components/` are auto-discovered by Laravel and don't need registration
-- **Livewire views** in `resources/views/livewire/` follow standard Livewire conventions
-- The trait uses `RecursiveDirectoryIterator` to scan nested directories
+- The trait uses Livewire v4's `addNamespace()` which handles nested directory discovery natively
+- **MFC/SFC components** in `resources/views/components/` are discovered via the Livewire namespace's `viewPath`
+- **Class-based components** in `src/Livewire/` are discovered via the Livewire namespace's `classNamespace` and `classPath`
+- **Class component views** in `resources/views/livewire/` are discovered via the Livewire namespace's `classViewPath`
 - Component names are converted to kebab-case automatically
-- The trait safely handles missing directories (no errors if `src/Livewire/` or `src/View/Components/` don't exist)
+- The trait safely handles missing directories (passes `null` for non-existent paths)
+- All Livewire components use namespace notation: `<livewire:prefix::component-name />`
 
 ### When to Use
 
