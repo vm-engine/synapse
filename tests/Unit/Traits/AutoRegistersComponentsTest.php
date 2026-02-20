@@ -76,6 +76,9 @@ PHP;
 });
 
 test('registers components safely when directories do not exist', function () {
+    // Livewire::addNamespace will be called but with null paths for missing directories
+    \Livewire\Livewire::shouldReceive('addNamespace')->once();
+
     $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
     {
         use AutoRegistersComponents;
@@ -99,7 +102,7 @@ test('trait has required methods', function () {
     $reflection = new ReflectionClass($provider);
 
     expect($reflection->hasMethod('registerComponents'))->toBeTrue()
-        ->and($reflection->hasMethod('registerLivewireComponents'))->toBeTrue()
+        ->and($reflection->hasMethod('registerLivewireNamespace'))->toBeTrue()
         ->and($reflection->hasMethod('registerBladeComponents'))->toBeTrue()
         ->and($reflection->hasMethod('getComponentPrefix'))->toBeTrue();
 });
@@ -217,4 +220,75 @@ test('converts nested component paths correctly to kebab-case', function () {
 
         expect($result)->toBe($expected);
     }
+});
+
+test('registerLivewireNamespace calls Livewire::addNamespace with correct params', function () {
+    // Mock Livewire facade to capture the addNamespace call
+    $calledWith = null;
+
+    \Livewire\Livewire::shouldReceive('addNamespace')
+        ->once()
+        ->withArgs(function () use (&$calledWith) {
+            $calledWith = func_get_args();
+
+            return true;
+        });
+
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+
+        public function doRegister(): void
+        {
+            $this->registerLivewireNamespace();
+        }
+    };
+
+    $provider->doRegister();
+
+    // First argument should be the kebab-case prefix derived from the anonymous class context
+    expect($calledWith)->not->toBeNull()
+        ->and($calledWith[0])->toBeString();
+});
+
+test('registerComponents calls registerLivewireNamespace when livewire flag is enabled', function () {
+    $namespaceCalled = false;
+    $bladeCalled = false;
+
+    \Livewire\Livewire::shouldReceive('addNamespace')
+        ->once()
+        ->andReturnUsing(function () use (&$namespaceCalled) {
+            $namespaceCalled = true;
+        });
+
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+
+        public function doRegister(): void
+        {
+            $this->registerComponents();
+        }
+    };
+
+    $provider->doRegister();
+
+    expect($namespaceCalled)->toBeTrue();
+});
+
+test('registerComponents skips livewire when flag is disabled', function () {
+    \Livewire\Livewire::shouldReceive('addNamespace')->never();
+
+    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    {
+        use AutoRegistersComponents;
+
+        public function doRegister(): void
+        {
+            $this->autoRegisterLivewireComponents = false;
+            $this->registerComponents();
+        }
+    };
+
+    $provider->doRegister();
 });

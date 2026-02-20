@@ -257,20 +257,39 @@ try {
         $emoji = $useEmoji ? "\u{26A1}" : '';
 
         if ($isMfc) {
-            // MFC: emoji on the directory name; files inside use the plain kebab name.
-            $mfcDir = $basePath . '/resources/views/components/' . $emoji . $kebabName;
+            // Split name by / or \ to support nested paths (e.g., Forms/ContactForm)
+            $segments = preg_split('/[\/\\\\]/', $name);
+            $segments = array_map(function ($seg) {
+                return strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $seg));
+            }, $segments);
+
+            // Last segment is the component name (gets emoji prefix on directory)
+            $leafName = array_pop($segments);
+
+            // Build the MFC directory path with optional subdirectories
+            $mfcDir = $basePath . '/resources/views/components';
+
+            if (count($segments) > 0) {
+                $mfcDir .= '/' . implode('/', $segments);
+            }
+
+            // MFC directory: resources/views/components/[subdir/][⚡]{component-name}/
+            $mfcDir .= '/' . $emoji . $leafName;
+
             if (!is_dir($mfcDir)) {
                 mkdir($mfcDir, 0755, true);
             }
 
-            $phpContent = $stubRenderer->render('livewire/component.mfc', ['class' => $name, 'moduleSlug' => $moduleSlug]);
-            $bladeContent = $stubRenderer->render('livewire/component.mfc.blade', ['class' => $name, 'moduleSlug' => $moduleSlug]);
+            $studlyLeaf = str_replace('-', '', ucwords($leafName, '-'));
+            $phpContent = $stubRenderer->render('livewire/component.mfc', ['class' => $studlyLeaf, 'moduleSlug' => $moduleSlug]);
+            $bladeContent = $stubRenderer->render('livewire/component.mfc.blade', ['class' => $studlyLeaf, 'moduleSlug' => $moduleSlug]);
 
-            file_put_contents($mfcDir . '/' . $kebabName . '.php', $phpContent);
-            file_put_contents($mfcDir . '/' . $kebabName . '.blade.php', $bladeContent);
+            file_put_contents($mfcDir . '/' . $leafName . '.php', $phpContent);
+            file_put_contents($mfcDir . '/' . $leafName . '.blade.php', $bladeContent);
 
+            $relativePath = (count($segments) > 0 ? implode('/', $segments) . '/' : '') . $emoji . $leafName;
             echo "\n✓ MFC livewire component created successfully!\n";
-            echo "Location: resources/views/components/{$emoji}{$kebabName}/\n";
+            echo "Location: resources/views/components/{$relativePath}/\n";
         } else {
             // SFC: emoji on the file name.
             $componentsDir = $basePath . '/resources/views/components';

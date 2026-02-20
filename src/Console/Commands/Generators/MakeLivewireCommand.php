@@ -58,12 +58,24 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         $this->setupGenerator($module);
 
         $modulePath = $this->resolveModulePath($module);
-        $kebabName = Str::kebab($name);
         $dirPrefix = $this->shouldUseEmoji() ? "\u{26A1}" : '';
 
-        // MFC directory: resources/views/components/[⚡]{component-name}/
-        // Emoji applies to the folder; files inside use the plain name.
-        $mfcDir = $modulePath.'/resources/views/components/'.$dirPrefix.$kebabName;
+        // Split name by / or \ to support nested paths (e.g., Forms/ContactForm)
+        $segments = preg_split('/[\/\\\\]/', $name);
+        $segments = array_map(fn (string $segment): string => Str::kebab($segment), $segments);
+
+        // Last segment is the component name (gets emoji prefix on directory)
+        $leafName = array_pop($segments);
+
+        // Build the MFC directory path with optional subdirectories
+        $mfcDir = $modulePath.'/resources/views/components';
+
+        if (count($segments) > 0) {
+            $mfcDir .= '/'.implode('/', $segments);
+        }
+
+        // MFC directory: resources/views/components/[subdir/][⚡]{component-name}/
+        $mfcDir .= '/'.$dirPrefix.$leafName;
 
         if (! is_dir($mfcDir)) {
             mkdir($mfcDir, 0755, true);
@@ -72,15 +84,15 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         // Generate PHP file from MFC stub
         $stubRenderer = $this->generator->stubRenderer;
         $variables = [
-            'class' => Str::studly($name),
+            'class' => Str::studly(str_replace('-', '_', $leafName)),
             'moduleSlug' => Str::slug($module),
         ];
 
         $phpContent = $stubRenderer->render('livewire/component.mfc', $variables);
         $bladeContent = $stubRenderer->render('livewire/component.mfc.blade', $variables);
 
-        file_put_contents($mfcDir.'/'.$kebabName.'.php', $phpContent);
-        file_put_contents($mfcDir.'/'.$kebabName.'.blade.php', $bladeContent);
+        file_put_contents($mfcDir.'/'.$leafName.'.php', $phpContent);
+        file_put_contents($mfcDir.'/'.$leafName.'.blade.php', $bladeContent);
 
         $this->components->info('MFC Livewire component created successfully.');
         $this->components->info("Location: {$mfcDir}/");

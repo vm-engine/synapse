@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-02-20
+
+### Breaking Changes
+
+**Livewire Component Namespace Notation:**
+- Component tags change from dot notation (`example.todo-form`) to namespace notation (`example::todo-form`)
+- This follows Livewire v4's standard `addNamespace()` system for package components
+- All consuming modules using `AutoRegistersComponents` trait must update their Livewire component references
+
+### Changed
+
+**AutoRegistersComponents Trait — Livewire v4 Namespace System:**
+- Replaced `registerMfcComponents()` (flat `DirectoryIterator` scan) and `registerLivewireComponents()` (recursive manual scan) with a single `registerLivewireNamespace()` method
+- Now uses Livewire v4's native `Livewire::addNamespace()` for automatic component discovery
+- Handles both class-based (`src/Livewire/`) and MFC/SFC (`resources/views/components/`) components in one call
+- Nested MFC directories (e.g., `resources/views/components/forms/contact-form/`) are now discovered automatically — previously only flat directories were scanned
+- Livewire handles emoji stripping, nested resolution, and class-based matching natively
+
+**MFC Generation — Nested Path Support:**
+- `synapps:make-livewire` command's `--mfc` flag now supports nested paths (e.g., `Forms/ContactForm`)
+- Splits name by `/` or `\` into segments; last segment gets emoji prefix on directory, preceding segments become subdirectories
+- Example: `php artisan synapps:make-livewire example Forms/ContactForm --mfc` → `resources/views/components/forms/⚡contact-form/`
+- `bin/synmod-make` standalone binary updated with same nested MFC generation logic
+
+### Migration Guide
+
+1. Update component references from dot notation to namespace notation:
+   - `<livewire:example.example-form />` → `<livewire:example::example-form />`
+   - `<livewire:example.todo-form />` → `<livewire:example::todo-form />`
+   - `<livewire:example.forms.contact-form />` → `<livewire:example::forms.contact-form />`
+2. If using `registerMfcComponents()` or `registerLivewireComponents()` directly, replace with `registerLivewireNamespace()`
+3. Run `composer update` and test all Livewire component references
+
 ## [2.1.1] - 2026-02-19
 
 ### Added
@@ -948,6 +981,7 @@ Previous releases (see git tags for history)
 
 Initial stable release
 
+[2.2.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v2.1.1...v2.2.0
 [2.0.1]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v2.0.0...v2.0.1
 [2.0.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.7.3...v2.0.0
 [1.1.0]: https://repo.4visionmedia.com:4000/vm-engine/synapse/compare/v1.0.6...v1.1.0

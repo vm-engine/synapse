@@ -13,9 +13,12 @@ use ReflectionClass;
  * Auto-register Livewire and Blade components for Synapse modules
  *
  * This trait automatically discovers and registers:
- * - Livewire MFC components from resources/views/components/ directory (Livewire v4)
- * - Livewire class-based components from src/Livewire/ directory (legacy)
+ * - Livewire MFC/SFC components from resources/views/components/ directory (Livewire v4)
+ * - Livewire class-based components from src/Livewire/ directory
  * - Class-based Blade components from src/View/Components/ directory
+ *
+ * Uses Livewire v4's namespace system (addNamespace) for automatic component discovery,
+ * supporting nested directories natively.
  *
  * Usage in module ServiceProvider:
  * ```php
@@ -31,6 +34,11 @@ use ReflectionClass;
  *     }
  * }
  * ```
+ *
+ * Components are registered with namespace notation:
+ * - <livewire:example::example-form /> (class-based from src/Livewire/)
+ * - <livewire:example::todo-form /> (MFC from resources/views/components/)
+ * - <livewire:example::forms.contact-form /> (nested MFC)
  */
 trait AutoRegistersComponents
 {
@@ -63,8 +71,7 @@ trait AutoRegistersComponents
     protected function registerComponents(): void
     {
         if ($this->autoRegisterLivewireComponents) {
-            $this->registerMfcComponents();
-            $this->registerLivewireComponents();
+            $this->registerLivewireNamespace();
         }
 
         if ($this->autoRegisterBladeComponents) {
@@ -73,97 +80,39 @@ trait AutoRegistersComponents
     }
 
     /**
-     * Auto-register Livewire v4 MFC components from resources/views/components/ directory
+     * Register a Livewire namespace for automatic component discovery
      *
-     * Scans for directories containing a .php file (anonymous class) alongside a .blade.php file:
-     * - resources/views/components/todo-form/todo-form.php → 'todos.todo-form'
-     * - resources/views/components/config-list/config-list.php → 'todos.config-list'
-     */
-    protected function registerMfcComponents(): void
-    {
-        $reflection = new ReflectionClass($this);
-        $basePath = dirname($reflection->getFileName());
-
-        // MFC components live in resources/views/components/ relative to the module's src/ dir
-        $componentsPath = dirname($basePath).'/resources/views/components';
-
-        if (! is_dir($componentsPath)) {
-            return;
-        }
-
-        $prefix = $this->getComponentPrefix();
-
-        // Scan for MFC directories (directories containing a .php + .blade.php pair)
-        $iterator = new \DirectoryIterator($componentsPath);
-
-        foreach ($iterator as $item) {
-            if (! $item->isDir() || $item->isDot()) {
-                continue;
-            }
-
-            $dirName = $item->getFilename();
-            $phpFile = $item->getPathname().'/'.$dirName.'.php';
-            $bladeFile = $item->getPathname().'/'.$dirName.'.blade.php';
-
-            // MFC component: directory with both .php and .blade.php files
-            if (file_exists($phpFile) && file_exists($bladeFile)) {
-                $componentName = $prefix.'.'.$dirName;
-
-                // Register the MFC component directory with Livewire's view resolver
-                // Must use viewPath (not class) so Livewire resolves it as a multi-file component
-                Livewire::addComponent($componentName, viewPath: $item->getPathname());
-            }
-        }
-    }
-
-    /**
-     * Auto-register all Livewire components from src/Livewire/ directory
+     * Uses Livewire v4's addNamespace() to register both class-based and MFC/SFC
+     * components in a single call. Livewire handles nested directory discovery natively.
      *
-     * Scans recursively and registers components with module prefix:
-     * - src/Livewire/ExampleForm.php → 'example.example-form'
-     * - src/Livewire/Components/ButtonSample.php → 'example.components.button-sample'
+     * Registered paths:
+     * - viewPath: resources/views/components/ (MFC/SFC components)
+     * - classNamespace: {ModuleNamespace}\Livewire (class-based components)
+     * - classPath: src/Livewire/ (class file location)
+     * - classViewPath: resources/views/livewire/ (class component views)
+     *
+     * Result: <livewire:prefix::component-name />
      */
-    protected function registerLivewireComponents(): void
+    protected function registerLivewireNamespace(): void
     {
         $reflection = new ReflectionClass($this);
         $namespace = $reflection->getNamespaceName();
         $basePath = dirname($reflection->getFileName());
-
-        $livewirePath = $basePath.'/Livewire';
-
-        if (! is_dir($livewirePath)) {
-            return;
-        }
+        $moduleRoot = dirname($basePath);
 
         $prefix = $this->getComponentPrefix();
         $livewireNamespace = $namespace.'\\Livewire';
+        $livewirePath = $basePath.'/Livewire';
+        $componentsPath = $moduleRoot.'/resources/views/components';
+        $classViewPath = $moduleRoot.'/resources/views/livewire';
 
-        // Recursively scan for Livewire component classes
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($livewirePath, \RecursiveDirectoryIterator::SKIP_DOTS)
+        Livewire::addNamespace(
+            $prefix,
+            is_dir($componentsPath) ? $componentsPath : null,
+            $livewireNamespace,
+            is_dir($livewirePath) ? $livewirePath : null,
+            is_dir($classViewPath) ? $classViewPath : null,
         );
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                // Get relative path from Livewire directory
-                $relativePath = str_replace($livewirePath.DIRECTORY_SEPARATOR, '', $file->getPathname());
-                $relativePath = str_replace('.php', '', $relativePath);
-                $relativePath = str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
-
-                $componentClass = $livewireNamespace.'\\'.$relativePath;
-
-                if (class_exists($componentClass)) {
-                    // Convert to kebab-case with dots for nested: components.button-sample
-                    // Split by namespace separator, convert each segment to kebab-case, then join with dots
-                    $segments = explode('\\', $relativePath);
-                    $segments = array_map(fn ($segment) => Str::kebab($segment), $segments);
-                    $componentName = implode('.', $segments);
-
-                    // Register with prefix: example.components.button-sample
-                    Livewire::component($prefix.'.'.$componentName, $componentClass);
-                }
-            }
-        }
     }
 
     /**
