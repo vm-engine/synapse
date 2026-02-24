@@ -12,6 +12,7 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
+| `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
 | `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
@@ -126,6 +127,22 @@ php artisan synapps:patch-resources
 - Configures Vite to copy static assets from modules
 - Comments out default Laravel welcome route in `routes/web.php`
 - Comments out default user seeder in `database/seeders/DatabaseSeeder.php`
+- Adds global `window.withBack()` JavaScript helper to `resources/js/app.js`
+
+### Backup files
+
+Before modifying any file, the command creates a `.bak` backup (e.g. `app.js.bak`). The backup is only created once — subsequent runs will not overwrite it.
+
+### Patched file reporting
+
+Each successfully patched file is reported individually:
+
+```
+Patched: app.js — synapps import
+Patched: app.css — synapps import
+Patched: vite.config.js
+Patched: app.js — global helpers
+```
 
 ### Safe to run multiple times
 
@@ -179,6 +196,10 @@ php artisan test --testsuite=Modules    # Module tests only
 php artisan test --testsuite=Packages   # Package tests only
 ```
 
+### Backup files
+
+Before modifying `tests/Pest.php` and `.env.testing`, the command creates `.bak` backups. The backup is only created once — subsequent runs will not overwrite it.
+
 ### When to run
 
 - After fresh installation
@@ -206,6 +227,61 @@ php artisan synapps:link-errors
 - After fresh installation
 - After customizing error pages
 - **Automatically called by `synapps:setup`**
+
+---
+
+## synapps:copy-stubs
+
+Copies one or more stub modules from the Synapse package into `synapps/modules/` to give you a working starting point.
+
+```bash
+php artisan synapps:copy-stubs
+```
+
+### Arguments
+
+- `module*` - Optional list of module names to copy (e.g. `home todos`). When omitted, an interactive multi-select prompt lets you pick from the available stubs.
+
+### Options
+
+- `--force` - Overwrite existing module directories (default: skipped with a warning)
+
+### Available stubs
+
+```bash
+# See what's available
+php artisan synapps:copy-stubs
+# → Interactive prompt lists all available stubs
+```
+
+Stubs are shipped inside the Synapse package at `vendor/vm-engine/synapse/stubs/synapps/modules/`.
+
+### Examples
+
+```bash
+# Interactive selection
+php artisan synapps:copy-stubs
+
+# Copy specific modules
+php artisan synapps:copy-stubs home todos
+
+# Overwrite existing
+php artisan synapps:copy-stubs todos --force
+```
+
+### After copying
+
+Run `php artisan synapps:discover` to register the new modules and update autoloading:
+
+```bash
+php artisan synapps:discover
+```
+
+### When to run
+
+- When you want a working reference module to learn from or customise
+- When scaffolding a new project and you want the `todos` demo module
+- When you need to reset a stub module back to its original state (`--force`)
 
 ---
 

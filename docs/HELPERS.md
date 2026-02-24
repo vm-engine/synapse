@@ -58,6 +58,70 @@ See [Database Services](SERVICES.md#dblang-service) for more details.
 
 ---
 
+## JavaScript Helpers
+
+### withBack()
+
+Appends the current page URL as a `back` query parameter to a given URL, enabling form pages to redirect back to the correct list page after saving.
+
+Injected into `resources/js/app.js` by `synapps:patch-resources`. Available globally as `window.withBack()`.
+
+```js
+// Basic usage
+withBack('/posts/create')
+// → '/posts/create?back=<encoded-current-url>'
+
+// Works when the URL already has query params
+withBack('/posts/create?draft=1')
+// → '/posts/create?draft=1&back=<encoded-current-url>'
+```
+
+**Parameters:**
+- `url` (string) - Destination URL
+
+**Returns:** string - URL with `back=<current-url>` appended
+
+**Usage in Blade with Alpine.js / wire:navigate:**
+
+```blade
+{{-- Simple link --}}
+<a :href="withBack('{{ route('posts.create') }}')" wire:navigate>
+    Create Post
+</a>
+
+{{-- In a loop --}}
+@foreach($posts as $post)
+    <a :href="withBack('{{ route('posts.edit', $post) }}')" wire:navigate>
+        Edit
+    </a>
+@endforeach
+```
+
+**How back-URL is consumed:**
+
+Use the [`WithReturnUrl`](TRAITS.md#withreturnurl) trait in your Livewire form component. It automatically binds `$backUrl` from the `?back=` parameter and provides a safe `redirectBack()` method.
+
+```php
+use VmEngine\Synapse\Traits\WithReturnUrl;
+
+class PostForm extends Component
+{
+    use WithReturnUrl;
+
+    public function save(): void
+    {
+        // ...
+        $this->redirectBack('posts.index'); // redirects to back URL or falls back to posts.index
+    }
+}
+```
+
+**Notes:**
+- The `back` parameter is re-evaluated at mousedown time (not at render time) so Livewire pagination changes are correctly reflected in the URL
+- Invalid or external URLs are rejected by `WithReturnUrl::isSafeReturnUrl()` as an open-redirect protection
+
+---
+
 ## Theme Helpers
 
 ### theme_asset()

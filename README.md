@@ -11,7 +11,7 @@ A sophisticated modular architecture system for Laravel applications that enable
 - **Database Services**: DbConfig and DbLang for runtime configuration and multi-language support
 - **Excel Import/Export**: Memory-efficient streaming import/export with background processing, progress tracking, and resume support
 - **Blade Components**: Pre-built UI components for forms and common patterns
-- **Security Traits**: WithDeleteToken for secure delete operations
+- **Livewire Traits**: WithDeleteToken, WithReturnUrl, and RemembersQueryParams for common Livewire patterns
 - **Route Management**: Automatic route registration with module-specific prefixes
 - **Service Container Integration**: Module-based bindings and service providers
 
@@ -79,7 +79,7 @@ DbConfig::set('app.site_name', 'My Site');
 - **[Creating Modules](docs/MODULES.md)** - Guide to building your own modules
 - **[Module Generator](docs/MODULE-GENERATOR.md)** - Laravel-style make commands for generating module components
 - **[Configuration](docs/CONFIGURATION.md)** - Advanced config features, env:: prefix, and overrides
-- **[Traits](docs/TRAITS.md)** - WithDeleteToken and other useful traits
+- **[Traits](docs/TRAITS.md)** - WithDeleteToken, WithReturnUrl, RemembersQueryParams, and AutoRegistersComponents
 - **[Testing Guide](TESTING.md)** - Comprehensive testing documentation
 - **[IDE Helper](IDE_HELPER.md)** - Generate PHPDoc for better IDE support
 
@@ -126,6 +126,9 @@ php artisan synapse:db-lang welcome.title "Welcome!" --language=en
 
 # Create and manage themes
 php artisan synapps:make-theme my-theme --copy-from=default
+
+# Copy stub modules (home, todos) to try out
+php artisan synapps:copy-stubs
 
 # Publish settings module
 php artisan synapps:publish-settings

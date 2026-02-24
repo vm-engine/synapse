@@ -3,6 +3,9 @@
 # Import personal global standards
 @~/.claude/CLAUDE.md
 
+# Import project standards
+@../../CLAUDE.md
+
 ---
 
 Package guidance for **vm-engine/synapse** - Laravel modular architecture system.
@@ -18,7 +21,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 - Package-based modules (`synmod-*`, `synmodule-*`, `synapps-*` in vendor)
 - Configuration generators with Builder pattern and `env::` prefix support
 - Database services (DbConfig, DbLang) for runtime configuration and translations
-- Security traits (WithDeleteToken) for secure operations
+- Livewire traits (WithDeleteToken, WithReturnUrl, RemembersQueryParams) for common patterns
 - Configuration override system for Laravel config files
 - Livewire components and helpers
 - Automatic route/provider registration
@@ -33,6 +36,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
+| `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
 | `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
@@ -294,6 +298,7 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 - Binds aliases/classes/interfaces (`dbconf`, `dblang`, `synav`)
 - Loads migrations, seeders, languages
 - **Applies config overrides** from `synapps/config/override/`
+- **Registers SynapseFinder** — overrides Livewire's `livewire.finder` singleton to fix an MFC discovery bug where directories whose names contain "index" as a substring (e.g. `todo-index`) were incorrectly resolved (see `src/Finder/SynapseFinder.php`)
 
 **2. SynapseLangServiceProvider**: Language files
 
@@ -727,6 +732,66 @@ if ($id === false || $id != $post->id) {
 - Prevents CSRF-like attacks on delete operations
 
 See [docs/TRAITS.md#withdeletetoken](docs/TRAITS.md#withdeletetoken) for complete documentation.
+
+---
+
+### WithReturnUrl
+
+Safe return-URL trait for Livewire form components. Binds `?back=` query parameter and provides a validated redirect method.
+
+```php
+use VmEngine\Synapse\Traits\WithReturnUrl;
+
+class PostForm extends Component
+{
+    use WithReturnUrl;
+    // $backUrl auto-bound from ?back= via #[Url]
+
+    public function save(): void
+    {
+        // redirects to $backUrl if same-origin, else falls back to route
+        $this->redirectBack('posts.index');
+    }
+}
+```
+
+**Methods:**
+- `redirectBack(string $defaultRoute, array $parameters = [])` - Redirect to back URL or named route
+
+**JavaScript helper:** `withBack(url)` — global JS function (injected by `synapps:patch-resources`) that appends `?back=<current-url>` to a URL for use in Blade links.
+
+See [docs/TRAITS.md#withreturnurl](docs/TRAITS.md#withreturnurl) for complete documentation.
+
+---
+
+### RemembersQueryParams
+
+Persists Livewire component properties (search, filters, pagination) to session so list pages restore state on back-navigation. URL query params always take precedence over session.
+
+```php
+use VmEngine\Synapse\Traits\RemembersQueryParams;
+
+class PostList extends Component
+{
+    use RemembersQueryParams;
+
+    public string $search = '';
+    public string $status = 'all';
+
+    protected function rememberedParams(): array
+    {
+        return ['search', 'status'];
+    }
+}
+```
+
+**Methods:**
+- `rememberedParams()` - Declare which properties to persist (override in component)
+- `rememberKey()` - Override session key (default: `synapse:query_params:{ClassName}`)
+- `forgetRememberedParams()` - Clear session storage (call from "reset filters")
+- `getRememberedParamValues()` - Read stored values without modifying properties
+
+See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) for complete documentation.
 
 ---
 

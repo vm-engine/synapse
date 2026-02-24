@@ -584,3 +584,197 @@ class ArticleManager extends Component
 **Cause:** The session salt changes when generating new tokens in different tabs
 
 **Solution:** This is expected behavior for security. Users should complete delete operations in the same tab where they initiated them.
+
+---
+
+## RemembersQueryParams
+
+Persists declared Livewire properties (filters, search terms, pagination) to the session so list pages automatically restore state when the user navigates back via breadcrumbs or browser history.
+
+URL query parameters always take precedence over session values, so bookmarked or shared URLs work as expected.
+
+### Usage
+
+```php
+<?php
+
+namespace SynApps\Modules\Blog\Livewire;
+
+use Livewire\Component;
+use VmEngine\Synapse\Traits\RemembersQueryParams;
+
+class PostList extends Component
+{
+    use RemembersQueryParams;
+
+    public string $search = '';
+    public string $status = 'all';
+    public int $perPage = 20;
+
+    protected function rememberedParams(): array
+    {
+        return ['search', 'status', 'perPage'];
+    }
+
+    // ...
+}
+```
+
+That's it. When the user leaves the page and returns, `$search`, `$status`, and `$perPage` are automatically restored from the session (unless URL query params override them).
+
+### How It Works
+
+1. **On mount** (`mountRemembersQueryParams`) — restores session values for any `rememberedParams()` property that is **not** present in the current URL query string
+2. **On every response** (`dehydrateRemembersQueryParams`) — saves current property values back to the session
+3. **URL wins** — if a property appears in the URL query string it is never overridden by the session
+
+### Livewire Integration
+
+The trait uses Livewire's lifecycle hook naming conventions:
+
+| Hook | Method | Trigger |
+|------|--------|---------|
+| `mount` | `mountRemembersQueryParams()` | Restore session values on component mount |
+| `dehydrate` | `dehydrateRemembersQueryParams()` | Persist values to session after each request |
+
+No additional wiring is required — Livewire calls these automatically.
+
+### Customization
+
+**Override which params are remembered:**
+
+```php
+protected function rememberedParams(): array
+{
+    return ['search', 'sortBy', 'sortDir'];
+}
+```
+
+**Override the session key** (useful when multiple components use the same class name):
+
+```php
+protected function rememberKey(): string
+{
+    return 'blog:posts:list';
+}
+```
+
+### Available Methods
+
+| Method | Description |
+|--------|-------------|
+| `rememberedParams()` | Returns list of property names to persist (override in component) |
+| `rememberKey()` | Returns session key (defaults to `synapse:query_params:{ClassName}`) |
+| `forgetRememberedParams()` | Clears session storage — call from a "reset filters" action |
+| `getRememberedParamValues()` | Returns stored values without modifying properties |
+
+### Example: Reset Filters
+
+```php
+public function resetFilters(): void
+{
+    $this->search = '';
+    $this->status = 'all';
+    $this->forgetRememberedParams();
+}
+```
+
+### Notes
+
+- The trait is safe to use on any Livewire component
+- Only properties declared in `rememberedParams()` are persisted — other properties are unaffected
+- Uses Livewire's Referer header detection for AJAX requests so the URL check works correctly during Livewire requests
+
+---
+
+## WithReturnUrl
+
+Provides a safe return-URL mechanism for Livewire form components, letting list pages pass a `?back=` parameter to forms so the form can redirect back to the correct page after saving.
+
+Prevents open-redirect attacks by validating that the return URL belongs to the same application.
+
+### Usage
+
+#### 1. Add trait to form component
+
+```php
+<?php
+
+namespace SynApps\Modules\Blog\Livewire;
+
+use Livewire\Component;
+use VmEngine\Synapse\Traits\WithReturnUrl;
+
+class PostForm extends Component
+{
+    use WithReturnUrl;
+
+    // $backUrl is automatically bound from ?back= query parameter
+    // public string $backUrl = '';  ← declared by the trait
+
+    public function save(): void
+    {
+        // ... save logic ...
+
+        // Redirects to $backUrl if safe, or falls back to the named route
+        $this->redirectBack('blog.posts.index');
+    }
+}
+```
+
+#### 2. Generate back-URL links from list pages
+
+Use the global `withBack()` JavaScript helper (injected by `synapps:patch-resources`) to append the current URL as the `back` parameter:
+
+```blade
+<!-- Blade view (list page) -->
+<a :href="withBack('{{ route('blog.posts.create') }}')"
+   wire:navigate>
+    Create Post
+</a>
+
+<!-- Or for edit links in a loop -->
+@foreach($posts as $post)
+    <a :href="withBack('{{ route('blog.posts.edit', $post) }}')"
+       wire:navigate>
+        Edit
+    </a>
+@endforeach
+```
+
+The `withBack()` helper appends `?back=<current-url>` (or `&back=` if the URL already has query params).
+
+### How It Works
+
+1. `$backUrl` is a public Livewire property decorated with `#[Url(as: 'back')]`, so Livewire automatically binds it from the `?back=` query parameter
+2. `redirectBack()` validates that the URL starts with the application's base URL to prevent open-redirect attacks
+3. If validation fails or `$backUrl` is empty, `redirectBack()` falls back to the provided named route
+
+### Available Methods
+
+#### `redirectBack(string $defaultRoute, array $parameters = []): void`
+
+Redirect to `$backUrl` if safe, otherwise to the named route.
+
+```php
+// Simple fallback
+$this->redirectBack('posts.index');
+
+// With route parameters
+$this->redirectBack('posts.show', ['post' => $post->id]);
+```
+
+### Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `$backUrl` | `string` | `''` | Bound automatically from `?back=` query parameter via `#[Url]` |
+
+### Security
+
+- URLs are validated with `isSafeReturnUrl()` which checks `str_starts_with($url, url('/'))` — only same-origin URLs are accepted
+- External URLs are silently ignored and the default route is used instead
+
+### See Also
+
+- [`window.withBack()` helper](HELPERS.md#withback) — JavaScript helper for generating back URLs in Blade views
