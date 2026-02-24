@@ -157,7 +157,7 @@ For package `vm-engine/synmod-blog`:
 | `synapps:make-job` | Create job | |
 | `synapps:make-job-middleware` | Create job middleware | |
 | `synapps:make-listener` | Create listener | |
-| `synapps:make-livewire` | Create Livewire component | `--inline`, `--test` |
+| `synapps:make-livewire` | Create Livewire component | `--inline`, `--test`, `--mfc`, `--sfc` |
 | `synapps:make-mail` | Create mailable | |
 | `synapps:make-middleware` | Create middleware | |
 | `synapps:make-migration` | Create migration | `--create={table}`, `--table={table}` |
@@ -174,6 +174,64 @@ For package `vm-engine/synmod-blog`:
 | `synapps:make-test` | Create test | `--unit` |
 | `synapps:make-trait` | Create trait | |
 | `synapps:make-view` | Create Blade view | |
+
+---
+
+## Livewire Component Formats
+
+`synapps:make-livewire` (and the `livewire` sub-command in `synmod-make`) supports three component formats for Livewire v4:
+
+### Standard (class-based)
+
+Creates a class in `src/Livewire/` with a separate view in `resources/views/livewire/`:
+
+```bash
+php artisan synapps:make-livewire blog PostList
+# → src/Livewire/PostList.php
+# → resources/views/livewire/post-list.blade.php
+```
+
+Usage: `<livewire:blog::post-list />`
+
+### MFC — Multi-File Component (`--mfc`)
+
+Creates a directory under `resources/views/components/` containing a PHP anonymous class file and a Blade template. Supports nested paths:
+
+```bash
+php artisan synapps:make-livewire blog PostList --mfc
+# → resources/views/components/⚡post-list/post-list.php
+# → resources/views/components/⚡post-list/post-list.blade.php
+
+# Nested path (slash-separated)
+php artisan synapps:make-livewire blog Forms/ContactForm --mfc
+# → resources/views/components/forms/⚡contact-form/contact-form.php
+# → resources/views/components/forms/⚡contact-form/contact-form.blade.php
+```
+
+Usage: `<livewire:blog::post-list />`, `<livewire:blog::forms.contact-form />`
+
+### SFC — Single-File Component (`--sfc`)
+
+Creates a single `.blade.php` file with an embedded PHP anonymous class. Ideal for simple components with minimal logic:
+
+```bash
+php artisan synapps:make-livewire blog PostList --sfc
+# → resources/views/components/post-list.blade.php  (with embedded PHP class)
+```
+
+Usage: `<livewire:blog::post-list />`
+
+### Package modules (`synmod-make`)
+
+The standalone `synmod-make` binary inside package modules supports all the same flags:
+
+```bash
+./vendor/bin/synmod-make livewire ProductCatalog --mfc
+./vendor/bin/synmod-make livewire Forms/ContactForm --mfc
+./vendor/bin/synmod-make livewire QuickEdit --sfc
+```
+
+> **Note:** MFC and SFC components are auto-discovered by the `AutoRegistersComponents` trait via Livewire v4's `addNamespace()`. No manual component registration is required.
 
 ---
 
@@ -593,8 +651,11 @@ php artisan synapps:make-controller blog PostApiController --api      # API
 php artisan synapps:make-controller blog ShowPostController --invokable  # Invokable
 
 # Livewire
-php artisan synapps:make-livewire blog PostList               # Standard
-php artisan synapps:make-livewire blog QuickPost --inline     # Inline
+php artisan synapps:make-livewire blog PostList               # Standard (class-based)
+php artisan synapps:make-livewire blog QuickPost --inline     # Inline (no view file)
+php artisan synapps:make-livewire blog PostList --mfc         # Multi-File Component (MFC)
+php artisan synapps:make-livewire blog PostList --sfc         # Single-File Component (SFC)
+php artisan synapps:make-livewire blog Forms/ContactForm --mfc  # Nested MFC
 
 # Migrations
 php artisan synapps:make-migration blog create_posts_table --create=posts

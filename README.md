@@ -94,7 +94,7 @@ DbConfig::set('app.site_name', 'My Site');
 
 - PHP 8.2+
 - Laravel 12.x
-- Livewire 3.x
+- Livewire 4.x
 - Composer
 - Node.js & NPM
 

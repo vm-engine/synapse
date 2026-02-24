@@ -139,9 +139,127 @@ All features from beta are now stable. See [CHANGELOG.md](CHANGELOG.md) for full
 
 ---
 
-### Upgrading to v2.0.0 (Future)
+### Upgrading to v2.0.0
 
-_This section will be updated when v2.0.0 is released._
+#### Breaking Changes
+
+**Livewire v4 Upgrade:**
+- Livewire dependency changed from `^3.0` to `^4.0`
+- Stub components converted from class-based (`src/Livewire/`) to MFC format (`resources/views/components/`)
+- Stub routes migrated from `Route::get(Component::class)` to `Route::livewire(Component::class)`
+- JavaScript hooks migrated from Livewire v3 API to v4 interceptor pattern
+
+**Required Actions:**
+
+1. **Update composer.json:**
+   ```json
+   {
+       "require": {
+           "vm-engine/synapse": "^2.0",
+           "livewire/livewire": "^4.0"
+       }
+   }
+   ```
+
+2. **Migrate JS hooks** — replace v3 hooks with v4 interceptor pattern:
+   ```js
+   // Before (v3)
+   Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => { ... })
+   Livewire.hook('morph.updated', ({ el, component }) => { ... })
+   Livewire.hook('message.processed', (message, component) => { ... })
+
+   // After (v4)
+   Livewire.interceptMessage(component, message, ({ respond, succeed, fail }) => {
+       succeed(({ snapshot, effect }) => { ... })
+   })
+   ```
+
+3. **Migrate routes** — replace `Route::get()` with `Route::livewire()` for full-page components:
+   ```php
+   // Before
+   Route::get('/dashboard', Dashboard::class);
+
+   // After
+   Route::livewire('/dashboard', Dashboard::class);
+   ```
+
+4. **Update component references** — Blade facade calls should use `app('blade.compiler')` directly (see changelog for details if you extend `SynapseViewServiceProvider`).
+
+5. **Run setup commands:**
+   ```bash
+   composer update vm-engine/synapse
+   php artisan synapps:discover
+   php artisan synapps:config
+   ```
+
+---
+
+### Upgrading to v2.1.0
+
+#### New Features (non-breaking)
+
+**RemembersQueryParams Trait:**
+- New `RemembersQueryParams` trait for Livewire components that persists declared properties (search, filters, pagination) to the session
+- Automatically restores list state when navigating back
+- No changes required — opt-in by using the trait
+
+---
+
+### Upgrading to v2.2.0
+
+#### Breaking Changes
+
+**Livewire Component Namespace Notation:**
+- Component tags change from dot notation to namespace notation
+- `<livewire:example.todo-form />` → `<livewire:example::todo-form />`
+- `<livewire:example.forms.contact-form />` → `<livewire:example::forms.contact-form />`
+
+**AutoRegistersComponents Trait:**
+- `registerMfcComponents()` and `registerLivewireComponents()` replaced by `registerLivewireNamespace()`
+- New method uses Livewire v4's native `addNamespace()` for automatic component discovery
+
+**Required Actions:**
+
+1. **Update all component tags** in Blade views from dot notation to namespace notation:
+   ```blade
+   {{-- Before --}}
+   <livewire:example.todo-form />
+   <livewire:example.forms.contact-form />
+
+   {{-- After --}}
+   <livewire:example::todo-form />
+   <livewire:example::forms.contact-form />
+   ```
+
+2. **Update `Route::livewire()` calls** if using dot notation:
+   ```php
+   // Before
+   Route::livewire('/todo', 'example.todo-form');
+
+   // After
+   Route::livewire('/todo', 'example::todo-form');
+   ```
+
+3. **Update service provider** if calling registration methods directly:
+   ```php
+   // Before
+   $this->registerMfcComponents();
+   $this->registerLivewireComponents();
+
+   // After
+   $this->registerLivewireNamespace();
+   // Or simply:
+   $this->registerComponents(); // handles everything
+   ```
+
+4. **Update Livewire component references in tests** to namespace notation.
+
+5. **Run setup commands:**
+   ```bash
+   composer update vm-engine/synapse
+   php artisan synapps:discover
+   php artisan synapps:config
+   ```
 
 ---
 
@@ -231,7 +349,8 @@ When creating modules, specify compatible Synapse versions in `module.json`:
 
 | Synapse Version | Laravel | Livewire | PHP |
 |-----------------|---------|----------|-----|
-| v1.0.x          | ^12.0   | ^3.0     | >=8.2 |
+| v1.0.x – v1.7.x | ^12.0  | ^3.0     | >=8.2 |
+| v2.0.x – v2.2.x | ^12.0  | ^4.0     | >=8.2 |
 
 ---
 

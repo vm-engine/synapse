@@ -272,6 +272,95 @@ class ExampleServiceProvider extends ServiceProvider
 
 ---
 
+## RemembersQueryParams
+
+A Livewire trait that persists list state (search terms, filters, sort options, pagination) to the session, so users see the same state when they navigate back to a list page.
+
+### Purpose
+
+When users click into a detail view and then navigate back (breadcrumb, browser back button, or direct link), their search/filter state is automatically restored. URL query parameters always take precedence over session values, so bookmarked or shared URLs continue to work correctly.
+
+### Usage
+
+```php
+<?php
+
+namespace SynApps\Modules\Blog\Livewire;
+
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use VmEngine\Synapse\Traits\RemembersQueryParams;
+
+class PostList extends Component
+{
+    use RemembersQueryParams;
+
+    #[Url()] public string $q = '';
+    #[Url()] public string $status = '';
+    #[Url()] public string $sortBy = 'created_at';
+    #[Url()] public string $sortDir = 'desc';
+
+    protected function rememberedParams(): array
+    {
+        return ['q', 'status', 'sortBy', 'sortDir'];
+    }
+
+    public function mount(): void
+    {
+        $this->restoreRememberedParams();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->q = '';
+        $this->status = '';
+        $this->forgetRememberedParams();
+    }
+
+    // ...
+}
+```
+
+### How It Works
+
+1. Declare which properties to persist in `rememberedParams()`.
+2. Call `$this->restoreRememberedParams()` in `mount()` — it reads session values for any property that wasn't supplied via the URL.
+3. Livewire's `#[Url()]` attribute keeps the URL in sync when properties change, which also updates the session automatically.
+4. Call `forgetRememberedParams()` in your `clearFilters()` method to wipe the session state.
+
+### Available Methods
+
+| Method | Description |
+|--------|-------------|
+| `rememberedParams(): array` | Return property names to persist (override this) |
+| `rememberKey(): string` | Session key (auto-generated from component class name) |
+| `restoreRememberedParams(): void` | Restore properties from session (call in `mount()`) |
+| `forgetRememberedParams(): void` | Clear all persisted params from session |
+| `getRememberedParamValues(): array` | Return the currently stored session values |
+
+### Session Key
+
+The session key is derived from the component's class name (snake_case), e.g.:
+- `SynApps\Modules\Blog\Livewire\PostList` → `post_list_params`
+
+Override `rememberKey()` to use a custom key:
+
+```php
+protected function rememberKey(): string
+{
+    return 'my_custom_key_params';
+}
+```
+
+### Notes
+
+- URL query parameters (via `#[Url()]`) always override session values — shared/bookmarked URLs work correctly.
+- The trait works alongside Livewire's `#[Url()]` attribute.
+- Only call `restoreRememberedParams()` in `mount()`, not in `render()`.
+- Call `forgetRememberedParams()` in `clearFilters()` to reset state cleanly.
+
+---
+
 ## WithDeleteToken
 
 A security trait that generates encrypted delete tokens for models to prevent unauthorized delete operations.
