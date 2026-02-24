@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+
+uses(RefreshDatabase::class);
 
 use function Pest\Laravel\get;
 
@@ -11,7 +14,7 @@ test('can access todos index page', function () {
 });
 
 test('can render todo index component', function () {
-    Livewire::test('todos.todo-index')
+    Livewire::test('todos::todo-index')
         ->assertStatus(200);
 });
 

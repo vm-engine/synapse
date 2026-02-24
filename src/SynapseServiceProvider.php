@@ -54,6 +54,7 @@ use VmEngine\Synapse\Console\Commands\SynapseDbLang;
 use VmEngine\Synapse\Console\Commands\SynapseExcelCleanup;
 use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
+use VmEngine\Synapse\Finder\SynapseFinder;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
 use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
@@ -181,6 +182,7 @@ class SynapseServiceProvider extends ServiceProvider
             return new Services\ThemeService;
         });
         if (SynapseUtils::isSynAppsAutoloaded()) {
+            $this->registerSynapseFinder();
             $this->bindAlias();
             $this->bindPublicPath();
             $this->bindInterface();
@@ -189,6 +191,16 @@ class SynapseServiceProvider extends ServiceProvider
             $this->registerLangFiles();
             $this->overrideConfigs();
         }
+    }
+
+    private function registerSynapseFinder(): void
+    {
+        $this->app->singleton('livewire.finder', function () {
+            $finder = new SynapseFinder;
+            $finder->addLocation(classNamespace: config('livewire.class_namespace'));
+
+            return $finder;
+        });
     }
 
     private function bindAlias()
