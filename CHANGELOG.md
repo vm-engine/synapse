@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-02-25
+
+### Added
+
+**Versioned and Override API Routes:**
+- Modules can now define versioned API route files using the naming convention `routes/api.v{N}.php` (e.g., `api.v1.php`, `api.v2.php`)
+- `SynapseRouteServiceProvider` automatically discovers all matching files via `glob('api.v[0-9]*.php')`
+- Each versioned file is registered with:
+  - URL prefix: `/api/{version}/{module_prefix}/` (e.g., `/api/v1/pm/`)
+  - Route name prefix: `api.{version}.{module_id}.` (e.g., `api.v1.pm.`)
+  - Middleware: `api`
+- New `routes/api.override.php` — API override routes with no module URL prefix (registered at `/api/` root), mirrors `web.override.php` pattern
+- New `routes/api.v{N}.override.php` — versioned API override routes with no module URL prefix (registered at `/api/{version}/`), one per version
+- Multiple versions can coexist alongside the unversioned `api.php` — all are registered simultaneously
+- No configuration required; file naming drives automatic discovery
+
+---
+
+## [2.2.2] - 2026-02-24
+
+### Fixed
+
+**SynapseFinder — MFC Resolution for "index" Directories:**
+- Added `SynapseFinder` that overrides Livewire's `livewire.finder` singleton to fix an MFC component resolution bug
+- Root cause: Livewire's `MultiFileParser` matches any directory whose name *contains* "index" as a substring (e.g. `todo-index`), causing incorrect resolution
+- `SynapseFinder` restricts `MultiFileParser` to only directories whose name *ends with* "index" (i.e., the actual `todo-index/` directory name after emoji stripping)
+- Registered in `SynapseServiceProvider::boot()` via `app()->singleton('livewire.finder', SynapseFinder::class)`
+
+**Stubs Updates:**
+- `stubs/synapps/modules/todos/routes/web.php`: route updated to use `::` namespace notation (`todos::todo-index`)
+- `stubs/synapps/modules/todos/tests/Feature/TodoIndexTest.php`: added `RefreshDatabase` trait and updated component reference to `::` namespace notation
+
+---
+
 ## [2.2.1] - 2026-02-20
 
 ### Fixed

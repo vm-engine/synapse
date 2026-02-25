@@ -255,7 +255,11 @@ The standalone `synmod-make` binary inside package modules supports all the same
 ├── routes/
 │   ├── web.php          # Frontend routes
 │   ├── web.backend.php  # Backend routes (auto-auth)
-│   └── api.php          # API routes
+│   ├── api.php              # API routes (unversioned, module-prefixed)
+│   ├── api.override.php     # API override routes (no module prefix)
+│   ├── api.v1.php           # API v1 routes (optional)
+│   ├── api.v1.override.php  # API v1 override routes (no module prefix)
+│   └── api.v2.php           # API v2 routes (optional)
 ├── src/
 │   ├── Broadcasting/    # Broadcasting channels
 │   ├── Casts/           # Custom Eloquent casts

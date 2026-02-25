@@ -306,7 +306,10 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 - `routes/web.php` - Standard (URL + name prefixed)
 - `routes/web.backend.php` - Backend (auto-auth, `/admin/*`, `backend.` prefix)
 - `routes/web.override.php` - Override (no URL prefix, name prefixed)
-- `routes/api.php` - API routes
+- `routes/api.php` - API routes (`/api/{prefix}/`, name `api.{id}.`)
+- `routes/api.override.php` - API override routes (`/api/`, name `api.{id}.`, no module prefix)
+- `routes/api.v{N}.php` - Versioned API routes (`/api/{version}/{prefix}/`, name `api.{version}.{id}.`) — auto-discovered via glob
+- `routes/api.v{N}.override.php` - Versioned API override routes (`/api/{version}/`, name `api.{version}.{id}.`, no module prefix) — one per version
 
 **4. SynapseViewServiceProvider**: Views and components
 

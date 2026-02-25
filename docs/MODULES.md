@@ -58,7 +58,12 @@ synapps/modules/{module-name}/
 │   ├── web.php             # Standard module routes (URL & name prefixed)
 │   ├── web.backend.php     # Backend routes (auto-auth, backend_prefix URL, 'backend.' name)
 │   ├── web.override.php    # Override routes (no URL prefix, module name prefix)
-│   └── api.php             # API routes
+│   ├── api.php             # API routes (unversioned)
+│   ├── api.override.php    # API override routes (no module prefix)
+│   ├── api.v1.php          # API v1 routes (optional, versioned)
+│   ├── api.v1.override.php # API v1 override routes (no module prefix)
+│   ├── api.v2.php          # API v2 routes (optional, versioned)
+│   └── api.v2.override.php # API v2 override routes (no module prefix)
 ├── resources/
 │   ├── views/
 │   │   ├── components/     # Blade components
@@ -267,7 +272,7 @@ Create `synapps/modules/example/resources/views/index.blade.php`:
 
 ## Route Types
 
-Modules support four types of route files:
+Modules support seven types of route files:
 
 ### 1. web.php - Standard Routes
 
@@ -317,16 +322,86 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 ### 4. api.php - API Routes
 
 ```php
-// URL: /api/users
-// Route name: example.users.index
-Route::get('/users', [ApiController::class, 'index'])->name('users.index');
+// URL: /api/pm/invoices
+// Route name: api.pm.invoices.index
+Route::get('/invoices', [InvoiceApiController::class, 'index'])->name('invoices.index');
 ```
 
 **Characteristics:**
 
--   URL prefixed with `/api`
--   Route name prefixed with module ID
--   No automatic authentication (add manually if needed)
+-   URL prefixed with `/api/{module_prefix}`
+-   Route name prefixed with `api.{module_id}.`
+-   Middleware: `api`
+-   No automatic authentication (add middleware manually if needed)
+
+### 5. api.override.php - API Override Routes
+
+```php
+// URL: /api/login  (no module prefix)
+// Route name: api.pm.login
+Route::post('/login', [ApiAuthController::class, 'login'])->name('login');
+```
+
+**Characteristics:**
+
+-   URL prefixed with `/api` only — no module prefix
+-   Route name prefixed with `api.{module_id}.`
+-   Middleware: `api`
+-   Use for root-level API routes that must not carry the module prefix (e.g., `/api/login`, `/api/health`)
+
+### 6. api.v{N}.php - Versioned API Routes
+
+For modules that need multiple API versions, use the `api.v{N}.php` naming convention. Any file matching `api.v[0-9]*.php` is automatically discovered and registered.
+
+```php
+// routes/api.v1.php
+// URL: /api/v1/pm/invoices
+// Route name: api.v1.pm.invoices.index
+Route::get('/invoices', [InvoiceApiV1Controller::class, 'index'])->name('invoices.index');
+```
+
+```php
+// routes/api.v2.php
+// URL: /api/v2/pm/invoices
+// Route name: api.v2.pm.invoices.index
+Route::get('/invoices', [InvoiceApiV2Controller::class, 'index'])->name('invoices.index');
+```
+
+**Characteristics:**
+
+-   URL prefixed with `/api/{version}/{module_prefix}` (e.g., `/api/v1/pm/`)
+-   Route name prefixed with `api.{version}.{module_id}.` (e.g., `api.v1.pm.`)
+-   Middleware: `api`
+-   All versions are registered simultaneously — `api.php`, `api.v1.php`, and `api.v2.php` can all coexist
+-   No configuration required; file naming drives discovery automatically
+
+### 7. api.v{N}.override.php - Versioned API Override Routes
+
+```php
+// routes/api.v1.override.php
+// URL: /api/v1/login  (no module prefix)
+// Route name: api.v1.pm.login
+Route::post('/login', [ApiV1AuthController::class, 'login'])->name('login');
+```
+
+**Characteristics:**
+
+-   URL prefixed with `/api/{version}` only — no module prefix
+-   Route name prefixed with `api.{version}.{module_id}.`
+-   Middleware: `api`
+-   One override file per version — `api.v1.override.php`, `api.v2.override.php`, etc.
+
+**Example — full route file layout:**
+
+```
+routes/
+├── api.php              → /api/pm/...           (unversioned, module-prefixed)
+├── api.override.php     → /api/...              (unversioned, no module prefix)
+├── api.v1.php           → /api/v1/pm/...        (v1, module-prefixed)
+├── api.v1.override.php  → /api/v1/...           (v1, no module prefix)
+├── api.v2.php           → /api/v2/pm/...        (v2, module-prefixed)
+└── api.v2.override.php  → /api/v2/...           (v2, no module prefix)
+```
 
 ---
 

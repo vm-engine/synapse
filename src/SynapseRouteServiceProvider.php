@@ -64,6 +64,29 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
                     ->prefix($apiPrefix.'/'.$modulePrefix)
                     ->group($routesPath.'api.php');
             }
+
+            if (file_exists($routesPath.'api.override.php')) {
+                Route::middleware('api')
+                    ->name('api.'.$id.'.')
+                    ->prefix($apiPrefix)
+                    ->group($routesPath.'api.override.php');
+            }
+
+            $apiVersions = glob($routesPath.'api.v[0-9]*.php');
+            foreach ($apiVersions as $versionPath) {
+                $version = explode('.', pathinfo($versionPath, PATHINFO_FILENAME))[1]; // extract version from filename
+                Route::middleware('api')
+                    ->name('api.'.$version.'.'.$id.'.')
+                    ->prefix($apiPrefix.'/'.$version.'/'.$modulePrefix)
+                    ->group($versionPath);
+
+                if (file_exists($routesPath.'api.'.$version.'.override.php')) {
+                    Route::middleware('api')
+                        ->name('api.'.$version.'.'.$id.'.')
+                        ->prefix($apiPrefix.'/'.$version)
+                        ->group($routesPath.'api.'.$version.'.override.php');
+                }
+            }
         }
     }
 }
