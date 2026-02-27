@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`synapps:patch-resources` — selective patching**: Command now accepts option flags (`--theme`, `--comment-default`, `--css-sources`, `--npm-watch`, `--js-back`, `--vite`) to run only specific patches instead of always running all patches; when no flag is provided all patches still run as before
+- **`synapps:patch-resources` — refactored into methods**: Extracted each patch operation from the monolithic `handle()` into its own dedicated protected method (`patchAppJsImport()`, `patchAppCssImport()`); each method returns `bool` indicating whether a patch was applied
+- **`bin/synmod-make`**: Changed file mode from executable (755) to non-executable (644)
+
 ## [2.3.0] - 2026-02-25
 
 ### Added

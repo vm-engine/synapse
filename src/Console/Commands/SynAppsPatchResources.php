@@ -11,7 +11,13 @@ class SynAppsPatchResources extends Command
      *
      * @var string
      */
-    protected $signature = 'synapps:patch-resources';
+    protected $signature = 'synapps:patch-resources
+        {--theme : Only patch theme assets (CSS/JS)}
+        {--comment-default : Only patch web routes and database seeder}
+        {--css-sources : Only patch CSS @source directives}
+        {--npm-watch : Only patch package.json for npm run watch script}
+        {--js-back : Only patch app.js withBack global helper}
+        {--vite : Only patch vite.config.js}';
 
     /**
      * The console command description.
@@ -23,10 +29,61 @@ class SynAppsPatchResources extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
+    {
+        $runAll = ! (
+            $this->option('theme') ||
+            $this->option('comment-default') ||
+            $this->option('css-sources') ||
+            $this->option('npm-watch') ||
+            $this->option('js-back') ||
+            $this->option('vite')
+        );
+
+        // Always patch synapps JS/CSS imports
+        $patches = [
+            'app.js — synapps import' => $this->patchAppJsImport(),
+            'app.css — synapps import' => $this->patchAppCssImport(),
+        ];
+
+        if ($runAll || $this->option('css-sources')) {
+            $patches['app.css — @source directives'] = $this->patchCssSource();
+        }
+
+        if ($runAll || $this->option('theme')) {
+            $patches['app.css / app.js — theme assets'] = $this->patchThemeAssets();
+        }
+
+        if ($runAll || $this->option('vite')) {
+            $patches['vite.config.js'] = $this->patchViteConfig();
+        }
+
+        if ($runAll || $this->option('comment-default')) {
+            $patches['routes/web.php'] = $this->patchWebRoutes();
+            $patches['database/seeders/DatabaseSeeder.php'] = $this->patchDatabaseSeeder();
+        }
+
+        if ($runAll || $this->option('npm-watch')) {
+            $patches['package.json — watch script'] = $this->patchPackageJson();
+        }
+
+        if ($runAll || $this->option('js-back')) {
+            $patches['app.js — global helpers'] = $this->patchAppJsGlobals();
+        }
+
+        foreach ($patches as $label => $patched) {
+            if ($patched) {
+                $this->components->info("Patched: {$label}");
+            }
+        }
+    }
+
+    /**
+     * Patch resources/js/app.js to add synapps.js import.
+     */
+    protected function patchAppJsImport(): bool
     {
         $jsLine = "import '../../synapps/resources/js/synapps.js';";
-        $cssLine = "@import '../../synapps/resources/css/synapps.css';";
 
         $jsPatched = false;
         $jsLines = file(resource_path('js/app.js'));
@@ -41,12 +98,24 @@ class SynAppsPatchResources extends Command
             }
             $jsPatched = true;
         }
+
         if ($jsPatched || empty($jsLines)) {
             array_splice($jsLines, $lastImportJs + 1, 0, $jsLine."\n");
             $this->createBackup(resource_path('js/app.js'));
             file_put_contents(resource_path('js/app.js'), implode("\n", $jsLines));
-            $jsPatched = true;
+
+            return true;
         }
+
+        return false;
+    }
+
+    /**
+     * Patch resources/css/app.css to add synapps.css import.
+     */
+    protected function patchAppCssImport(): bool
+    {
+        $cssLine = "@import '../../synapps/resources/css/synapps.css';";
 
         $cssPatched = false;
         $cssLines = file(resource_path('css/app.css'));
@@ -61,51 +130,16 @@ class SynAppsPatchResources extends Command
             }
             $cssPatched = true;
         }
+
         if ($cssPatched || empty($cssLines)) {
             array_splice($cssLines, $lastImportCss + 1, 0, $cssLine."\n");
             $this->createBackup(resource_path('css/app.css'));
             file_put_contents(resource_path('css/app.css'), implode("\n", $cssLines));
-            $cssPatched = true;
+
+            return true;
         }
 
-        // Patch CSS @source directives for module files
-        $cssSourcePatched = $this->patchCssSource();
-
-        // Patch theme assets (CSS/JS)
-        $themePatched = $this->patchThemeAssets();
-
-        // Patch vite.config.js
-        $vitePatched = $this->patchViteConfig();
-
-        // Patch routes/web.php to disable default Laravel welcome route
-        $routePatched = $this->patchWebRoutes();
-
-        // Patch DatabaseSeeder to comment out default user seeder
-        $seederPatched = $this->patchDatabaseSeeder();
-
-        // Patch package.json to add 'npm run watch' script
-        $packageJsonPatched = $this->patchPackageJson();
-
-        // Patch app.js to add global JS helper functions
-        $globalsPatched = $this->patchAppJsGlobals();
-
-        $patches = [
-            'app.js — synapps import' => $jsPatched,
-            'app.css — synapps import' => $cssPatched,
-            'app.css — @source directives' => $cssSourcePatched,
-            'app.css / app.js — theme assets' => $themePatched,
-            'vite.config.js' => $vitePatched,
-            'routes/web.php' => $routePatched,
-            'database/seeders/DatabaseSeeder.php' => $seederPatched,
-            'package.json — watch script' => $packageJsonPatched,
-            'app.js — global helpers' => $globalsPatched,
-        ];
-
-        foreach ($patches as $label => $patched) {
-            if ($patched) {
-                $this->components->info("Patched: {$label}");
-            }
-        }
+        return false;
     }
 
     /**
