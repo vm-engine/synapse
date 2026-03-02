@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Console\Commands\Generators\MakeCastCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeChannelCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeClassCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeCommandCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeComponentCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeConfigCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeControllerCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeEnumCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeEventCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeExceptionCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeFactoryCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeInterfaceCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeJobCommand;
@@ -125,6 +127,8 @@ class SynapseServiceProvider extends ServiceProvider
                 // New Generator Commands
                 MakeCastCommand::class,
                 MakeChannelCommand::class,
+                MakeClassCommand::class,
+                MakeExceptionCommand::class,
                 MakeCommandCommand::class,
                 MakeComponentCommand::class,
                 MakeConfigCommand::class,

@@ -452,9 +452,34 @@ class ModuleGeneratorService
             'scope' => 'scope/scope',
             'trait' => 'trait/trait',
             'view' => 'view/view',
+            'class' => $options['invokable'] ?? false ? 'class/class.invokable' : 'class/class',
+            'exception' => $this->getExceptionStub($options),
         ];
 
         return $stubMap[$type] ?? $type.'/'.$type;
+    }
+
+    /**
+     * Get exception stub variant
+     */
+    protected function getExceptionStub(array $options): string
+    {
+        $render = $options['render'] ?? false;
+        $report = $options['report'] ?? false;
+
+        if ($render && $report) {
+            return 'exception/exception.render-report';
+        }
+
+        if ($render) {
+            return 'exception/exception.render';
+        }
+
+        if ($report) {
+            return 'exception/exception.report';
+        }
+
+        return 'exception/exception';
     }
 
     /**

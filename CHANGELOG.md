@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-03-02
+
+### Added
+- **`synapps:make-class`**: New generator command to create a plain PHP class inside a module (`src/` directory, namespace `SynApps\Modules\{Module}`); supports `--invokable` option to add an `__invoke(): void` method, matching Laravel's `make:class` behaviour
+- **`synapps:make-exception`**: New generator command to create a custom exception class inside a module (`src/Exceptions/`, namespace `SynApps\Modules\{Module}\Exceptions`); supports `--render` and `--report` options (combinable) to scaffold the corresponding methods, matching Laravel's `make:exception` behaviour
+- **Six new stubs**: `class/class`, `class/class.invokable`, `exception/exception`, `exception/exception.render`, `exception/exception.report`, `exception/exception.render-report`
+
 ### Changed
+- **`synapps:make-livewire` — respects Livewire config default type**: When no type flag (`--mfc`, `--sfc`, `--class`, `--inline`) is provided, the command now reads `config('livewire.make_command.type')` to determine the default component type instead of always falling back to class-based; a new explicit `--class` flag forces class-based generation regardless of config
 - **`synapps:patch-resources` — selective patching**: Command now accepts option flags (`--theme`, `--comment-default`, `--css-sources`, `--npm-watch`, `--js-back`, `--vite`) to run only specific patches instead of always running all patches; when no flag is provided all patches still run as before
 - **`synapps:patch-resources` — refactored into methods**: Extracted each patch operation from the monolithic `handle()` into its own dedicated protected method (`patchAppJsImport()`, `patchAppCssImport()`); each method returns `bool` indicating whether a patch was applied
 - **`bin/synmod-make`**: Changed file mode from executable (755) to non-executable (644)

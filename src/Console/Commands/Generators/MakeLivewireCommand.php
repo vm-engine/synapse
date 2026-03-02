@@ -12,6 +12,7 @@ class MakeLivewireCommand extends BaseGeneratorCommand
                             {module : The module name}
                             {name? : The name of the Livewire component}
                             {--inline : Create inline component}
+                            {--class : Create class-based component}
                             {--sfc : Create single-file component (Livewire v4 SFC)}
                             {--mfc : Create multi-file component (Livewire v4 MFC)}
                             {--form : Create form object}
@@ -32,6 +33,19 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
         if ($this->option('sfc')) {
             return $this->handleSfc();
+        }
+
+        // --class explicitly requests class-based; otherwise check livewire config
+        if (! $this->option('class')) {
+            $configType = config('livewire.make_command.type', 'class');
+
+            if ($configType === 'mfc') {
+                return $this->handleMfc();
+            }
+
+            if ($configType === 'sfc') {
+                return $this->handleSfc();
+            }
         }
 
         $result = parent::handle();
