@@ -13,6 +13,7 @@ use VmEngine\Synapse\Console\Commands\Generators\MakeCommandCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeComponentCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeConfigCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeControllerCommand;
+use VmEngine\Synapse\Console\Commands\Generators\MakeDataCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeEnumCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeEventCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeExceptionCommand;
@@ -144,6 +145,11 @@ class SynapseServiceProvider extends ServiceProvider
                 // Unified Make Command
                 SynmodMakeCommand::class,
             ]);
+
+            // Register spatie/laravel-data command only when package is installed
+            if (class_exists(\Spatie\LaravelData\Data::class)) {
+                $this->commands([MakeDataCommand::class]);
+            }
         }
 
         // Load package migrations (configs, languages, excel tasks)

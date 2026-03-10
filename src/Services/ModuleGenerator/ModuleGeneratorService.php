@@ -454,6 +454,7 @@ class ModuleGeneratorService
             'view' => 'view/view',
             'class' => $options['invokable'] ?? false ? 'class/class.invokable' : 'class/class',
             'exception' => $this->getExceptionStub($options),
+            'data' => 'data/data',
         ];
 
         return $stubMap[$type] ?? $type.'/'.$type;

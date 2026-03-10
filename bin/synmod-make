@@ -54,6 +54,9 @@ function showHelp() {
     echo "  config <name>             Create a new config file\n";
     echo "  test <name>               Create a new test\n\n";
 
+    echo "Data (requires spatie/laravel-data):\n";
+    echo "  data <name>               Create a new Spatie Data class\n\n";
+
     echo "Examples:\n";
     echo "  synmod-make model Post\n";
     echo "  synmod-make livewire PostList\n";
@@ -120,6 +123,9 @@ $commandMap = [
     'trait' => 'synapps:make-trait',
     'config' => 'synapps:make-config',
     'test' => 'synapps:make-test',
+
+    // Data (requires spatie/laravel-data)
+    'data' => 'synapps:make-data',
 ];
 
 if (!isset($commandMap[$command])) {
@@ -213,6 +219,13 @@ function resolveLivewireEmoji(string $basePath): bool
     }
 
     return true; // Livewire default
+}
+
+// Check spatie/laravel-data requirement for data command
+if ($command === 'data' && !class_exists(\Spatie\LaravelData\Data::class)) {
+    echo "Error: spatie/laravel-data is not installed.\n";
+    echo "Install it with: composer require spatie/laravel-data\n";
+    exit(1);
 }
 
 echo "Creating {$command}: {$name}\n";

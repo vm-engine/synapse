@@ -203,6 +203,7 @@ class SynAppsSetup extends Command
         $this->call('synapps:patch-resources');
         $this->call('synapps:patch-tests');
         $this->call('synapps:discover');
+        $this->call('migrate');
 
         $this->components->success('Setup complete.');
         $this->components->warn("Don't forget to init Git Repository in synapps folder or your project root.");

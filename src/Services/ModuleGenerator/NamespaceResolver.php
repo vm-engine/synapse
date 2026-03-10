@@ -116,6 +116,7 @@ class NamespaceResolver
             'view' => 'resources/views',
             'class' => 'src',
             'exception' => 'src/Exceptions',
+            'data' => 'src/Data',
         ];
 
         return $map[strtolower($type)] ?? '';
@@ -154,6 +155,7 @@ class NamespaceResolver
             'scope' => 'Models\\Scopes',
             'trait' => 'Traits',
             'exception' => 'Exceptions',
+            'data' => 'Data',
         ];
 
         return $map[strtolower($type)] ?? '';
