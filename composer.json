@@ -1,6 +1,6 @@
 {
     "name": "vm-engine/synapse",
-    "version": "2.3.2",
+    "version": "2.3.3",
     "description": "HP Synapse rebuild using Livewire and as Laravel Package",
     "type": "library",
     "require": {

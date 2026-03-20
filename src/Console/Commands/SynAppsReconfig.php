@@ -31,54 +31,54 @@ class SynAppsReconfig extends Command
             label: 'App code',
             hint: 'Use snake_case',
             required: true,
-            default: config('synapps.apps.app_code')
+            default: config('synapps.apps.app_code', '')
         ));
         $appName = text(
             label: 'App name',
             required: true,
-            default: config('synapps.apps.app_name')
+            default: config('synapps.apps.app_name', '')
         );
         $author = text(
             label: 'Author',
             required: true,
-            default: config('synapps.apps.author')
+            default: config('synapps.apps.author', '')
         );
         $email = text(
             label: 'Author Email',
             required: true,
-            default: config('synapps.apps.email')
+            default: config('synapps.apps.email', '')
         );
         $gitRepo = text('GIT Repository');
         $devDomain = text(
             label: 'Dev Domain URL',
             hint: 'Including proto',
-            default: config('synapps.apps.urls.domain.dev')
+            default: config('synapps.apps.urls.domain.dev', '')
         );
         $prodDomain = text(
             label: 'Prod Domain URL',
             hint: 'Including proto',
-            default: config('synapps.apps.urls.domain.prod')
+            default: config('synapps.apps.urls.domain.prod', '')
         );
         $frontendPrefix = text(
             label: 'Frontend Prefix',
-            default: config('synapps.apps.urls.prefix')
+            default: config('synapps.apps.urls.prefix', '')
         );
         $apiPrefix = text(
             label: 'API Prefix',
-            default: config('synapps.apps.urls.api_prefix')
+            default: config('synapps.apps.urls.api_prefix', '')
         );
         $appTitle = text(
             label: 'Application Title',
-            default: config('synapps.apps.title')
+            default: config('synapps.apps.title', '')
         );
         $appDesc = text(
             label: 'Application Description',
-            default: config('synapps.apps.description')
+            default: config('synapps.apps.description', '')
         );
 
         $multiLanguage = confirm(
             label: 'Enable Multi-Language Support?',
-            default: config('synapps.apps.multi_language')
+            default: config('synapps.apps.multi_language', false)
         );
 
         $enabledLanguages = ['en'];
@@ -86,7 +86,7 @@ class SynAppsReconfig extends Command
             $languagesInput = text(
                 label: 'Enabled Languages',
                 placeholder: 'en,id,es',
-                default: implode(',', config('synapps.apps.enabled_languages')),
+                default: implode(',', config('synapps.apps.enabled_languages', $enabledLanguages)),
                 hint: 'Comma-separated language codes (e.g., en,id,es)',
             );
             $enabledLanguages = array_map('trim', explode(',', $languagesInput));

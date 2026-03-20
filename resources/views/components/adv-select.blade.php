@@ -252,7 +252,7 @@ Version: 1.0.0
                 this.results = staticResults;
             }
     
-            this.open = this.results.length > 0;
+            this.open = this.results.length > 0 || (this.allowCreate && this.search.trim() !== '');
         },
     
         select(item) {

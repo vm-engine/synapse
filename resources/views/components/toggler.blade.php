@@ -43,7 +43,7 @@
                     id="{{ $componentId }}"
                     name="{{ $name }}"
                     type="checkbox"
-                    :checked="active"
+                    x-model="active"
                     {{ $attributes->only(['@change', 'wire:model', 'wire:loading']) }}
                 />
                 <div

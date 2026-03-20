@@ -21,7 +21,7 @@
         });"
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
-    <span class="pointer-events-none input-group-item right">
+    <span class="input-group-item right pointer-events-none">
         <svg
             class="fill-current"
             width="20"
