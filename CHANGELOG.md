@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.4] - 2026-04-04
+
+### Changed
+- **Home stub module — MFC pattern**: Updated `stubs/synapps/modules/home/` to use Livewire MFC (Multi-File Component) pattern instead of a traditional controller
+  - `HomeServiceProvider` now uses `AutoRegistersComponents` trait and calls `registerComponents()` for automatic component discovery
+  - Route changed from `[HomeController::class, 'index']` to `Route::livewire('/', 'home::landing')`
+  - Added new `landing` MFC component (`resources/views/components/landing/landing.php` and `landing.blade.php`) that resolves the active frontend theme layout with a fallback to `synapps::components.layouts.layout`
+
 ## [2.3.1] - 2026-03-02
 
 ### Added
