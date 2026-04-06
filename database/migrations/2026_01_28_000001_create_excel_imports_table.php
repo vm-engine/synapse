@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('excel_imports')) {
+            return;
+        }
+
         Schema::create('excel_imports', function (Blueprint $table) {
             $table->id();
             $table->string('status', 20)->default('pending');

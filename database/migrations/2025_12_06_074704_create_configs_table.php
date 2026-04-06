@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('configs')) {
+            return;
+        }
+
         Schema::create('configs', function (Blueprint $table) {
             $table->id();
             $table->string('group')->default('global');

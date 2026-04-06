@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('excel_exports', function (Blueprint $table) {
-            $table->string('reference')->nullable()->after('user_id')->index();
-        });
+        if (Schema::hasTable('excel_exports') && ! Schema::hasColumn('excel_exports', 'reference')) {
+            Schema::table('excel_exports', function (Blueprint $table) {
+                $table->string('reference')->nullable()->after('user_id')->index();
+            });
+        }
 
-        Schema::table('excel_imports', function (Blueprint $table) {
-            $table->string('reference')->nullable()->after('user_id')->index();
-        });
+        if (Schema::hasTable('excel_imports') && ! Schema::hasColumn('excel_imports', 'reference')) {
+            Schema::table('excel_imports', function (Blueprint $table) {
+                $table->string('reference')->nullable()->after('user_id')->index();
+            });
+        }
     }
 
     /**
@@ -25,14 +29,18 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('excel_exports', function (Blueprint $table) {
-            $table->dropIndex(['reference']);
-            $table->dropColumn('reference');
-        });
+        if (Schema::hasTable('excel_exports') && Schema::hasColumn('excel_exports', 'reference')) {
+            Schema::table('excel_exports', function (Blueprint $table) {
+                $table->dropIndex(['reference']);
+                $table->dropColumn('reference');
+            });
+        }
 
-        Schema::table('excel_imports', function (Blueprint $table) {
-            $table->dropIndex(['reference']);
-            $table->dropColumn('reference');
-        });
+        if (Schema::hasTable('excel_imports') && Schema::hasColumn('excel_imports', 'reference')) {
+            Schema::table('excel_imports', function (Blueprint $table) {
+                $table->dropIndex(['reference']);
+                $table->dropColumn('reference');
+            });
+        }
     }
 };
