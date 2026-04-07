@@ -293,6 +293,7 @@ class ModuleGeneratorService
             'routes',
             'resources/views',
             'resources/views/livewire',
+            'resources/views/components',
             'database/migrations',
             'database/factories',
             'database/seeders',

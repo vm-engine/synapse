@@ -50,7 +50,12 @@ class SynapseUtils
 
     public static function isSynAppsAutoloaded(): bool
     {
-        $composerJson = file_get_contents(base_path('composer.json'));
+        $path = base_path('composer.json');
+        if (! file_exists($path)) {
+            return false;
+        }
+
+        $composerJson = file_get_contents($path);
 
         return strpos($composerJson, 'SynApps') !== false;
     }

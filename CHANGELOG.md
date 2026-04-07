@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.6] - 2026-04-07
+
+### Added
+- **`resources/views/components` directory**: Module scaffolding now creates this directory automatically when generating a new module, enabling MFC component development out of the box
+- **`--discover` flag on generator commands**: All `synapps:make-*` generator commands now accept a `--discover` flag to run module discovery after generation; removes the interactive prompt that was previously shown (non-interactive mode no longer auto-runs discovery)
+
+### Changed
+- **`ServiceProvider.stub`**: Generated service provider now includes `AutoRegistersComponents` trait and calls `$this->registerComponents()` in `register()`, so new modules auto-register Livewire and Blade components without extra setup
+- **`glob` dependency**: Moved `glob` from main npm dependencies to dev-only and updated to `^13.0.0`; only `vite-plugin-static-copy` remains in main npm deps
+- **Laravel 13 compatibility**: Updated `laravel/framework` requirement to `12.x|13.x`
+
+### Fixed
+- **`SynapseUtils::isSynAppsAutoloaded()`**: No longer throws `ErrorException` when `composer.json` does not exist at the base path (e.g., in Orchestra Testbench environments); returns `false` gracefully instead
+
 ## [2.3.4] - 2026-04-04
 
 ### Changed

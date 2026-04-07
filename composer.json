@@ -1,10 +1,10 @@
 {
     "name": "vm-engine/synapse",
-    "version": "2.3.5",
+    "version": "2.3.6",
     "description": "HP Synapse rebuild using Livewire and as Laravel Package",
     "type": "library",
     "require": {
-        "laravel/framework": "12.x",
+        "laravel/framework": "12.x|13.x",
         "livewire/livewire": "^4.0",
         "composer/semver": "^3.0",
         "openspout/openspout": "^4.0",

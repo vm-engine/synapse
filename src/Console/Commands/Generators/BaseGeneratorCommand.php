@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputOption;
 use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
 
 use function Laravel\Prompts\confirm;
@@ -13,6 +14,12 @@ use function Laravel\Prompts\text;
 abstract class BaseGeneratorCommand extends Command
 {
     protected ModuleGeneratorService $generator;
+
+    protected function configure(): void
+    {
+        parent::configure();
+        $this->addOption('discover', null, InputOption::VALUE_NONE, 'Run module discovery after generation');
+    }
 
     /**
      * Component type (model, controller, migration, etc.)
@@ -151,15 +158,7 @@ abstract class BaseGeneratorCommand extends Command
      */
     protected function shouldRunDiscovery(): bool
     {
-        if ($this->option('no-interaction')) {
-            return true;
-        }
-
-        return confirm(
-            label: 'Run module discovery?',
-            default: true,
-            hint: 'Updates PSR-4 autoload and dependencies'
-        );
+        return (bool) $this->option('discover');
     }
 
     /**
