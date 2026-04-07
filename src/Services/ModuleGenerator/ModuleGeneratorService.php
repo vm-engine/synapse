@@ -600,7 +600,8 @@ class ModuleGeneratorService
         ];
 
         // Merge with custom options (allows commands to pass additional variables)
-        return array_merge($variables, $options);
+        // Filter out null values to avoid overwriting computed variables (e.g., 'table' when --create is used)
+        return array_merge($variables, array_filter($options, fn ($v) => $v !== null));
     }
 
     /**

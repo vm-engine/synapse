@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.7] - 2026-04-07
+
+### Fixed
+- **`synapps:make-migration --create`**: Migration stub `{{ table }}` placeholder was not replaced when using `--create` option; `array_merge($variables, $options)` was overwriting the computed `table` variable with `null` from the `--table` option; fixed by filtering null values from options before merging
+
 ## [2.3.6] - 2026-04-07
 
 ### Added
