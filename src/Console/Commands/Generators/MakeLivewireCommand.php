@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
 use Illuminate\Support\Str;
+use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
 
 class MakeLivewireCommand extends BaseGeneratorCommand
 {
@@ -64,7 +65,7 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
     protected function handleMfc(): int
     {
-        $this->generator = app(\VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService::class);
+        $this->generator = app(ModuleGeneratorService::class);
 
         $module = $this->getModuleName();
         $name = $this->getComponentName();
@@ -120,7 +121,7 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
     protected function handleSfc(): int
     {
-        $this->generator = app(\VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService::class);
+        $this->generator = app(ModuleGeneratorService::class);
 
         $module = $this->getModuleName();
         $name = $this->getComponentName();

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\QueryException;
 use VmEngine\Synapse\Models\Language;
 
 test('can create language', function () {
@@ -69,7 +70,7 @@ test('unique constraint on language_code and key', function () {
         'language_code' => 'en',
         'key' => 'test',
         'value' => 'Second',
-    ]))->toThrow(\Illuminate\Database\QueryException::class);
+    ]))->toThrow(QueryException::class);
 });
 
 test('allows same key in different languages', function () {

@@ -2,21 +2,25 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use VmEngine\Synapse\Enums\ExcelTaskStatus;
 use VmEngine\Synapse\Events\ExcelImportCompleted;
 use VmEngine\Synapse\Events\ExcelImportFailed;
 use VmEngine\Synapse\Jobs\ProcessExcelExport;
 use VmEngine\Synapse\Jobs\ProcessExcelImport;
+use VmEngine\Synapse\Models\Config;
 use VmEngine\Synapse\Models\ExcelExport;
 use VmEngine\Synapse\Models\ExcelImport;
 use VmEngine\Synapse\Services\Excel\Contracts\ExportQuery;
 use VmEngine\Synapse\Services\Excel\Contracts\ProcessesImport;
 use VmEngine\Synapse\Services\Excel\ExcelExporter;
 use VmEngine\Synapse\Services\Excel\ExcelImporter;
+use VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
 use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
 use VmEngine\Synapse\Services\Excel\Transformers\UpperCaseTransformer;
 
@@ -50,7 +54,7 @@ describe('ExcelImporter dispatch', function () {
 
     it('throws when processor class does not implement interface', function () {
         ExcelImporter::make('/tmp/test.csv')
-            ->dispatch(\stdClass::class);
+            ->dispatch(stdClass::class);
     })->throws(RuntimeException::class, 'must implement');
 
     it('processes import job synchronously', function () {
@@ -101,7 +105,7 @@ describe('ExcelImporter dispatch', function () {
 
         try {
             $job->handle();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Expected
         }
 
@@ -291,9 +295,9 @@ class TestImportProcessor implements ProcessesImport
 
 class TestExportQuery implements ExportQuery
 {
-    public function __invoke(): \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+    public function __invoke(): Builder|Illuminate\Database\Query\Builder
     {
-        return \VmEngine\Synapse\Models\Config::query();
+        return Config::query();
     }
 }
 
@@ -304,9 +308,9 @@ class FilteredExportQuery implements ExportQuery
         public readonly ?string $keyPrefix = null,
     ) {}
 
-    public function __invoke(): \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+    public function __invoke(): Builder|Illuminate\Database\Query\Builder
     {
-        return \VmEngine\Synapse\Models\Config::query()
+        return Config::query()
             ->when($this->group, fn ($q) => $q->where('group', $this->group))
             ->when($this->keyPrefix, fn ($q) => $q->where('key', 'like', $this->keyPrefix.'%'));
     }
@@ -344,13 +348,13 @@ describe('ExcelExporter with styles dispatch', function () {
 
     it('processes background export with styles', function () {
         // Create some test data in configs table
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'test',
             'key' => 'setting1',
             'value' => 'value1',
             'label' => 'Test Setting 1',
         ]);
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'test',
             'key' => 'setting2',
             'value' => 'value2',
@@ -388,7 +392,7 @@ describe('ExcelExporter with styles dispatch', function () {
         expect(file_exists($outputPath))->toBeTrue();
 
         // Verify styles were applied
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($outputPath);
+        $spreadsheet = IOFactory::load($outputPath);
         $sheet = $spreadsheet->getActiveSheet();
 
         // Column widths
@@ -449,7 +453,7 @@ describe('ExcelExporter with reference dispatch', function () {
 
 describe('ExcelExporter background with transformers', function () {
     it('processes background export with transformer columns', function () {
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'test',
             'key' => 'setting1',
             'value' => 'hello world',
@@ -484,7 +488,7 @@ describe('ExcelExporter background with transformers', function () {
         expect($task->status)->toBe(ExcelTaskStatus::Completed);
         expect(file_exists($outputPath))->toBeTrue();
 
-        $reader = new \VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+        $reader = new SpoutReader;
         $reader->open($outputPath);
         $rows = [];
         foreach ($reader->rows() as $row) {
@@ -503,7 +507,7 @@ describe('ExcelExporter background with transformers', function () {
     });
 
     it('processes background export with transformer config', function () {
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'test',
             'key' => 'active_flag',
             'value' => '1',
@@ -538,7 +542,7 @@ describe('ExcelExporter background with transformers', function () {
 
         expect($task->status)->toBe(ExcelTaskStatus::Completed);
 
-        $reader = new \VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+        $reader = new SpoutReader;
         $reader->open($outputPath);
         $rows = [];
         foreach ($reader->rows() as $row) {
@@ -574,19 +578,19 @@ describe('ExcelExporter with filters dispatch', function () {
 
     it('processes background export with filters', function () {
         // Create test data with different groups
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'app',
             'key' => 'setting1',
             'value' => 'value1',
             'label' => 'App Setting 1',
         ]);
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'app',
             'key' => 'setting2',
             'value' => 'value2',
             'label' => 'App Setting 2',
         ]);
-        \VmEngine\Synapse\Models\Config::create([
+        Config::create([
             'group' => 'system',
             'key' => 'other',
             'value' => 'value3',
@@ -624,7 +628,7 @@ describe('ExcelExporter with filters dispatch', function () {
         expect($task->processed_rows)->toBe(2);
 
         // Read file to verify content
-        $reader = new \VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+        $reader = new SpoutReader;
         $reader->open($outputPath);
         $rows = [];
         foreach ($reader->rows() as $row) {

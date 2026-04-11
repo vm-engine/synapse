@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
 use Illuminate\Console\Command;
+use Spatie\LaravelData\Data;
 
 class MakeDataCommand extends BaseGeneratorCommand
 {
@@ -23,7 +24,7 @@ class MakeDataCommand extends BaseGeneratorCommand
      */
     public function handle(): int
     {
-        if (! class_exists(\Spatie\LaravelData\Data::class)) {
+        if (! class_exists(Data::class)) {
             $this->components->error('spatie/laravel-data is not installed.');
             $this->components->info('Install it with: composer require spatie/laravel-data');
 

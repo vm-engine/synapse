@@ -6,6 +6,7 @@ namespace VmEngine\Synapse\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use VmEngine\Synapse\Enums\ExcelTaskStatus;
 
 /**
@@ -20,11 +21,11 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
  * @property int|null $failed_at_row
  * @property array<string, mixed>|null $options
  * @property string|null $error_message
- * @property \Illuminate\Support\Carbon|null $started_at
- * @property \Illuminate\Support\Carbon|null $completed_at
- * @property \Illuminate\Support\Carbon|null $last_heartbeat_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $started_at
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $last_heartbeat_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static \VmEngine\Synapse\Models\ExcelImport create(array $attributes)

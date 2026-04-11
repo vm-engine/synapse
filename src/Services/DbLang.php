@@ -2,6 +2,7 @@
 
 namespace VmEngine\Synapse\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use VmEngine\Synapse\Models\Language;
 
 class DbLang
@@ -101,7 +102,7 @@ class DbLang
 
     private function loadLanguage(string $languageCode): void
     {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, Language> $langs */
+        /** @var Collection<int, Language> $langs */
         $langs = Language::where('language_code', $languageCode)->get();
 
         foreach ($langs as $lang) {

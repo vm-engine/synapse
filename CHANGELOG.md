@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.8] - 2026-04-11
+
+### Added
+- **`registerConfigs()`**: `SynapseServiceProvider` now auto-loads PHP config files from `synapps/modules/{id}/config/*.php` for directory modules using `mergeConfigFrom()`, so modules can ship their own Laravel config files without manual registration
+
+### Changed
+- **Component prefix now snake_case**: `AutoRegistersComponents::getComponentPrefix()` switched from `Str::kebab()` to `Str::snake()` — multi-word module names now register with underscores (e.g. `my_module`) instead of dashes; single-word names are unaffected
+
+### Fixed
+- **Import cleanup**: `SynapseServiceProvider` — replaced FQCN references with proper `use` imports for `AliasLoader` and `Data`; removed redundant fully-qualified class names inline
+
 ## [2.3.7] - 2026-04-07
 
 ### Fixed

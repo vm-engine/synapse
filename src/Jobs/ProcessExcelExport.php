@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -135,7 +137,7 @@ class ProcessExcelExport implements ShouldQueue
      *
      * @param  array<string, mixed>  $filters
      */
-    private function resolveQuery(?string $queryClass, array $filters = []): \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+    private function resolveQuery(?string $queryClass, array $filters = []): Builder|\Illuminate\Database\Query\Builder
     {
         if ($queryClass === null) {
             throw new \RuntimeException('No query class specified for background export.');
@@ -227,7 +229,7 @@ class ProcessExcelExport implements ShouldQueue
     private function extractRowData(mixed $record, array $columns): array
     {
         if (empty($columns)) {
-            if ($record instanceof \Illuminate\Database\Eloquent\Model) {
+            if ($record instanceof Model) {
                 return array_values($record->toArray());
             }
 
@@ -259,7 +261,7 @@ class ProcessExcelExport implements ShouldQueue
             return data_get($record, $field);
         }
 
-        if ($record instanceof \Illuminate\Database\Eloquent\Model) {
+        if ($record instanceof Model) {
             return $record->getAttribute($field);
         }
 

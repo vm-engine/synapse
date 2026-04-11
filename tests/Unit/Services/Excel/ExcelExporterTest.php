@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Builder;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use VmEngine\Synapse\Services\Excel\ExcelExporter;
 use VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
 use VmEngine\Synapse\Services\Excel\Transformers\BooleanTransformer;
@@ -37,8 +39,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'Jane Smith', 'email' => 'jane@example.com'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns(['name', 'email'])
@@ -70,8 +72,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'Jane Smith', 'email' => 'jane@example.com', 'age' => 25],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -104,8 +106,8 @@ describe('ExcelExporter', function () {
             (object) ['first_name' => 'John', 'last_name' => 'Doe'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -135,8 +137,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'Jane Smith', 'email' => 'jane@example.com', 'phone' => '456'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns(['name', 'email', 'phone'])
@@ -147,7 +149,7 @@ describe('ExcelExporter', function () {
         expect(file_exists($outputPath))->toBeTrue();
 
         // Verify template content is preserved using PhpSpreadsheet
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($outputPath);
+        $spreadsheet = IOFactory::load($outputPath);
         $sheet = $spreadsheet->getActiveSheet();
 
         // Template header should be preserved
@@ -169,8 +171,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'John'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns(['name'])
@@ -193,8 +195,8 @@ describe('ExcelExporter', function () {
         $nestedDir = $this->outputDir.'/nested/deep/dir';
         $outputPath = $nestedDir.'/output.csv';
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator([]));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator([]));
 
         ExcelExporter::make($mockQuery)
             ->columns(['name'])
@@ -210,11 +212,11 @@ describe('ExcelExporter', function () {
     });
 
     it('throws exception when ExportQuery class does not implement interface', function () {
-        ExcelExporter::make(\stdClass::class);
+        ExcelExporter::make(stdClass::class);
     })->throws(RuntimeException::class, 'must implement');
 
     it('throws exception when dispatching with query builder instead of class', function () {
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+        $mockQuery = Mockery::mock(Builder::class);
 
         ExcelExporter::make($mockQuery)->dispatch('/tmp/output.xlsx');
     })->throws(RuntimeException::class, 'Background export requires an ExportQuery class');
@@ -227,8 +229,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'Jane Smith', 'salary' => 60000],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -246,7 +248,7 @@ describe('ExcelExporter', function () {
 
         expect(file_exists($outputPath))->toBeTrue();
 
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($outputPath);
+        $spreadsheet = IOFactory::load($outputPath);
         $sheet = $spreadsheet->getActiveSheet();
 
         expect($sheet->getColumnDimension('A')->getWidth())->toBe(30.0);
@@ -263,8 +265,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'John Doe'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns(['Name' => 'name'])
@@ -276,7 +278,7 @@ describe('ExcelExporter', function () {
 
         expect(file_exists($outputPath))->toBeTrue();
 
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($outputPath);
+        $spreadsheet = IOFactory::load($outputPath);
         $sheet = $spreadsheet->getActiveSheet();
 
         expect($sheet->getStyle('A1')->getFont()->getBold())->toBeTrue();
@@ -292,8 +294,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'John Doe', 'email' => 'john@example.com'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -312,7 +314,7 @@ describe('ExcelExporter', function () {
 
         expect(file_exists($outputPath))->toBeTrue();
 
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($outputPath);
+        $spreadsheet = IOFactory::load($outputPath);
         $sheet = $spreadsheet->getActiveSheet();
 
         // Header should have both header style and column width
@@ -337,8 +339,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'John Doe', 'email' => 'john@example.com', 'phone' => '123'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns(['name', 'email', 'phone'])
@@ -351,7 +353,7 @@ describe('ExcelExporter', function () {
 
         expect(file_exists($outputPath))->toBeTrue();
 
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($outputPath);
+        $spreadsheet = IOFactory::load($outputPath);
         $sheet = $spreadsheet->getActiveSheet();
 
         // Template header preserved
@@ -371,8 +373,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'John Doe'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         // Export without any styles - should use SpoutWriter
         ExcelExporter::make($mockQuery)
@@ -382,7 +384,7 @@ describe('ExcelExporter', function () {
         expect(file_exists($outputPath))->toBeTrue();
 
         // Read back to verify data was written
-        $reader = new VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
+        $reader = new SpoutReader;
         $reader->open($outputPath);
         $rows = [];
         foreach ($reader->rows() as $row) {
@@ -402,8 +404,8 @@ describe('ExcelExporter', function () {
             (object) ['name' => 'John Doe'],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns(['name'])
@@ -431,8 +433,8 @@ describe('ExcelExporter', function () {
             ],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -466,12 +468,12 @@ describe('ExcelExporter', function () {
                 'name' => 'john doe',
                 'salary' => 50000.5,
                 'is_active' => true,
-                'created_at' => new \DateTimeImmutable('2025-06-15 14:30:00'),
+                'created_at' => new DateTimeImmutable('2025-06-15 14:30:00'),
             ],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -524,8 +526,8 @@ describe('ExcelExporter', function () {
             ],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -556,8 +558,8 @@ describe('ExcelExporter', function () {
             (object) ['client' => (object) ['name' => 'Acme']],
         ]);
 
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
-        $mockQuery->shouldReceive('cursor')->andReturn(new \ArrayIterator($items->toArray()));
+        $mockQuery = Mockery::mock(Builder::class);
+        $mockQuery->shouldReceive('cursor')->andReturn(new ArrayIterator($items->toArray()));
 
         ExcelExporter::make($mockQuery)
             ->columns([
@@ -577,7 +579,7 @@ describe('ExcelExporter', function () {
     });
 
     it('serializes transformer array columns for background dispatch', function () {
-        $mockQuery = Mockery::mock(\Illuminate\Database\Eloquent\Builder::class);
+        $mockQuery = Mockery::mock(Builder::class);
 
         $columns = [
             'Name' => 'name',
@@ -590,7 +592,7 @@ describe('ExcelExporter', function () {
 
         // Use reflection to test serializeColumns
         $exporter = ExcelExporter::make($mockQuery)->columns($columns);
-        $method = new \ReflectionMethod($exporter, 'serializeColumns');
+        $method = new ReflectionMethod($exporter, 'serializeColumns');
 
         $serialized = $method->invoke($exporter);
 

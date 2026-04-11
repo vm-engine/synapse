@@ -1,6 +1,7 @@
 <?php
 
 use VmEngine\Synapse\Models\Language;
+use VmEngine\Synapse\Services\DbLang;
 
 test('triple underscore helper returns translation', function () {
     Language::create([
@@ -11,7 +12,7 @@ test('triple underscore helper returns translation', function () {
 
     // Need to clear the service instance to reload with new data
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     expect(___('welcome'))->toBe('Welcome to our application!');
 });
@@ -26,7 +27,7 @@ test('triple underscore helper works with dotted keys', function () {
 
     // Clear and reload
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     expect(___('menu.home'))->toBe('Home')
         ->and(___('menu.about'))->toBe('About');
@@ -41,7 +42,7 @@ test('triple underscore helper handles unicode characters', function () {
 
     // Clear and reload
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     expect(___('greeting.arabic'))->toBe('مرحبا');
 });
@@ -51,7 +52,7 @@ test('triple underscore helper loads from cache', function () {
 
     // Initialize the service
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     // First call
     $first = ___('cached');
@@ -71,7 +72,7 @@ test('triple underscore helper handles empty translations', function () {
 
     // Clear and reload
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     expect(___('empty'))->toBe('');
 });
@@ -85,7 +86,7 @@ test('triple underscore helper handles special characters', function () {
 
     // Clear and reload
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     expect(___('special'))->toBe('Text with "quotes" & \'apostrophes\' <html>');
 });
@@ -97,7 +98,7 @@ test('triple underscore helper can fetch from different language', function () {
 
     // Clear and reload with default 'en'
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang);
+    app()->singleton('dblang', fn () => new DbLang);
 
     expect(___('hello'))->toBe('Hello')
         ->and(___('hello', 'id'))->toBe('Halo')
@@ -111,7 +112,7 @@ test('triple underscore helper supports multiple languages simultaneously', func
 
     // Clear and reload
     app()->forgetInstance('dblang');
-    app()->singleton('dblang', fn () => new \VmEngine\Synapse\Services\DbLang('en'));
+    app()->singleton('dblang', fn () => new DbLang('en'));
 
     expect(___('greeting'))->toBe('Good morning')
         ->and(___('greeting', 'id'))->toBe('Selamat pagi')

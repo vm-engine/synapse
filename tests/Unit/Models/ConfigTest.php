@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\QueryException;
 use VmEngine\Synapse\Models\Config;
 
 test('can create config', function () {
@@ -38,7 +39,7 @@ test('unique constraint on group and key', function () {
         'group' => 'app',
         'key' => 'name',
         'value' => 'Second',
-    ]))->toThrow(\Illuminate\Database\QueryException::class);
+    ]))->toThrow(QueryException::class);
 });
 
 test('allows same key in different groups', function () {

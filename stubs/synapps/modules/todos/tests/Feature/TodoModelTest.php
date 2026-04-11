@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Carbon;
 use SynApps\Modules\Todos\Models\Todo;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -28,7 +29,7 @@ test('casts due_date as datetime', function () {
         'due_date' => $dueDate,
     ]);
 
-    expect($todo->due_date)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
+    expect($todo->due_date)->toBeInstanceOf(Carbon::class)
         ->and($todo->due_date->format('Y-m-d'))->toBe($dueDate->format('Y-m-d'));
 });
 
@@ -46,7 +47,7 @@ test('casts completed_at as datetime', function () {
         'completed_at' => $completedAt,
     ]);
 
-    expect($todo->completed_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+    expect($todo->completed_at)->toBeInstanceOf(Carbon::class);
 });
 
 test('completed scope filters completed todos', function () {
@@ -275,5 +276,5 @@ test('completed_at has value for completed todos', function () {
     $todo = Todo::factory()->completed()->create();
 
     expect($todo->completed_at)->not->toBeNull()
-        ->and($todo->completed_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+        ->and($todo->completed_at)->toBeInstanceOf(Carbon::class);
 });

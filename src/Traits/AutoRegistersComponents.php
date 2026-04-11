@@ -187,8 +187,8 @@ trait AutoRegistersComponents
         $parts = explode('\\', $namespace);
         $moduleName = end($parts);
 
-        // Convert to kebab-case
-        $this->componentPrefix = Str::kebab($moduleName);
+        // Convert to snake_case
+        $this->componentPrefix = Str::snake($moduleName);
 
         return $this->componentPrefix;
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
 
@@ -148,7 +149,7 @@ abstract class BaseGeneratorCommand extends Command
         }
 
         // Default to synapps/modules/{module} for directory modules
-        $moduleName = \Illuminate\Support\Str::snake($module);
+        $moduleName = Str::snake($module);
 
         return base_path('synapps/modules/'.$moduleName);
     }

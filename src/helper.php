@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Str;
+use VmEngine\Synapse\Services\SyNav;
+use VmEngine\Synapse\Services\ThemeService;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
@@ -52,7 +54,7 @@ if (! function_exists('synav')) {
     /**
      * SyNav Helper function
      *
-     * @return VmEngine\Synapse\Services\SyNav
+     * @return SyNav
      */
     function synav()
     {
@@ -165,7 +167,7 @@ if (! function_exists('theme_service')) {
     /**
      * Get ThemeService instance
      */
-    function theme_service(): \VmEngine\Synapse\Services\ThemeService
+    function theme_service(): ThemeService
     {
         return app('synapse.theme');
     }

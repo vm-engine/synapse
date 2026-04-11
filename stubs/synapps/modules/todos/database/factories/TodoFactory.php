@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use SynApps\Modules\Todos\Models\Todo;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\SynApps\Modules\Todos\Models\Todo>
+ * @extends Factory<Todo>
  */
 class TodoFactory extends Factory
 {

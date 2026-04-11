@@ -6,6 +6,7 @@ namespace SynApps\Modules\Todos\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use SynDB\Modules\Todos\Factories\TodoFactory;
 use VmEngine\Synapse\Traits\WithDeleteToken;
 
 class Todo extends Model
@@ -18,7 +19,7 @@ class Todo extends Model
      */
     protected static function newFactory()
     {
-        return \SynDB\Modules\Todos\Factories\TodoFactory::new();
+        return TodoFactory::new();
     }
 
     protected $fillable = [

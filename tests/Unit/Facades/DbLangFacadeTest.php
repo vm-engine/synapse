@@ -33,7 +33,7 @@ test('facade loads existing translations on instantiation', function () {
 test('facade resolves to correct service instance', function () {
     $instance = DbLang::getFacadeRoot();
 
-    expect($instance)->toBeInstanceOf(\VmEngine\Synapse\Services\DbLang::class);
+    expect($instance)->toBeInstanceOf(VmEngine\Synapse\Services\DbLang::class);
 });
 
 test('facade can get language code', function () {

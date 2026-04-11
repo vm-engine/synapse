@@ -4,8 +4,10 @@ namespace VmEngine\Synapse;
 
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Spatie\LaravelData\Data;
 use VmEngine\Synapse\Console\Commands\Generators\MakeCastCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeChannelCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeClassCommand;
@@ -149,7 +151,7 @@ class SynapseServiceProvider extends ServiceProvider
             ]);
 
             // Register spatie/laravel-data command only when package is installed
-            if (class_exists(\Spatie\LaravelData\Data::class)) {
+            if (class_exists(Data::class)) {
                 $this->commands([MakeDataCommand::class]);
             }
         }
@@ -201,6 +203,7 @@ class SynapseServiceProvider extends ServiceProvider
             $this->bindClass();
             $this->registerSynAppsServiceProviders();
             $this->registerLangFiles();
+            $this->registerConfigs();
             $this->overrideConfigs();
         }
     }
@@ -219,7 +222,7 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if (config('synapps.binding.alias')) {
             $this->app->booting(function () {
-                $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+                $loader = AliasLoader::getInstance();
                 $classList = config('synapps.binding.alias', []);
                 foreach ($classList as $classAliasName => $className) {
                     $loader->alias($classAliasName, $className);
@@ -308,6 +311,23 @@ class SynapseServiceProvider extends ServiceProvider
                 $that->loadTranslationsFrom($v[0], $v[1]);
             }
         );
+    }
+
+    private function registerConfigs()
+    {
+        $modules = config('synapps.modules', []);
+        foreach ($modules as $module) {
+            if (! $module['is_package']) {
+                $configPath = synapps_path('modules'.DS.$module['id'].DS.'config');
+                if (file_exists($configPath)) {
+                    $configs = glob($configPath.DS.'*.php');
+                    foreach ($configs as $config) {
+                        $configName = basename($config, '.php');
+                        $this->mergeConfigFrom($config, $configName);
+                    }
+                }
+            }
+        }
     }
 
     private function overrideConfigs()

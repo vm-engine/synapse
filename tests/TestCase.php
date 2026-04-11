@@ -3,6 +3,8 @@
 namespace Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
+use VmEngine\Synapse\Facades\DbConfig;
+use VmEngine\Synapse\Facades\DbLang;
 use VmEngine\Synapse\SynapseServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -23,8 +25,8 @@ abstract class TestCase extends Orchestra
     protected function getPackageAliases($app): array
     {
         return [
-            'DbConfig' => \VmEngine\Synapse\Facades\DbConfig::class,
-            'DbLang' => \VmEngine\Synapse\Facades\DbLang::class,
+            'DbConfig' => DbConfig::class,
+            'DbLang' => DbLang::class,
         ];
     }
 

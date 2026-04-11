@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Finder;
 
+use Livewire\Compiler\Parser\MultiFileParser;
 use Livewire\Finder\Finder;
 
 /**
@@ -20,8 +21,8 @@ use Livewire\Finder\Finder;
  * This override makes hasValidMultiFileComponentSource consistent with MultiFileParser
  * by always using basename($dir) (with emoji stripped) as the file base name.
  *
- * @see \Livewire\Finder\Finder::hasValidMultiFileComponentSource
- * @see \Livewire\Compiler\Parser\MultiFileParser::parse
+ * @see Finder::hasValidMultiFileComponentSource
+ * @see MultiFileParser::parse
  */
 class SynapseFinder extends Finder
 {

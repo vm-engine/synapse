@@ -2,7 +2,14 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Livewire\Livewire;
+use SynApps\Modules\TestModule\TestModuleServiceProvider;
+use VmEngine\ExampleModule\TestServiceProvider;
+use VmEngine\MyPackage\MyPackageServiceProvider;
 use VmEngine\Synapse\Traits\AutoRegistersComponents;
+use VmEngine\TestModule\TestModuleProvider;
 
 test('gets component prefix from namespace automatically', function () {
     $code = <<<'PHP'
@@ -25,13 +32,13 @@ PHP;
 
     eval(str_replace('<?php', '', $code));
 
-    $provider = new \VmEngine\TestModule\TestModuleProvider(app());
-    expect($provider->getPrefix())->toBe('test-module');
+    $provider = new TestModuleProvider(app());
+    expect($provider->getPrefix())->toBe('test_module');
 });
 
 test('custom component prefix can be set', function () {
     // Test that prefix property exists and can be customized
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
 
@@ -50,7 +57,7 @@ test('custom component prefix can be set', function () {
     expect($provider->getPrefix())->toBe('custom-prefix');
 });
 
-test('converts pascal case to kebab case for prefix', function () {
+test('converts pascal case to snake_case for prefix', function () {
     $code = <<<'PHP'
 <?php
 namespace VmEngine\ExampleModule;
@@ -71,15 +78,15 @@ PHP;
 
     eval(str_replace('<?php', '', $code));
 
-    $provider = new \VmEngine\ExampleModule\TestServiceProvider(app());
-    expect($provider->getPrefix())->toBe('example-module');
+    $provider = new TestServiceProvider(app());
+    expect($provider->getPrefix())->toBe('example_module');
 });
 
 test('registers components safely when directories do not exist', function () {
     // Livewire::addNamespace will be called but with null paths for missing directories
-    \Livewire\Livewire::shouldReceive('addNamespace')->once();
+    Livewire::shouldReceive('addNamespace')->once();
 
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
 
@@ -94,7 +101,7 @@ test('registers components safely when directories do not exist', function () {
 });
 
 test('trait has required methods', function () {
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
     };
@@ -128,8 +135,8 @@ PHP;
 
     eval(str_replace('<?php', '', $code));
 
-    $provider = new \SynApps\Modules\TestModule\TestModuleServiceProvider(app());
-    expect($provider->getPrefix())->toBe('test-module');
+    $provider = new TestModuleServiceProvider(app());
+    expect($provider->getPrefix())->toBe('test_module');
 });
 
 test('prefix detection handles VmEngine package namespace', function () {
@@ -153,12 +160,12 @@ PHP;
 
     eval(str_replace('<?php', '', $code));
 
-    $provider = new \VmEngine\MyPackage\MyPackageServiceProvider(app());
-    expect($provider->getPrefix())->toBe('my-package');
+    $provider = new MyPackageServiceProvider(app());
+    expect($provider->getPrefix())->toBe('my_package');
 });
 
 test('can toggle component registration flags', function () {
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
 
@@ -215,7 +222,7 @@ test('converts nested component paths correctly to kebab-case', function () {
     foreach ($testCases as $input => $expected) {
         // Simulate the trait's logic
         $segments = explode('\\', $input);
-        $segments = array_map(fn ($segment) => \Illuminate\Support\Str::kebab($segment), $segments);
+        $segments = array_map(fn ($segment) => Str::kebab($segment), $segments);
         $result = implode('.', $segments);
 
         expect($result)->toBe($expected);
@@ -226,7 +233,7 @@ test('registerLivewireNamespace calls Livewire::addNamespace with correct params
     // Mock Livewire facade to capture the addNamespace call
     $calledWith = null;
 
-    \Livewire\Livewire::shouldReceive('addNamespace')
+    Livewire::shouldReceive('addNamespace')
         ->once()
         ->withArgs(function () use (&$calledWith) {
             $calledWith = func_get_args();
@@ -234,7 +241,7 @@ test('registerLivewireNamespace calls Livewire::addNamespace with correct params
             return true;
         });
 
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
 
@@ -255,13 +262,13 @@ test('registerComponents calls registerLivewireNamespace when livewire flag is e
     $namespaceCalled = false;
     $bladeCalled = false;
 
-    \Livewire\Livewire::shouldReceive('addNamespace')
+    Livewire::shouldReceive('addNamespace')
         ->once()
         ->andReturnUsing(function () use (&$namespaceCalled) {
             $namespaceCalled = true;
         });
 
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
 
@@ -277,9 +284,9 @@ test('registerComponents calls registerLivewireNamespace when livewire flag is e
 });
 
 test('registerComponents skips livewire when flag is disabled', function () {
-    \Livewire\Livewire::shouldReceive('addNamespace')->never();
+    Livewire::shouldReceive('addNamespace')->never();
 
-    $provider = new class(app()) extends \Illuminate\Support\ServiceProvider
+    $provider = new class(app()) extends ServiceProvider
     {
         use AutoRegistersComponents;
 

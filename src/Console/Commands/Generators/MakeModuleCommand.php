@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Console\Commands\Generators;
 
+use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
+
 use function Laravel\Prompts\text;
 
 class MakeModuleCommand extends BaseGeneratorCommand
@@ -30,7 +32,7 @@ class MakeModuleCommand extends BaseGeneratorCommand
      */
     public function handle(): int
     {
-        $this->generator = app(\VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService::class);
+        $this->generator = app(ModuleGeneratorService::class);
 
         try {
             // Get module name

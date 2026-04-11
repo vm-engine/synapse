@@ -11,14 +11,14 @@ use VmEngine\Synapse\Services\Excel\Transformers\UpperCaseTransformer;
 describe('DateFormatTransformer', function () {
     it('formats a DateTime object with default format', function () {
         $transformer = new DateFormatTransformer;
-        $date = new \DateTimeImmutable('2025-06-15 14:30:00');
+        $date = new DateTimeImmutable('2025-06-15 14:30:00');
 
         expect($transformer->transform($date, null))->toBe('2025-06-15');
     });
 
     it('formats a DateTime object with custom format', function () {
         $transformer = new DateFormatTransformer(format: 'd/m/Y');
-        $date = new \DateTimeImmutable('2025-06-15 14:30:00');
+        $date = new DateTimeImmutable('2025-06-15 14:30:00');
 
         expect($transformer->transform($date, null))->toBe('15/06/2025');
     });

@@ -41,5 +41,5 @@ test('facade get can force reload from database', function () {
 test('facade resolves to correct service instance', function () {
     $instance = DbConfig::getFacadeRoot();
 
-    expect($instance)->toBeInstanceOf(\VmEngine\Synapse\Services\DbConfig::class);
+    expect($instance)->toBeInstanceOf(VmEngine\Synapse\Services\DbConfig::class);
 });
