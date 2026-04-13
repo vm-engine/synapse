@@ -16,8 +16,10 @@ use VmEngine\Synapse\Components\Modal;
 use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
+use VmEngine\Synapse\Components\PerPageSelector;
 use VmEngine\Synapse\Components\RadioButtons;
 use VmEngine\Synapse\Components\Select;
+use VmEngine\Synapse\Components\SortIcon;
 use VmEngine\Synapse\Components\Toastr;
 use VmEngine\Synapse\Components\Toggler;
 use VmEngine\Synapse\Services\SynapseUtils;
@@ -114,5 +116,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(ConfirmDialog::class, 'synapse-confirm-dialog');
         $blade->component(Toastr::class, 'synapse-toastr');
         $blade->component(DragNDrop::class, 'synapse-drag-n-drop');
+        $blade->component(SortIcon::class, 'synapse-sort-icon');
+        $blade->component(PerPageSelector::class, 'synapse-per-page-selector');
     }
 }

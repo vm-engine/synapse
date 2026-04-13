@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.9] - 2026-04-13
+
+### Added
+- **`WithSortablePagination` trait**: Reusable Livewire trait providing `sortBy()`, `$sortField`, `$sortDirection`, `$perPage` properties, `validatedSortField()` / `validatedSortDirection()` whitelist helpers, and `allowedSortFields()` override point for list components
+- **`<x-synapse-sort-icon>` Blade component**: Renders a clickable sort icon (`fa-sort` / `fa-sort-up` / `fa-sort-down`) that calls `sortBy()` on the parent Livewire component; accepts `field`, `sort-field`, and `sort-direction` props
+- **`<x-synapse-per-page-selector>` Blade component**: Renders a per-page `<select>` (10/15/25/50) bound to `wire:model.live="perPage"` alongside pagination links; accepts a `paginator` prop (`LengthAwarePaginator`)
+
 ## [2.3.8] - 2026-04-11
 
 ### Added
