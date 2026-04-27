@@ -27,7 +27,9 @@
             this.show = true;
         },
         close() {
+            if (!this.show) return;
             this.show = false;
+            $dispatch('closed-modal-{{ $name }}');
         }
     }"
     @open-modal-{{ $name }}.window="open()"

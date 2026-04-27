@@ -83,11 +83,13 @@ if (! function_exists('dbconf')) {
 
             return $config->get($group, $key, $default, $force);
         } else {
-            $configKey = key($configString);
-            [$group, $key] = explode('.', (string) $configKey, 2);
-            $value = current($configString);
+            $result = null;
+            foreach ($configString as $configKey => $value) {
+                [$group, $key] = explode('.', (string) $configKey, 2);
+                $result = $config->set($group, $key, $value);
+            }
 
-            return $config->set($group, $key, $value);
+            return $result;
         }
     }
 }

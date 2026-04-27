@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.10] - 2026-04-27
+
+### Changed
+- **`<x-synapse-modal>` close behavior**: `close()` now dispatches a `closed-modal-{name}` event whenever the modal transitions from open to closed (close button, ESC key, or backdrop click), letting parent components react to all close paths. Includes a guard so the event only fires once per close.
+
+### Fixed
+- **`dbconf()` setter with array input**: When passed an associative array of `['group.key' => 'value']` pairs, the helper now iterates and persists every entry instead of silently writing only the first key.
+
 ## [2.3.9] - 2026-04-13
 
 ### Added

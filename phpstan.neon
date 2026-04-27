@@ -87,6 +87,13 @@ parameters:
             message: "#should return array<string, mixed> but returns array<int, mixed>#"
             path: src/Services/Excel/Support/ColumnMapper.php
 
+        # SynapseFinder addLocation call - parent class dynamically resolved at runtime
+        -
+            message: "#Call to an undefined method VmEngine\\\\Synapse\\\\Finder\\\\SynapseFinder::addLocation\\(\\)#"
+            path: src/SynapseServiceProvider.php
+
     reportUnmatchedIgnoredErrors: false
 
     excludePaths:
+        # Livewire Finder class location varies across Livewire versions; SynapseFinder overrides livewire.finder at runtime
+        - src/Finder/SynapseFinder.php
