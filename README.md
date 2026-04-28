@@ -169,6 +169,11 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-datepicker />
 <x-synapse-currency currency="$" />
 
+<!-- File upload -->
+<x-synapse-drag-n-drop wireModel="avatar" />          {{-- single image, with preview --}}
+<x-synapse-file-drop wire-model="docs" multiple       {{-- multi-file, any type --}}
+    :max-count="3" :allowed-types="['pdf','jpg']" />
+
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
 <x-synapse-drawer title="Settings">...</x-synapse-drawer>

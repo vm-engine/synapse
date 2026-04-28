@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.11] - 2026-04-28
+
+### Added
+- **`<x-synapse-file-drop>`** — new multi-file drop-zone Blade component, complements the existing `<x-synapse-drag-n-drop>` (which is single-image-only with preview). Use cases: forms with multiple file slots that accept any file type (PDF, docs, etc.), each with its own `maxCount` and per-slot allowed extensions.
+  - **Class:** `VmEngine\Synapse\Components\FileDrop` (registered in `SynapseViewServiceProvider` as `synapse-file-drop`)
+  - **View:** `resources/views/components/file-drop.blade.php` — self-contained scoped CSS via `@once`, drag-and-drop event chain, hidden input with `opacity:0` overlay, `is-dragging` state with brand-teal styling
+  - **Props:** `wireModel`, `multiple`, `maxCount`, `maxSizeKb`, `allowedTypes` (extension array), `currentCount` (parent-supplied), `name`, `label`, `hint`, `fullText`, `uploadingText`, `error`, `module` (lang-namespace driver)
+  - **Module-driven translations:** when `module="my-module"` is passed, the four default strings (`label`, `full`, `uploading`, `max`/`kb`) resolve via `__("my-module::file_drop.{key}")` with English fallbacks if any key is missing — lets each consumer module localise without per-instance prop overrides
+  - **Existing files:** the component owns the drop zone only; consumers render their own existing-files list and feed the count via `currentCount` so the zone knows when the slot is full
+
+### Changed
+- **Documentation** — `docs/COMPONENTS.md` now has a dedicated **"File Upload Components"** section with a side-by-side comparison of `<x-synapse-drag-n-drop>` vs `<x-synapse-file-drop>`, full reference for both (the drag-n-drop component was previously undocumented), three usage examples for file-drop, and the per-module `lang/{locale}/file_drop.php` schema
+- **README quick reference** — Blade Components snippet now includes a "File upload" group with one-line examples for both components
+
 ## [2.3.10] - 2026-04-27
 
 ### Changed

@@ -161,6 +161,112 @@ Date picker using Flatpickr:
 
 ---
 
+## File Upload Components
+
+Synapse ships two complementary file-upload components. Pick by use case:
+
+| | `<x-synapse-drag-n-drop>` | `<x-synapse-file-drop>` |
+|---|---|---|
+| Files | Single only | Single or multiple (`multiple` prop) |
+| File types | Image-only with preview thumbnail | Any file type |
+| Slot count | n/a | `maxCount` enforcement (combined with `currentCount`) |
+| Default copy | English defaults via props | Hardcoded English **or** module-driven via `module="…"` lang namespace |
+| Styling | Tailwind utilities baked into markup | Self-contained scoped CSS (`@once`-protected) |
+| Best for | Avatar / logo / single-image fields | Multi-slot attachment forms (e.g. one drop zone per required document) |
+
+### Drag-n-Drop (single image, with preview)
+
+Single-file image picker with drag-and-drop, client-side validation, and a base64 preview thumbnail. Best paired with Livewire's `wire:model` for direct property binding.
+
+```blade
+<x-synapse-drag-n-drop
+    wireModel="avatar"
+    accept="image/png,image/jpeg,image/webp"
+    :maxSize="2048"
+    label="Drop your avatar here"
+    description="PNG, JPG, or WebP up to 2 MB" />
+```
+
+**Props:**
+- `name` (string, default: `'file'`) — `<input>` name attribute
+- `wireModel` (string|null) — Livewire property to bind to
+- `accept` (string, default: `'image/png,image/jpeg,image/webp'`) — comma-separated MIME types
+- `maxSize` (int, default: `5120`) — max file size in **KB** (client-side validated)
+- `maxWidth` / `maxHeight` (int|null) — server-side dimension validation hints
+- `preview` (bool, default: `true`) — render image preview on selection
+- `label`, `description`, `browseText` (string) — display copy
+- `error` (string|null) — initial server-side error to display
+
+**Behaviour:**
+- Drag-and-drop and click-to-browse both supported.
+- For `wireModel` mode: integrates with `livewire-upload-start` / `livewire-upload-finish` / `livewire-upload-error` events for upload progress feedback.
+- Uses `x-cloak` to prevent FOUC on the preview block.
+
+### File Drop (multi-file, any type)
+
+General-purpose multi-file drop zone designed for forms with several "slots" (e.g. an activity submission form with one drop zone per required document type). Stays presentation-agnostic — no embedded image preview — so it works for PDFs, spreadsheets, etc.
+
+```blade
+{{-- Single file --}}
+<x-synapse-file-drop
+    wire-model="avatar"
+    :allowed-types="['png', 'jpg', 'webp']"
+    :max-size-kb="2048" />
+
+{{-- Multiple files for one slot --}}
+<x-synapse-file-drop
+    wire-model="newFiles.{{ $doc->id }}"
+    multiple
+    :max-count="$doc->max_count"
+    :max-size-kb="$doc->max_size_kb"
+    :allowed-types="$doc->allowed_types"
+    :current-count="$total"
+    :error="$errors->first('newFiles.'.$doc->id)" />
+
+{{-- With consumer-module translations --}}
+<x-synapse-file-drop
+    module="submission"
+    wire-model="newFiles.5"
+    multiple
+    :max-count="3" />
+```
+
+**Props:**
+- `wireModel` (string|null) — Livewire property; nested array paths supported (e.g. `newFiles.5`)
+- `multiple` (bool, default: `false`) — accept multiple files in a single picker
+- `maxCount` (int|null) — when set, the zone is replaced with a "Maximum file reached" pill once `currentCount >= maxCount`
+- `maxSizeKb` (int|null) — shown in the auto-built hint and used by HTML5 client-side validation
+- `allowedTypes` (array, default: `[]`) — file extensions **without** the leading dot (e.g. `['pdf', 'jpg']`); used to build both the `accept=".pdf,.jpg"` attribute and the hint text
+- `currentCount` (int, default: `0`) — existing-plus-staged file count, supplied by the parent so the zone knows when it's full (existing files are rendered separately by the consumer)
+- `name` (string, default: `'file'`) — input `name` attribute
+- `error` (string|null) — server-side error string from `$errors->first(...)`
+- `label`, `hint`, `fullText`, `uploadingText` (string|null) — explicit overrides for the four visible strings; if any is null the component falls back to either the module-namespaced translation or a hardcoded English default
+- `module` (string|null) — translation namespace. When set, defaults resolve via `__("{module}::file_drop.{key}")` for `label`, `full`, `uploading`, `max`, `kb`. Any missing key falls back to the English default. Lets each consuming module localise without per-instance prop overrides.
+
+**Behaviour:**
+- Drag-and-drop: `dragover`/`dragenter` adds `.is-dragging` (brand teal background, solid border, 4px focus ring). On drop, files are written to the hidden input and a `change` event is dispatched so Livewire's `wire:model` picks them up.
+- Self-contained styling: emits a `<style>` block via `@once` so the CSS lands once per page regardless of how many instances exist.
+- Hint auto-built from `allowedTypes` + `maxSizeKb` (e.g. `"PDF, JPG · max 2,048 KB"`) when `hint` prop is null.
+- Counter pill (`1/3 file`) renders when `maxCount` is set.
+- Loading indicator: spinner + translated "Uploading…" text shown via `wire:loading wire:target="{wireModel}"`.
+
+**Module translation file** (`lang/{locale}/file_drop.php`):
+```php
+return [
+    'label' => 'Click to upload or drag &amp; drop',
+    'full' => 'Maximum file reached',
+    'uploading' => 'Uploading…',
+    'max' => 'max',
+    'kb' => 'KB',
+];
+```
+
+The label supports inline HTML — `<em>` is styled by the component as a brand-teal underlined call-to-action, so a translation like `'<em>Click to upload</em> or drag &amp; drop'` renders the verb as a tactile target.
+
+**Existing files:** the component owns the drop zone only. Render existing/already-uploaded files yourself above the component (the consumer keeps full control over the file-list markup, remove buttons, download links, etc.) and pass the count via `currentCount` so the component knows when the slot is full.
+
+---
+
 ## UI Components
 
 ### Confirm Dialog

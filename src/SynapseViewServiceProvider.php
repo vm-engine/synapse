@@ -12,6 +12,7 @@ use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\FileDrop;
 use VmEngine\Synapse\Components\Modal;
 use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
@@ -116,6 +117,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(ConfirmDialog::class, 'synapse-confirm-dialog');
         $blade->component(Toastr::class, 'synapse-toastr');
         $blade->component(DragNDrop::class, 'synapse-drag-n-drop');
+        $blade->component(FileDrop::class, 'synapse-file-drop');
         $blade->component(SortIcon::class, 'synapse-sort-icon');
         $blade->component(PerPageSelector::class, 'synapse-per-page-selector');
     }
