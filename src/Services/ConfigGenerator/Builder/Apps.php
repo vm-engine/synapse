@@ -59,16 +59,23 @@ class Apps extends BuilderBase
         if (file_exists($themeJsonPath)) {
             $themeConfig = json_decode(file_get_contents($themeJsonPath), true);
 
-            // Merge theme CDN resources into apps config
+            // Merge theme CDN resources into apps config. The set of layout
+            // buckets is read from the theme.json itself so custom layouts
+            // (e.g. 'landing', 'minisite') don't get silently dropped.
             foreach (['css', 'js', 'headers'] as $type) {
-                foreach (['all', 'app', 'guest', 'frontend'] as $layout) {
-                    if (isset($themeConfig[$type][$layout]) && is_array($themeConfig[$type][$layout])) {
-                        // Merge theme resources with existing resources
-                        $this->synapps->config['apps']['themes'][$type][$layout] = array_merge(
-                            $this->synapps->config['apps']['themes'][$type][$layout] ?? [],
-                            $themeConfig[$type][$layout]
-                        );
+                $layouts = is_array($themeConfig[$type] ?? null)
+                    ? array_keys($themeConfig[$type])
+                    : [];
+
+                foreach ($layouts as $layout) {
+                    if (! is_array($themeConfig[$type][$layout])) {
+                        continue;
                     }
+
+                    $this->synapps->config['apps']['themes'][$type][$layout] = array_merge(
+                        $this->synapps->config['apps']['themes'][$type][$layout] ?? [],
+                        $themeConfig[$type][$layout]
+                    );
                 }
             }
 

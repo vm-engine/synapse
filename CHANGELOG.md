@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.12] - 2026-05-04
+
+### Fixed
+- **Theme config compiler dropped custom layout buckets** — `Apps::loadActiveThemeConfig()` previously hardcoded the layout buckets it would read from `theme.json` to `['all', 'app', 'guest', 'frontend']`, silently discarding any custom layout key. Themes that define additional layouts (e.g. `landing`, `minisite`) for `css` / `js` / `headers` now have those buckets compiled into `config('synapps.apps.themes.*')` correctly. Backward compatible: existing themes with only the four standard buckets behave unchanged.
+
 ## [2.3.11] - 2026-04-28
 
 ### Added
