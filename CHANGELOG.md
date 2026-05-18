@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.13] - 2026-05-18
+
+### Changed
+- **`<x-synapse-currency>`** — input now auto-selects its content on focus when the displayed value is `"0"`, so typing immediately replaces the zero rather than appending to it.
+
 ## [2.3.12] - 2026-05-04
 
 ### Fixed
