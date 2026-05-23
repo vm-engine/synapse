@@ -1,72 +1,16 @@
 /**
- * Member4VM Theme JavaScript
- * Alpine.js components and utilities
+ * Application Synapse Theme — Base JavaScript (Shared Across All Layouts)
+ *
+ * Contains: Reusable Alpine.js components and utility functions loaded
+ * on EVERY page: dropdown, toast, modal, tabs, collapsible, tooltip,
+ * formValidator, and the m4vm utility namespace.
  */
 
 document.addEventListener('alpine:init', () => {
 
-    // Global Theme Store
-    Alpine.store('m4vm', {
-        sidebarOpen: Alpine.$persist(true).as('m4vm_sidebar_open'),
-        sidebarCollapsed: Alpine.$persist(false).as('m4vm_sidebar_collapsed'),
-        darkMode: Alpine.$persist(false).as('m4vm_dark_mode'),
-
-        init() {
-            // Apply dark mode class on init
-            if (this.darkMode) {
-                document.documentElement.classList.add('dark');
-            }
-        },
-
-        toggleSidebar() {
-            this.sidebarOpen = !this.sidebarOpen;
-        },
-
-        toggleCollapse() {
-            this.sidebarCollapsed = !this.sidebarCollapsed;
-        },
-
-        toggleDarkMode() {
-            this.darkMode = !this.darkMode;
-            if (this.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-    });
-
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-        // Cmd/Ctrl + K for search
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-            e.preventDefault();
-            const searchInput = document.querySelector('input[type="text"][placeholder*="Search"]');
-            if (searchInput) {
-                searchInput.focus();
-            }
-        }
-
-        // Cmd/Ctrl + B for sidebar toggle
-        if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-            e.preventDefault();
-            Alpine.store('m4vm').toggleSidebar();
-        }
-
-        // Cmd/Ctrl + D for dark mode toggle
-        if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
-            e.preventDefault();
-            Alpine.store('m4vm').toggleDarkMode();
-        }
-
-        // Escape to close dropdowns and modals
-        if (e.key === 'Escape') {
-            // Trigger click.away for all open dropdowns
-            window.dispatchEvent(new Event('click'));
-        }
-    });
-
-    // Dropdown Component
+    // ============================================
+    // DROPDOWN COMPONENT
+    // ============================================
     Alpine.data('dropdown', () => ({
         open: false,
 
@@ -90,7 +34,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // Toast Notification Component
+    // ============================================
+    // TOAST NOTIFICATION COMPONENT
+    // ============================================
     Alpine.data('toast', () => ({
         show: false,
         message: '',
@@ -113,7 +59,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // Modal Component
+    // ============================================
+    // MODAL COMPONENT
+    // ============================================
     Alpine.data('modal', (isOpen = false) => ({
         open: isOpen,
 
@@ -136,7 +84,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // Tabs Component
+    // ============================================
+    // TABS COMPONENT
+    // ============================================
     Alpine.data('tabs', (defaultTab = 0) => ({
         activeTab: defaultTab,
 
@@ -149,7 +99,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // Accordion/Collapsible Component
+    // ============================================
+    // ACCORDION/COLLAPSIBLE COMPONENT
+    // ============================================
     Alpine.data('collapsible', (isOpen = false) => ({
         open: isOpen,
 
@@ -158,7 +110,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // Tooltip Component
+    // ============================================
+    // TOOLTIP COMPONENT
+    // ============================================
     Alpine.data('tooltip', (text = '') => ({
         tooltipText: text,
         show: false,
@@ -177,80 +131,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // Sidebar Menu Component
-    Alpine.data('sidebarMenu', () => ({
-        activeMenu: null,
-        submenus: {},
-
-        init() {
-            // Get current route to set active menu
-            const path = window.location.pathname;
-            this.activeMenu = this.findActiveMenu(path);
-        },
-
-        findActiveMenu(path) {
-            // Logic to determine active menu from path
-            return path.split('/')[1] || 'dashboard';
-        },
-
-        toggleSubmenu(menuId) {
-            if (!this.submenus[menuId]) {
-                this.submenus[menuId] = true;
-            } else {
-                this.submenus[menuId] = !this.submenus[menuId];
-            }
-        },
-
-        isSubmenuOpen(menuId) {
-            return this.submenus[menuId] === true;
-        },
-
-        isActive(menuId) {
-            return this.activeMenu === menuId;
-        }
-    }));
-
-    // Search Component with Debounce
-    Alpine.data('search', () => ({
-        query: '',
-        results: [],
-        loading: false,
-        timeout: null,
-
-        search() {
-            clearTimeout(this.timeout);
-
-            if (this.query.length < 2) {
-                this.results = [];
-                return;
-            }
-
-            this.timeout = setTimeout(() => {
-                this.loading = true;
-                this.performSearch();
-            }, 300);
-        },
-
-        performSearch() {
-            // Implement your search logic here
-            // Example: fetch('/api/search?q=' + this.query)
-
-            setTimeout(() => {
-                this.results = [
-                    { title: 'Sample Result 1', url: '#' },
-                    { title: 'Sample Result 2', url: '#' }
-                ];
-                this.loading = false;
-            }, 500);
-        },
-
-        clear() {
-            this.query = '';
-            this.results = [];
-        }
-    }));
-
-    // Form Validator Component
+    // ============================================
+    // FORM VALIDATOR COMPONENT
+    // ============================================
     Alpine.data('formValidator', () => ({
         errors: {},
         touched: {},
@@ -302,7 +185,9 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-// Utility Functions (Global Namespace)
+// ============================================
+// UTILITY FUNCTIONS (Global Namespace)
+// ============================================
 window.m4vm = {
     /**
      * Copy text to clipboard
@@ -311,7 +196,6 @@ window.m4vm = {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
                 console.log('Copied to clipboard');
-                // Optionally trigger a toast notification
             }).catch(err => {
                 console.error('Failed to copy:', err);
             });
@@ -352,36 +236,23 @@ window.m4vm = {
         const diff = now - d;
 
         if (format === 'relative') {
-            // Less than 1 minute
             if (diff < 60000) return 'Just now';
-
-            // Less than 1 hour
             if (diff < 3600000) {
                 const minutes = Math.floor(diff / 60000);
                 return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
             }
-
-            // Less than 1 day
             if (diff < 86400000) {
                 const hours = Math.floor(diff / 3600000);
                 return `${hours} hour${hours > 1 ? 's' : ''} ago`;
             }
-
-            // Less than 1 week
             if (diff < 604800000) {
                 const days = Math.floor(diff / 86400000);
                 return `${days} day${days > 1 ? 's' : ''} ago`;
             }
-
-            // Format as date
             return d.toLocaleDateString();
         }
 
-        // Other formats
-        if (format === 'short') {
-            return d.toLocaleDateString();
-        }
-
+        if (format === 'short') return d.toLocaleDateString();
         if (format === 'long') {
             return d.toLocaleDateString('en-US', {
                 year: 'numeric',
@@ -389,14 +260,12 @@ window.m4vm = {
                 day: 'numeric'
             });
         }
-
         if (format === 'time') {
             return d.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
         }
-
         return d.toLocaleString();
     },
 
@@ -467,11 +336,7 @@ window.m4vm = {
         if (!element) return;
 
         const top = element.getBoundingClientRect().top + window.pageYOffset - offset;
-
-        window.scrollTo({
-            top: top,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: top, behavior: 'smooth' });
     },
 
     /**
@@ -494,11 +359,3 @@ window.m4vm = {
         window.URL.revokeObjectURL(url);
     }
 };
-
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Member4VM Theme loaded');
-
-    // Initialize dark mode from store
-    Alpine.store('m4vm')?.init();
-});

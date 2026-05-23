@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-05-23
+
+### Added
+- **Per-layout CSS/JS split** — Theme assets are now split into 4 CSS + 4 JS files per theme:
+  - `theme-base.css` / `theme-base.js` — shared, loaded on every page
+  - `theme-app.css` / `theme-app.js` — backend/admin layout only
+  - `theme-frontend.css` / `theme-frontend.js` — public/frontend layout only
+  - `theme-guest.css` / `theme-guest.js` — auth/guest layout only
+- **8 Vite entry points** — `resources/css/{base,app,frontend,guest}.css` and `resources/js/{base,app,frontend,guest}.js`; `synapps:patch-resources` creates and wires all 8 automatically.
+- **`@themeStyles` / `@themeScripts` now inject Vite assets** — blade layout files no longer need a separate `@vite()` call; the directives render CDN links + `base.{css,js}` + `{layout}.{css,js}` in one call.
+- **`--split-layouts` flag for `synapps:patch-resources`** — targeted flag to create/patch only the per-layout split files (synapps intermediary CSS/JS, resource entry files, vite.config inputs, theme import lines).
+- **Synapse intermediary split files** — `synapps/resources/css/synapps-{base,app,frontend,guest}.css` and matching `.js` files bridge the resource entry points to the active theme split files; created by `synapps:patch-resources`.
+- **Theme-import line patching** — `synapps:patch-resources` updates the active-theme import lines in all 8 intermediary files whenever the active theme changes.
+
+### Changed
+- **`synapps:make-theme`** — scaffolds the 4-file CSS split and 4-file JS split structure instead of the former single `theme.css` / `theme.js`; next-steps output updated accordingly.
+- **Default and Application theme stubs** — `theme.css` and `theme.js` replaced by 4 split files each; old single-file stubs deleted.
+- **Sidebar arrow icon** — `.menu-item-arrow` gets `ml-auto` (flex push-right) so the chevron always appears flush-right in the nav item regardless of label length.
+- **`datatable` CSS class** — restored full table padding, header/row styling, dividers, and hover states in `theme-app.css` (was dropped when `lta.css` was streamlined).
+- **Dark mode text** — improved readability for body text, headings, and form labels in dark mode via overrides in `theme-base.css`.
+- **Submenu styling** — corrected `menu-dropdown-item`, `menu-dropdown-item-active`, and `menu-dropdown-item-inactive` class definitions for proper indented submenu appearance.
+- **Sidebar height** — changed `height: 100vh` to `height: auto; min-height: 100vh` so the sidebar grows with content instead of clipping on short viewports.
+
+### Fixed
+- **`patchPackageJson()`** — returned `true` (patched) when the watch script already had the correct value; now correctly returns `false` when no change is needed (idempotency fix).
+- **`updateThemeJson()` in `synapps:make-theme`** — would fatal if `theme.json` contained invalid JSON; now guards against `null` from `json_decode()`.
+- **`patchThemeImportLines()` regex** — pattern `theme-[a-z]+` did not match theme file names containing digits or hyphens after a letter; widened to `theme-[a-z][a-z0-9-]*`.
+
+### ⚠️ Breaking Change
+- **Themes must be split into 4 CSS + 4 JS files.** Any theme that still has a single `theme.css` / `theme.js` will fail `npm run build` because `synapps-base.css` now imports `theme-base.css` (the split file). Upgrade path:
+  1. Split your `theme.css` → `theme-base.css`, `theme-app.css`, `theme-frontend.css`, `theme-guest.css`.
+  2. Split your `theme.js` → `theme-base.js`, `theme-app.js`, `theme-frontend.js`, `theme-guest.js`.
+  3. Remove direct `@import …theme.css` from `resources/css/app.css` and `import …theme.js` from `resources/js/app.js`.
+  4. Run `php artisan synapps:patch-resources --split-layouts` to wire up the new files.
+  5. Run `npm run build`.
+  - Projects that want to stay on 2.3.x without upgrading should pin `"vm-engine/synapse": "~2.3"` in `composer.json`.
+
 ## [2.3.13] - 2026-05-18
 
 ### Changed

@@ -22,75 +22,105 @@
     @themeHeaders('frontend')
 
     <link
-        href="https://fonts.googleapis.com"
         rel="preconnect"
+        href="https://fonts.googleapis.com"
     >
     <link
-        href="https://fonts.gstatic.com"
         rel="preconnect"
+        href="https://fonts.gstatic.com"
         crossorigin
     >
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap"
         rel="stylesheet"
     >
 
-    {{-- Theme CDN Styles --}}
+    {{-- Theme CDN Styles + Vite (base.css + frontend.css via ThemeService) --}}
     @themeStyles('frontend')
-
-    @vite(['resources/css/app.css'])
     @livewireStyles
     @stack('styles')
 </head>
 
-<body
-    x-data="{ 'loaded': true, 'darkMode': $persist(false).as('darkMode') }"
-    :class="{ 'dark bg-gray-900': darkMode === true }"
->
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 shadow">
-            <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
-                <div class="text-xl font-bold">
-                    <a href="/">{{ config('synapps.apps.title', config('app.name')) }}</a>
+<body class="fe-body">
+    <div class="fe-layout">
+
+        {{-- Header --}}
+        <header
+            class="fe-header"
+            x-data="{ scrolled: false }"
+            x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
+            :class="{ 'fe-header--scrolled': scrolled }"
+        >
+            <div class="fe-header__inner">
+
+                {{-- Logo --}}
+                <a
+                    class="fe-logo"
+                    href="/"
+                >
+                    {{ config('synapps.apps.title', config('app.name')) }}
+                </a>
+
+                {{-- CMS Navigation --}}
+                <div class="fe-nav">
+                    <x-cms::menu position="header" />
                 </div>
-                <div class="flex items-center gap-4">
+
+                {{-- Auth Actions --}}
+                <div class="fe-header__actions">
                     @auth
                         <a
+                            class="fe-action-link fe-action-link--primary"
                             href="{{ route('backend.home.dashboard') }}"
-                            class="text-gray-700 dark:text-gray-300 hover:text-primary"
                         >
+                            <span class="fa-solid fa-gauge-high fa-sm"></span>
                             Dashboard
                         </a>
                     @else
                         <a
+                            class="fe-action-link"
                             href="{{ route('auth.login') }}"
-                            class="text-gray-700 dark:text-gray-300 hover:text-primary"
                         >
-                            Login
+                            Sign in
                         </a>
                     @endauth
                 </div>
-            </nav>
+
+                {{-- Mobile toggle --}}
+                <button
+                    class="fe-mobile-toggle"
+                    type="button"
+                    x-data="{ open: false }"
+                    @click="open = !open"
+                    aria-label="Toggle navigation"
+                >
+                    <span class="fa-solid fa-bars"></span>
+                </button>
+            </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="flex-1">
+        {{-- Main Content --}}
+        <main class="fe-main">
             {{ $slot }}
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-gray-100 dark:bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-                &copy; {{ date('Y') }} {{ config('synapps.apps.title', config('app.name')) }}. All rights reserved.
+        {{-- Footer --}}
+        <footer class="fe-footer">
+            <div class="fe-footer__inner">
+                <div class="fe-footer__brand">
+                    <span class="fe-footer__logo">{{ config('synapps.apps.title', config('app.name')) }}</span>
+                    <p class="fe-footer__tagline">{{ config('synapps.apps.description') }}</p>
+                </div>
+                <p class="fe-footer__copy">
+                    &copy; {{ date('Y') }} {{ config('synapps.apps.title', config('app.name')) }}.
+                    All rights reserved.
+                </p>
             </div>
         </footer>
     </div>
 
-    {{-- Theme CDN Scripts --}}
+    {{-- Theme CDN Scripts + Vite (base.js + frontend.js via ThemeService) --}}
     @themeScripts('frontend')
-
-    @vite(['resources/js/app.js'])
     @livewireScripts
     @stack('scripts')
 </body>

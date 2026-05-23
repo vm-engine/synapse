@@ -1,0 +1,8 @@
+/**
+ * Default Synapse Theme — Guest Layout (Auth Pages)
+ *
+ * Contains: Login, register, password reset, and other auth page styles.
+ * Loaded ONLY on auth/guest pages via resources/css/guest.css.
+ *
+ * Add your auth-specific styles here.
+ */

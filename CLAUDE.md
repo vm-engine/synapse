@@ -98,25 +98,36 @@ Critical command that:
 **Run after:** Creating modules, modifying `module.json`, changing dependencies
 
 ### synapps:patch-resources
-Patches Laravel resource files and cleans up default Laravel files:
-- **resources/js/app.js** - Adds import for `synapps/resources/js/synapps.js`
-- **resources/css/app.css** - Adds import for `synapps/resources/css/synapps.css`
-- **resources/css/app.css** - Adds @source directives for module Blade/JS files:
-  - `synapps/**/*.blade.php` and `synapps/**/*.js`
-  - `vendor/vm-engine/*/**/*.blade.php` and `vendor/vm-engine/*/**/*.js`
-  - `vendor/*/synmod-*/**/*.blade.php` and `vendor/*/synmod-*/**/*.js`
-  - `vendor/*/synapps-*/**/*.blade.php` and `vendor/*/synapps-*/**/*.js`
-- **vite.config.js** - Adds `vite-plugin-static-copy` plugin to copy static assets:
-  - Imports `vite-plugin-static-copy` and `glob` packages
+Patches Laravel resource files, wires per-layout CSS/JS split, and cleans up default Laravel files:
+
+**Creates per-layout entry files (if missing):**
+- `resources/css/base.css` — Tailwind + `synapps-base.css` + all `@source` directives
+- `resources/css/app.css` — imports `synapps-app.css` only
+- `resources/css/frontend.css` — imports `synapps-frontend.css` only
+- `resources/css/guest.css` — imports `synapps-guest.css` only
+- `resources/js/base.js` — `synapps-base.js` + `withBack` helper + mousedown listener
+- `resources/js/app.js` — imports `synapps-app.js` only
+- `resources/js/frontend.js` — imports `synapps-frontend.js` only
+- `resources/js/guest.js` — imports `synapps-guest.js` only
+
+**Creates Synapse intermediary files (if missing):**
+- `synapps/resources/css/synapps-base.css` — imports `synapps.css` + active `theme-base.css`
+- `synapps/resources/css/synapps-{app,frontend,guest}.css` — import active theme split files
+- `synapps/resources/js/synapps-base.js` — imports `synapps.js` + active `theme-base.js`
+- `synapps/resources/js/synapps-{app,frontend,guest}.js` — import active theme split files
+
+**Patches existing files:**
+- **theme import lines** in all 8 `synapps-*.css` / `synapps-*.js` — updated to point at the active theme whenever the active theme changes
+- **vite.config.js** — expands `input` array to all 8 entry points; adds `vite-plugin-static-copy`:
   - Copies assets from `synapps/resources/assets/**/*` to `public/assets`
   - Copies assets from `vendor/*/synmod-*/resources/assets/**/*` to `public/assets`
   - Copies assets from `vendor/vm-engine/synapps-*/resources/assets/**/*` to `public/assets`
-- **routes/web.php** - Comments out default Laravel welcome route (only if no other routes exist)
-- **database/seeders/DatabaseSeeder.php** - Comments out default `User::factory()` calls
+- **routes/web.php** — comments out default Laravel welcome route (only if no other routes exist)
+- **database/seeders/DatabaseSeeder.php** — comments out default `User::factory()` calls
 
 **Required npm packages:** `vite-plugin-static-copy` and `glob` (automatically included in `synapps:setup` dependencies)
 
-Safe to run multiple times (only patches if not already present).
+Safe to run multiple times — all operations are idempotent.
 
 ### synapps:patch-tests
 Comprehensive test configuration that patches **4 files**:
@@ -442,14 +453,22 @@ $headers = $themeService->renderHeaders('app');
 **Theme Structure:**
 ```
 themes/{name}/
-├── theme.json          # Metadata and CDN resources
+├── theme.json              # Metadata and CDN resources
 ├── layouts/
 │   ├── app.blade.php
 │   ├── frontend.blade.php
 │   └── guest.blade.php
-├── css/theme.css       # Custom Tailwind v4 styles
-├── js/theme.js         # Alpine.js components
-└── assets/             # Images, fonts, etc.
+├── css/
+│   ├── theme-base.css      # Shared styles (every page)
+│   ├── theme-app.css       # Backend-only styles
+│   ├── theme-frontend.css  # Frontend-only styles
+│   └── theme-guest.css     # Auth-only styles
+├── js/
+│   ├── theme-base.js       # Shared Alpine components (every page)
+│   ├── theme-app.js        # Backend-only Alpine components
+│   ├── theme-frontend.js   # Frontend-only JS
+│   └── theme-guest.js      # Auth-only JS
+└── assets/                 # Images, fonts, etc.
 ```
 
 **Fallback Chain:**
@@ -458,9 +477,11 @@ themes/{name}/
 3. Synapse default layouts (`synapps::components.layouts.*`)
 
 **Blade Directives:**
-- `@themeStyles('app')` - Render CDN stylesheet links
-- `@themeScripts('app')` - Render CDN script tags
-- `@themeHeaders('app')` - Render CDN headers (meta tags)
+- `@themeStyles('app')` - Render CDN links + Vite assets (`base.css` + `app.css`)
+- `@themeScripts('app')` - Render CDN scripts + Vite assets (`base.js` + `app.js`)
+- `@themeHeaders('app')` - Render CDN headers (meta tags from `theme.json`)
+
+**Do NOT add `@vite()` calls to layout files** — `@themeStyles` / `@themeScripts` already include the Vite-compiled bundles.
 
 **Helper Functions:**
 - `theme_asset($path, $theme)` - Get theme asset URL

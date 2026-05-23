@@ -17,7 +17,8 @@ class SynAppsPatchResources extends Command
         {--css-sources : Only patch CSS @source directives}
         {--npm-watch : Only patch package.json for npm run watch script}
         {--js-back : Only patch app.js withBack global helper}
-        {--vite : Only patch vite.config.js}';
+        {--vite : Only patch vite.config.js}
+        {--split-layouts : Only patch per-layout CSS/JS split (synapps-*.css/js, base/frontend/guest entry files, vite inputs)}';
 
     /**
      * The console command description.
@@ -37,14 +38,19 @@ class SynAppsPatchResources extends Command
             $this->option('css-sources') ||
             $this->option('npm-watch') ||
             $this->option('js-back') ||
-            $this->option('vite')
+            $this->option('vite') ||
+            $this->option('split-layouts')
         );
 
-        // Always patch synapps JS/CSS imports
-        $patches = [
-            'app.js — synapps import' => $this->patchAppJsImport(),
-            'app.css — synapps import' => $this->patchAppCssImport(),
-        ];
+        // Always patch synapps JS/CSS imports (unless a targeted option is given)
+        if ($runAll) {
+            $patches = [
+                'app.js — synapps import' => $this->patchAppJsImport(),
+                'app.css — synapps import' => $this->patchAppCssImport(),
+            ];
+        } else {
+            $patches = [];
+        }
 
         if ($runAll || $this->option('css-sources')) {
             $patches['app.css — @source directives'] = $this->patchCssSource();
@@ -71,11 +77,422 @@ class SynAppsPatchResources extends Command
             $patches['app.js — global helpers'] = $this->patchAppJsGlobals();
         }
 
+        if ($runAll || $this->option('split-layouts')) {
+            $splitPatches = $this->patchSplitLayouts();
+            $patches = array_merge($patches, $splitPatches);
+        }
+
         foreach ($patches as $label => $patched) {
             if ($patched) {
                 $this->components->info("Patched: {$label}");
             }
         }
+    }
+
+    // ─── Per-layout CSS/JS split ──────────────────────────────────────────────
+
+    /**
+     * Orchestrate all per-layout split operations.
+     * Returns a map of label => bool (true = patched).
+     *
+     * @return array<string, bool>
+     */
+    protected function patchSplitLayouts(): array
+    {
+        return [
+            'synapps/resources/css — synapps-{base,app,frontend,guest}.css' => $this->createSynappsIntermediaryCss(),
+            'synapps/resources/js  — synapps-{base,app,frontend,guest}.js' => $this->createSynappsIntermediaryJs(),
+            'resources/css/base.css' => $this->createBaseCss(),
+            'resources/css/frontend.css' => $this->createFrontendCss(),
+            'resources/css/guest.css' => $this->createGuestCss(),
+            'resources/css/app.css — rewrite to focused import' => $this->rewriteAppCssToFocused(),
+            'resources/js/base.js' => $this->createBaseJs(),
+            'resources/js/frontend.js' => $this->createFrontendJs(),
+            'resources/js/guest.js' => $this->createGuestJs(),
+            'resources/js/app.js — rewrite to focused import' => $this->rewriteAppJsToFocused(),
+            'synapps-*.css / synapps-*.js — theme import lines' => $this->patchThemeImportLines(),
+            'vite.config.js — expand input array' => $this->expandViteInputs(),
+        ];
+    }
+
+    /**
+     * Create synapps/resources/css/synapps-base.css, synapps-app.css,
+     * synapps-frontend.css, synapps-guest.css (all idempotent).
+     */
+    protected function createSynappsIntermediaryCss(): bool
+    {
+        $cssDir = synapps_path('resources/css');
+        $activeTheme = config('synapps.apps.themes.active', 'default');
+        $patched = false;
+
+        $files = [
+            'synapps-base.css' => implode("\n", [
+                "@import './synapps.css';",
+                "@import '../themes/{$activeTheme}/css/theme-base.css';",
+            ]),
+            'synapps-app.css' => "@import '../themes/{$activeTheme}/css/theme-app.css';",
+            'synapps-frontend.css' => "@import '../themes/{$activeTheme}/css/theme-frontend.css';",
+            'synapps-guest.css' => "@import '../themes/{$activeTheme}/css/theme-guest.css';",
+        ];
+
+        foreach ($files as $filename => $content) {
+            $path = $cssDir.'/'.$filename;
+            if (! file_exists($path)) {
+                file_put_contents($path, $content."\n");
+                $patched = true;
+            }
+        }
+
+        return $patched;
+    }
+
+    /**
+     * Create synapps/resources/js/synapps-base.js, synapps-app.js,
+     * synapps-frontend.js, synapps-guest.js (all idempotent).
+     */
+    protected function createSynappsIntermediaryJs(): bool
+    {
+        $jsDir = synapps_path('resources/js');
+        $activeTheme = config('synapps.apps.themes.active', 'default');
+        $patched = false;
+
+        $files = [
+            'synapps-base.js' => implode("\n", [
+                "import './synapps.js';",
+                "import '../themes/{$activeTheme}/js/theme-base.js';",
+            ]),
+            'synapps-app.js' => "import '../themes/{$activeTheme}/js/theme-app.js';",
+            'synapps-frontend.js' => "import '../themes/{$activeTheme}/js/theme-frontend.js';",
+            'synapps-guest.js' => "import '../themes/{$activeTheme}/js/theme-guest.js';",
+        ];
+
+        foreach ($files as $filename => $content) {
+            $path = $jsDir.'/'.$filename;
+            if (! file_exists($path)) {
+                file_put_contents($path, $content."\n");
+                $patched = true;
+            }
+        }
+
+        return $patched;
+    }
+
+    /**
+     * Create resources/css/base.css by migrating the monolith app.css content.
+     * Replaces the synapps.css import → synapps-base.css and strips the direct
+     * theme.css import (now handled by synapps-base.css).
+     * Skips if base.css already exists.
+     */
+    protected function createBaseCss(): bool
+    {
+        $basePath = resource_path('css/base.css');
+
+        if (file_exists($basePath)) {
+            return false;
+        }
+
+        $appCssPath = resource_path('css/app.css');
+
+        if (! file_exists($appCssPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($appCssPath);
+
+        // Replace direct synapps.css import → synapps-base.css
+        $content = str_replace(
+            "@import '../../synapps/resources/css/synapps.css';",
+            "@import '../../synapps/resources/css/synapps-base.css';",
+            $content
+        );
+
+        // Remove direct theme.css import lines (theme-base.css is now loaded via synapps-base.css)
+        $content = preg_replace(
+            "/@import\s+['\"]\.\.\/\.\.\/synapps\/resources\/themes\/.*?\/css\/theme\.css['\"]\s*;?\n?/",
+            '',
+            $content
+        );
+
+        file_put_contents($basePath, $content);
+
+        return true;
+    }
+
+    /**
+     * Create resources/css/frontend.css if it does not exist.
+     */
+    protected function createFrontendCss(): bool
+    {
+        $path = resource_path('css/frontend.css');
+
+        if (file_exists($path)) {
+            return false;
+        }
+
+        file_put_contents($path, "@import '../../synapps/resources/css/synapps-frontend.css';\n");
+
+        return true;
+    }
+
+    /**
+     * Create resources/css/guest.css if it does not exist.
+     */
+    protected function createGuestCss(): bool
+    {
+        $path = resource_path('css/guest.css');
+
+        if (file_exists($path)) {
+            return false;
+        }
+
+        file_put_contents($path, "@import '../../synapps/resources/css/synapps-guest.css';\n");
+
+        return true;
+    }
+
+    /**
+     * Rewrite resources/css/app.css from the monolith form to a focused single-import file.
+     * Detection: if `@import "tailwindcss"` is present, the file is still in monolith form.
+     */
+    protected function rewriteAppCssToFocused(): bool
+    {
+        $cssPath = resource_path('css/app.css');
+
+        if (! file_exists($cssPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($cssPath);
+
+        // Already in focused form — skip
+        if (strpos($content, '@import "tailwindcss"') === false
+            && strpos($content, "@import 'tailwindcss'") === false) {
+            return false;
+        }
+
+        $this->createBackup($cssPath);
+        file_put_contents($cssPath, "@import '../../synapps/resources/css/synapps-app.css';\n");
+
+        return true;
+    }
+
+    /**
+     * Create resources/js/base.js by migrating the monolith app.js content.
+     * Replaces the synapps.js import → synapps-base.js and strips the direct
+     * theme.js import (now handled by synapps-base.js).
+     * Skips if base.js already exists.
+     */
+    protected function createBaseJs(): bool
+    {
+        $basePath = resource_path('js/base.js');
+
+        if (file_exists($basePath)) {
+            return false;
+        }
+
+        $appJsPath = resource_path('js/app.js');
+
+        if (! file_exists($appJsPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($appJsPath);
+
+        // Replace direct synapps.js import → synapps-base.js
+        $content = str_replace(
+            "import '../../synapps/resources/js/synapps.js';",
+            "import '../../synapps/resources/js/synapps-base.js';",
+            $content
+        );
+
+        // Remove direct theme.js import lines (theme-base.js is now loaded via synapps-base.js)
+        $content = preg_replace(
+            "/import\s+['\"]\.\.\/\.\.\/synapps\/resources\/themes\/.*?\/js\/theme\.js['\"]\s*;?\n?/",
+            '',
+            $content
+        );
+
+        file_put_contents($basePath, $content);
+
+        return true;
+    }
+
+    /**
+     * Create resources/js/frontend.js if it does not exist.
+     */
+    protected function createFrontendJs(): bool
+    {
+        $path = resource_path('js/frontend.js');
+
+        if (file_exists($path)) {
+            return false;
+        }
+
+        file_put_contents($path, "import '../../synapps/resources/js/synapps-frontend.js';\n");
+
+        return true;
+    }
+
+    /**
+     * Create resources/js/guest.js if it does not exist.
+     */
+    protected function createGuestJs(): bool
+    {
+        $path = resource_path('js/guest.js');
+
+        if (file_exists($path)) {
+            return false;
+        }
+
+        file_put_contents($path, "import '../../synapps/resources/js/synapps-guest.js';\n");
+
+        return true;
+    }
+
+    /**
+     * Rewrite resources/js/app.js from the monolith form to a focused single-import file.
+     * Detection: if `synapps/resources/js/synapps.js` (direct) is imported, it's still monolith.
+     */
+    protected function rewriteAppJsToFocused(): bool
+    {
+        $jsPath = resource_path('js/app.js');
+
+        if (! file_exists($jsPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($jsPath);
+
+        // Check for the direct synapps.js import (monolith marker)
+        if (strpos($content, "synapps/resources/js/synapps.js'") === false
+            && strpos($content, 'synapps/resources/js/synapps.js"') === false) {
+            return false;
+        }
+
+        $this->createBackup($jsPath);
+        file_put_contents($jsPath, "import '../../synapps/resources/js/synapps-app.js';\n");
+
+        return true;
+    }
+
+    /**
+     * Patch the active-theme import lines in all 8 synapps-*.css and synapps-*.js files.
+     * Updates the theme folder name to match the currently active theme.
+     * Idempotent — only writes when the theme path has changed.
+     */
+    protected function patchThemeImportLines(): bool
+    {
+        $activeTheme = config('synapps.apps.themes.active', 'default');
+        $patched = false;
+
+        $cssFiles = [
+            'synapps-base.css' => "../themes/{$activeTheme}/css/theme-base.css",
+            'synapps-app.css' => "../themes/{$activeTheme}/css/theme-app.css",
+            'synapps-frontend.css' => "../themes/{$activeTheme}/css/theme-frontend.css",
+            'synapps-guest.css' => "../themes/{$activeTheme}/css/theme-guest.css",
+        ];
+
+        $cssDir = synapps_path('resources/css');
+        foreach ($cssFiles as $filename => $themePath) {
+            $filePath = $cssDir.'/'.$filename;
+
+            if (! file_exists($filePath)) {
+                continue;
+            }
+
+            $content = file_get_contents($filePath);
+            $updated = preg_replace(
+                "/@import\s+['\"]\.\.\/themes\/[^'\"]+\/css\/theme-[a-z][a-z0-9-]*\.css['\"]\s*;/",
+                "@import '{$themePath}';",
+                $content
+            );
+
+            if ($updated !== $content) {
+                file_put_contents($filePath, $updated);
+                $patched = true;
+            }
+        }
+
+        $jsFiles = [
+            'synapps-base.js' => "../themes/{$activeTheme}/js/theme-base.js",
+            'synapps-app.js' => "../themes/{$activeTheme}/js/theme-app.js",
+            'synapps-frontend.js' => "../themes/{$activeTheme}/js/theme-frontend.js",
+            'synapps-guest.js' => "../themes/{$activeTheme}/js/theme-guest.js",
+        ];
+
+        $jsDir = synapps_path('resources/js');
+        foreach ($jsFiles as $filename => $themePath) {
+            $filePath = $jsDir.'/'.$filename;
+
+            if (! file_exists($filePath)) {
+                continue;
+            }
+
+            $content = file_get_contents($filePath);
+            $updated = preg_replace(
+                "/import\s+['\"]\.\.\/themes\/[^'\"]+\/js\/theme-[a-z][a-z0-9-]*\.js['\"]\s*;/",
+                "import '{$themePath}';",
+                $content
+            );
+
+            if ($updated !== $content) {
+                file_put_contents($filePath, $updated);
+                $patched = true;
+            }
+        }
+
+        return $patched;
+    }
+
+    /**
+     * Expand the Vite input array in vite.config.js to include the 6 new layout entry points.
+     * Idempotent — skips if resources/css/base.css is already listed.
+     */
+    protected function expandViteInputs(): bool
+    {
+        $viteConfigPath = base_path('vite.config.js');
+
+        if (! file_exists($viteConfigPath)) {
+            return false;
+        }
+
+        $content = file_get_contents($viteConfigPath);
+
+        // Already expanded — idempotency check
+        if (strpos($content, 'resources/css/base.css') !== false) {
+            return false;
+        }
+
+        $expandedInput = implode('', [
+            "input: [\n",
+            "                'resources/css/base.css',\n",
+            "                'resources/css/app.css',\n",
+            "                'resources/css/frontend.css',\n",
+            "                'resources/css/guest.css',\n",
+            "                'resources/js/base.js',\n",
+            "                'resources/js/app.js',\n",
+            "                'resources/js/frontend.js',\n",
+            "                'resources/js/guest.js',\n",
+            '            ]',
+        ]);
+
+        // Replace the existing compact input array
+        $updated = preg_replace(
+            "/input:\s*\[(?:[^\]]*)\]/s",
+            $expandedInput,
+            $content,
+            1,
+            $count
+        );
+
+        if ($count === 0 || $updated === $content) {
+            return false;
+        }
+
+        $this->createBackup($viteConfigPath);
+        file_put_contents($viteConfigPath, $updated);
+
+        return true;
     }
 
     /**
@@ -873,7 +1290,7 @@ JS;
             isset($packageJson['scripts']['watch'])
             && $packageJson['scripts']['watch'] === 'vite build --watch'
         ) {
-            return true;
+            return false;
         }
 
         // Add watch script (compile only, no dev server)

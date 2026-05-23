@@ -49,14 +49,33 @@ synapps/resources/themes/my-theme/
 │   │   └── logo-dark.svg  # Dark mode logo
 │   └── fonts/             # Custom web fonts (optional)
 ├── css/
-│   └── theme.css          # Custom Tailwind v4 styles
+│   ├── theme-base.css     # Shared styles (loaded on every page)
+│   ├── theme-app.css      # Backend/admin-only styles
+│   ├── theme-frontend.css # Public frontend-only styles
+│   └── theme-guest.css    # Auth pages-only styles
 ├── js/
-│   └── theme.js           # Alpine.js components and utilities
+│   ├── theme-base.js      # Shared Alpine components & utilities (every page)
+│   ├── theme-app.js       # Backend-only Alpine components (sidebar, toggles)
+│   ├── theme-frontend.js  # Frontend-only JS (scroll behaviour, flyout menus)
+│   └── theme-guest.js     # Auth-only JS (password reveal, OTP autofocus)
 └── layouts/
     ├── app.blade.php      # Backend/admin layout
     ├── frontend.blade.php # Public website layout
     └── guest.blade.php    # Authentication pages layout
 ```
+
+### CSS/JS Split Boundary
+
+Each page loads exactly **two** CSS bundles and **two** JS bundles:
+
+| Bundle | Loaded on | Contains |
+|--------|-----------|----------|
+| `base.css` + `base.js` | **Every page** | Tailwind utilities, Synapse core, `theme-base.*` |
+| `app.css` + `app.js` | Backend (`/admin/*`) | `theme-app.*` — sidebar, header, datatable |
+| `frontend.css` + `frontend.js` | Public pages | `theme-frontend.*` — CMS nav, editorial typography |
+| `guest.css` + `guest.js` | Auth pages | `theme-guest.*` — auth form container, OTP grid |
+
+This keeps auth pages from loading admin styles and vice-versa.
 
 ---
 
@@ -278,7 +297,7 @@ Synapse registers Blade directives for rendering theme resources.
 
 ### @themeStyles
 
-Render CDN stylesheet links for a specific layout type.
+Render CDN stylesheet links **and** Vite asset tags for a specific layout type.
 
 ```blade
 <head>
@@ -288,16 +307,23 @@ Render CDN stylesheet links for a specific layout type.
 </head>
 ```
 
-**Output:**
+**Output (example for `app` layout):**
 
 ```html
+<!-- CDN resources from theme.json -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter" />
 <link rel="stylesheet" href="https://cdn.example.com/admin-styles.css" />
+
+<!-- Vite-compiled assets (base + layout-specific) -->
+<link rel="stylesheet" href="/build/assets/base-[hash].css" />
+<link rel="stylesheet" href="/build/assets/app-[hash].css" />
 ```
+
+Do **not** call `@vite(['resources/css/app.css'])` separately — it is already included.
 
 ### @themeScripts
 
-Render CDN script tags for a specific layout type.
+Render CDN script tags **and** Vite asset tags for a specific layout type.
 
 ```blade
 <body>
@@ -307,10 +333,15 @@ Render CDN script tags for a specific layout type.
 </body>
 ```
 
-**Output:**
+**Output (example for `app` layout):**
 
 ```html
+<!-- CDN resources from theme.json -->
 <script src="https://cdn.example.com/analytics.js"></script>
+
+<!-- Vite-compiled assets (base + layout-specific) -->
+<script type="module" src="/build/assets/base-[hash].js"></script>
+<script type="module" src="/build/assets/app-[hash].js"></script>
 ```
 
 ### @themeHeaders
@@ -359,11 +390,18 @@ Edit `synapps/resources/themes/my-theme/theme.json`:
 
 ### Step 3: Customize Styles
 
-Edit `css/theme.css` using Tailwind v4 syntax:
+Theme styles are split across four files. Edit the file that matches the scope of your change:
+
+| File | Edit when you need to… |
+|------|------------------------|
+| `css/theme-base.css` | Change colors, buttons, cards, modals, badges — anything shared across all layouts |
+| `css/theme-app.css` | Style sidebar, admin header, data tables, backend nav |
+| `css/theme-frontend.css` | Style public header/footer, CMS menus, editorial typography |
+| `css/theme-guest.css` | Style auth forms, login page centering, OTP digit grid |
+
+**Example — theme-base.css:**
 
 ```css
-@import "tailwindcss";
-
 @theme {
     /* Custom colors */
     --color-brand-500: oklch(0.55 0.2 240);
@@ -374,18 +412,13 @@ Edit `css/theme.css` using Tailwind v4 syntax:
     --spacing-header-height: 4rem;
 }
 
-/* Custom component styles */
+/* Shared component styles */
 .my-card {
-    @apply bg-white rounded-xl shadow-lg p-6;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .my-card {
-        @apply bg-gray-800 border border-gray-700;
-    }
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6;
 }
 ```
+
+Do **not** add `@import "tailwindcss"` to these files — Tailwind is already imported in `resources/css/base.css`.
 
 **OKLCH Color System:**
 
@@ -397,7 +430,18 @@ Edit `css/theme.css` using Tailwind v4 syntax:
 
 ### Step 4: Add Alpine.js Components
 
-Edit `js/theme.js`:
+Theme JS is also split by layout. Edit the appropriate file:
+
+| File | Edit when you need to… |
+|------|------------------------|
+| `js/theme-base.js` | Shared Alpine components: modal, dropdown, tabs, toastr |
+| `js/theme-app.js` | Backend Alpine components: sidebar toggle, global search |
+| `js/theme-frontend.js` | Frontend JS: scroll behaviour, CMS flyout menus |
+| `js/theme-guest.js` | Auth JS: password reveal, OTP autofocus |
+
+**Example — theme-base.js** (shared components):
+
+Edit `js/theme-base.js`:
 
 ```javascript
 // Custom Alpine.js components
@@ -421,7 +465,7 @@ window.myUtils = {
 
 ### Step 5: Customize Layouts
 
-Edit layout files in `layouts/`:
+Edit layout files in `layouts/`. The `@themeStyles()` and `@themeScripts()` directives automatically inject both CDN links **and** Vite-compiled assets (`base.css` + the layout-specific bundle). Do **not** add `@vite()` calls — they are redundant.
 
 **layouts/app.blade.php** - Backend/admin layout
 
@@ -432,10 +476,12 @@ Edit layout files in `layouts/`:
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    @themeHeaders()
-    @themeStyles()
+    {{-- Theme CDN headers (meta tags from theme.json) --}}
+    @themeHeaders('app')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- CDN styles + Vite: base.css + app.css --}}
+    @themeStyles('app')
+    @livewireStyles
 </head>
 <body>
     <div class="flex h-screen">
@@ -450,7 +496,9 @@ Edit layout files in `layouts/`:
         </main>
     </div>
 
-    @themeScripts()
+    {{-- CDN scripts + Vite: base.js + app.js --}}
+    @themeScripts('app')
+    @livewireScripts
 </body>
 </html>
 ```
@@ -522,32 +570,93 @@ $view = theme_service()->resolveThemeLayout('app');
 
 ## Asset Management
 
+### Vite Entry Points
+
+The project uses **8 Vite entry points** — one `base` bundle shared by all pages plus a layout-specific bundle per page. `synapps:patch-resources` creates and wires all of these automatically.
+
+```
+resources/css/base.css       ← Tailwind + Synapse core + theme-base.css (every page)
+resources/css/app.css        ← theme-app.css (backend/admin only)
+resources/css/frontend.css   ← theme-frontend.css (public pages only)
+resources/css/guest.css      ← theme-guest.css (auth pages only)
+
+resources/js/base.js         ← Alpine plugins + theme-base.js + global helpers (every page)
+resources/js/app.js          ← theme-app.js (backend/admin only)
+resources/js/frontend.js     ← theme-frontend.js (public pages only)
+resources/js/guest.js        ← theme-guest.js (auth pages only)
+```
+
+**`resources/css/base.css`** is the only entry that imports Tailwind and `@source` directives:
+
+```css
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900") layer(base);
+@import "tailwindcss";
+@import '../../synapps/resources/css/synapps-base.css';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+/* ... remaining @source directives ... */
+@theme {
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+**`resources/css/app.css`** is minimal — just the backend-specific import:
+
+```css
+@reference "../../synapps/resources/css/tailwind-ref.css";
+@import '../../synapps/resources/css/synapps-app.css';
+```
+
+### Synapse Intermediary CSS/JS Files
+
+`synapps/resources/css/` and `synapps/resources/js/` contain split intermediary files that import the active theme's split files. These are generated and patched by `synapps:patch-resources`:
+
+```
+synapps/resources/css/synapps-base.css     ← imports synapps.css + active theme-base.css
+synapps/resources/css/synapps-app.css      ← imports active theme-app.css
+synapps/resources/css/synapps-frontend.css ← imports active theme-frontend.css
+synapps/resources/css/synapps-guest.css    ← imports active theme-guest.css
+
+synapps/resources/js/synapps-base.js       ← imports synapps.js + active theme-base.js
+synapps/resources/js/synapps-app.js        ← imports active theme-app.js
+synapps/resources/js/synapps-frontend.js   ← imports active theme-frontend.js
+synapps/resources/js/synapps-guest.js      ← imports active theme-guest.js
+```
+
+When you run `synapps:patch-resources`, the theme import lines are updated to point at the currently active theme.
+
 ### Vite Configuration
 
-Theme assets are automatically copied to `public/assets/themes/` during build. This is configured in `synapps:patch-resources` command.
-
-**vite.config.js** includes:
+`vite.config.js` is patched by `synapps:patch-resources` to include all 8 entry points plus static asset copying:
 
 ```javascript
+import laravel from "laravel-vite-plugin";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { glob } from "glob";
 
-export default {
+export default defineConfig(() => ({
     plugins: [
+        laravel({
+            input: [
+                "resources/css/base.css",
+                "resources/css/app.css",
+                "resources/css/frontend.css",
+                "resources/css/guest.css",
+                "resources/js/base.js",
+                "resources/js/app.js",
+                "resources/js/frontend.js",
+                "resources/js/guest.js",
+            ],
+            refresh: true,
+        }),
         viteStaticCopy({
             targets: [
-                // Copy theme assets
-                {
-                    src: "synapps/resources/themes/*/assets/**/*",
-                    dest: "assets/themes",
-                    rename: (name, ext, fullPath) => {
-                        // Preserves theme directory structure
-                    },
-                },
+                { src: "synapps/resources/assets/**/*", dest: "assets" },
+                // ... module asset targets
             ],
         }),
     ],
-};
+}));
 ```
 
 ### Public Asset URLs
@@ -811,10 +920,13 @@ Theme layouts use a fallback system. Check:
 
 ### Styles not applying
 
-1. Check CSS file exists: `synapps/resources/themes/{theme}/css/theme.css`
-2. Verify Tailwind compilation: `npm run build`
-3. Check browser console for CSS errors
-4. Clear browser cache (Ctrl+Shift+R)
+1. Check all 4 split CSS files exist in `synapps/resources/themes/{theme}/css/`:
+   - `theme-base.css`, `theme-app.css`, `theme-frontend.css`, `theme-guest.css`
+2. Verify Tailwind compilation: `npm run build` — expect 8 output assets
+3. Check `public/build/manifest.json` contains all 8 entry points (`base.css`, `app.css`, `frontend.css`, `guest.css` + JS equivalents). A stale 2-entry manifest means `npm run build` was not re-run after the split.
+4. Confirm layouts do **not** have a manual `@vite()` call — `@themeStyles()` handles Vite injection
+5. Check browser console for CSS errors
+6. Clear browser cache (Ctrl+Shift+R)
 
 ### Alpine.js not working
 

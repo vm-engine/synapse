@@ -35,10 +35,8 @@
         rel="stylesheet"
     >
 
-    {{-- Theme CDN Styles --}}
+    {{-- Theme CDN Styles + Vite (base.css + guest.css via ThemeService) --}}
     @themeStyles('guest')
-
-    @vite(['resources/css/app.css'])
     @livewireStyles
     @stack('styles')
 </head>
@@ -53,10 +51,8 @@
         </div>
     </div>
 
-    {{-- Theme CDN Scripts --}}
+    {{-- Theme CDN Scripts + Vite (base.js + guest.js via ThemeService) --}}
     @themeScripts('guest')
-
-    @vite(['resources/js/app.js'])
     @livewireScripts
     @stack('scripts')
 </body>

@@ -5,29 +5,103 @@ namespace VmEngine\Synapse\Services;
 class ThemeService
 {
     /**
-     * Render theme CDN stylesheets for a specific layout type
+     * Render theme CDN stylesheets for a specific layout type,
+     * followed by Vite-compiled base + layout-specific CSS assets.
      */
     public function renderStyles(?string $layoutType = null): string
     {
         $layoutType = $layoutType ?? $this->getCurrentLayoutType();
         $styles = $this->getResources('css', $layoutType);
 
-        return collect($styles)
+        $cdnOutput = collect($styles)
             ->map(fn ($url) => '<link rel="stylesheet" href="'.e($url).'">')
             ->join("\n    ");
+
+        $viteOutput = $this->renderViteStyles($layoutType);
+
+        return $cdnOutput.($cdnOutput && $viteOutput ? "\n    " : '').$viteOutput;
     }
 
     /**
-     * Render theme CDN scripts for a specific layout type
+     * Render theme CDN scripts for a specific layout type,
+     * followed by Vite-compiled base + layout-specific JS assets.
      */
     public function renderScripts(?string $layoutType = null): string
     {
         $layoutType = $layoutType ?? $this->getCurrentLayoutType();
         $scripts = $this->getResources('js', $layoutType);
 
-        return collect($scripts)
+        $cdnOutput = collect($scripts)
             ->map(fn ($url) => '<script src="'.e($url).'"></script>')
             ->join("\n    ");
+
+        $viteOutput = $this->renderViteScripts($layoutType);
+
+        return $cdnOutput.($cdnOutput && $viteOutput ? "\n    " : '').$viteOutput;
+    }
+
+    /**
+     * Render Vite-compiled stylesheet tags for the given layout type.
+     * Loads base.css (shared) + {layoutType}.css (layout-specific).
+     * Silently skips entries missing from the Vite manifest (e.g. during dev
+     * before the split files are built, or for themes that haven't been split yet).
+     */
+    private function renderViteStyles(string $layoutType): string
+    {
+        $entries = [
+            'resources/css/base.css',
+            "resources/css/{$layoutType}.css",
+        ];
+
+        return $this->safeViteRender($entries);
+    }
+
+    /**
+     * Render Vite-compiled script tags for the given layout type.
+     * Loads base.js (shared) + {layoutType}.js (layout-specific).
+     * Silently skips entries missing from the Vite manifest.
+     */
+    private function renderViteScripts(string $layoutType): string
+    {
+        $entries = [
+            'resources/js/base.js',
+            "resources/js/{$layoutType}.js",
+        ];
+
+        return $this->safeViteRender($entries);
+    }
+
+    /**
+     * Render Vite asset tags for the given entry points, silently skipping
+     * any entries that are not present in the Vite manifest.
+     */
+    private function safeViteRender(array $entries): string
+    {
+        /** @var \Illuminate\Foundation\Vite $vite */
+        $vite = app(\Illuminate\Foundation\Vite::class);
+
+        // Filter to only entries that exist in the manifest so that a missing
+        // layout-specific file (e.g. guest.css before the split build) does not
+        // throw a Vite manifest exception.
+        $existingEntries = array_filter($entries, static function (string $entry) use ($vite): bool {
+            try {
+                $vite->asset($entry);
+
+                return true;
+            } catch (\Throwable) {
+                return false;
+            }
+        });
+
+        if (empty($existingEntries)) {
+            return '';
+        }
+
+        try {
+            return $vite(array_values($existingEntries))->toHtml();
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     /**

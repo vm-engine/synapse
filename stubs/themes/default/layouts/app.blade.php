@@ -35,10 +35,8 @@
         rel="stylesheet"
     >
 
-    {{-- Theme CDN Styles --}}
+    {{-- Theme CDN Styles + Vite (base.css + app.css via ThemeService) --}}
     @themeStyles('app')
-
-    @vite(['resources/css/app.css'])
     @livewireStyles
     @stack('styles')
 </head>
@@ -65,10 +63,8 @@
     <!-- Toast Notifications - Outside Livewire context -->
     <x-synapse-toastr></x-synapse-toastr>
 
-    {{-- Theme CDN Scripts --}}
+    {{-- Theme CDN Scripts + Vite (base.js + app.js via ThemeService) --}}
     @themeScripts('app')
-
-    @vite(['resources/js/app.js'])
     @livewireScripts
     @stack('scripts')
 </body>

@@ -18,20 +18,20 @@
             ></span>
         @endif
 
-        @isset($item['sub'])
-            <x-synapps::layouts.nav.arrow :itemKey="$itemKey" />
-        @endisset
-
         <span
             class="menu-item-text"
             :class="sidebarToggle ? 'lg:hidden' : ''"
         >
             {{ synav()->translate($item['name']) }}
         </span>
+
+        @isset($item['sub'])
+            <x-synapps::nav.arrow :itemKey="$itemKey" />
+        @endisset
     </a>
 
     @isset($item['sub'])
-        <x-synapps::layouts.nav.submenu
+        <x-synapps::nav.submenu
             :items="$item['sub']"
             :parentKey="$itemKey"
         />

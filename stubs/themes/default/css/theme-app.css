@@ -1,0 +1,527 @@
+/**
+ * Default Synapse Theme — App Layout CSS (Backend/Admin)
+ *
+ * Contains: Synapse theme-sidebar/header component classes, actual sidebar
+ * and header layout styling, page wrapper, and backend page components.
+ * Loaded ONLY on backend/admin pages via resources/css/app.css.
+ */
+
+/* ========================================
+   LAYOUT COMPONENTS
+   ======================================== */
+
+/* Sidebar - Modern Professional Design */
+.theme-sidebar {
+    @apply fixed left-0 top-0 bottom-0 z-40;
+    @apply bg-gradient-to-br from-brand-500 to-brand-600;
+    @apply text-white shadow-2xl;
+    @apply transition-all duration-300 ease-in-out;
+    width: var(--spacing-sidebar-width);
+}
+
+.theme-sidebar.collapsed {
+    width: var(--spacing-sidebar-collapsed);
+}
+
+/* Sidebar Logo Area */
+.theme-sidebar-logo {
+    @apply flex items-center gap-3 px-6 py-5;
+    @apply border-b border-white/10;
+    height: var(--spacing-header-height);
+}
+
+.theme-sidebar-logo img {
+    @apply w-10 h-10 rounded-lg shadow-md;
+}
+
+.theme-sidebar-logo span {
+    @apply text-xl font-bold tracking-tight;
+    @apply transition-opacity duration-200;
+}
+
+.theme-sidebar.collapsed .theme-sidebar-logo span {
+    @apply opacity-0;
+}
+
+/* Sidebar Navigation */
+.theme-sidebar-nav {
+    @apply flex flex-col gap-1 px-3 py-4;
+}
+
+.theme-sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg;
+    @apply text-white hover:text-white;
+    @apply hover:bg-white/15 transition-all duration-200;
+    @apply font-medium text-sm;
+}
+
+.theme-sidebar-nav-item.active {
+    @apply bg-white shadow-md font-semibold;
+    color: oklch(0.38 0.15 240) !important; /* brand-700 forced */
+}
+
+.theme-sidebar-nav-item i,
+.theme-sidebar-nav-item svg {
+    @apply text-lg w-5 text-center text-white;
+}
+
+.theme-sidebar-nav-item.active i,
+.theme-sidebar-nav-item.active svg {
+    color: oklch(0.38 0.15 240) !important; /* brand-700 forced */
+}
+
+.theme-sidebar-nav-item span {
+    @apply transition-opacity duration-200;
+}
+
+.theme-sidebar.collapsed .theme-sidebar-nav-item span {
+    @apply opacity-0 w-0;
+}
+
+/* Header - Clean Modern Design */
+.theme-header {
+    @apply fixed top-0 right-0 z-30;
+    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
+    @apply shadow-sm;
+    @apply transition-all duration-300;
+    height: var(--spacing-header-height);
+    left: var(--spacing-sidebar-width);
+}
+
+.theme-header.sidebar-collapsed {
+    left: var(--spacing-sidebar-collapsed);
+}
+
+.theme-header-content {
+    @apply flex items-center justify-between px-6 h-full;
+}
+
+/* Header Search */
+.theme-header-search {
+    @apply flex-1 max-w-md;
+}
+
+.theme-header-search input {
+    @apply w-full px-4 py-2 rounded-lg;
+    @apply bg-gray-100 dark:bg-gray-700 border-transparent;
+    @apply focus:bg-white dark:focus:bg-gray-600 focus:border-brand-300 focus:ring-2 focus:ring-brand-200;
+    @apply text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500;
+    @apply transition-all duration-200;
+}
+
+/* Header Actions */
+.theme-header-actions {
+    @apply flex items-center gap-3;
+}
+
+.theme-header-button {
+    @apply relative p-2 rounded-lg text-gray-600 dark:text-gray-400;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-brand-600 dark:hover:text-brand-400;
+    @apply transition-colors duration-200;
+}
+
+.theme-header-button .badge {
+    @apply absolute -top-1 -right-1 w-5 h-5;
+    @apply flex items-center justify-center;
+    @apply bg-danger-500 text-white text-xs font-bold rounded-full;
+}
+
+/* User Menu */
+.theme-user-menu {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer;
+    @apply transition-colors duration-200;
+}
+
+.theme-user-avatar {
+    @apply w-10 h-10 rounded-full;
+    @apply bg-gradient-to-br from-brand-400 to-brand-600;
+    @apply flex items-center justify-center;
+    @apply text-white font-bold shadow-md;
+}
+
+/* Main Content Area */
+.theme-main-content {
+    @apply transition-all duration-300;
+    margin-left: var(--spacing-sidebar-width);
+    margin-top: var(--spacing-header-height);
+    min-height: calc(100vh - var(--spacing-header-height));
+}
+
+.theme-main-content.sidebar-collapsed {
+    margin-left: var(--spacing-sidebar-collapsed);
+}
+
+.theme-content-wrapper {
+    @apply p-6;
+}
+
+
+/* ========================================
+   ACTUAL LAYOUT STYLING - Sidebar & Header
+   Styles for the existing synapps layout partials
+   ======================================== */
+
+/* ========================================
+   SIDEBAR STYLING
+   ======================================== */
+.sidebar {
+    @apply bg-gradient-to-br from-brand-500 to-brand-600;
+    @apply shadow-xl;
+    height: auto;       /* Override h-screen so flex-stretch fills full page height */
+    min-height: 100vh;  /* At least viewport height for mobile fixed-position state */
+}
+
+.sidebar-header {
+    @apply flex items-center gap-3 px-6 py-5;
+    @apply border-b border-white/20;
+    height: var(--spacing-header-height);
+}
+
+.sidebar-header .logo img {
+    @apply h-8 w-auto max-w-full;
+}
+
+.sidebar-header .logo-icon {
+    @apply h-10 w-10 rounded-lg shadow-md;
+}
+
+/* Menu Container */
+.menu-container {
+    @apply flex-1 overflow-y-auto;
+    @apply py-4;
+}
+
+.menu-container::-webkit-scrollbar {
+    @apply w-1.5;
+}
+
+.menu-container::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+.menu-container::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+    @apply hover:bg-white/20;
+}
+
+/* Menu Heading */
+.menu-heading {
+    @apply px-6 py-2 mb-2;
+}
+
+.menu-group-title {
+    @apply text-xs font-bold text-white/80 uppercase tracking-wider;
+}
+
+.menu-group-icon {
+    @apply text-white/60;
+}
+
+/* Menu List */
+.menu {
+    @apply flex flex-col gap-1 px-3;
+}
+
+/* Menu Items - targeting the nav-item component output */
+.menu-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg;
+    @apply text-white hover:text-white;
+    @apply hover:bg-white/15 transition-all duration-200;
+    @apply font-medium text-sm;
+    @apply w-full text-left;
+}
+
+.menu-item-active {
+    @apply bg-white shadow-md font-semibold;
+    color: oklch(0.38 0.15 240) !important; /* brand-700 forced */
+}
+
+.menu-item-inactive {
+    @apply text-white;
+}
+
+/* Menu item text */
+.menu-item-text {
+    @apply transition-opacity duration-200;
+}
+
+/* Menu icons */
+.menu-item-icon-active {
+    @apply w-5 h-5 shrink-0;
+    color: oklch(0.38 0.15 240) !important; /* brand-700 forced */
+}
+
+.menu-item-icon-inactive {
+    @apply w-5 h-5 shrink-0 text-white;
+}
+
+.menu a:hover svg,
+.menu button:hover svg {
+    @apply scale-110;
+}
+
+/* Arrow/chevron for expandable menu items — pushed to right end of flex row */
+.menu-item-arrow {
+    @apply ml-auto shrink-0 transition-transform duration-200;
+}
+
+.menu-item-arrow-active {
+    @apply rotate-180;
+}
+
+.menu-item-arrow-inactive {
+    @apply rotate-0;
+}
+
+/* ========================================
+   DATA TABLE
+   ======================================== */
+.datatable {
+    @apply min-w-full;
+
+    & > thead > tr {
+        @apply border-b border-gray-100 dark:border-gray-800;
+
+        & > th {
+            @apply px-5 py-3 sm:px-6;
+
+            & p {
+                @apply font-medium text-sm text-gray-800 dark:text-gray-400;
+            }
+        }
+
+        & > th.sortable > div {
+            @apply flex justify-between gap-2 items-center;
+
+            & > a {
+                @apply flex-none;
+            }
+        }
+    }
+}
+
+.datatable > tbody {
+    @apply divide-y divide-gray-100 dark:divide-gray-800;
+
+    & > tr {
+        @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+
+        & > td {
+            @apply px-5 py-4 sm:px-6;
+
+            & p {
+                @apply text-sm text-gray-500 dark:text-gray-400;
+            }
+        }
+    }
+}
+
+.datatable > tfoot td {
+    @apply px-5 py-4 sm:px-6;
+}
+
+/* Dropdown submenu — rendered by <x-synapps::nav.submenu> */
+.menu-dropdown-item {
+    @apply flex items-center gap-2.5 px-4 py-2 rounded-lg;
+    @apply text-white/90 hover:text-white text-sm font-medium;
+    @apply hover:bg-white/15 transition-all duration-200;
+    @apply w-full;
+}
+
+.menu-dropdown-item-active {
+    @apply bg-white/20 text-white font-semibold;
+}
+
+.menu-dropdown-item-inactive {
+    @apply text-white/80;
+}
+
+/* ========================================
+   HEADER STYLING
+   ======================================== */
+.header {
+    @apply sticky top-0 z-30;
+    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
+    @apply shadow-sm;
+    @apply transition-all duration-300;
+}
+
+.header-box {
+    @apply flex flex-col lg:flex-row lg:items-center lg:justify-between;
+    @apply gap-4;
+}
+
+.inner-header {
+    @apply flex items-center gap-4 px-5 py-3.5;
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+    @apply flex items-center justify-center;
+    @apply h-11 w-11 rounded-full;
+    @apply border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700;
+    @apply text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200;
+    @apply transition-colors duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-200;
+}
+
+/* Menu Button (mobile) */
+.menu-btn {
+    @apply lg:hidden flex items-center justify-center;
+    @apply h-11 w-11 rounded-full;
+    @apply border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700;
+    @apply text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200;
+    @apply transition-colors duration-200;
+}
+
+/* Search input in header */
+.header input[type="text"] {
+    @apply focus:border-brand-300 focus:ring-brand-500/10;
+}
+
+/* Header notification & user dropdowns */
+.header button[class*="hover:text"] {
+    @apply transition-all duration-200;
+}
+
+.header button[class*="hover:text"]:hover {
+    @apply scale-105;
+}
+
+/* ========================================
+   PAGE WRAPPER & MAIN CONTAINER
+   ======================================== */
+.page-wrapper {
+    @apply flex min-h-screen;
+}
+
+.main-container {
+    @apply flex-1 flex flex-col;
+    @apply bg-gray-100 dark:bg-gray-900;
+}
+
+/* Main content area */
+main {
+    @apply flex-1;
+}
+
+/* Breadcrumbs styling */
+.breadcrumb {
+    @apply flex items-center gap-2 text-sm;
+    @apply text-gray-600 dark:text-gray-400 mb-6;
+}
+
+.breadcrumb a {
+    @apply hover:text-brand-600 dark:hover:text-brand-400 transition-colors;
+}
+
+.breadcrumb svg {
+    @apply w-4 h-4 text-gray-400 dark:text-gray-600;
+}
+
+/* ========================================
+   PAGE-SPECIFIC COMPONENTS
+   ======================================== */
+
+/* Project detail cards */
+.project-stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6;
+}
+
+.project-stat-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply hover:shadow-md transition-shadow duration-200;
+}
+
+.project-stat-label {
+    @apply text-sm font-medium text-gray-600 dark:text-gray-400 mb-2;
+}
+
+.project-stat-value {
+    @apply text-2xl font-bold text-gray-900 dark:text-gray-100;
+}
+
+/* Tabs navigation */
+.tabs-nav {
+    @apply flex items-center gap-6 border-b border-gray-200 dark:border-gray-700 mb-6;
+    @apply overflow-x-auto;
+}
+
+.tab-item {
+    @apply flex items-center gap-2 px-4 py-3;
+    @apply text-gray-600 dark:text-gray-400 font-medium text-sm;
+    @apply border-b-2 border-transparent;
+    @apply hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-200 dark:hover:border-brand-700;
+    @apply transition-all duration-200;
+    @apply cursor-pointer whitespace-nowrap;
+}
+
+.tab-item.active {
+    @apply text-brand-600 dark:text-brand-400 border-brand-600 dark:border-brand-400;
+}
+
+.tab-item svg {
+    @apply w-5 h-5;
+}
+
+/* Document sections */
+.document-section {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md;
+    @apply border border-gray-200/50 dark:border-gray-700 p-6;
+    @apply mb-4;
+}
+
+.document-header {
+    @apply flex items-center justify-between;
+    @apply pb-4 border-b border-gray-200 dark:border-gray-700;
+    @apply cursor-pointer;
+}
+
+.document-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.document-body {
+    @apply pt-4;
+}
+
+.document-item {
+    @apply flex items-center justify-between;
+    @apply p-4 rounded-lg;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-700/50;
+    @apply transition-colors duration-150;
+}
+
+.document-info {
+    @apply flex items-center gap-4;
+}
+
+.document-icon {
+    @apply w-12 h-12 flex items-center justify-center;
+    @apply bg-red-50 dark:bg-red-900/20 rounded-lg;
+}
+
+.document-meta {
+    @apply flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400;
+}
+
+.document-actions {
+    @apply flex items-center gap-2;
+}
+
+/* Empty state */
+.empty-state {
+    @apply flex flex-col items-center justify-center;
+    @apply py-12 text-center;
+}
+
+.empty-state-icon {
+    @apply w-24 h-24 text-gray-300 dark:text-gray-600 mb-4;
+}
+
+.empty-state-text {
+    @apply text-gray-500 dark:text-gray-400 mb-4;
+}
+

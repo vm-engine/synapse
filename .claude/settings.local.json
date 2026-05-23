@@ -46,7 +46,9 @@
       "Bash(findstr:*)",
       "Skill(ui-ux-pro-max)",
       "Bash(python3:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(./vendor/bin/phpstan analyse:*)",
+      "Bash(ls /srv/www/synapse/packages/synapse/phpstan*)"
     ],
     "deny": [],
     "ask": []

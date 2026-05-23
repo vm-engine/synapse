@@ -1,0 +1,552 @@
+/**
+ * Default Synapse Theme — Base CSS (Shared Across All Layouts)
+ *
+ * Contains: @theme variables, global body styles, card/button/form/badge/
+ * table components, text utilities, animations, and shared .btn styles.
+ * Loaded on EVERY page via resources/css/base.css.
+ */
+
+/**
+ * Default Synapse Theme - Modern Professional Design
+ *
+ * A comprehensive theme showcasing Tailwind v4 @theme capabilities
+ * Features: Custom color palette, typography, spacing, components, animations
+ */
+
+@theme {
+    /* ========================================
+     BRAND COLORS - Modern Blue Palette
+     ======================================== */
+    --color-brand-50: oklch(0.97 0.01 240);
+    --color-brand-100: oklch(0.94 0.02 240);
+    --color-brand-200: oklch(0.87 0.05 240);
+    --color-brand-300: oklch(0.75 0.1 240);
+    --color-brand-400: oklch(0.65 0.15 240);
+    --color-brand-500: oklch(0.55 0.2 240);
+    --color-brand-600: oklch(0.45 0.18 240);
+    --color-brand-700: oklch(0.38 0.15 240);
+    --color-brand-800: oklch(0.28 0.12 240);
+    --color-brand-900: oklch(0.2 0.08 240);
+    --color-brand-950: oklch(0.13 0.05 240);
+
+    /* Success Color Scale */
+    --color-success-50: oklch(0.95 0.05 145);
+    --color-success-100: oklch(0.9 0.08 145);
+    --color-success-200: oklch(0.8 0.1 145);
+    --color-success-300: oklch(0.7 0.12 145);
+    --color-success-400: oklch(0.65 0.14 145);
+    --color-success-500: oklch(0.6 0.15 145);
+    --color-success-600: oklch(0.55 0.14 145);
+    --color-success-700: oklch(0.48 0.12 145);
+    --color-success-800: oklch(0.4 0.1 145);
+    --color-success-900: oklch(0.3 0.08 145);
+
+    /* Warning Color Scale */
+    --color-warning-50: oklch(0.95 0.05 75);
+    --color-warning-100: oklch(0.9 0.1 75);
+    --color-warning-200: oklch(0.85 0.14 75);
+    --color-warning-300: oklch(0.78 0.16 75);
+    --color-warning-400: oklch(0.73 0.17 75);
+    --color-warning-500: oklch(0.7 0.18 75);
+    --color-warning-600: oklch(0.65 0.16 75);
+    --color-warning-700: oklch(0.58 0.14 75);
+    --color-warning-800: oklch(0.48 0.12 75);
+    --color-warning-900: oklch(0.38 0.1 75);
+
+    /* Danger/Error Color Scale */
+    --color-danger-50: oklch(0.95 0.05 25);
+    --color-danger-100: oklch(0.9 0.1 25);
+    --color-danger-200: oklch(0.82 0.15 25);
+    --color-danger-300: oklch(0.72 0.18 25);
+    --color-danger-400: oklch(0.65 0.2 25);
+    --color-danger-500: oklch(0.58 0.22 25);
+    --color-danger-600: oklch(0.52 0.2 25);
+    --color-danger-700: oklch(0.45 0.18 25);
+    --color-danger-800: oklch(0.38 0.15 25);
+    --color-danger-900: oklch(0.3 0.12 25);
+
+    /* Info Color Scale */
+    --color-info-50: oklch(0.95 0.05 230);
+    --color-info-100: oklch(0.9 0.08 230);
+    --color-info-200: oklch(0.82 0.12 230);
+    --color-info-300: oklch(0.73 0.15 230);
+    --color-info-400: oklch(0.68 0.17 230);
+    --color-info-500: oklch(0.65 0.18 230);
+    --color-info-600: oklch(0.6 0.16 230);
+    --color-info-700: oklch(0.52 0.14 230);
+    --color-info-800: oklch(0.43 0.12 230);
+    --color-info-900: oklch(0.33 0.1 230);
+
+    /* ========================================
+     LAYOUT SPACING
+     ======================================== */
+    --spacing-sidebar-width: 16rem;
+    --spacing-sidebar-collapsed: 4rem;
+    --spacing-header-height: 4rem;
+    --spacing-content-padding: 2rem;
+    --spacing-card-padding: 1.5rem;
+
+    /* ========================================
+     TYPOGRAPHY SCALE
+     ======================================== */
+    --font-size-display: 3.5rem;
+    --font-size-heading-1: 2.5rem;
+    --font-size-heading-2: 2rem;
+    --font-size-heading-3: 1.5rem;
+    --font-size-body: 1rem;
+    --font-size-small: 0.875rem;
+    --font-size-tiny: 0.75rem;
+
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* ========================================
+     BORDER & SHADOW SYSTEM
+     ======================================== */
+    --radius-none: 0;
+    --radius-sm: 0.25rem;
+    --radius-default: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* Modern shadow system */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1),
+        0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+        0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* ========================================
+     ANIMATION TIMING
+     ======================================== */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 350ms;
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
+body {
+    @apply antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+}
+
+
+/* ========================================
+   CARD COMPONENTS
+   ======================================== */
+.theme-card,
+.card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm;
+    @apply border border-gray-200 dark:border-gray-700;
+    @apply transition-shadow duration-200;
+    @apply hover:shadow-md;
+}
+
+.theme-card-header,
+.card-header {
+    @apply px-6 py-4 border-b border-gray-200/50 dark:border-gray-700;
+    @apply flex items-center justify-between;
+}
+
+.theme-card-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.theme-card-body,
+.card-body {
+    padding: var(--spacing-card-padding);
+}
+
+/* Card body text styling - only affects direct children */
+.theme-card-body > h1,
+.theme-card-body > h2,
+.theme-card-body > h3,
+.card-body > h1,
+.card-body > h2,
+.card-body > h3 {
+    @apply text-gray-900 dark:text-gray-100 font-bold;
+}
+
+.theme-card-body > p,
+.card-body > p {
+    @apply text-gray-700 dark:text-gray-300;
+}
+
+.theme-card-footer,
+.card-footer {
+    @apply px-6 py-4 border-t border-gray-200/50 dark:border-gray-700;
+    @apply bg-gray-50/50 dark:bg-gray-800/50;
+}
+
+/* ========================================
+   BUTTON COMPONENTS - Standardized Classes
+   ======================================== */
+
+/* Base button styles */
+.theme-btn,
+.btn,
+button[type="submit"],
+button[type="button"] {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2;
+    @apply font-medium rounded-lg;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Primary button */
+.theme-btn-primary,
+.btn.primary {
+    @apply bg-brand-600 text-white;
+    @apply hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/30;
+    @apply focus:ring-brand-500;
+}
+
+/* Secondary button */
+.theme-btn-secondary,
+.btn.secondary {
+    @apply bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100;
+    @apply hover:bg-gray-300 dark:hover:bg-gray-600;
+    @apply focus:ring-gray-400;
+}
+
+/* Success button */
+.theme-btn-success,
+.btn.success {
+    @apply bg-success-500 text-white;
+    @apply hover:brightness-110;
+    @apply focus:ring-success-500;
+}
+
+/* Danger button */
+.theme-btn-danger,
+.btn.danger {
+    @apply bg-danger-500 text-white;
+    @apply hover:brightness-110;
+    @apply focus:ring-danger-500;
+}
+
+/* Warning button */
+.btn.warning {
+    @apply bg-warning-500 text-white;
+    @apply hover:brightness-110;
+    @apply focus:ring-warning-500;
+}
+
+/* Info button */
+.btn.info {
+    @apply bg-info-500 text-white;
+    @apply hover:brightness-110;
+    @apply focus:ring-info-500;
+}
+
+/* ========================================
+   FORM COMPONENTS - Standardized Classes
+   ======================================== */
+
+/* Form wrapper */
+.theme-form-group,
+.form-box {
+    @apply mb-4;
+}
+
+/* Form labels */
+.theme-form-label,
+.form-box label,
+label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+}
+
+/* Form inputs */
+.theme-form-input,
+.form-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+    @apply w-full px-4 py-2 rounded-lg;
+    @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100;
+    @apply focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:focus:ring-brand-800;
+    @apply transition-all duration-200;
+    @apply placeholder:text-gray-400 dark:placeholder:text-gray-500;
+}
+
+.theme-form-input:disabled,
+.form-input:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+    @apply bg-gray-100 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400;
+}
+
+/* Input with error state */
+.theme-form-input.has-error,
+.form-input.has-error,
+input.has-error {
+    @apply border-danger-500 focus:ring-danger-200;
+}
+
+/* Form error message */
+.theme-form-error,
+.form-error-message {
+    @apply mt-1 text-sm text-danger-600;
+}
+
+/* Checkboxes and radios */
+.theme-form-checkbox,
+.form-checkbox,
+input[type="checkbox"],
+input[type="radio"] {
+    @apply w-4 h-4 text-brand-600 border-gray-300 rounded;
+    @apply focus:ring-2 focus:ring-brand-200;
+}
+
+/* Input groups (icon + input) */
+.input-group {
+    @apply flex items-stretch;
+}
+
+/* Input inside a group: override w-full so flex can control the width */
+.input-group > .form-input,
+.input-group > input[type="text"],
+.input-group > input[type="email"],
+.input-group > input[type="password"],
+.input-group > input[type="number"],
+.input-group > input[type="url"],
+.input-group > input[type="search"],
+.input-group > textarea,
+.input-group > select {
+    width: auto !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right-width: 0 !important;
+}
+
+/* Generic item */
+.input-group-item {
+    @apply flex-shrink-0 flex items-center justify-center;
+}
+
+/* Icon color only for non-btn items (read-only overlays) */
+.input-group-item:not(.btn) .fa-solid,
+.input-group-item:not(.btn) .fa-regular,
+.input-group-item:not(.btn) .fa-brands {
+    @apply text-gray-600 text-base;
+}
+
+/* Clickable button appended to the right — only remove left radius */
+.input-group-item.right.btn {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+/* Middle button (Browse when Clear also exists) */
+.input-group-item.right.btn:not(:last-child) {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* ========================================
+   BADGE & TAG COMPONENTS
+   ======================================== */
+.theme-badge {
+    @apply inline-flex items-center px-2.5 py-0.5;
+    @apply text-xs font-medium rounded-full;
+}
+
+.theme-badge-primary {
+    @apply bg-brand-100 text-brand-800;
+}
+
+.theme-badge-success {
+    @apply bg-green-100 text-green-800;
+}
+
+.theme-badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.theme-badge-danger {
+    @apply bg-red-100 text-red-800;
+}
+
+/* ========================================
+   TABLE COMPONENTS
+   ======================================== */
+.theme-table {
+    @apply w-full border-collapse;
+}
+
+.theme-table thead {
+    @apply bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-700;
+}
+
+.theme-table th {
+    @apply px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider;
+}
+
+.theme-table td {
+    @apply px-6 py-4 text-sm text-gray-900 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700;
+}
+
+.theme-table tbody tr {
+    @apply hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150;
+}
+
+/* ========================================
+   UTILITY CLASSES - Text Colors
+   ======================================== */
+.text-primary {
+    @apply text-brand-600;
+}
+
+.text-secondary {
+    @apply text-gray-600;
+}
+
+.text-success {
+    @apply text-success-600;
+}
+
+.text-danger,
+.text-error {
+    @apply text-danger-600;
+}
+
+.text-warning {
+    @apply text-warning-600;
+}
+
+.text-info {
+    @apply text-info-600;
+}
+
+.text-muted {
+    @apply text-gray-500;
+}
+
+/* ========================================
+   DARK MODE - Disabled for Consistent Light Theme
+   ======================================== */
+/* All dark mode styles removed to maintain light theme regardless of OS settings */
+
+
+/* ========================================
+   DARK MODE - Disabled (Use light theme always)
+   ======================================== */
+/* Dark mode auto-detection removed to maintain consistent light theme */
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes slideInRight {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.theme-animate-slide-in {
+    animation: slideInRight 0.3s var(--ease-in-out);
+}
+
+.theme-animate-fade-in {
+    animation: fadeIn 0.3s var(--ease-in-out);
+}
+
+.theme-animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+.btn {
+    @apply inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition shadow-theme-xs hover:shadow-theme-md cursor-pointer;
+}
+
+.btn.sm {
+    @apply px-3 py-2 text-sm;
+}
+
+.btn.xs {
+    @apply px-2 py-1.5 text-xs;
+}
+
+.btn.lg {
+    @apply px-5 py-3 text-lg;
+}
+
+.btn.xl {
+    @apply px-7 py-4 text-xl;
+}
+
+/* ========================================
+   DARK MODE — TEXT READABILITY OVERRIDES
+   Override Tailwind gray text utilities so content authored without
+   dark: variants remains readable in dark mode.
+
+   .dark .text-gray-* has specificity 0-2-0 which beats the utility
+   class .text-gray-* at 0-1-0, so these rules always win.
+   ======================================== */
+
+.dark .text-gray-950,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 { color: rgb(229 231 235); }   /* ≈ gray-200 */
+
+.dark .text-gray-600 { color: rgb(156 163 175); }   /* ≈ gray-400 */
+
+/* Table cells: default light text in dark mode */
+.dark table td,
+.dark table th { color: rgb(209 213 219); }   /* gray-300 */
+
+/* Headings inside content areas */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: rgb(243 244 246);   /* gray-100 */
+}
+
+/* Inline paragraph text */
+.dark p { color: rgb(209 213 219); }   /* gray-300 */
+

@@ -58,12 +58,22 @@ class SynAppsMakeTheme extends Command
         $this->newLine();
         $this->components->warn('Next steps:');
         $this->line("  1. Edit {$themePath}/theme.json");
-        $this->line("  2. Customize {$themePath}/css/theme.css");
-        $this->line("  3. Update {$themePath}/layouts/*.blade.php");
-        $this->line('  4. Update synapps/config/apps.json to set active theme:');
+        $this->line("  2. Customize the split CSS files in {$themePath}/css/:");
+        $this->line('     - theme-base.css    (shared — used on all layouts)');
+        $this->line('     - theme-app.css     (backend/admin layout only)');
+        $this->line('     - theme-frontend.css (public/frontend layout only)');
+        $this->line('     - theme-guest.css   (auth/guest layout only)');
+        $this->line("  3. Customize the split JS files in {$themePath}/js/:");
+        $this->line('     - theme-base.js    (shared — used on all layouts)');
+        $this->line('     - theme-app.js     (backend/admin layout only)');
+        $this->line('     - theme-frontend.js (public/frontend layout only)');
+        $this->line('     - theme-guest.js   (auth/guest layout only)');
+        $this->line("  4. Update {$themePath}/layouts/*.blade.php");
+        $this->line('  5. Update synapps/config/apps.json to set active theme:');
         $this->line('     { "themes": { "active": "'.$name.'" } }');
-        $this->line('  5. Run: php artisan synapps:config');
-        $this->line('  6. Run: npm run build');
+        $this->line('  6. Run: php artisan synapps:config');
+        $this->line('  7. Run: php artisan synapps:patch-resources --split-layouts');
+        $this->line('  8. Run: npm run build');
 
         return 0;
     }
@@ -107,6 +117,11 @@ class SynAppsMakeTheme extends Command
         }
 
         $config = json_decode(file_get_contents($jsonPath), true);
+
+        if (! is_array($config)) {
+            return;
+        }
+
         $config['id'] = $name;
         $config['name'] = Str::title(str_replace('-', ' ', $name)).' Theme';
         $config['version'] = '1.0.0';
