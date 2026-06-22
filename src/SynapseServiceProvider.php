@@ -268,7 +268,7 @@ class SynapseServiceProvider extends ServiceProvider
         $moduleConfigs = config('synapps.modules', []);
 
         foreach ($moduleConfigs as $moduleConfig) {
-            if ($moduleConfig['is_package']) {
+            if (isset($moduleConfig['is_package']) && $moduleConfig['is_package']) {
                 continue;
             }
             // VmEngine\Example\ExampleServiceProvider
