@@ -9,6 +9,14 @@ class Apps extends BuilderBase
     public function init()
     {
         $synappsPath = $this->synapps->synappsPath;
+
+        if (! file_exists($synappsPath.'/config/apps.json')) {
+            throw new \RuntimeException(
+                "Synapse config file not found: {$synappsPath}/config/apps.json. ".
+                'Run `php artisan synapps:setup` to initialise the project.'
+            );
+        }
+
         $this->synapps->config['apps'] = json_decode(
             file_get_contents($synappsPath.'/config/apps.json'),
             true

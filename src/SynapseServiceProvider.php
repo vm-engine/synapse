@@ -5,6 +5,7 @@ namespace VmEngine\Synapse;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Spatie\LaravelData\Data;
@@ -161,7 +162,8 @@ class SynapseServiceProvider extends ServiceProvider
 
         if (
             SynapseUtils::isSynAppsAutoloaded() &&
-            $this->app->runningInConsole()
+            $this->app->runningInConsole() &&
+            $this->isSynAppsConfigured()
         ) {
             $this->bootDbOverride();
         }
@@ -195,7 +197,7 @@ class SynapseServiceProvider extends ServiceProvider
         $this->app->singleton('synapse.theme', function ($app) {
             return new Services\ThemeService;
         });
-        if (SynapseUtils::isSynAppsAutoloaded()) {
+        if (SynapseUtils::isSynAppsAutoloaded() && $this->isSynAppsConfigured()) {
             $this->registerSynapseFinder();
             $this->bindAlias();
             $this->bindPublicPath();
@@ -206,6 +208,11 @@ class SynapseServiceProvider extends ServiceProvider
             $this->registerConfigs();
             $this->overrideConfigs();
         }
+    }
+
+    private function isSynAppsConfigured(): bool
+    {
+        return file_exists(synapps_path('config/compiled/synapps.json'));
     }
 
     private function registerSynapseFinder(): void
@@ -272,6 +279,7 @@ class SynapseServiceProvider extends ServiceProvider
                 continue;
             }
             // VmEngine\Example\ExampleServiceProvider
+            Log::debug('Registering SynApps Service Provider for module: '.$moduleConfig['id'], ['module' => $moduleConfig]);
             $serviceProviderClass = 'SynApps\\Modules\\'
                 .$moduleConfig['id_case']['pascal'].'\\'
                 .$moduleConfig['id_case']['pascal'].'ServiceProvider';
