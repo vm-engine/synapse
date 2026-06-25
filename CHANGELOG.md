@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.16] - 2026-06-25
+
+### Security
+- **`WithReturnUrl::isSafeReturnUrl()`** — replaced `str_starts_with(url('/'))` with `parse_url()` host+scheme comparison to close an open-redirect bypass where `http://yourapp.com.attacker.com/` would pass the prefix check.
+- **`WithDeleteToken::validateDeleteToken()`** — added guard before destructuring `explode('|', $decrypted, 2)` so a malformed decrypted string returns `false` instead of throwing an uncaught `ErrorException` (PHP `\Error`, not caught by the existing `\Exception` handler).
+- **`helper.php / dbconf()`** — added `InvalidArgumentException` for keys that contain no dot separator, in both the getter and array-setter branches; previously produced an unhelpful `ErrorException: Undefined offset: 1`.
+- **`SynAppsLinkErrors`** — Windows junction creation now uses `proc_open(['cmd', '/c', 'mklink', '/J', ...])` with an explicit argument list instead of string-interpolated `exec()`, preventing shell-injection on paths that contain special characters (spaces, parentheses, etc.).
+
+### Fixed
+- **`ProcessExcelImport`** — replaced stale read-modify-write (`$task->processed_rows + $processedInThisRun`) with `$task->increment('processed_rows', $rows->count(), [...])`. The old pattern produced wrong row counts on job retries and could cause rows to be silently skipped on resume.
+- **`SynapseExcelCleanup`** — replaced `->get()` (loads all processing tasks into memory) with a DB-level staleness filter and `->cursor()->each()`. The staleness logic (`last_heartbeat_at`-or-`started_at`-based cutoff) is now evaluated in SQL, preventing memory exhaustion under high task volume.
+- **`SynAppsDiscover::compareDependencies()`** — null-coalesced all four nested dependency keys (`npm.main`, `npm.dev`, `composer.main`, `composer.dev`); a `module.json` missing or partially omitting the `dependencies` key no longer aborts the entire discovery run with a `TypeError`.
+- **`drag-n-drop.blade.php`** — Alpine `error` data property now initialises to `null` instead of the PHP `$error` prop value, preventing a stale server-side error from being shown before the user interacts with the component.
+
+### Changed
+- **`DbLang`** — added `reload()` method to flush the in-memory cache and re-load from the database; supports Octane workers and queue jobs that need to invalidate the language cache mid-process.
+- **`SecureHeaders` CSP** — tightened `Content-Security-Policy` from `default-src *` (effectively no XSS protection) to `default-src 'self' data:` with explicit directives for `script-src`, `style-src`, `img-src`, `font-src`, `connect-src`, and `frame-src`. CDN resources loaded via `https:` remain permitted.
+- **`SynapseServiceProvider`** — removed the hard `use Spatie\LaravelData\Data` import; optional-package detection now uses `class_exists('Spatie\\LaravelData\\Data')` string form, correctly expressing `spatie/laravel-data` as optional with no parse-time dependency.
+- **Type hints** — added explicit parameter and return types to `DbConfig::get()`, `DbConfig::set()`, `DbLang::get()`, `DbLang::set()`, all `SyNav` methods, and `BuilderBase::loop()` parameter types. Added typed `$synapps` property to `BuilderBase`.
+
 ## [2.3.13] - 2026-05-18
 
 ### Changed

@@ -4,7 +4,7 @@ namespace VmEngine\Synapse\Services\ConfigGenerator;
 
 class BuilderBase
 {
-    protected $synapps;
+    protected Builder $synapps;
 
     public function __construct(Builder &$synapps)
     {
@@ -15,7 +15,7 @@ class BuilderBase
 
     public function preLoop() {}
 
-    public function loop($packageNamespace, $packageConfig) {}
+    public function loop(string $packageNamespace, array $packageConfig) {}
 
     public function postLoop() {}
 

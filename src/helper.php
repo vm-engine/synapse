@@ -79,13 +79,24 @@ if (! function_exists('dbconf')) {
                 $force = true;
                 $configString = Str::after($configString, '!');
             }
+
+            if (! str_contains($configString, '.')) {
+                throw new InvalidArgumentException("dbconf key must be in 'group.key' format, got: {$configString}");
+            }
+
             [$group, $key] = explode('.', $configString, 2);
 
             return $config->get($group, $key, $default, $force);
         } else {
             $result = null;
             foreach ($configString as $configKey => $value) {
-                [$group, $key] = explode('.', (string) $configKey, 2);
+                $configKeyStr = (string) $configKey;
+
+                if (! str_contains($configKeyStr, '.')) {
+                    throw new InvalidArgumentException("dbconf key must be in 'group.key' format, got: {$configKeyStr}");
+                }
+
+                [$group, $key] = explode('.', $configKeyStr, 2);
                 $result = $config->set($group, $key, $value);
             }
 

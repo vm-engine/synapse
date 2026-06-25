@@ -8,7 +8,7 @@ class DbConfig
 {
     private array $cache = [];
 
-    public function get($group, $key, $default = null, $force = false)
+    public function get(string $group, string $key, mixed $default = null, bool $force = false): mixed
     {
         if (isset($this->cache[$group][$key]) && ! $force) {
             return $this->cache[$group][$key];
@@ -19,7 +19,7 @@ class DbConfig
         return $this->cache[$group][$key];
     }
 
-    public function set($group, $key, $value, $label = null)
+    public function set(string $group, string $key, mixed $value, ?string $label = null): mixed
     {
         $data = ['value' => $value];
 

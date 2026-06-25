@@ -203,27 +203,20 @@ class SynAppsDiscover extends Command
         }
     }
 
-    private function compareDependencies($moduleDependecies)
+    private function compareDependencies(array $moduleDependecies): void
     {
-        $this->compareDeps('packageJson', 'dependencies', $moduleDependecies['npm']['main'], 'npmDeps');
-        $this->compareDeps('packageJson', 'devDependencies', $moduleDependecies['npm']['dev'], 'npmDevDeps');
-        $this->compareDeps('composerJson', 'require', $moduleDependecies['composer']['main'], 'composerDeps');
-        $this->compareDeps('composerJson', 'require-dev', $moduleDependecies['composer']['dev'], 'composerDevDeps');
-
-        return [
-            'npmDeps' => $this->npmDeps,
-            'composerDeps' => $this->composerDeps,
-            'npmDevDeps' => $this->npmDevDeps,
-            'composerDevDeps' => $this->composerDevDeps,
-        ];
+        $this->compareDeps('packageJson', 'dependencies', $moduleDependecies['npm']['main'] ?? [], 'npmDeps');
+        $this->compareDeps('packageJson', 'devDependencies', $moduleDependecies['npm']['dev'] ?? [], 'npmDevDeps');
+        $this->compareDeps('composerJson', 'require', $moduleDependecies['composer']['main'] ?? [], 'composerDeps');
+        $this->compareDeps('composerJson', 'require-dev', $moduleDependecies['composer']['dev'] ?? [], 'composerDevDeps');
     }
 
     private function compareDeps(
-        $thisVar,
-        $thisVarKey,
-        $toLoop,
-        $counterVar
-    ) {
+        string $thisVar,
+        string $thisVarKey,
+        array $toLoop,
+        string $counterVar
+    ): void {
         $collection = $this->{$thisVar}[$thisVarKey] ?? [];
 
         foreach ($toLoop as $package => $version) {

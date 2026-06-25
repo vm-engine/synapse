@@ -11,27 +11,23 @@ class SyNav
 {
     protected string $activeMenu = '';
 
-    public function backend()
+    public function backend(): mixed
     {
         return config('synapps.nav.backend');
     }
 
     /**
-     * Get generated Backend Navigation Menu
-     *
-     * @return array
+     * Get generated Frontend Navigation Menu
      */
-    public function frontend()
+    public function frontend(): mixed
     {
         return config('synapps.nav.frontend');
     }
 
     /**
      * Translate given string name if start with '__' or else return as is
-     *
-     * @return string
      */
-    public function translate(string $name)
+    public function translate(string $name): string
     {
         return Str::startsWith($name, '__') ? __(substr($name, 2)) : $name;
     }
@@ -48,15 +44,13 @@ class SyNav
 
     /**
      * Get Active Menu
-     *
-     * @return string
      */
-    public function getActiveMenu()
+    public function getActiveMenu(): string
     {
         return $this->activeMenu;
     }
 
-    public function is(string $id)
+    public function is(string $id): bool
     {
         return Str::startsWith($this->activeMenu, $id);
     }

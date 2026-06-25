@@ -5,10 +5,8 @@ namespace VmEngine\Synapse;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
-use Spatie\LaravelData\Data;
 use VmEngine\Synapse\Console\Commands\Generators\MakeCastCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeChannelCommand;
 use VmEngine\Synapse\Console\Commands\Generators\MakeClassCommand;
@@ -152,7 +150,7 @@ class SynapseServiceProvider extends ServiceProvider
             ]);
 
             // Register spatie/laravel-data command only when package is installed
-            if (class_exists(Data::class)) {
+            if (class_exists('Spatie\\LaravelData\\Data')) {
                 $this->commands([MakeDataCommand::class]);
             }
         }
@@ -279,7 +277,6 @@ class SynapseServiceProvider extends ServiceProvider
                 continue;
             }
             // VmEngine\Example\ExampleServiceProvider
-            Log::debug('Registering SynApps Service Provider for module: '.$moduleConfig['id'], ['module' => $moduleConfig]);
             $serviceProviderClass = 'SynApps\\Modules\\'
                 .$moduleConfig['id_case']['pascal'].'\\'
                 .$moduleConfig['id_case']['pascal'].'ServiceProvider';

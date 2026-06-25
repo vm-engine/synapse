@@ -20,7 +20,7 @@ class SecureHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=()');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-        $response->headers->set('Content-Security-Policy', "default-src * data:; script-src https: 'unsafe-inline' 'unsafe-eval'; style-src https: 'unsafe-inline'");
+        $response->headers->set('Content-Security-Policy', "default-src 'self' data:; script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; style-src 'self' https: 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self';");
 
         // Additional headers
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
