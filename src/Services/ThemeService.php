@@ -2,6 +2,8 @@
 
 namespace VmEngine\Synapse\Services;
 
+use Illuminate\Foundation\Vite;
+
 class ThemeService
 {
     /**
@@ -77,8 +79,8 @@ class ThemeService
      */
     private function safeViteRender(array $entries): string
     {
-        /** @var \Illuminate\Foundation\Vite $vite */
-        $vite = app(\Illuminate\Foundation\Vite::class);
+        /** @var Vite $vite */
+        $vite = app(Vite::class);
 
         // Filter to only entries that exist in the manifest so that a missing
         // layout-specific file (e.g. guest.css before the split build) does not

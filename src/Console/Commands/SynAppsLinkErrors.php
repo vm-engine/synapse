@@ -75,16 +75,32 @@ class SynAppsLinkErrors extends Command
         // Try junction on Windows (doesn't require admin)
         if (PHP_OS_FAMILY === 'Windows') {
             $this->components->info('Symlink failed, trying Windows junction...');
-            $targetPath = str_replace('/', '\\', realpath($target));
+            $targetPath = str_replace('/', '\\', (string) realpath($target));
             $linkPath = str_replace('/', '\\', $link);
 
-            exec("mklink /J \"{$linkPath}\" \"{$targetPath}\" 2>&1", $output, $returnCode);
+            $process = proc_open(
+                ['cmd', '/c', 'mklink', '/J', $linkPath, $targetPath],
+                [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
+                $pipes
+            );
+
+            if ($process === false) {
+                $this->components->warn('Junction creation failed: could not launch cmd.exe');
+
+                return false;
+            }
+
+            fclose($pipes[0]);
+            $stderr = stream_get_contents($pipes[2]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            $returnCode = proc_close($process);
 
             if ($returnCode === 0) {
                 return true;
             }
 
-            $this->components->warn('Junction creation failed: '.implode(' ', $output));
+            $this->components->warn('Junction creation failed: '.trim($stderr));
         }
 
         return false;

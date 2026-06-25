@@ -38,7 +38,7 @@ class DbLang
         return $this->currentLanguage;
     }
 
-    public function get($key, ?string $languageCode = null)
+    public function get(string $key, ?string $languageCode = null): string
     {
         $lang = $languageCode ?? $this->currentLanguage;
 
@@ -54,7 +54,7 @@ class DbLang
         return $this->cache[$key] ?? $key;
     }
 
-    public function set($key, $value, $label = null, ?string $languageCode = null)
+    public function set(string $key, mixed $value, ?string $label = null, ?string $languageCode = null): mixed
     {
         $lang = $languageCode ?? $this->currentLanguage;
 
@@ -98,6 +98,12 @@ class DbLang
         }
 
         return $value;
+    }
+
+    public function reload(): void
+    {
+        $this->cache = [];
+        $this->loadLanguage($this->currentLanguage);
     }
 
     private function loadLanguage(string $languageCode): void

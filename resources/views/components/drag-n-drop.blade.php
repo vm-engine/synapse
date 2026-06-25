@@ -27,25 +27,25 @@
         fileSize: '',
         previewUrl: null,
         isDragging: false,
-        error: @js($error),
+        error: null,
         accept: @js($acceptTypes),
         maxSize: @js($maxSize),
         maxWidth: @js($maxWidth),
         maxHeight: @js($maxHeight),
-
+    
         handleFiles(files) {
             if (files.length === 0) return;
-
+    
             const file = files[0];
             this.error = null;
-
+    
             // Validate file type
             if (this.accept && !this.accept.split(',').some(type => file.type === type.trim())) {
                 this.error = 'Invalid file type. Accepted types: ' + @js($acceptExtensions);
                 this.clearFileInput();
                 return;
             }
-
+    
             // Validate file size
             const fileSizeKB = Math.round(file.size / 1024);
             if (this.maxSize && fileSizeKB > this.maxSize) {
@@ -53,15 +53,15 @@
                 this.clearFileInput();
                 return;
             }
-
+    
             // Set preview immediately - dimension validation will be done server-side
             this.setFileInfo(file);
         },
-
+    
         setFileInfo(file) {
             this.fileName = file.name;
             this.fileSize = this.formatFileSize(file.size);
-
+    
             // Show preview for images
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -71,7 +71,7 @@
                 reader.readAsDataURL(file);
             }
         },
-
+    
         formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -79,17 +79,17 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
         },
-
+    
         clearFileInput() {
             if (this.$refs.fileInput) {
                 this.$refs.fileInput.value = '';
             }
-
+    
             @if($wireModel)
             this.$wire.set('{{ $wireModel }}', null);
             @endif
         },
-
+    
         removeFile() {
             this.fileName = '';
             this.fileSize = '';
@@ -97,37 +97,37 @@
             this.error = null;
             this.clearFileInput();
         },
-
+    
         triggerFileInput() {
             if (this.$refs.fileInput) {
                 this.$refs.fileInput.click();
             }
         },
-
+    
         // Handle drag-and-drop for Livewire mode
         handleDrop(event) {
             const files = event.dataTransfer.files;
-
+    
             if (files.length > 0 && this.$refs.fileInput) {
                 // Set the files to the input element so Livewire can pick them up
                 this.$refs.fileInput.files = files;
-
+    
                 // Manually trigger change event for Livewire to detect
                 const changeEvent = new Event('change', { bubbles: true });
                 this.$refs.fileInput.dispatchEvent(changeEvent);
             }
         },
-
+    
         // Livewire upload event handlers
         handleLivewireUploadStart() {
             this.error = null;
-
+    
             // Get file info from the input
             if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
                 const file = this.$refs.fileInput.files[0];
                 this.fileName = file.name;
                 this.fileSize = this.formatFileSize(file.size);
-
+    
                 // Show preview for images
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -138,11 +138,11 @@
                 }
             }
         },
-
+    
         handleLivewireUploadFinish(event) {
             // Upload completed successfully
         },
-
+    
         handleLivewireUploadError() {
             this.error = 'Upload failed. Please try again.';
             this.removeFile();

@@ -25,6 +25,10 @@ trait WithReturnUrl
 
     private function isSafeReturnUrl(string $url): bool
     {
-        return str_starts_with($url, url('/'));
+        $parsed = parse_url($url);
+        $appParsed = parse_url(url('/'));
+
+        return ($parsed['scheme'] ?? '') === ($appParsed['scheme'] ?? '')
+            && ($parsed['host'] ?? '') === ($appParsed['host'] ?? '');
     }
 }

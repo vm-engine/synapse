@@ -50,7 +50,13 @@ trait WithDeleteToken
 
         try {
             $decrypted = Crypt::decryptString($token);
-            [$id, $salt] = explode('|', $decrypted);
+            $parts = explode('|', $decrypted, 2);
+
+            if (count($parts) !== 2) {
+                return false;
+            }
+
+            [$id, $salt] = $parts;
 
             if ($salt !== session('dToken')) {
                 return false;

@@ -83,20 +83,14 @@ class ProcessExcelImport implements ShouldQueue
             }
 
             $mappedRows = $this->getMappedRowsGenerator($reader, $startingRow, $columnMapper);
-            $processedInThisRun = 0;
 
             ChunkIterator::process(
                 $mappedRows,
                 $chunkSize,
-                function ($rows, $chunkIndex) use ($task, $processor, &$processedInThisRun) {
+                function ($rows, $chunkIndex) use ($task, $processor) {
                     $processor->process($rows, $chunkIndex);
-                    $processedInThisRun += $rows->count();
-                    $task->update([
-                        'processed_rows' => $task->processed_rows + $processedInThisRun,
-                        'last_heartbeat_at' => now(),
-                    ]);
+                    $task->increment('processed_rows', $rows->count(), ['last_heartbeat_at' => now()]);
                     $task->refresh();
-                    $processedInThisRun = 0;
 
                     // Check for cancellation between chunks
                     if ($task->status === ExcelTaskStatus::Cancelled) {
