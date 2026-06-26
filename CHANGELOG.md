@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.17] - 2026-06-27
+
+### Changed
+- **`SynAppsPatchTests` — smarter `.env.testing` handling** — instead of overwriting the file on every run, the command now diffs existing keys against required keys and only appends the missing ones (with a backup). This preserves any custom values the developer has set.
+- **`SynAppsPatchTests` — `APP_LOCALE` and `APP_FALLBACK_LOCALE` required keys** — both are now added to `.env.testing` (value: `en`) and to `phpunit.xml` as `force="true"` env vars, ensuring locale-dependent tests are deterministic.
+- **`SynAppsPatchTests` — `phpunit.xml` `force` attribute support** — `ensureEnvVar()` now accepts a `$force` flag and writes or removes the `force="true"` attribute accordingly, instead of always omitting it.
+
+### Fixed
+- **`ExcelExport` PHPDoc** — `$status` property typed as `ExcelTaskStatus` (was `string`), matching the actual cast.
+
 ## [2.3.16] - 2026-06-25
 
 ### Security
