@@ -137,9 +137,25 @@ class SynAppsPatchTests extends Command
     {
         $envTestingPath = base_path('.env.testing');
 
-        $envTestingContent = <<<'ENV'
+        /** @var array<string, string> $requiredKeys */
+        $requiredKeys = [
+            'APP_ENV' => 'testing',
+            'APP_LOCALE' => 'en',
+            'APP_FALLBACK_LOCALE' => 'en',
+            'DB_CONNECTION' => 'sqlite',
+            'DB_DATABASE' => ':memory:',
+            'CACHE_STORE' => 'array',
+            'QUEUE_CONNECTION' => 'sync',
+            'SESSION_DRIVER' => 'array',
+            'MAIL_MAILER' => 'array',
+            'BCRYPT_ROUNDS' => '4',
+        ];
+
+        $defaultContent = <<<'ENV'
 APP_ENV=testing
 APP_KEY=
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
 
 DB_CONNECTION=sqlite
 DB_DATABASE=:memory:
@@ -153,30 +169,46 @@ BCRYPT_ROUNDS=4
 
 ENV;
 
-        // Check if file exists
-        if (file_exists($envTestingPath)) {
-            $existingContent = file_get_contents($envTestingPath);
+        if (! file_exists($envTestingPath)) {
+            if (! file_put_contents($envTestingPath, $defaultContent)) {
+                $this->components->error('Failed to create .env.testing.');
 
-            // Check if it already has the correct database configuration
-            if (str_contains($existingContent, 'DB_DATABASE=:memory:')) {
-                $this->components->info('.env.testing already configured correctly.');
-
-                return true;
+                return false;
             }
 
-            // Update existing file
-            $this->components->warn('.env.testing exists but needs updating.');
+            $this->components->success('.env.testing created successfully!');
+
+            return true;
         }
 
-        // Create or update the file
+        // File exists — find missing keys and append them
+        $existingContent = file_get_contents($envTestingPath);
+
+        /** @var array<string, string> $missingLines */
+        $missingLines = [];
+
+        foreach ($requiredKeys as $key => $value) {
+            if (! preg_match('/^'.preg_quote($key, '/').'=/m', $existingContent)) {
+                $missingLines[$key] = "{$key}={$value}";
+            }
+        }
+
+        if (empty($missingLines)) {
+            $this->components->info('.env.testing already configured correctly.');
+
+            return true;
+        }
+
         $this->createBackup($envTestingPath);
-        if (! file_put_contents($envTestingPath, $envTestingContent)) {
-            $this->components->error('Failed to create/update .env.testing.');
+        $appendContent = "\n".implode("\n", $missingLines)."\n";
+
+        if (! file_put_contents($envTestingPath, rtrim($existingContent)."\n".$appendContent)) {
+            $this->components->error('Failed to update .env.testing.');
 
             return false;
         }
 
-        $this->components->success('.env.testing created/updated successfully!');
+        $this->components->success('.env.testing updated — added: '.implode(', ', array_keys($missingLines)));
 
         return true;
     }
@@ -458,20 +490,22 @@ ENV;
             $php = $phpNode;
         }
 
-        // Define required environment variables
+        // Define required environment variables — [name => [value, force]]
         $requiredEnvVars = [
-            'APP_ENV' => 'testing',
-            'DB_CONNECTION' => 'sqlite',
-            'DB_DATABASE' => ':memory:',
-            'CACHE_STORE' => 'array',
-            'SESSION_DRIVER' => 'array',
-            'QUEUE_CONNECTION' => 'sync',
-            'MAIL_MAILER' => 'array',
-            'BCRYPT_ROUNDS' => '4',
+            'APP_ENV' => ['testing', false],
+            'APP_LOCALE' => ['en', true],
+            'APP_FALLBACK_LOCALE' => ['en', true],
+            'DB_CONNECTION' => ['sqlite', false],
+            'DB_DATABASE' => [':memory:', false],
+            'CACHE_STORE' => ['array', false],
+            'SESSION_DRIVER' => ['array', false],
+            'QUEUE_CONNECTION' => ['sync', false],
+            'MAIL_MAILER' => ['array', false],
+            'BCRYPT_ROUNDS' => ['4', false],
         ];
 
-        foreach ($requiredEnvVars as $name => $value) {
-            if ($this->ensureEnvVar($dom, $xpath, $php, $name, $value)) {
+        foreach ($requiredEnvVars as $name => [$value, $force]) {
+            if ($this->ensureEnvVar($dom, $xpath, $php, $name, $value, $force)) {
                 $modified = true;
             }
         }
@@ -479,27 +513,47 @@ ENV;
         return $modified;
     }
 
-    private function ensureEnvVar(\DOMDocument $dom, \DOMXPath $xpath, \DOMElement $php, string $name, string $value): bool
+    private function ensureEnvVar(\DOMDocument $dom, \DOMXPath $xpath, \DOMElement $php, string $name, string $value, bool $force = false): bool
     {
         // Check if env var exists
         $envVars = $xpath->query("/phpunit/php/env[@name='{$name}']");
 
         if ($envVars->length > 0) {
-            // Update if value is different
             $envVar = $envVars->item(0);
-            if ($envVar instanceof \DOMElement && $envVar->getAttribute('value') !== $value) {
-                $envVar->setAttribute('value', $value);
 
-                return true;
+            if (! $envVar instanceof \DOMElement) {
+                return false;
             }
 
-            return false;
+            $changed = false;
+
+            if ($envVar->getAttribute('value') !== $value) {
+                $envVar->setAttribute('value', $value);
+                $changed = true;
+            }
+
+            $currentForce = $envVar->getAttribute('force');
+
+            if ($force && $currentForce !== 'true') {
+                $envVar->setAttribute('force', 'true');
+                $changed = true;
+            } elseif (! $force && $currentForce === 'true') {
+                $envVar->removeAttribute('force');
+                $changed = true;
+            }
+
+            return $changed;
         }
 
         // Create new env var
         $env = $dom->createElement('env');
         $env->setAttribute('name', $name);
         $env->setAttribute('value', $value);
+
+        if ($force) {
+            $env->setAttribute('force', 'true');
+        }
+
         $php->appendChild($env);
 
         return true;
