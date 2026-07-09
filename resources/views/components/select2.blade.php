@@ -176,7 +176,7 @@
     $isLive = $wireModelAttr && str_contains($wireModelAttr, '.live');
 @endphp
 @script
-    <script>
+    <script nonce="{{ csp_nonce() }}">
         $(document).ready(function() {
             const componentId = '{{ $componentId }}';
             const $select = $('#' + componentId);

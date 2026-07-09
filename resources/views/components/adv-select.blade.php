@@ -145,13 +145,13 @@ Version: 1.0.0
             if (this.autoLoad && this.selected.length === 0) {
                 await this.loadInitialValues();
             }
-
+    
             // Set initial value to Livewire model
             // Only sync if preload has values (avoid empty updates on first render)
             if (this.selected && this.selected.length > 0) {
                 this.syncWithWire();
             }
-
+    
             // Reopen dropdown after Livewire updates
             Livewire.interceptMessage(({ onSuccess }) => {
                 onSuccess(() => {
@@ -160,26 +160,26 @@ Version: 1.0.0
                     }
                 });
             });
-
+    
             // Listen for reset event
             window.addEventListener('reset-tag-input', () => {
                 this.clearSelection();
             });
         },
-
+    
         async loadInitialValues() {
             if (!this.$wire) return;
-
+    
             try {
                 // Get current value from Livewire model
                 const currentValue = this.$wire.get(this.wireModel);
-
+    
                 if (currentValue === null || currentValue === undefined || (Array.isArray(currentValue) && currentValue.length === 0)) {
                     return; // No value to load
                 }
-
+    
                 const values = Array.isArray(currentValue) ? currentValue : [currentValue];
-
+    
                 // Try to find values in static options first
                 const foundInStatic = [];
                 for (const val of values) {
@@ -189,23 +189,23 @@ Version: 1.0.0
                         foundInStatic.push(found);
                     }
                 }
-
+    
                 // If all values found in static options, use them
                 if (foundInStatic.length === values.length) {
                     this.selected = foundInStatic;
                     return;
                 }
-
+    
                 // If loadMethod is provided, call it to get full objects
                 if (this.loadMethod && this.$wire?.call) {
                     const loaded = await this.$wire.call(this.loadMethod, this.multiple ? values : values[0]);
-
+    
                     if (loaded) {
                         this.selected = Array.isArray(loaded) ? loaded : [loaded];
                         return;
                     }
                 }
-
+    
                 // Fallback: create simple objects with value = label
                 this.selected = values.map(val => ({
                     [this.valueField]: val,
@@ -306,15 +306,15 @@ Version: 1.0.0
     
         syncWithWire() {
             if (!this.$wire) return; // safety check
-
+    
             const ids = this.selected.map(i => i[this.valueField]);
-
+    
             // Prevent sending [] on init unless already synced once
             if (!this._initialized) {
                 this._initialized = true;
                 if (ids.length === 0) return; // skip initial empty sync
             }
-
+    
             this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] : null), this.live);
         },
     }"
@@ -325,7 +325,11 @@ Version: 1.0.0
     <div
         class="adv-select-input-box shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 focus:ring-3 focus:outline-hidden flex w-full flex-wrap gap-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
         @click="focusInput"
-        @click.away="open = false"
+        {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
+             stopPropagation() on click, which would otherwise prevent this
+             bubble-phase document listener from ever firing inside a modal.
+             Capture-phase runs before that stopPropagation() takes effect. --}}
+        @click.away.capture="open = false"
     >
         {{-- Selected items (multiple mode) --}}
         <template x-if="multiple">

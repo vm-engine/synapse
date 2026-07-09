@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.18] - 2026-07-09
+
+### Added
+- **`synapps:vendor-fonts {theme?}`** — new command that self-hosts a theme's Google Fonts: auto-detects the `fonts.googleapis.com/css2` link in `theme.json`'s `headers.*`, downloads the referenced woff2 files and rewrites the CSS to reference them locally, removes the Google `<link>`/`preconnect` entries, and registers the local stylesheet in `theme.json`'s `css.*`. Atomic — nothing is written to disk until every font file downloads successfully.
+- **`csp_nonce()` helper** — returns the per-request CSP nonce bound by `SecureHeaders`, for stamping onto inline `<script>` tags.
+- **`ThemeService::renderStyles()`/`renderScripts()` — Subresource Integrity support** — CDN entries in `theme.json`'s `css`/`js` arrays may now be an object (`{ src/href, integrity, crossorigin }`) instead of a plain URL string, rendering the `integrity`/`crossorigin` attributes. Plain string entries still render exactly as before.
+- **`csp` block in generated `apps.json`** — `synapps:setup` and `synapps:reconfig` now scaffold an empty `csp.{script_src,style_src,font_src,img_src,connect_src}` block, read by `SecureHeaders` to extend the CSP allowlist per-app without hardcoding any project's CDN hosts into the shared package.
+
+### Fixed
+- **`SecureHeaders` — hardened Content-Security-Policy** — `script-src` no longer allows `'unsafe-inline'` (replaced with a per-request nonce); the blanket `https:` wildcard on `script-src`/`style-src`/`img-src`/`font-src`/`connect-src` is replaced by an explicit, config-driven allowlist; added `frame-ancestors 'self'` and `form-action 'self'` (previously undefined, meaning unrestricted).
+- **`adv-select` — click-away not closing inside modals** — `@click.away` now runs in the capture phase (`@click.away.capture`), since ancestors like `<x-synapse-modal>`'s content box call `stopPropagation()` on click, which previously prevented the bubble-phase listener from ever firing.
+
 ## [2.3.17] - 2026-06-27
 
 ### Changed

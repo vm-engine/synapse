@@ -13,7 +13,7 @@ class ThemeService
         $styles = $this->getResources('css', $layoutType);
 
         return collect($styles)
-            ->map(fn ($url) => '<link rel="stylesheet" href="'.e($url).'">')
+            ->map(fn ($entry) => $this->renderLinkTag($entry))
             ->join("\n    ");
     }
 
@@ -26,8 +26,60 @@ class ThemeService
         $scripts = $this->getResources('js', $layoutType);
 
         return collect($scripts)
-            ->map(fn ($url) => '<script src="'.e($url).'"></script>')
+            ->map(fn ($entry) => $this->renderScriptTag($entry))
             ->join("\n    ");
+    }
+
+    /**
+     * Render a single CDN <link rel="stylesheet"> tag. `$entry` may be a
+     * plain URL string (backward compatible) or an array with 'href' (or
+     * 'src'), 'integrity', and 'crossorigin' keys for Subresource Integrity.
+     *
+     * @param  string|array<string, string>  $entry
+     */
+    protected function renderLinkTag(string|array $entry): string
+    {
+        if (is_string($entry)) {
+            return '<link rel="stylesheet" href="'.e($entry).'">';
+        }
+
+        $href = $entry['href'] ?? $entry['src'] ?? '';
+        $tag = '<link rel="stylesheet" href="'.e($href).'"';
+
+        if (! empty($entry['integrity'])) {
+            $tag .= ' integrity="'.e($entry['integrity']).'"';
+        }
+        if (! empty($entry['crossorigin'])) {
+            $tag .= ' crossorigin="'.e($entry['crossorigin']).'"';
+        }
+
+        return $tag.'>';
+    }
+
+    /**
+     * Render a single CDN <script> tag. `$entry` may be a plain URL string
+     * (backward compatible) or an array with 'src', 'integrity', and
+     * 'crossorigin' keys for Subresource Integrity.
+     *
+     * @param  string|array<string, string>  $entry
+     */
+    protected function renderScriptTag(string|array $entry): string
+    {
+        if (is_string($entry)) {
+            return '<script src="'.e($entry).'"></script>';
+        }
+
+        $src = $entry['src'] ?? '';
+        $tag = '<script src="'.e($src).'"';
+
+        if (! empty($entry['integrity'])) {
+            $tag .= ' integrity="'.e($entry['integrity']).'"';
+        }
+        if (! empty($entry['crossorigin'])) {
+            $tag .= ' crossorigin="'.e($entry['crossorigin']).'"';
+        }
+
+        return $tag.'></script>';
     }
 
     /**

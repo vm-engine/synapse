@@ -54,6 +54,7 @@ use VmEngine\Synapse\Console\Commands\SynAppsPatchTests;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
+use VmEngine\Synapse\Console\Commands\SynAppsVendorFonts;
 use VmEngine\Synapse\Console\Commands\SynapseDbConfig;
 use VmEngine\Synapse\Console\Commands\SynapseDbLang;
 use VmEngine\Synapse\Console\Commands\SynapseExcelCleanup;
@@ -105,6 +106,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsCopyStubs::class,
                 SynAppsCopyThemes::class,
                 SynAppsMakeTheme::class,
+                SynAppsVendorFonts::class,
                 SynapseDbConfig::class,
                 SynapseDbLang::class,
                 SynapsePatchComposer::class,
