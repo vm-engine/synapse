@@ -53,6 +53,60 @@ test('renderScripts returns CDN script tags from config', function () {
         ->and($output)->toContain('<script src="https://cdn.example.com/frontend.js"></script>');
 });
 
+test('renderScripts renders integrity and crossorigin attributes for object entries', function () {
+    config([
+        'synapps.apps.themes.js' => [
+            'all' => [],
+            'app' => [
+                [
+                    'src' => 'https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js',
+                    'integrity' => 'sha384-LoktLSu+KN7O05Gi2Epno0XhcstpeXAu40T7IP2JC5OZ2qKi/oE9znxViQS3yYn5',
+                    'crossorigin' => 'anonymous',
+                ],
+            ],
+        ],
+    ]);
+
+    $output = $this->service->renderScripts('app');
+
+    expect($output)->toContain('src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"')
+        ->and($output)->toContain('integrity="sha384-LoktLSu+KN7O05Gi2Epno0XhcstpeXAu40T7IP2JC5OZ2qKi/oE9znxViQS3yYn5"')
+        ->and($output)->toContain('crossorigin="anonymous"');
+});
+
+test('renderStyles renders integrity and crossorigin attributes for object entries', function () {
+    config([
+        'synapps.apps.themes.css' => [
+            'all' => [],
+            'app' => [
+                [
+                    'href' => 'https://cdn.example.com/lib.css',
+                    'integrity' => 'sha384-abc123',
+                    'crossorigin' => 'anonymous',
+                ],
+            ],
+        ],
+    ]);
+
+    $output = $this->service->renderStyles('app');
+
+    expect($output)->toContain('href="https://cdn.example.com/lib.css"')
+        ->and($output)->toContain('integrity="sha384-abc123"')
+        ->and($output)->toContain('crossorigin="anonymous"');
+});
+
+test('renderScripts still supports plain string entries without integrity', function () {
+    config([
+        'synapps.apps.themes.js' => [
+            'all' => ['https://cdn.example.com/plain.js'],
+        ],
+    ]);
+
+    $output = $this->service->renderScripts('app');
+
+    expect($output)->toBe('<script src="https://cdn.example.com/plain.js"></script>');
+});
+
 test('renderStyles does not include layout-specific CDN for different layout', function () {
     config([
         'synapps.apps.themes.css' => [

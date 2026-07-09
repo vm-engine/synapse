@@ -186,6 +186,19 @@ if (! function_exists('theme_service')) {
     }
 }
 
+if (! function_exists('csp_nonce')) {
+    /**
+     * Get the per-request Content-Security-Policy nonce.
+     *
+     * Bound by SecureHeaders middleware before the response is rendered.
+     * Use on inline <script> tags: <script nonce="{{ csp_nonce() }}">
+     */
+    function csp_nonce(): string
+    {
+        return app()->bound('csp.nonce') ? app('csp.nonce') : '';
+    }
+}
+
 if (! function_exists('int2roman')) {
     /**
      * Convert Integer to Roman Numerical

@@ -160,6 +160,13 @@ class SynAppsSetup extends Command
                     'frontend' => [],
                 ],
             ],
+            'csp' => [
+                'script_src' => [],
+                'style_src' => [],
+                'font_src' => [],
+                'img_src' => [],
+                'connect_src' => [],
+            ],
         ];
 
         if (! file_exists(base_path('synapps'))) {

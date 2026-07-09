@@ -139,7 +139,7 @@ Version: 1.0.0
         isLive: {{ $live ? 'true' : 'false' }},
         allowCreate: {{ $allowCreate ? 'true' : 'false' }},
         autoLoad: {{ $autoLoad ? 'true' : 'false' }},
-    
+
         async init() {
             // Auto-load selected values from wireModel if enabled
             if (this.autoLoad && this.selected.length === 0) {
@@ -215,21 +215,21 @@ Version: 1.0.0
                 console.error('Error loading initial values:', e);
             }
         },
-    
+
         focusInput() {
             this.$refs.search.classList.remove('hidden');
             this.$refs.search.focus();
             this.open = true;
         },
-    
+
         async fetch() {
             const query = this.search.toLowerCase();
-    
+
             // ✅ 1. Start with static options (filter client-side)
             let staticResults = this.staticOptions.filter(o =>
                 o[this.labelField].toLowerCase().includes(query)
             );
-    
+
             // ✅ 2. If a Livewire search method is provided, merge remote results
             if (this.searchMethod && query.length > this.minSearchLength && this.$wire?.call) {
                 try {
@@ -251,10 +251,10 @@ Version: 1.0.0
                 // no remote search — static only
                 this.results = staticResults;
             }
-    
+
             this.open = this.results.length > 0 || (this.allowCreate && this.search.trim() !== '');
         },
-    
+
         select(item) {
             if (this.multiple) {
                 if (!this.selected.find(i => i[this.valueField] == item[this
@@ -270,40 +270,40 @@ Version: 1.0.0
             this.open = false;
             this.syncWithWire();
         },
-    
+
         createNew() {
             if (!this.allowCreate || !this.search.trim()) return;
-    
+
             const newItem = {
                 [this.valueField]: this.search.trim(),
                 [this.labelField]: this.search.trim()
             };
-    
+
             // Add to static options for future searches
             this.staticOptions.push(newItem);
-    
+
             // Select the new item
             this.select(newItem);
         },
-    
+
         handleKeydown(e) {
             if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
                 e.preventDefault();
                 this.createNew();
             }
         },
-    
+
         remove(index) {
             this.selected.splice(index, 1);
             this.syncWithWire();
         },
-    
+
         clearSelection() {
             this.selected = [];
             this.syncWithWire();
             this.focusInput();
         },
-    
+
         syncWithWire() {
             if (!this.$wire) return; // safety check
 
@@ -325,7 +325,11 @@ Version: 1.0.0
     <div
         class="adv-select-input-box shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 focus:ring-3 focus:outline-hidden flex w-full flex-wrap gap-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
         @click="focusInput"
-        @click.away="open = false"
+        {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
+             stopPropagation() on click, which would otherwise prevent this
+             bubble-phase document listener from ever firing inside a modal.
+             Capture-phase runs before that stopPropagation() takes effect. --}}
+        @click.away.capture="open = false"
     >
         {{-- Selected items (multiple mode) --}}
         <template x-if="multiple">

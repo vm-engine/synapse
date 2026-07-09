@@ -161,6 +161,13 @@ class SynAppsReconfig extends Command
                     'frontend' => [],
                 ],
             ],
+            'csp' => config('synapps.apps.csp', [
+                'script_src' => [],
+                'style_src' => [],
+                'font_src' => [],
+                'img_src' => [],
+                'connect_src' => [],
+            ]),
         ];
 
         file_put_contents(
