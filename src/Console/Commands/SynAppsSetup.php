@@ -167,6 +167,23 @@ class SynAppsSetup extends Command
                 'img_src' => [],
                 'connect_src' => [],
             ],
+            'logging' => [
+                'sensitive_keys' => [
+                    'password',
+                    'password_confirmation',
+                    'token',
+                    'access_token',
+                    'refresh_token',
+                    'authorization',
+                    'secret',
+                    'api_key',
+                    'card_number',
+                    'cookie',
+                    'set-cookie',
+                    'x-xsrf-token',
+                ],
+                'max_body_size' => 65536,
+            ],
         ];
 
         if (! file_exists(base_path('synapps'))) {

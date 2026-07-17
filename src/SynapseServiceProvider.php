@@ -5,6 +5,7 @@ namespace VmEngine\Synapse;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use VmEngine\Synapse\Console\Commands\Generators\MakeCastCommand;
@@ -61,6 +62,7 @@ use VmEngine\Synapse\Console\Commands\SynapseExcelCleanup;
 use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
 use VmEngine\Synapse\Finder\SynapseFinder;
+use VmEngine\Synapse\Http\Middlewares\LogApiRequest;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
 use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
@@ -173,6 +175,10 @@ class SynapseServiceProvider extends ServiceProvider
             $kernel = $this->app->make(Kernel::class);
             $kernel->pushMiddleware(SecureHeaders::class);
         });
+
+        // Register the api.log middleware alias — attached manually per
+        // route group, never applied globally.
+        $this->app->make(Router::class)->aliasMiddleware('api.log', LogApiRequest::class);
 
         Schema::defaultStringLength(191);
         bcscale(8);

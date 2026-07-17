@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.6] - 2026-07-17
+
+### Added
+- **`api.log` middleware** (`LogApiRequest`) — opt-in, per-route-group middleware that records every API request/response into a new `api_request_logs` table: method, URL, status code, actor (guest/user/API user), IP, user agent, duration, and the redacted request headers/body and response body. Attach it manually to a route group's middleware array, e.g. `['auth:sanctum', 'api.auth', 'api.token.expiry', 'throttle:api', 'api.log']` — never applied globally. Logging failures are caught and never break the actual API response.
+- **`SensitiveDataRedactor` service** — recursively redacts a configurable list of sensitive keys (case-insensitive) from request/response data, replacing values with a self-describing `[REDACTED:{key}]` placeholder instead of a generic mask. `UploadedFile` instances are replaced with `[FILE:{field}:{original_name}]` so multipart uploads don't break JSON serialization. Oversized payloads are safely truncated into a valid-JSON `{ "_truncated": true, "original_size", "preview" }` envelope rather than a raw cut-off string.
+- **`ApiRequestLog` model** and **`ApiLogActorType` enum** (`Guest`/`User`/`ApiUser`) backing the new table.
+- **`logging` block in generated `apps.json`** — `synapps:setup` and `synapps:reconfig` now scaffold `logging.sensitive_keys` (includes `password`, `token`, `authorization`, `cookie`, `set-cookie`, `x-xsrf-token`, etc.) and `logging.max_body_size`, read by the new middleware via `config('synapps.apps.logging.*')`, with hardcoded fallbacks so it works even without a compiled Synapse config.
+
 ## [2.4.5] - 2026-07-09
 
 ### Added

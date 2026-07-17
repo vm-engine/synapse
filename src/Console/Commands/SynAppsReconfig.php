@@ -168,6 +168,23 @@ class SynAppsReconfig extends Command
                 'img_src' => [],
                 'connect_src' => [],
             ]),
+            'logging' => config('synapps.apps.logging', [
+                'sensitive_keys' => [
+                    'password',
+                    'password_confirmation',
+                    'token',
+                    'access_token',
+                    'refresh_token',
+                    'authorization',
+                    'secret',
+                    'api_key',
+                    'card_number',
+                    'cookie',
+                    'set-cookie',
+                    'x-xsrf-token',
+                ],
+                'max_body_size' => 65536,
+            ]),
         ];
 
         file_put_contents(
