@@ -185,13 +185,13 @@
             >
                 <span class="h-11 w-11 overflow-hidden rounded-full">
                     <img
-                        src="{{ auth()->user()->avatar_url }}"
-                        alt="{{ auth()->user()->name }}"
+                        src="{{ auth()->user()?->avatar_url }}"
+                        alt="{{ auth()->user()?->name }}"
                     >
                 </span>
 
                 {{-- <span class="mr-1 hidden text-sm font-medium lg:block">
-                    {{ auth()->user()->name }}
+                    {{ auth()->user()?->name }}
                 </span> --}}
 
                 <svg
@@ -221,10 +221,10 @@
             >
                 <div>
                     <span class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                        {{ auth()->user()->name }}
+                        {{ auth()->user()?->name }}
                     </span>
                     <span class="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
-                        {{ auth()->user()->email }}
+                        {{ auth()->user()?->email }}
                     </span>
                 </div>
 

@@ -48,7 +48,10 @@ class SynAppsReconfig extends Command
             required: true,
             default: config('synapps.apps.email', '')
         );
-        $gitRepo = text('GIT Repository');
+        $gitRepo = text(
+            label: 'GIT Repository',
+            default: config('synapps.apps.git_repo', '')
+        );
         $devDomain = text(
             label: 'Dev Domain URL',
             hint: 'Including proto',
@@ -111,7 +114,7 @@ class SynAppsReconfig extends Command
             'description' => $appDesc,
             'multi_language' => $multiLanguage,
             'enabled_languages' => $enabledLanguages,
-            'dependencies' => [
+            'dependencies' => config('synapps.apps.dependencies', [
                 'npm' => [
                     'main' => [
                         'jquery' => '^3.7',
@@ -138,8 +141,8 @@ class SynAppsReconfig extends Command
                     'main' => new stdClass,
                     'dev' => new stdClass,
                 ],
-            ],
-            'themes' => [
+            ]),
+            'themes' => config('synapps.apps.themes', [
                 'active' => 'default',
                 'fallback' => 'default',
                 'css' => [
@@ -160,7 +163,7 @@ class SynAppsReconfig extends Command
                     'guest' => [],
                     'frontend' => [],
                 ],
-            ],
+            ]),
             'csp' => config('synapps.apps.csp', [
                 'script_src' => [],
                 'style_src' => [],

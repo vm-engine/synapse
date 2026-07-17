@@ -314,12 +314,12 @@
                 >
                     <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
                         <img
-                            src="{{ auth()->user()->avatar_url }}"
+                            src="{{ auth()->user()?->avatar_url }}"
                             alt="User"
                         />
                     </span>
 
-                    <span class="text-theme-sm mr-1 block font-medium"> {{ auth()->user()->name }} </span>
+                    <span class="text-theme-sm mr-1 block font-medium"> {{ auth()->user()?->name }} </span>
 
                     <svg
                         class="stroke-gray-500 dark:stroke-gray-400"
@@ -348,10 +348,10 @@
                 >
                     <div>
                         <span class="text-theme-sm block font-medium text-gray-700 dark:text-gray-400">
-                            {{ auth()->user()->name }}
+                            {{ auth()->user()?->name }}
                         </span>
                         <span class="text-theme-xs mt-0.5 block text-gray-500 dark:text-gray-400">
-                            {{ auth()->user()->email }}
+                            {{ auth()->user()?->email }}
                         </span>
                     </div>
 

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.7] - 2026-07-17
+
+### Fixed
+- **`synapps:reconfig` — `themes` block reset on every run** — was hardcoded to `active: 'default'`/empty `css`/`js`/`headers`, wiping out any theme customization on each reconfig. Now reads `config('synapps.apps.themes', [...])` first, matching the existing `csp`/`logging` preservation pattern.
+- **`synapps:reconfig` — `dependencies` block reset on every run** — same issue: hardcoded npm/composer baseline overwrote any project-specific package a developer had added directly to `apps.json`'s `dependencies`, which `synapps:discover` reads as live state to merge into `composer.json`/`package.json`. Now preserved via `config('synapps.apps.dependencies', [...])`.
+- **`synapps:reconfig` — `git_repo` prompt had no default** — leaving it blank (the common case, since nothing showed the existing value) erased the stored repository URL on every run. Prompt now defaults to `config('synapps.apps.git_repo', '')`.
+- **Stub theme templates — null user guards** — `auth()->user()->{name,email,avatar_url}` in the bundled theme stubs (`header.blade.php`, `header-nav.blade.php`, `sidebar-menu.blade.php`) now use `auth()->user()?->` null-safe access, matching the guard already applied to the generated app's own theme.
+
 ## [2.4.6] - 2026-07-17
 
 ### Added

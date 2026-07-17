@@ -249,7 +249,7 @@
         >
             <img
                 class="h-10 w-10 shrink-0 rounded-full"
-                src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&background=3B82F6&color=fff"
+                src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()?->name ?? 'User') }}&background=3B82F6&color=fff"
                 alt="User"
             >
             <div
@@ -257,8 +257,8 @@
                 x-show="!sidebarCollapsed"
                 x-transition
             >
-                <p class="truncate text-sm font-medium text-white">{{ auth()->user()->name ?? 'User Name' }}</p>
-                <p class="truncate text-xs text-gray-400">{{ auth()->user()->email ?? 'user@example.com' }}</p>
+                <p class="truncate text-sm font-medium text-white">{{ auth()->user()?->name ?? 'User Name' }}</p>
+                <p class="truncate text-xs text-gray-400">{{ auth()->user()?->email ?? 'user@example.com' }}</p>
             </div>
         </div>
     </div>
