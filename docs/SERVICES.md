@@ -99,7 +99,12 @@ DbLang::setLanguage('id');
 
 // Get current language code
 $lang = DbLang::getLanguage(); // 'id'
+
+// Flush the in-memory cache and re-load the current language from the database
+DbLang::reload();
 ```
+
+> `reload()` is for long-running processes (Octane workers, queue jobs) that need to pick up translation changes made mid-process, since the in-memory cache would otherwise persist stale values for the process lifetime.
 
 ### Using Helper Function
 
@@ -170,6 +175,59 @@ The `languages` table stores translations:
 | `updated_at` | timestamp | Last update timestamp |
 
 Unique constraint: `[language_code, key]`
+
+---
+
+## API Request Logging
+
+Opt-in, per-route-group middleware (`api.log` / `LogApiRequest`) that records every API request/response into an `api_request_logs` table — method, URL, status code, actor, IP, user agent, duration, and redacted request/response bodies. It is **never applied globally**; attach it explicitly to the route groups you want audited.
+
+### Attaching the Middleware
+
+```php
+Route::middleware(['auth:sanctum', 'api.auth', 'api.token.expiry', 'throttle:api', 'api.log'])
+    ->group(function () {
+        // audited routes
+    });
+```
+
+Logging failures are caught internally and logged via `Log::error()` — they never break the actual API response.
+
+### What Gets Redacted
+
+`SensitiveDataRedactor` recursively walks the request headers, request body, and (for JSON responses) the response body:
+
+- Keys matching `config('synapps.apps.logging.sensitive_keys')` (case-insensitive) are replaced with a self-describing `[REDACTED:{key}]` placeholder (array values keep their shape, e.g. single-value header arrays)
+- `UploadedFile` instances are replaced with `[FILE:{field}:{original_name}]` so multipart uploads don't break JSON serialization
+- If the redacted, JSON-encoded payload exceeds `config('synapps.apps.logging.max_body_size')` (default 65536 bytes), it's replaced with a truncated envelope: `{ "_truncated": true, "original_size": ..., "preview": "..." }`
+
+See [Security & Logging Configuration](CONFIGURATION.md#logging) to customize `sensitive_keys` / `max_body_size`.
+
+### ApiRequestLog Model
+
+```php
+use VmEngine\Synapse\Models\ApiRequestLog;
+
+ApiRequestLog::latest()->where('status_code', '>=', 500)->get();
+```
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `method` | string | HTTP method |
+| `url` | string | Full request URL |
+| `status_code` | int | Response HTTP status code |
+| `actor_type` | `ApiLogActorType` | `guest` \| `user` \| `api_user` |
+| `actor_id` | int, nullable | Authenticated user/API user ID |
+| `actor_name` | string, nullable | Authenticated user/API user name |
+| `ip_address` | string, nullable | Client IP |
+| `user_agent` | string, nullable | Client user agent |
+| `duration_ms` | int | Request handling duration |
+| `request_headers` | array, nullable | Redacted request headers |
+| `request_body` | array, nullable | Redacted request body |
+| `response_body` | array, nullable | Redacted response body (JSON responses only) |
+| `created_at` | timestamp | No `updated_at` — logs are write-once |
+
+`ApiLogActorType` is resolved from the authenticated user: `Guest` if unauthenticated, `ApiUser` if `$user->is_api_user` is truthy, otherwise `User`.
 
 ---
 

@@ -454,6 +454,58 @@ Located in `synapps/config/override/`:
 
 ---
 
+## Security & Logging Configuration
+
+Both blocks below are scaffolded automatically into `synapps/config/apps.json` by `synapps:setup` and `synapps:reconfig`, with hardcoded fallbacks so the app works even before `synapps:config` has compiled them.
+
+### csp
+
+Extends the `Content-Security-Policy` allowlist enforced by the `SecureHeaders` middleware, without hardcoding any project's CDN hosts into the shared package.
+
+```json
+{
+    "csp": {
+        "script_src": ["https://cdn.jsdelivr.net"],
+        "style_src": ["https://fonts.googleapis.com"],
+        "font_src": ["https://fonts.gstatic.com"],
+        "img_src": ["https://my-cdn.example.com"],
+        "connect_src": []
+    }
+}
+```
+
+Read via `config('synapps.apps.csp.*')`. Inline `<script>` tags must carry the per-request nonce instead of relying on `'unsafe-inline'`:
+
+```blade
+<script nonce="{{ csp_nonce() }}">
+    // ...
+</script>
+```
+
+See [`csp_nonce()`](HELPERS.md#csp_nonce) and use [`synapps:vendor-fonts`](COMMANDS.md#synapps-vendor-fonts) to remove the need for `fonts.googleapis.com`/`fonts.gstatic.com` entries entirely.
+
+### logging
+
+Configures the opt-in `api.log` middleware (`LogApiRequest`), which records API requests/responses into the `api_request_logs` table.
+
+```json
+{
+    "logging": {
+        "sensitive_keys": [
+            "password", "password_confirmation", "token", "access_token",
+            "refresh_token", "authorization", "secret", "api_key",
+            "card_number", "cookie", "set-cookie", "x-xsrf-token"
+        ],
+        "max_body_size": 65536
+    }
+}
+```
+
+- `sensitive_keys` — case-insensitive key names redacted (recursively) from logged request/response bodies and headers, replaced with a self-describing `[REDACTED:{key}]` placeholder
+- `max_body_size` — byte threshold (of the JSON-encoded, redacted payload) beyond which the log stores a truncated `{ "_truncated": true, "original_size", "preview" }` envelope instead of the full body
+
+Read via `config('synapps.apps.logging.sensitive_keys')` / `config('synapps.apps.logging.max_body_size')`. See [API Request Logging](SERVICES.md#api-request-logging) for how to attach the middleware and query the logs.
+
 ---
 
 ## Theme Configuration

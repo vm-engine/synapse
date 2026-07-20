@@ -37,12 +37,31 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
+| `synapps:reconfig` | Interactively update core `apps.json` fields | Renaming app/changing domains after setup | Yes | No |
+| `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
 | `synapse:db-lang` | Manage database translations | When updating translations | Yes | No |
 | `synapse:patch-composer` | Merge composer.local.json | Local dev with path repos | Yes | No |
 | `synapse:restore-composer` | Restore original composer.json | After patching | Yes | No |
 | `synapse:excel-cleanup` | Mark stale Excel tasks as failed | Scheduled or manual | Yes | No |
+| `synapps:upgrade-audit` | Detect (and optionally auto-fix) legacy Synapse patterns | Before/while upgrading vm-engine/synapse | Yes | No |
+
+### synapps:upgrade-audit
+Detects legacy `vm-engine/synapse` patterns that need updating before/while upgrading, and optionally auto-fixes the mechanical ones.
+
+```bash
+php artisan synapps:upgrade-audit              # report only, writes SYNAPSE_UPGRADE_AUDIT.md
+php artisan synapps:upgrade-audit --apply      # also rewrite auto-fixable findings
+```
+
+**Options:** `--apply`, `--only=*` (restrict to rule IDs, e.g. `--only=A`), `--force` (skip git-clean check + confirmation), `--output=` (report path)
+
+**Detects:**
+- Auto-fixable: Blade `<livewire:module.name>` dot-notation → `::` namespace notation, `Route::livewire()` dotted string targets, removed `registerMfcComponents()`/`registerLivewireComponents()` calls
+- Manual-review only (never auto-fixed): Livewire v3 `Livewire.hook()` JS calls (need porting to `Livewire.interceptMessage()`), `Route::get(Component::class)` candidates
+
+**If the project is stuck on a version too old to have this command**, copy the self-contained standalone script `vendor/vm-engine/synapse/tools/synapse-upgrade-audit.php` into the project root and run `php synapse-upgrade-audit.php` directly — no autoload/Composer dependency, audit-only. See [UPGRADE.md](UPGRADE.md#before-you-upgrade) and [docs/COMMANDS.md](docs/COMMANDS.md#synappsupgrade-audit).
 
 ### synapps:setup
 Interactive wizard that:
@@ -165,6 +184,34 @@ Creates symlink/junction from `resources/views/errors` → `synapps/resources/vi
 - Tries symlink first, falls back to Windows junction
 - Auto-removes existing link/directory
 - No admin required on Windows (uses junctions)
+
+### synapps:reconfig
+Interactive updater for core `apps.json` fields (app code, name, author, domains, prefixes, title, description, multi-language), each defaulting to the current config value.
+
+```bash
+php artisan synapps:reconfig
+```
+
+**Preserves (not reset) on every run:** `themes`, `dependencies`, `csp`, `logging` — read from current config and carried forward unless `apps.json` is edited directly.
+
+> Prior to v2.4.7 these four blocks were hardcoded and wiped on every run — upgrade if you use `synapps:reconfig` with customized themes/dependencies/CSP/logging.
+
+**Run after:** `php artisan synapps:config` to recompile.
+
+### synapps:vendor-fonts
+Self-hosts a theme's Google Fonts (removes third-party font CDN calls).
+
+```bash
+php artisan synapps:vendor-fonts {theme?}
+```
+
+**What it does:**
+1. Finds the `fonts.googleapis.com/css2` link in `theme.json`'s `headers.*`
+2. Downloads the CSS + referenced `.woff2` files, rewrites CSS to reference them locally
+3. Removes the Google `<link>`/`preconnect` entries and registers the local stylesheet in `theme.json`'s `css.*`
+4. Atomic — nothing written to disk until every font file downloads successfully
+
+**After running:** `npm run build` then `php artisan synapps:config`
 
 ### synapse:patch-composer
 Merges `composer.local.json` into `composer.json` for local development with path repositories.
@@ -395,6 +442,9 @@ DbLang::set('welcome.title', 'Selamat datang', 'Welcome Title', 'id');
 // Change current language
 DbLang::setLanguage('id');
 
+// Flush in-memory cache and re-load current language from DB (Octane workers, queue jobs)
+DbLang::reload();
+
 // Using helper function
 $text = ___('welcome.title');
 $text = ___('welcome.title', 'id');
@@ -406,6 +456,21 @@ $text = ___('welcome.title', 'id');
 
 **Multi-language auto-creation:**
 When `synapps.apps.multi_language` is `true`, setting a translation auto-creates empty entries for all `enabled_languages`.
+
+### API Request Logging
+
+Opt-in `api.log` middleware (`LogApiRequest`) that records every API request/response into an `api_request_logs` table (method, URL, status code, actor, IP, user agent, duration, redacted headers/body). Never applied globally — attach explicitly per route group:
+
+```php
+Route::middleware(['auth:sanctum', 'api.auth', 'api.token.expiry', 'throttle:api', 'api.log'])
+    ->group(function () { /* audited routes */ });
+```
+
+**`SensitiveDataRedactor`** — recursively redacts keys from `config('synapps.apps.logging.sensitive_keys')` (case-insensitive) as `[REDACTED:{key}]`; `UploadedFile` values become `[FILE:{field}:{name}]`; oversized payloads (over `config('synapps.apps.logging.max_body_size')`) are truncated into a valid-JSON `{_truncated, original_size, preview}` envelope.
+
+**Model:** `ApiRequestLog` (no `updated_at` — write-once). **Enum:** `ApiLogActorType` — `Guest` (unauthenticated) / `ApiUser` (`$user->is_api_user`) / `User` (otherwise).
+
+Logging failures never break the actual API response — caught internally and logged via `Log::error()`.
 
 ### ThemeService
 
@@ -1007,8 +1072,8 @@ tests/
 ## Dependencies
 
 **Required:**
-- Laravel Framework 12.x
-- Livewire 3.x
+- Laravel Framework 12.x|13.x
+- Livewire ^4.0
 - composer/semver ^3.0
 - openspout/openspout ^4.0
 - phpoffice/phpspreadsheet ^2.0
@@ -1018,3 +1083,6 @@ tests/
 - pestphp/pest-plugin-laravel ^3.0
 - orchestra/testbench ^10.0
 - laradumps/laradumps ^4.0
+- phpstan/phpstan ^2.1
+- larastan/larastan ^3.8
+- laravel/pint ^1.26

@@ -14,27 +14,30 @@ A sophisticated modular architecture system for Laravel applications that enable
 - **Livewire Traits**: WithDeleteToken, WithReturnUrl, and RemembersQueryParams for common Livewire patterns
 - **Route Management**: Automatic route registration with module-specific prefixes
 - **Service Container Integration**: Module-based bindings and service providers
+- **API Request Logging**: Opt-in, redacted audit trail for API routes via the `api.log` middleware
+- **Hardened CSP**: Config-driven Content-Security-Policy allowlist with per-request script nonces
+- **Upgrade Audit**: Detects (and optionally auto-fixes) legacy patterns when upgrading between Synapse versions, via `synapps:upgrade-audit` or a standalone pre-upgrade script
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-# Add repository to composer.json
+# Add the private VCS repository to composer.json
 {
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://repo.4visionmedia.com:4000/vm-engine/synapse.git"
+            "url": "ssh://git@repo.4visionmedia.com:40288/vm-engine/synapse.git"
         }
     ],
     "require": {
-        "vm-engine/synapse": "^1.0"
+        "vm-engine/synapse": "^2.4"
     }
 }
 
 # Install
-composer install
+composer update vm-engine/synapse
 
 # Run interactive setup
 php artisan synapps:setup
@@ -68,8 +71,8 @@ DbConfig::set('app.site_name', 'My Site');
 
 ### Core Features
 
-- **[Theme System](docs/THEMES.md)** - Customizable themes with layouts, CDN resources, and dark mode
-- **[Database Services](docs/SERVICES.md)** - DbConfig, DbLang, and Breadcrumbs services
+- **[Theme System](docs/THEMES.md)** - Customizable themes with layouts, CDN resources (with SRI), and dark mode
+- **[Database Services](docs/SERVICES.md)** - DbConfig, DbLang, Breadcrumbs, and API Request Logging services
 - **[Excel Import/Export](docs/EXCEL.md)** - Streaming Excel/CSV import and export with background processing
 - **[Blade Components](docs/COMPONENTS.md)** - UI components for forms, alerts, and more
 - **[Helper Functions](docs/HELPERS.md)** - Global helpers for common tasks

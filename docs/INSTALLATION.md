@@ -3,8 +3,8 @@
 ## Requirements
 
 - PHP 8.2+
-- Laravel 12.x
-- Livewire 3.x
+- Laravel 12.x|13.x
+- Livewire ^4.0 (installed transitively as a dependency of this package)
 - Composer
 - Node.js & NPM
 
@@ -14,14 +14,14 @@ Since this is a private package, you need to manually add it to your `composer.j
 
 ### 1. Add Repository to composer.json
 
-Add the private git repository to your `composer.json`:
+Add the private git repository to your `composer.json` **before** requiring the package — Composer needs to know where to fetch it from, since it isn't published on Packagist:
 
 ```json
 {
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://repo.4visionmedia.com:4000/vm-engine/synapse.git"
+            "url": "ssh://git@repo.4visionmedia.com:40288/vm-engine/synapse.git"
         }
     ]
 }
@@ -34,7 +34,7 @@ Add the package to your requirements:
 ```json
 {
     "require": {
-        "vm-engine/synapse": "^1.0"
+        "vm-engine/synapse": "^2.4"
     }
 }
 ```

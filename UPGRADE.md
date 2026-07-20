@@ -52,7 +52,27 @@ Once v1.0.0 is released:
 
 ## Upgrade Process
 
+### Before You Upgrade
+
+If your project is still on an old `vm-engine/synapse` version, audit it first for legacy patterns that will need updating:
+
+- **Already on a version that ships `synapps:upgrade-audit`?** Run:
+  ```bash
+  php artisan synapps:upgrade-audit
+  ```
+  This reports findings only (no file changes) and writes `SYNAPSE_UPGRADE_AUDIT.md`. Pass `--apply` to auto-fix the mechanical findings once you're ready.
+
+- **Stuck on a version too old to have that command?** Copy the self-contained standalone script into your project root and run it directly — no `composer update` required first:
+  ```bash
+  php synapse-upgrade-audit.php --path=.
+  ```
+  The script lives at `vendor/vm-engine/synapse/tools/synapse-upgrade-audit.php` (or in this repo at `packages/synapse/tools/synapse-upgrade-audit.php`). It's audit-only, makes no changes, and detects the same breaking-change patterns documented in the version-specific guides below.
+
+See [docs/COMMANDS.md](docs/COMMANDS.md#synappsupgrade-audit) for full command/script documentation.
+
 ### General Upgrade Steps
+
+0. **Run the upgrade audit** (see above) to see what needs attention before you touch `composer.json`.
 
 1. **Review the CHANGELOG**
    ```bash

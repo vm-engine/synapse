@@ -122,6 +122,38 @@ Theme metadata and CDN resources configuration.
 -   **guest** - Authentication pages (login, register, forgot password)
 -   **frontend** - Public website pages
 
+#### Subresource Integrity (SRI)
+
+Entries in `css` / `js` may be a plain URL string (as above) **or** an object with `src`/`href`, `integrity`, and `crossorigin` keys. Both forms can be mixed in the same array:
+
+```json
+{
+    "js": {
+        "all": [
+            "https://cdn.example.com/analytics.js",
+            {
+                "src": "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js",
+                "integrity": "sha384-abc123...",
+                "crossorigin": "anonymous"
+            }
+        ]
+    },
+    "css": {
+        "all": [
+            {
+                "href": "https://cdn.example.com/lib.css",
+                "integrity": "sha384-def456...",
+                "crossorigin": "anonymous"
+            }
+        ]
+    }
+}
+```
+
+`ThemeService::renderStyles()` / `renderScripts()` render the `integrity`/`crossorigin` attributes on the `<link>`/`<script>` tag for object entries; string entries render exactly as before (no attributes added).
+
+> To avoid a third-party font CDN entirely (e.g. to drop `fonts.googleapis.com` from your [`csp`](CONFIGURATION.md#csp) allowlist), self-host Google Fonts with `php artisan synapps:vendor-fonts` instead of adding SRI to a Google Fonts link — see [Artisan Commands](COMMANDS.md#synapps-vendor-fonts).
+
 ### apps.json
 
 Application-level theme configuration in `synapps/config/apps.json`:

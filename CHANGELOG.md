@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.4.8] - 2026-07-20
+
+### Added
+- **`synapps:upgrade-audit` command** — detects legacy `vm-engine/synapse` patterns that need updating (Blade `<livewire:module.name>` dot-notation, `Route::livewire()` dotted string targets, removed `registerMfcComponents()`/`registerLivewireComponents()` calls, Livewire v3 `Livewire.hook()` JS calls, `Route::get(Component::class)` candidates). Reports only by default; pass `--apply` to auto-fix the mechanical findings (with a `{file}.bak` backup and a git-clean check first).
+- **Standalone `tools/synapse-upgrade-audit.php` script** — a self-contained, zero-dependency version of the same audit for projects still on an old synapse version that don't have the artisan command available yet. Copy it into the target project's root and run `php synapse-upgrade-audit.php` directly.
+
+### Fixed
+- **`UpgradeAuditService` — crash on a file vanishing mid-scan** — `scan()`/`apply()` now check `is_readable()` and suppress `file_get_contents()` warnings before reading, instead of letting a race between directory listing and reading throw an uncaught error.
 
 ## [2.4.7] - 2026-07-17
 

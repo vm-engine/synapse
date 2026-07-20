@@ -55,6 +55,7 @@ use VmEngine\Synapse\Console\Commands\SynAppsPatchTests;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
+use VmEngine\Synapse\Console\Commands\SynAppsUpgradeAudit;
 use VmEngine\Synapse\Console\Commands\SynAppsVendorFonts;
 use VmEngine\Synapse\Console\Commands\SynapseDbConfig;
 use VmEngine\Synapse\Console\Commands\SynapseDbLang;
@@ -114,6 +115,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynapsePatchComposer::class,
                 SynapseRestoreComposer::class,
                 SynapseExcelCleanup::class,
+                SynAppsUpgradeAudit::class,
                 // Generator Commands
                 MakeModuleCommand::class,
                 MakeModelCommand::class,

@@ -260,6 +260,26 @@ See [Theme Service](SERVICES.md#themeservice) and [Theme System](THEMES.md) for 
 
 ---
 
+## Security Helpers
+
+### csp_nonce()
+
+Get the per-request Content-Security-Policy nonce, bound by the `SecureHeaders` middleware before the response is rendered. Stamp it onto any inline `<script>` tag instead of relying on `'unsafe-inline'`.
+
+```blade
+<script nonce="{{ csp_nonce() }}">
+    Alpine.data('myComponent', () => ({ open: false }));
+</script>
+```
+
+**Parameters:** None
+
+**Returns:** string - The current request's CSP nonce, or an empty string if `SecureHeaders` hasn't bound one (e.g. outside an HTTP request lifecycle)
+
+See [Security & Logging Configuration](CONFIGURATION.md#security--logging-configuration) for the related `csp` config block.
+
+---
+
 ## Path Helpers
 
 ### synapps_path()
