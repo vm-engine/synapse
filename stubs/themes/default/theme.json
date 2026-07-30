@@ -1,9 +1,9 @@
 {
   "id": "default",
-  "name": "Synapse Professional",
-  "version": "1.0.0",
+  "name": "TailAdmin",
+  "version": "2.0.0",
   "author": "VM Engine",
-  "description": "A modern, professional theme showcasing Synapse theming capabilities with comprehensive UI components",
+  "description": "TailAdmin-faithful theme for Synapse backend admin: clean white/near-black sidebar, TailAdmin's real design tokens, comprehensive UI components",
   "framework": "tailwind",
   "tailwind_version": "4.x",
   "alpine_version": "3.x",
@@ -11,7 +11,7 @@
   "features": [
     "Responsive sidebar with collapse",
     "Dark mode support",
-    "Modern gradient design",
+    "Clean white/near-black TailAdmin-style sidebar",
     "Comprehensive component library",
     "Alpine.js interactive components",
     "Smooth animations and transitions",
@@ -19,8 +19,8 @@
     "Mobile-optimized layouts"
   ],
   "color_scheme": {
-    "primary": "Blue gradient (oklch 240 hue)",
-    "dark_mode": "Supported via @media (prefers-color-scheme: dark)"
+    "primary": "TailAdmin brand blue (#465fff, from lta.css design tokens)",
+    "dark_mode": "Supported via .dark class toggle (Alpine darkMode, persisted), matching lta.css's @custom-variant dark (&:is(.dark *))"
   },
   "css": {
     "all": [],
@@ -41,7 +41,7 @@
     "frontend": []
   },
   "components": {
-    "sidebar": "Collapsible sidebar with gradient background",
+    "sidebar": "Collapsible sidebar, white (light) / near-black (dark) background, TailAdmin style",
     "header": "Fixed header with search and user menu",
     "cards": "Modern card components with shadows",
     "buttons": "Primary, secondary, success, danger variants",
@@ -54,10 +54,10 @@
     "dropdowns": "Click-away dropdowns"
   },
   "customization": {
-    "colors": "Edit @theme section in css/theme.css",
+    "colors": "Edit @theme section in css/theme-base.css",
     "spacing": "Modify CSS variables in @theme block",
     "typography": "Adjust font sizes and weights in @theme",
-    "components": "Customize component styles in css/theme.css",
-    "javascript": "Add Alpine.js components in js/theme.js"
+    "components": "Customize component styles in css/theme-app.css",
+    "javascript": "Add Alpine.js components in js/theme-base.js"
   }
 }

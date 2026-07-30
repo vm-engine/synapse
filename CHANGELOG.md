@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.9] - 2026-07-30
+
+### Changed
+- **Default stub theme reworked to a TailAdmin-faithful design** — white/near-black sidebar, TailAdmin's real brand color tokens (`#465fff`), dark mode via a `.dark` class toggle instead of `@media (prefers-color-scheme: dark)`, and a large cleanup of unused/duplicated `theme-*`-prefixed CSS classes in `theme-app.css`/`theme-base.css`. New `logo-icon.svg` asset added.
+- **`stubs/synapps/resources/views/components/layouts/app.blade.php`** — now renders theme CDN headers/styles/scripts via `@themeHeaders('app')`/`@themeStyles('app')`/`@themeScripts('app')` instead of a bare `@vite(['resources/css/app.css'])` call, so the stub layout picks up `ThemeService`-driven CDN resources and the base+app Vite bundle split.
+- **`stubs/modules/settings/routes/web.backend.php`** — `Route::livewire()` targets updated from dot-notation (`settings.configuration-list`) to namespace notation (`settings::configuration-list`), matching the current Livewire v4 component registration format.
+
+### Fixed
+- **`ThemeServiceTest` — 3 new fallback-tier tests relied on a theme directory that doesn't exist in the test environment** — `resolveThemeLayout()`'s middle fallback tier checks a theme's layout files on disk, which real installs get via `synapps:setup`'s `vendor:publish`, but Testbench's bare base path has none. Tests now create a dedicated fixture theme directory in `beforeEach` rather than assuming the "default" theme's files are present (a name reused by other test files' own disk fixtures, which raced under `--parallel`).
+
 ## [2.4.8] - 2026-07-20
 
 ### Added

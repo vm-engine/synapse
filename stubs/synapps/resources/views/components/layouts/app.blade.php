@@ -17,6 +17,10 @@
     >
 
     <title>{{ $title ?? config('synapps.apps.title', config('app.name')) }}</title>
+
+    {{-- Theme CDN Headers --}}
+    @themeHeaders('app')
+
     <link
         href="https://fonts.googleapis.com"
         rel="preconnect"
@@ -31,7 +35,8 @@
         rel="stylesheet"
     >
 
-    @vite(['resources/css/app.css'])
+    {{-- Theme CDN Styles + Vite (base.css + app.css via ThemeService) --}}
+    @themeStyles('app')
     @livewireStyles
     @stack('styles')
 </head>
@@ -60,7 +65,8 @@
     <!-- Toast Notifications - Outside Livewire context -->
     <x-synapse-toastr></x-synapse-toastr>
 
-    @vite(['resources/js/app.js'])
+    {{-- Theme CDN Scripts + Vite (base.js + app.js via ThemeService) --}}
+    @themeScripts('app')
     @livewireScripts
     @stack('scripts')
 </body>

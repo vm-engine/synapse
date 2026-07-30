@@ -1,15 +1,28 @@
 <?php
 
+use Illuminate\Foundation\Vite;
 use VmEngine\Synapse\Services\ThemeService;
 
 beforeEach(function () {
     $this->service = new ThemeService;
 });
 
+/**
+ * Force Vite::asset()/__invoke() to behave as if no manifest was built,
+ * regardless of whether a real public/build/manifest.json exists on disk
+ * (e.g. after running `npm run build` locally). Deterministic stand-in
+ * for "Vite manifest is absent".
+ */
+function fakeMissingViteManifest(): void
+{
+    app()->instance(Vite::class, (new Vite)->useManifestFilename('does-not-exist.json'));
+}
+
 // ─── renderStyles / renderScripts — CDN only (no Vite manifest) ───────────────
 
 test('renderStyles returns empty string when no CDN resources and no Vite manifest', function () {
     config(['synapps.apps.themes.css' => []]);
+    fakeMissingViteManifest();
 
     $output = $this->service->renderStyles('app');
 
@@ -19,6 +32,7 @@ test('renderStyles returns empty string when no CDN resources and no Vite manife
 
 test('renderScripts returns empty string when no CDN resources and no Vite manifest', function () {
     config(['synapps.apps.themes.js' => []]);
+    fakeMissingViteManifest();
 
     $output = $this->service->renderScripts('app');
 
@@ -101,6 +115,7 @@ test('renderScripts still supports plain string entries without integrity', func
             'all' => ['https://cdn.example.com/plain.js'],
         ],
     ]);
+    fakeMissingViteManifest();
 
     $output = $this->service->renderScripts('app');
 
@@ -171,24 +186,77 @@ test('getCurrentLayoutType returns frontend when path does not match backend pre
 
 // ─── resolveThemeLayout ───────────────────────────────────────────────────────
 
-test('resolveThemeLayout falls back to synapps default when theme layout file missing', function () {
+beforeEach(function () {
+    // resolveThemeLayout()'s fallback tier checks synapps_path() on disk. Real
+    // installs get the "default" theme there via `synapps:setup` (vendor:publish
+    // of stubs/themes/default), but Testbench's bare base path has no such
+    // install — and other parallel test files (e.g. SynAppsPatchResourcesSplitTest)
+    // create/delete base_path('synapps') themselves, so reusing the "default"
+    // theme name here would race across parallel processes. Use a dedicated
+    // fixture theme name and point the fallback config at it instead.
+    $this->fallbackThemeName = 'resolve-theme-layout-fallback-fixture';
+    config(['synapps.apps.themes.fallback' => $this->fallbackThemeName]);
+
+    $this->fallbackThemePath = synapps_path("resources/themes/{$this->fallbackThemeName}/layouts");
+    Illuminate\Support\Facades\File::ensureDirectoryExists($this->fallbackThemePath);
+    foreach (['app', 'frontend', 'guest'] as $layout) {
+        Illuminate\Support\Facades\File::put("{$this->fallbackThemePath}/{$layout}.blade.php", '');
+    }
+});
+
+afterEach(function () {
+    Illuminate\Support\Facades\File::deleteDirectory(synapps_path("resources/themes/{$this->fallbackThemeName}"));
+});
+
+test('resolveThemeLayout uses fallback theme when active theme layout file missing', function () {
+    // Fallback theme config points at the fixture theme created in beforeEach,
+    // whose layout files genuinely exist on disk — so the middle tier of the
+    // chain (theme-fallback::) is what actually resolves here, not the
+    // ultimate synapps:: default.
     config(['synapps.apps.themes.active' => 'nonexistent-theme']);
+
+    $view = $this->service->resolveThemeLayout('app');
+
+    expect($view)->toBe('theme-fallback::app');
+});
+
+test('resolveThemeLayout falls back to synapps default when both active and fallback theme layout files missing', function () {
+    config(['synapps.apps.themes.active' => 'nonexistent-theme']);
+    config(['synapps.apps.themes.fallback' => 'also-nonexistent-theme']);
 
     $view = $this->service->resolveThemeLayout('app');
 
     expect($view)->toBe('synapps::components.layouts.app');
 });
 
-test('resolveThemeLayout falls back to synapps default for frontend layout', function () {
+test('resolveThemeLayout uses fallback theme for frontend layout', function () {
     config(['synapps.apps.themes.active' => 'nonexistent-theme']);
+
+    $view = $this->service->resolveThemeLayout('frontend');
+
+    expect($view)->toBe('theme-fallback::frontend');
+});
+
+test('resolveThemeLayout falls back to synapps default for frontend layout when both tiers missing', function () {
+    config(['synapps.apps.themes.active' => 'nonexistent-theme']);
+    config(['synapps.apps.themes.fallback' => 'also-nonexistent-theme']);
 
     $view = $this->service->resolveThemeLayout('frontend');
 
     expect($view)->toBe('synapps::components.layouts.layout');
 });
 
-test('resolveThemeLayout falls back to synapps default for guest layout', function () {
+test('resolveThemeLayout uses fallback theme for guest layout', function () {
     config(['synapps.apps.themes.active' => 'nonexistent-theme']);
+
+    $view = $this->service->resolveThemeLayout('guest');
+
+    expect($view)->toBe('theme-fallback::guest');
+});
+
+test('resolveThemeLayout falls back to synapps default for guest layout when both tiers missing', function () {
+    config(['synapps.apps.themes.active' => 'nonexistent-theme']);
+    config(['synapps.apps.themes.fallback' => 'also-nonexistent-theme']);
 
     $view = $this->service->resolveThemeLayout('guest');
 
