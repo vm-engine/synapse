@@ -61,28 +61,27 @@
                     {{ config('synapps.apps.title', config('app.name')) }}
                 </a>
 
-                {{-- CMS Navigation --}}
-                <div class="fe-nav">
-                    <x-cms::menu position="header" />
-                </div>
-
                 {{-- Auth Actions --}}
                 <div class="fe-header__actions">
                     @auth
-                        <a
-                            class="fe-action-link fe-action-link--primary"
-                            href="{{ route('backend.home.dashboard') }}"
-                        >
-                            <span class="fa-solid fa-gauge-high fa-sm"></span>
-                            Dashboard
-                        </a>
+                        @if (Route::has('backend.home.dashboard'))
+                            <a
+                                class="fe-action-link fe-action-link--primary"
+                                href="{{ route('backend.home.dashboard') }}"
+                            >
+                                <span class="fa-solid fa-gauge-high fa-sm"></span>
+                                Dashboard
+                            </a>
+                        @endif
                     @else
-                        <a
-                            class="fe-action-link"
-                            href="{{ route('auth.login') }}"
-                        >
-                            Sign in
-                        </a>
+                        @if (Route::has('auth.login'))
+                            <a
+                                class="fe-action-link"
+                                href="{{ route('auth.login') }}"
+                            >
+                                Sign in
+                            </a>
+                        @endif
                     @endauth
                 </div>
 

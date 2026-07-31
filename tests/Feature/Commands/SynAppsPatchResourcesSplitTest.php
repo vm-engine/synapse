@@ -58,6 +58,7 @@ afterEach(function () {
         base_path('synapps/resources/css/synapps-app.css'),
         base_path('synapps/resources/css/synapps-frontend.css'),
         base_path('synapps/resources/css/synapps-guest.css'),
+        base_path('synapps/resources/css/tailwind-ref.css'),
         base_path('synapps/resources/js/synapps-base.js'),
         base_path('synapps/resources/js/synapps-app.js'),
         base_path('synapps/resources/js/synapps-frontend.js'),
@@ -137,7 +138,7 @@ test('creates base.css from monolith app.css and rewrites app.css', function () 
         ->and($baseCss)->not->toContain("@import '../../synapps/resources/css/synapps.css';");  // replaced
 
     $appCss = File::get(resource_path('css/app.css'));
-    expect($appCss)->toBe("@import '../../synapps/resources/css/synapps-app.css';\n")
+    expect($appCss)->toBe("@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n")
         ->and($appCss)->not->toContain('@import "tailwindcss"');
 });
 
@@ -147,10 +148,33 @@ test('creates frontend.css and guest.css layout entry files', function () {
     $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
 
     expect(File::get(resource_path('css/frontend.css')))
-        ->toBe("@import '../../synapps/resources/css/synapps-frontend.css';\n");
+        ->toBe("@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-frontend.css';\n");
 
     expect(File::get(resource_path('css/guest.css')))
-        ->toBe("@import '../../synapps/resources/css/synapps-guest.css';\n");
+        ->toBe("@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-guest.css';\n");
+});
+
+// ─── createTailwindRefCss ─────────────────────────────────────────────────────
+
+test('creates tailwind-ref.css with tailwind import and theme tokens', function () {
+    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+
+    $path = base_path('synapps/resources/css/tailwind-ref.css');
+    expect(File::exists($path))->toBeTrue();
+
+    $content = File::get($path);
+    expect($content)->toContain('@import "tailwindcss";')
+        ->and($content)->toContain("@import './lta.css';")
+        ->and($content)->toContain("@import '../themes/default/css/theme-base.css';")
+        ->and($content)->not->toContain("@source '");
+});
+
+test('does not overwrite existing tailwind-ref.css', function () {
+    File::put(base_path('synapps/resources/css/tailwind-ref.css'), "/* custom */\n");
+
+    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+
+    expect(File::get(base_path('synapps/resources/css/tailwind-ref.css')))->toBe("/* custom */\n");
 });
 
 // ─── createBaseJs / rewriteAppJsToFocused ─────────────────────────────────────

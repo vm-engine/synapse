@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.10] - 2026-07-31
+
+### Fixed
+- **Tailwind v4 `@apply` had no theme context in split entry CSS files** — `resources/css/{app,frontend,guest}.css` are independent Vite entries that never pulled in `lta.css`'s custom `--color-brand-*` tokens (only reachable via the `base.css` chain), so `@apply text-brand-500` etc. in theme CSS (`theme-app.css`) silently failed to resolve. `synapps:patch-resources --split-layouts` now also generates `synapps/resources/css/tailwind-ref.css` (a minimal `@import "tailwindcss"` + theme-token reference file with no `@source` directives, so it doesn't trigger redundant blade/js scanning) and prepends `@reference '../../synapps/resources/css/tailwind-ref.css';` to the generated `app.css`/`frontend.css`/`guest.css`.
+- **`stubs/synapps/resources/views/components/layouts/nav/menu-item.blade.php` used the wrong component path** — `<x-synapps::nav.arrow>`/`<x-synapps::nav.submenu>` were missing the `layouts.` namespace segment used by every sibling file in the same directory (`<x-synapps::layouts.nav.arrow>`/`<x-synapps::layouts.nav.submenu>`), which resolve to `resources/views/components/layouts/nav/*.blade.php`.
+- **Default frontend theme layout assumed modules that don't exist in a fresh scaffold** — `stubs/themes/default/layouts/frontend.blade.php` unconditionally called `<x-cms::menu>` (no `cms` module ships by default) and `route('backend.home.dashboard')` / `route('auth.login')` (assume the `home` module and `vm-engine/synapps-auth` are installed). The CMS menu call was removed, and both route links are now wrapped in `@if (Route::has(...))` guards so the stub degrades gracefully on a bare `synapps:setup` scaffold.
+
 ## [2.4.9] - 2026-07-30
 
 ### Changed

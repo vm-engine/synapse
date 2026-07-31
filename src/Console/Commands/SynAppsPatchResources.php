@@ -102,6 +102,7 @@ class SynAppsPatchResources extends Command
         return [
             'synapps/resources/css — synapps-{base,app,frontend,guest}.css' => $this->createSynappsIntermediaryCss(),
             'synapps/resources/js  — synapps-{base,app,frontend,guest}.js' => $this->createSynappsIntermediaryJs(),
+            'synapps/resources/css/tailwind-ref.css' => $this->createTailwindRefCss(),
             'resources/css/base.css' => $this->createBaseCss(),
             'resources/css/frontend.css' => $this->createFrontendCss(),
             'resources/css/guest.css' => $this->createGuestCss(),
@@ -144,6 +145,43 @@ class SynAppsPatchResources extends Command
         }
 
         return $patched;
+    }
+
+    /**
+     * Create synapps/resources/css/tailwind-ref.css — a minimal Tailwind v4
+     * reference file (no @source directives) that layout-specific CSS entry
+     * points (frontend.css, guest.css, app.css) can `@reference` so their
+     * `@apply` rules resolve theme tokens without re-scanning blade/js files.
+     * Skips if the file already exists.
+     */
+    protected function createTailwindRefCss(): bool
+    {
+        $cssDir = synapps_path('resources/css');
+        $activeTheme = config('synapps.apps.themes.active', 'default');
+        $path = $cssDir.'/tailwind-ref.css';
+
+        if (file_exists($path)) {
+            return false;
+        }
+
+        $content = implode("\n", [
+            '/**',
+            ' * Minimal Tailwind v4 reference file — used by layout-specific CSS entry points',
+            " * (resources/css/app.css, etc.) that need @apply but aren't the main CSS entry point.",
+            ' *',
+            ' * Contains: @import "tailwindcss" + all custom @theme tokens (lta + theme-base).',
+            ' * NO @source directives — avoids re-scanning all blade/js files.',
+            ' *',
+            ' * Usage: @reference "../../synapps/resources/css/tailwind-ref.css";',
+            ' */',
+            '@import "tailwindcss";',
+            "@import './lta.css';",
+            "@import '../themes/{$activeTheme}/css/theme-base.css';",
+        ]);
+
+        file_put_contents($path, $content."\n");
+
+        return true;
     }
 
     /**
@@ -229,7 +267,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        file_put_contents($path, "@import '../../synapps/resources/css/synapps-frontend.css';\n");
+        file_put_contents($path, "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-frontend.css';\n");
 
         return true;
     }
@@ -245,7 +283,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        file_put_contents($path, "@import '../../synapps/resources/css/synapps-guest.css';\n");
+        file_put_contents($path, "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-guest.css';\n");
 
         return true;
     }
@@ -271,7 +309,7 @@ class SynAppsPatchResources extends Command
         }
 
         $this->createBackup($cssPath);
-        file_put_contents($cssPath, "@import '../../synapps/resources/css/synapps-app.css';\n");
+        file_put_contents($cssPath, "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n");
 
         return true;
     }
