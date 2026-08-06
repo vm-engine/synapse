@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.12] - 2026-08-06
+
+### Fixed
+- **Livewire's `@livewireScripts`/`@livewireStyles` inline tags were blocked by CSP** — Livewire defaults their nonce to `Vite::cspNonce()`, which independently generates its own random nonce the first time it's called if nothing registered one first. Since `SecureHeaders` never told Vite about the CSP nonce it puts in the `Content-Security-Policy` header, the two never matched, and every request produced spurious CSP violations for Livewire's own inline bootstrap `<script>`/`<style>` tags — visible in the browser console as unattributed "blocked an inline script/style... consider using a hash or a nonce" errors with no matching source in the app's own Blade files. `SecureHeaders` now calls `Vite::useCspNonce($nonce)` with the same nonce used in the header, so Livewire's (and any `@vite()`-based) inline tags carry a matching nonce.
+
 ## [2.4.11] - 2026-08-06
 
 ### Added

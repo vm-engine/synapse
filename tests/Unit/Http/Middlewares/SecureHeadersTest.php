@@ -102,3 +102,15 @@ test('the nonce bound for the view matches the nonce in the CSP header', functio
     expect($nonce)->not->toBe('')
         ->and($csp)->toContain("'nonce-{$nonce}'");
 });
+
+test('registers the CSP nonce as the Vite nonce so livewire scripts/styles match', function () {
+    app()->detectEnvironment(fn () => 'testing');
+
+    $response = runSecureHeaders();
+    $csp = $response->headers->get('Content-Security-Policy');
+
+    $viteNonce = \Illuminate\Support\Facades\Vite::cspNonce();
+
+    expect($viteNonce)->toBe(csp_nonce())
+        ->and($csp)->toContain("'nonce-{$viteNonce}'");
+});

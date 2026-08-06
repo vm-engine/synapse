@@ -3,6 +3,7 @@
 namespace VmEngine\Synapse\Http\Middlewares;
 
 use Closure;
+use Illuminate\Foundation\Vite;
 use Illuminate\Http\Request;
 
 class SecureHeaders
@@ -13,6 +14,13 @@ class SecureHeaders
         // read csp_nonce() and stamp it onto their inline <script> tags.
         $nonce = base64_encode(random_bytes(16));
         app()->instance('csp.nonce', $nonce);
+
+        // Livewire's @livewireScripts/@livewireStyles (and @vite()) default
+        // their own nonce to Vite::cspNonce(), which generates an
+        // independent random value if never told otherwise. Without this,
+        // that nonce never matches the one in our CSP header below, so
+        // Livewire's inline bootstrap <script>/<style> tags get blocked.
+        app(Vite::class)->useCspNonce($nonce);
 
         $response = $next($request);
 
