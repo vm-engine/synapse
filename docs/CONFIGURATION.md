@@ -469,10 +469,14 @@ Extends the `Content-Security-Policy` allowlist enforced by the `SecureHeaders` 
         "style_src": ["https://fonts.googleapis.com"],
         "font_src": ["https://fonts.gstatic.com"],
         "img_src": ["https://my-cdn.example.com"],
-        "connect_src": []
+        "connect_src": [],
+        "frame_src": ["https://www.google.com"],
+        "media_src": ["https://res.cloudinary.com"]
     }
 }
 ```
+
+`frame_src` (embedded iframes, e.g. reCAPTCHA) and `media_src` (audio/video, e.g. a notification sound) default to `'self'` like the other directives when left empty.
 
 Read via `config('synapps.apps.csp.*')`. Inline `<script>` tags must carry the per-request nonce instead of relying on `'unsafe-inline'`:
 

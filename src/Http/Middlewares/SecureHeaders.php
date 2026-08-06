@@ -42,6 +42,8 @@ class SecureHeaders
      * Extra allowed hosts per directive come from the app-level
      * `csp` block in `synapps/config/apps.json` (config('synapps.apps.csp'))
      * so this shared package doesn't hardcode any one project's CDN hosts.
+     * All seven directives below (script-src, style-src, img-src, font-src,
+     * connect-src, frame-src, media-src) are config-driven.
      *
      * `unsafe-eval` and `style-src 'unsafe-inline'` are kept for now:
      * Alpine.js's default build needs `unsafe-eval` to evaluate directive
@@ -57,6 +59,8 @@ class SecureHeaders
         $imgSrc = array_merge(["'self'", 'data:'], $extra['img_src'] ?? []);
         $fontSrc = array_merge(["'self'", 'data:'], $extra['font_src'] ?? []);
         $connectSrc = array_merge(["'self'"], $extra['connect_src'] ?? []);
+        $frameSrc = array_merge(["'self'"], $extra['frame_src'] ?? []);
+        $mediaSrc = array_merge(["'self'"], $extra['media_src'] ?? []);
 
         $directives = [
             "default-src 'self' data:",
@@ -65,7 +69,8 @@ class SecureHeaders
             'img-src '.implode(' ', $imgSrc),
             'font-src '.implode(' ', $fontSrc),
             'connect-src '.implode(' ', $connectSrc),
-            "frame-src 'self'",
+            'frame-src '.implode(' ', $frameSrc),
+            'media-src '.implode(' ', $mediaSrc),
             "frame-ancestors 'self'",
             "form-action 'self'",
         ];

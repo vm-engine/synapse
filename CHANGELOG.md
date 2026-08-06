@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.11] - 2026-08-06
+
+### Added
+- **`SecureHeaders` CSP config now supports `frame_src` and `media_src`** — the `csp` block in `synapps/config/apps.json` (`config('synapps.apps.csp')`) previously only extended `script_src`, `style_src`, `font_src`, `img_src`, and `connect_src`; `frame-src` was hardcoded to `'self'` and `media-src` wasn't set at all (silently falling back to `default-src 'self' data:`). Both are now config-driven like the other five directives, needed for embeds like reCAPTCHA iframes (`frame_src`) or CDN-hosted audio/video (`media_src`).
+- **`NoCacheHeaders` middleware** (`no-cache` alias) — sets `Cache-Control: no-store, no-cache, must-revalidate, max-age=0`, `Pragma: no-cache`, and `Expires: 0` on the response, for routes serving sensitive data that must never be cached (e.g. by the browser back/forward cache).
+- **Abort at boot if `APP_DEBUG` is enabled in `production`** — `SynapseServiceProvider` now raises a 500 during boot when `app.debug` is true in the `production` environment, preventing stack traces and environment details from leaking to end users.
+
+### Fixed
+- **`synapps:reconfig`'s scaffolded `glob` npm dependency moved from `main` to `dev` at `^13.0.0`** (was `^11.0.0` under `dev`, and duplicated under `main`) — `glob` is a build-time tool used by `vite.config.js`, not a runtime dependency, matching how `synapps:setup` declares it.
+
 ## [2.4.10] - 2026-07-31
 
 ### Fixed

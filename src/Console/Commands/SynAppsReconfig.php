@@ -129,12 +129,11 @@ class SynAppsReconfig extends Command
                         '@alpinejs/sort' => '^3.15.0',
                         '@fortawesome/fontawesome-free' => '^7.1.0',
                         'flatpickr' => '^4.6.13',
-                        'glob' => '^13.0.0',
                         'vite-plugin-static-copy' => '^3.1.4',
                     ],
                     'dev' => [
                         'vite-plugin-static-copy' => '^3.1.4',
-                        'glob' => '^11.0.0',
+                        'glob' => '^13.0.0',
                     ],
                 ],
                 'composer' => [

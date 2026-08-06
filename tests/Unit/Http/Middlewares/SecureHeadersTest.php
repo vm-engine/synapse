@@ -67,6 +67,31 @@ test('merges extra allowed hosts from synapps.apps.csp config', function () {
         ->and($csp)->toContain('https://fonts.gstatic.com');
 });
 
+test('merges extra allowed hosts for frame_src and media_src config', function () {
+    app()->detectEnvironment(fn () => 'testing');
+    config()->set('synapps.apps.csp', [
+        'frame_src' => ['https://www.google.com'],
+        'media_src' => ['https://res.cloudinary.com'],
+    ]);
+
+    $response = runSecureHeaders();
+    $csp = $response->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("frame-src 'self' https://www.google.com")
+        ->and($csp)->toContain("media-src 'self' https://res.cloudinary.com");
+});
+
+test('frame_src and media_src default to self when not configured', function () {
+    app()->detectEnvironment(fn () => 'testing');
+    config()->set('synapps.apps.csp', []);
+
+    $response = runSecureHeaders();
+    $csp = $response->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("frame-src 'self'")
+        ->and($csp)->toContain("media-src 'self'");
+});
+
 test('the nonce bound for the view matches the nonce in the CSP header', function () {
     app()->detectEnvironment(fn () => 'testing');
 

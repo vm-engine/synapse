@@ -64,6 +64,7 @@ use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
 use VmEngine\Synapse\Finder\SynapseFinder;
 use VmEngine\Synapse\Http\Middlewares\LogApiRequest;
+use VmEngine\Synapse\Http\Middlewares\NoCacheHeaders;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
 use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
@@ -172,6 +173,11 @@ class SynapseServiceProvider extends ServiceProvider
             $this->bootDbOverride();
         }
 
+        // Abort if APP_DEBUG is enabled in production to prevent information leakage
+        if ($this->app->environment('production') && config('app.debug')) {
+            abort(500, 'APP_DEBUG must be disabled in production.');
+        }
+
         // Register SecureHeaders middleware globally (Laravel 12 compatible)
         $this->app->booted(function () {
             $kernel = $this->app->make(Kernel::class);
@@ -181,6 +187,9 @@ class SynapseServiceProvider extends ServiceProvider
         // Register the api.log middleware alias — attached manually per
         // route group, never applied globally.
         $this->app->make(Router::class)->aliasMiddleware('api.log', LogApiRequest::class);
+
+        // Register the no-cache middleware alias for authenticated backend routes
+        $this->app->make(Router::class)->aliasMiddleware('no-cache', NoCacheHeaders::class);
 
         Schema::defaultStringLength(191);
         bcscale(8);
