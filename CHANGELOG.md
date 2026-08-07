@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **`VmEngine\Synapse\Services\Security\SsrfGuard`** — validates that a URL is safe for the application to fetch server-side, rejecting non-http(s) schemes and any host (literal IP or resolved hostname) that is loopback, RFC1918-private, link-local, or otherwise reserved (including the `169.254.169.254` cloud metadata address).
+- **`VmEngine\Synapse\Rules\SafeOutboundUrlRule`** — a `ValidationRule` wrapper around `SsrfGuard::isSafeUrl()` for validating user-supplied URLs (e.g. webhook/provider base URL config fields) at save time.
+
 ## [2.4.12] - 2026-08-06
 
 ### Fixed
