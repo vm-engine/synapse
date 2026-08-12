@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.13] - 2026-08-12
+
+### Fixed
+- **`<x-synapse::modal>` content taller than the viewport was unreachable** — the modal box capped itself at `max-h-[calc(100vh-2rem)]` and laid out as `flex flex-col`, but neither it nor its backdrop wrapper set `overflow-y-auto`, so any modal whose content exceeded the available height (e.g. multi-step forms, code/QR display grids) simply overflowed past the box with no scrollbar and no way to reach the clipped content. Added `overflow-y-auto` to the modal box so tall content scrolls within it instead of being clipped.
+
 ## [2.4.12] - 2026-08-06
 
 ### Fixed

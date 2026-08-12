@@ -48,7 +48,12 @@
       "Bash(python3:*)",
       "Bash(git stash:*)",
       "Bash(./vendor/bin/phpstan analyse:*)",
-      "Bash(ls /srv/www/synapse/packages/synapse/phpstan*)"
+      "Bash(ls /srv/www/synapse/packages/synapse/phpstan*)",
+      "Bash(rtk git *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk find *)",
+      "Bash(rtk read *)"
     ],
     "deny": [],
     "ask": []
