@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Vite;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
 
 function runSecureHeaders(): Response
@@ -109,7 +110,7 @@ test('registers the CSP nonce as the Vite nonce so livewire scripts/styles match
     $response = runSecureHeaders();
     $csp = $response->headers->get('Content-Security-Policy');
 
-    $viteNonce = \Illuminate\Support\Facades\Vite::cspNonce();
+    $viteNonce = Vite::cspNonce();
 
     expect($viteNonce)->toBe(csp_nonce())
         ->and($csp)->toContain("'nonce-{$viteNonce}'");

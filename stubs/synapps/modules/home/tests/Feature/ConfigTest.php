@@ -17,7 +17,7 @@ describe('SynapseConfig', function () {
         expect($configArray)
             // ->dd()
             ->toHaveKeys([
-                'apps_code',
+                'app_code',
                 'app_name',
                 'author',
                 'email',
@@ -53,7 +53,7 @@ describe('SynapseConfig', function () {
         expect($compiledApps)
             // ->dd()
             ->toHaveKeys([
-                'apps_code',
+                'app_code',
                 'app_name',
                 'author',
                 'email',

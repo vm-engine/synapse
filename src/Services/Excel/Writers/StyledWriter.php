@@ -168,14 +168,16 @@ class StyledWriter implements WriterInterface
         $values = array_values($row);
 
         // Track header vs data rows
-        if (! $this->headerWritten && $this->templatePath === null) {
-            $this->headerRowIndex = $this->currentRow;
-            $this->headerWritten = true;
-            $this->dataStartRow = $this->currentRow + 1;
-        } elseif (! $this->headerWritten && $this->templatePath !== null) {
-            // For templates, first row is data
-            $this->dataStartRow = $this->currentRow;
-            $this->headerWritten = true;
+        if (! $this->headerWritten) {
+            if ($this->templatePath === null) {
+                $this->headerRowIndex = $this->currentRow;
+                $this->headerWritten = true;
+                $this->dataStartRow = $this->currentRow + 1;
+            } else {
+                // For templates, first row is data
+                $this->dataStartRow = $this->currentRow;
+                $this->headerWritten = true;
+            }
         }
 
         foreach ($values as $colIndex => $value) {

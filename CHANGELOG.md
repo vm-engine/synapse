@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-08-24
+
+### Changed
+- **Requires PHP ^8.5 and Laravel ^13.0** (dropped `12.x|13.x` dual support) — dev dependencies bumped accordingly: Pest ^5.0, Pest Plugin Laravel ^5.0, Orchestra Testbench ^11.0, LaraDumps ^5.0.
+
+### Fixed
+- **`synapps:patch-resources` never commented out the default Laravel welcome route on newer Laravel skeletons** — `patchWebRoutes()`'s detection only matched the older `Route::get('/', function () {...})` closure form, not the `Route::view('/', 'welcome')->name('home')` form Laravel 13's skeleton uses, so the welcome route was left active. Since the `home` module intentionally also claims `GET /`, this caused a silent URI collision where the module's own named route (`home.landing`) could be evicted from the route collection, breaking any redirect targeting it. Detection now matches both forms.
+- **`synapps:patch-resources`'s CSS split-layout rewrite never fixed a re-introduced stray `synapps.css` import in `app.css`** — `rewriteAppCssToFocused()` detected "already focused" by checking for a `tailwindcss` import marker instead of the direct `synapps.css` import marker (unlike its JS counterpart, which checked the right thing), so a stray import re-added by the legacy `patchAppCssImport()` step on a later run was never cleaned up.
+- **`StyledWriter::writeRow()` had a tautological `elseif` branch** flagged by PHPStan level 5 — restructured into nested `if`/`else`.
+- Stub tests (`home`/`todos` modules) updated to match already-shipped app behavior: `'datetime'` casts now correctly assert `Carbon\CarbonImmutable` (the app's `Date::use(CarbonImmutable::class)` default), the resource-patch test checks the actual per-layout split chain (`base.css`/`base.js` → `synapps-base.*` → `synapps.*`) instead of the old monolith `app.css`/`app.js` imports, Livewire component references use `::` namespace syntax instead of legacy dot notation, and the `apps.json`/`system.json` key assertion was corrected from `apps_code` to `app_code`.
+
+### Added
+- Test coverage for the welcome-route detection fix (`tests/Feature/Commands/SynAppsPatchResourcesWebRoutesTest.php`).
+
 ## [2.4.13] - 2026-08-12
 
 ### Fixed

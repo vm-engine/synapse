@@ -290,7 +290,9 @@ class SynAppsPatchResources extends Command
 
     /**
      * Rewrite resources/css/app.css from the monolith form to a focused single-import file.
-     * Detection: if `@import "tailwindcss"` is present, the file is still in monolith form.
+     * Detection: rewrite whenever the direct synapps.css import (monolith marker) is present —
+     * mirrors rewriteAppJsToFocused()'s detection, since patchAppCssImport() can re-add that
+     * direct import on a later run even after the file was already split.
      */
     protected function rewriteAppCssToFocused(): bool
     {
@@ -302,9 +304,9 @@ class SynAppsPatchResources extends Command
 
         $content = file_get_contents($cssPath);
 
-        // Already in focused form — skip
-        if (strpos($content, '@import "tailwindcss"') === false
-            && strpos($content, "@import 'tailwindcss'") === false) {
+        // Check for the direct synapps.css import (monolith marker)
+        if (strpos($content, "synapps/resources/css/synapps.css'") === false
+            && strpos($content, 'synapps/resources/css/synapps.css"') === false) {
             return false;
         }
 
@@ -1020,9 +1022,11 @@ SERVER;
         $content = file_get_contents($webRoutesPath);
         $lines = file($webRoutesPath, FILE_IGNORE_NEW_LINES);
 
-        // Check if default route exists and is not already commented
+        // Check if default route exists and is not already commented.
+        // Matches both the closure-based skeleton (`Route::get('/', function () {...})`)
+        // and the `Route::view('/', 'welcome')` form used by newer Laravel skeletons.
         $hasDefaultRoute = false;
-        $defaultRoutePattern = "/Route::get\s*\(\s*['\"]\/['\"]\s*,\s*function\s*\(\s*\)/";
+        $defaultRoutePattern = "/Route::(get\s*\(\s*['\"]\/['\"]\s*,\s*function\s*\(\s*\)|view\s*\(\s*['\"]\/['\"]\s*,)/";
 
         foreach ($lines as $line) {
             if (preg_match($defaultRoutePattern, $line) && ! $this->isCommented($line)) {

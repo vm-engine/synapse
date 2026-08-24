@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 test('can render todo form component', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->assertStatus(200)
         ->assertSet('title', '')
         ->assertSet('detail', '')
@@ -22,7 +22,7 @@ test('can render todo form component', function () {
 });
 
 test('can create a new todo', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', 'Test Todo')
         ->set('detail', 'Test description')
         ->set('tag', ['work', 'urgent'])
@@ -42,7 +42,7 @@ test('can create a new todo', function () {
 });
 
 test('validates required title field', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', '')
         ->call('save')
         ->assertHasErrors(['title' => 'required']);
@@ -51,14 +51,14 @@ test('validates required title field', function () {
 });
 
 test('validates title max length', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', str_repeat('a', 256))
         ->call('save')
         ->assertHasErrors(['title' => 'max']);
 });
 
 test('  ', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', 'Simple Todo')
         ->call('save')
         ->assertDispatched('todo-created');
@@ -71,7 +71,7 @@ test('  ', function () {
 });
 
 test('resets form after successful creation', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', 'Test Todo')
         ->set('detail', 'Some detail')
         ->call('save')
@@ -91,7 +91,7 @@ test('can edit existing todo', function () {
         'completed' => false,
     ]);
 
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->call('editTodo', $todo->id)
         ->assertSet('todoId', $todo->id)
         ->assertSet('title', 'Original Title')
@@ -108,7 +108,7 @@ test('can update existing todo', function () {
         'completed' => false,
     ]);
 
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->call('editTodo', $todo->id)
         ->set('title', 'Updated Title')
         ->set('detail', 'Updated detail')
@@ -132,7 +132,7 @@ test('can cancel editing', function () {
         'completed' => false,
     ]);
 
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->call('editTodo', $todo->id)
         ->assertSet('isEditing', true)
         ->call('cancelEdit')
@@ -142,7 +142,7 @@ test('can cancel editing', function () {
 });
 
 test('can reset form', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', 'Some Title')
         ->set('detail', 'Some Detail')
         ->call('resetForm')
@@ -151,7 +151,7 @@ test('can reset form', function () {
 });
 
 test('throttles todo creation to once per 5 seconds', function () {
-    $component = Livewire::test('todos.todo-form');
+    $component = Livewire::test('todos::todo-form');
 
     // First submission should succeed
     $component
@@ -175,7 +175,7 @@ test('can edit todo even after creating one', function () {
         'completed' => false,
     ]);
 
-    $component = Livewire::test('todos.todo-form');
+    $component = Livewire::test('todos::todo-form');
 
     // Create a todo first to trigger rate limit
     $component
@@ -197,7 +197,7 @@ test('can edit todo even after creating one', function () {
 });
 
 test('validates due_date format', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', 'Test Todo')
         ->set('due_date', 'invalid-date')
         ->call('save')
@@ -205,7 +205,7 @@ test('validates due_date format', function () {
 });
 
 test('accepts null values for optional fields', function () {
-    Livewire::test('todos.todo-form')
+    Livewire::test('todos::todo-form')
         ->set('title', 'Test Todo')
         ->set('detail', null)
         ->set('tag', [])
