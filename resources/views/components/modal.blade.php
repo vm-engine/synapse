@@ -21,17 +21,7 @@
 
 <div
     style="display: none;"
-    x-data="{
-        show: false,
-        open() {
-            this.show = true;
-        },
-        close() {
-            if (!this.show) return;
-            this.show = false;
-            $dispatch('closed-modal-{{ $name }}');
-        }
-    }"
+    x-data="synapseModal()"
     @open-modal-{{ $name }}.window="open()"
     @close-modal-{{ $name }}.window="close()"
     @keydown.escape.window="show && close()"
@@ -72,3 +62,25 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseModal', () => ({
+            show: false,
+            open() {
+                this.show = true;
+            },
+            close() {
+                if (!this.show) return;
+                this.show = false;
+                this.$dispatch('closed-modal-{{ $name }}');
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

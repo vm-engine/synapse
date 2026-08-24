@@ -24,15 +24,14 @@
 
     <div
         class="flex flex-col items-center"
-        x-data="dropdown()"
-        x-init="loadOptions('{{ $name }}')"
+        x-data="synapseMultiSelect('{{ $name }}')"
     >
         <div class="relative z-20 inline-block w-full">
             <div class="relative flex flex-col items-center">
                 <div
                     class="w-full"
                     id="multi-select-{{ $name }}"
-                    @click="open"
+                    @click="open()"
                 >
                     <div
                         {{ $attributes->merge(['class' => 'form-input shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900'])->only('class') }}>
@@ -88,7 +87,7 @@
                             <button
                                 class="h-5 w-5 cursor-pointer text-gray-700 outline-hidden focus:outline-hidden dark:text-gray-400"
                                 type="button"
-                                @click="open"
+                                @click="open()"
                                 :class="isOpen() === true ? 'rotate-180' : ''"
                             >
                                 <svg
@@ -115,7 +114,7 @@
                     <div
                         class="max-h-select absolute top-full left-0 z-40 w-full overflow-y-auto rounded-lg bg-white shadow-sm dark:bg-gray-900"
                         x-show.transition.origin.top="isOpen()"
-                        @click.outside="close"
+                        @click.outside="close()"
                     >
                         <div class="flex w-full flex-col">
                             <template
@@ -151,79 +150,89 @@
 </div>
 
 <script nonce="{{ csp_nonce() }}">
-    function dropdown() {
-        return {
-            options: [],
-            selected: [],
-            show: false,
-            open() {
-                this.show = true;
-            },
-            close() {
-                this.show = false;
-            },
-            isOpen() {
-                return this.show === true;
-            },
-            select(index, event) {
-                if (!this.options[index].selected) {
-                    this.options[index].selected = true;
-                    this.options[index].element = event.target;
-                    this.selected.push(index);
-                } else {
-                    this.selected.splice(this.selected.lastIndexOf(index), 1);
-                    this.options[index].selected = false;
-                }
-                this.syncSelectElement();
-            },
-            remove(index, option) {
-                this.options[option].selected = false;
-                this.selected.splice(index, 1);
-                this.syncSelectElement();
-            },
-            syncSelectElement() {
-                // Update the native select element's selected options
-                const selectEl = document.getElementById('{{ $name }}');
-                if (selectEl) {
-                    // Get all option elements
-                    const selectOptions = selectEl.options;
-
-                    // Update selected state for each option
-                    for (let i = 0; i < selectOptions.length; i++) {
-                        const optionValue = selectOptions[i].value;
-                        const isSelected = this.selectedValuesArray().includes(optionValue);
-                        selectOptions[i].selected = isSelected;
+    (() => {
+        const register = () => {
+            Alpine.data('synapseMultiSelect', (name) => ({
+                name,
+                options: [],
+                selected: [],
+                show: false,
+                init() {
+                    this.loadOptions();
+                },
+                open() {
+                    this.show = true;
+                },
+                close() {
+                    this.show = false;
+                },
+                isOpen() {
+                    return this.show === true;
+                },
+                select(index, event) {
+                    if (!this.options[index].selected) {
+                        this.options[index].selected = true;
+                        this.options[index].element = event.target;
+                        this.selected.push(index);
+                    } else {
+                        this.selected.splice(this.selected.lastIndexOf(index), 1);
+                        this.options[index].selected = false;
                     }
+                    this.syncSelectElement();
+                },
+                remove(index, option) {
+                    this.options[option].selected = false;
+                    this.selected.splice(index, 1);
+                    this.syncSelectElement();
+                },
+                syncSelectElement() {
+                    // Update the native select element's selected options
+                    const selectEl = document.getElementById(this.name);
+                    if (selectEl) {
+                        // Get all option elements
+                        const selectOptions = selectEl.options;
 
-                    // Dispatch change event for Livewire to pick up
-                    selectEl.dispatchEvent(new Event('input', {
-                        bubbles: true
-                    }));
-                    selectEl.dispatchEvent(new Event('change', {
-                        bubbles: true
-                    }));
-                }
-            },
-            loadOptions(el) {
-                const options = document.getElementById(el).options;
-                for (let i = 0; i < options.length; i++) {
-                    var selected = options[i].getAttribute("selected") != null ?
-                        true : false;
-                    this.options.push({
-                        value: options[i].value,
-                        text: options[i].innerText,
-                        selected: selected,
+                        // Update selected state for each option
+                        for (let i = 0; i < selectOptions.length; i++) {
+                            const optionValue = selectOptions[i].value;
+                            const isSelected = this.selectedValuesArray().includes(optionValue);
+                            selectOptions[i].selected = isSelected;
+                        }
+
+                        // Dispatch change event for Livewire to pick up
+                        selectEl.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                        selectEl.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
+                    }
+                },
+                loadOptions() {
+                    const options = document.getElementById(this.name).options;
+                    for (let i = 0; i < options.length; i++) {
+                        var selected = options[i].getAttribute("selected") != null ?
+                            true : false;
+                        this.options.push({
+                            value: options[i].value,
+                            text: options[i].innerText,
+                            selected: selected,
+                        });
+                        if (selected) {
+                            this.selected.push(i);
+                        }
+                    }
+                },
+                selectedValuesArray() {
+                    return this.selected.map((option) => {
+                        return this.options[option].value;
                     });
-                    if (selected) {
-                        this.selected.push(i);
-                    }
-                }
-            },
-            selectedValuesArray() {
-                return this.selected.map((option) => {
-                    return this.options[option].value;
-                });
-            },
+                },
+            }));
         };
-    }
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
+    })();
 </script>

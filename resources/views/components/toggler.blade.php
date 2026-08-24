@@ -25,12 +25,7 @@
 @if ($inline)
     <div
         data-checked="{{ $checkedValue }}"
-        x-data="{ active: {{ $checkedValue }} }"
-        x-init="
-            active = $el.dataset.checked === 'true';
-            new MutationObserver(() => { active = $el.dataset.checked === 'true'; })
-                .observe($el, { attributes: true, attributeFilter: ['data-checked'] });
-        "
+        x-data="synapseTogglerInline({{ $checkedValue }})"
     >
         <label
             class="flex cursor-pointer select-none items-center gap-2 text-sm font-medium"
@@ -58,7 +53,7 @@
         </label>
     </div>
 @else
-    <div x-data="{ active: @entangle($attributes->wire('model')->value()) }">
+    <div x-data="synapseToggler($wire.entangle('{{ $attributes->wire('model')->value() }}').live)">
         <label
             class="flex cursor-pointer select-none items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-400"
             for="{{ $componentId }}"
@@ -88,3 +83,30 @@
         </label>
     </div>
 @endif
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseTogglerInline', (checkedValue) => ({
+            active: checkedValue,
+            init() {
+                this.active = this.$el.dataset.checked === 'true';
+                new MutationObserver(() => {
+                    this.active = this.$el.dataset.checked === 'true';
+                }).observe(this.$el, {
+                    attributes: true,
+                    attributeFilter: ['data-checked']
+                });
+            }
+        }));
+
+        Alpine.data('synapseToggler', (initialActive) => ({
+            active: initialActive,
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

@@ -28,9 +28,8 @@
 
 <body
     class="font-sans antialiased"
-    x-data="{ darkMode: $persist(false).as('m4vm_dark_mode_guest') }"
+    x-data="synapseGuestShell()"
     :class="{ 'dark': darkMode }"
-    x-init="darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')"
 >
     <div class="flex min-h-screen">
         <!-- LEFT: Banner Column (Hidden on mobile, visible on lg+) -->
@@ -148,7 +147,7 @@
                         class="group relative rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                         type="button"
                         aria-label="Toggle dark mode"
-                        @click="darkMode = !darkMode; darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')"
+                        @click="toggleDarkMode()"
                     >
                         <!-- Sun Icon (Light Mode) -->
                         <svg
@@ -238,6 +237,29 @@
     @themeScripts('guest')
 
     @stack('scripts')
+
+    <script nonce="{{ csp_nonce() }}">
+        (() => {
+            const register = () => {
+                Alpine.data('synapseGuestShell', () => ({
+                    darkMode: Alpine.$persist(false).as('m4vm_dark_mode_guest'),
+                    init() {
+                        this.darkMode ? document.documentElement.classList.add('dark') : document
+                            .documentElement.classList.remove('dark');
+                    },
+                    toggleDarkMode() {
+                        this.darkMode = !this.darkMode;
+                        this.darkMode ? document.documentElement.classList.add('dark') : document
+                            .documentElement.classList.remove('dark');
+                    },
+                }));
+            };
+            document.addEventListener('alpine:init', register);
+            if (window.Alpine) {
+                register();
+            }
+        })();
+    </script>
 </body>
 
 </html>

@@ -203,17 +203,6 @@ class SynAppsSetup extends Command
             json_encode($appsJson, JSON_PRETTY_PRINT)
         );
 
-        $systemFile = synapps_path('config/system.json');
-        $jsonSystem = json_decode(
-            file_get_contents($systemFile),
-            true
-        );
-        $jsonSystem['laravel_key'] = $key;
-        file_put_contents(
-            $systemFile,
-            json_encode($jsonSystem, JSON_PRETTY_PRINT)
-        );
-
         // Setup default theme
         $this->setupThemes();
 

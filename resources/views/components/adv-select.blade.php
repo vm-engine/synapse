@@ -123,201 +123,7 @@ Version: 1.0.0
 
 <div
     class="adv-select-container relative w-full"
-    x-data="{
-        search: '',
-        results: [],
-        selected: @js($preload ?? []),
-        multiple: {{ $multiple ? 'true' : 'false' }},
-        open: false,
-        searchMethod: {{ $searchMethod ? "'{$searchMethod}'" : 'null' }},
-        loadMethod: {{ $loadMethod ? "'{$loadMethod}'" : 'null' }},
-        wireModel: '{{ $wireModel }}',
-        labelField: '{{ $labelField }}',
-        valueField: '{{ $valueField }}',
-        staticOptions: @js($options),
-        minSearchLength: {{ $minSearchLength }},
-        isLive: {{ $live ? 'true' : 'false' }},
-        allowCreate: {{ $allowCreate ? 'true' : 'false' }},
-        autoLoad: {{ $autoLoad ? 'true' : 'false' }},
-
-        async init() {
-            // Auto-load selected values from wireModel if enabled
-            if (this.autoLoad && this.selected.length === 0) {
-                await this.loadInitialValues();
-            }
-
-            // Set initial value to Livewire model
-            // Only sync if preload has values (avoid empty updates on first render)
-            if (this.selected && this.selected.length > 0) {
-                this.syncWithWire();
-            }
-
-            // Reopen dropdown after Livewire updates
-            Livewire.interceptMessage(({ onSuccess }) => {
-                onSuccess(() => {
-                    if (document.activeElement === this.$refs.search && this.search.length > 0) {
-                        this.open = true;
-                    }
-                });
-            });
-
-            // Listen for reset event
-            window.addEventListener('reset-tag-input', () => {
-                this.clearSelection();
-            });
-        },
-
-        async loadInitialValues() {
-            if (!this.$wire) return;
-
-            try {
-                // Get current value from Livewire model
-                const currentValue = this.$wire.get(this.wireModel);
-
-                if (currentValue === null || currentValue === undefined || (Array.isArray(currentValue) && currentValue.length === 0)) {
-                    return; // No value to load
-                }
-
-                const values = Array.isArray(currentValue) ? currentValue : [currentValue];
-
-                // Try to find values in static options first
-                const foundInStatic = [];
-                for (const val of values) {
-                    // Use loose equality to handle type mismatches (string vs number)
-                    const found = this.staticOptions.find(o => o[this.valueField] == val);
-                    if (found) {
-                        foundInStatic.push(found);
-                    }
-                }
-
-                // If all values found in static options, use them
-                if (foundInStatic.length === values.length) {
-                    this.selected = foundInStatic;
-                    return;
-                }
-
-                // If loadMethod is provided, call it to get full objects
-                if (this.loadMethod && this.$wire?.call) {
-                    const loaded = await this.$wire.call(this.loadMethod, this.multiple ? values : values[0]);
-
-                    if (loaded) {
-                        this.selected = Array.isArray(loaded) ? loaded : [loaded];
-                        return;
-                    }
-                }
-
-                // Fallback: create simple objects with value = label
-                this.selected = values.map(val => ({
-                    [this.valueField]: val,
-                    [this.labelField]: val
-                }));
-            } catch (e) {
-                console.error('Error loading initial values:', e);
-            }
-        },
-
-        focusInput() {
-            this.$refs.search.classList.remove('hidden');
-            this.$refs.search.focus();
-            this.open = true;
-        },
-
-        async fetch() {
-            const query = this.search.toLowerCase();
-
-            // ✅ 1. Start with static options (filter client-side)
-            let staticResults = this.staticOptions.filter(o =>
-                o[this.labelField].toLowerCase().includes(query)
-            );
-
-            // ✅ 2. If a Livewire search method is provided, merge remote results
-            if (this.searchMethod && query.length > this.minSearchLength && this.$wire?.call) {
-                try {
-                    const res = await this.$wire.call(this.searchMethod, this.search);
-                    const remoteResults = Array.isArray(res) ? res : [];
-                    // merge while avoiding duplicates by valueField
-                    const merged = [...staticResults];
-                    for (const r of remoteResults) {
-                        if (!merged.find(o => o[this.valueField] == r[this.valueField])) {
-                            merged.push(r);
-                        }
-                    }
-                    this.results = merged;
-                } catch (e) {
-                    console.error('search error', e);
-                    this.results = staticResults;
-                }
-            } else {
-                // no remote search — static only
-                this.results = staticResults;
-            }
-
-            this.open = this.results.length > 0 || (this.allowCreate && this.search.trim() !== '');
-        },
-
-        select(item) {
-            if (this.multiple) {
-                if (!this.selected.find(i => i[this.valueField] == item[this
-                        .valueField])) {
-                    this.selected.push(item);
-                }
-            } else {
-                this.selected = [item];
-                this.$refs.search.blur();
-            }
-            this.search = '';
-            this.results = [];
-            this.open = false;
-            this.syncWithWire();
-        },
-
-        createNew() {
-            if (!this.allowCreate || !this.search.trim()) return;
-
-            const newItem = {
-                [this.valueField]: this.search.trim(),
-                [this.labelField]: this.search.trim()
-            };
-
-            // Add to static options for future searches
-            this.staticOptions.push(newItem);
-
-            // Select the new item
-            this.select(newItem);
-        },
-
-        handleKeydown(e) {
-            if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
-                e.preventDefault();
-                this.createNew();
-            }
-        },
-
-        remove(index) {
-            this.selected.splice(index, 1);
-            this.syncWithWire();
-        },
-
-        clearSelection() {
-            this.selected = [];
-            this.syncWithWire();
-            this.focusInput();
-        },
-
-        syncWithWire() {
-            if (!this.$wire) return; // safety check
-
-            const ids = this.selected.map(i => i[this.valueField]);
-
-            // Prevent sending [] on init unless already synced once
-            if (!this._initialized) {
-                this._initialized = true;
-                if (ids.length === 0) return; // skip initial empty sync
-            }
-
-            this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] : null), this.live);
-        },
-    }"
+    x-data="synapseAdvSelect(@js($preload ?? []), {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', @js($options), {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }})"
     x-init="init()"
     wire:ignore
 >
@@ -416,3 +222,196 @@ Version: 1.0.0
         </template>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wireModel, labelField, valueField,
+            staticOptions, minSearchLength, isLive, allowCreate, autoLoad) => ({
+            search: '',
+            results: [],
+            selected: preload,
+            multiple,
+            open: false,
+            searchMethod,
+            loadMethod,
+            wireModel,
+            labelField,
+            valueField,
+            staticOptions,
+            minSearchLength,
+            isLive,
+            allowCreate,
+            autoLoad,
+
+            async init() {
+                if (this.autoLoad && this.selected.length === 0) {
+                    await this.loadInitialValues();
+                }
+
+                if (this.selected && this.selected.length > 0) {
+                    this.syncWithWire();
+                }
+
+                Livewire.interceptMessage(({
+                    onSuccess
+                }) => {
+                    onSuccess(() => {
+                        if (document.activeElement === this.$refs.search && this.search
+                            .length > 0) {
+                            this.open = true;
+                        }
+                    });
+                });
+
+                window.addEventListener('reset-tag-input', () => {
+                    this.clearSelection();
+                });
+            },
+
+            async loadInitialValues() {
+                if (!this.$wire) return;
+
+                try {
+                    const currentValue = this.$wire.get(this.wireModel);
+
+                    if (currentValue === null || currentValue === undefined || (Array.isArray(
+                            currentValue) && currentValue.length === 0)) {
+                        return;
+                    }
+
+                    const values = Array.isArray(currentValue) ? currentValue : [currentValue];
+
+                    const foundInStatic = [];
+                    for (const val of values) {
+                        const found = this.staticOptions.find(o => o[this.valueField] == val);
+                        if (found) {
+                            foundInStatic.push(found);
+                        }
+                    }
+
+                    if (foundInStatic.length === values.length) {
+                        this.selected = foundInStatic;
+                        return;
+                    }
+
+                    if (this.loadMethod && this.$wire?.call) {
+                        const loaded = await this.$wire.call(this.loadMethod, this.multiple ? values :
+                            values[0]);
+
+                        if (loaded) {
+                            this.selected = Array.isArray(loaded) ? loaded : [loaded];
+                            return;
+                        }
+                    }
+
+                    this.selected = values.map(val => ({
+                        [this.valueField]: val,
+                        [this.labelField]: val
+                    }));
+                } catch (e) {
+                    console.error('Error loading initial values:', e);
+                }
+            },
+
+            focusInput() {
+                this.$refs.search.classList.remove('hidden');
+                this.$refs.search.focus();
+                this.open = true;
+            },
+
+            async fetch() {
+                const query = this.search.toLowerCase();
+
+                let staticResults = this.staticOptions.filter(o =>
+                    o[this.labelField].toLowerCase().includes(query)
+                );
+
+                if (this.searchMethod && query.length > this.minSearchLength && this.$wire?.call) {
+                    try {
+                        const res = await this.$wire.call(this.searchMethod, this.search);
+                        const remoteResults = Array.isArray(res) ? res : [];
+                        const merged = [...staticResults];
+                        for (const r of remoteResults) {
+                            if (!merged.find(o => o[this.valueField] == r[this.valueField])) {
+                                merged.push(r);
+                            }
+                        }
+                        this.results = merged;
+                    } catch (e) {
+                        console.error('search error', e);
+                        this.results = staticResults;
+                    }
+                } else {
+                    this.results = staticResults;
+                }
+
+                this.open = this.results.length > 0 || (this.allowCreate && this.search.trim() !== '');
+            },
+
+            select(item) {
+                if (this.multiple) {
+                    if (!this.selected.find(i => i[this.valueField] == item[this.valueField])) {
+                        this.selected.push(item);
+                    }
+                } else {
+                    this.selected = [item];
+                    this.$refs.search.blur();
+                }
+                this.search = '';
+                this.results = [];
+                this.open = false;
+                this.syncWithWire();
+            },
+
+            createNew() {
+                if (!this.allowCreate || !this.search.trim()) return;
+
+                const newItem = {
+                    [this.valueField]: this.search.trim(),
+                    [this.labelField]: this.search.trim()
+                };
+
+                this.staticOptions.push(newItem);
+                this.select(newItem);
+            },
+
+            handleKeydown(e) {
+                if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
+                    e.preventDefault();
+                    this.createNew();
+                }
+            },
+
+            remove(index) {
+                this.selected.splice(index, 1);
+                this.syncWithWire();
+            },
+
+            clearSelection() {
+                this.selected = [];
+                this.syncWithWire();
+                this.focusInput();
+            },
+
+            syncWithWire() {
+                if (!this.$wire) return;
+
+                const ids = this.selected.map(i => i[this.valueField]);
+
+                if (!this._initialized) {
+                    this._initialized = true;
+                    if (ids.length === 0) return;
+                }
+
+                this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] : null), this
+                    .live);
+            },
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

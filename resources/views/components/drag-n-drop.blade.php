@@ -22,143 +22,7 @@
 
 <div
     class="w-full"
-    x-data="{
-        fileName: '',
-        fileSize: '',
-        previewUrl: null,
-        isDragging: false,
-        error: null,
-        accept: @js($acceptTypes),
-        maxSize: @js($maxSize),
-        maxWidth: @js($maxWidth),
-        maxHeight: @js($maxHeight),
-    
-        handleFiles(files) {
-            if (files.length === 0) return;
-    
-            const file = files[0];
-            this.error = null;
-    
-            // Validate file type
-            if (this.accept && !this.accept.split(',').some(type => file.type === type.trim())) {
-                this.error = 'Invalid file type. Accepted types: ' + @js($acceptExtensions);
-                this.clearFileInput();
-                return;
-            }
-    
-            // Validate file size
-            const fileSizeKB = Math.round(file.size / 1024);
-            if (this.maxSize && fileSizeKB > this.maxSize) {
-                this.error = `File size exceeds maximum allowed size of ${this.maxSize}KB (${Math.round(this.maxSize / 1024)}MB)`;
-                this.clearFileInput();
-                return;
-            }
-    
-            // Set preview immediately - dimension validation will be done server-side
-            this.setFileInfo(file);
-        },
-    
-        setFileInfo(file) {
-            this.fileName = file.name;
-            this.fileSize = this.formatFileSize(file.size);
-    
-            // Show preview for images
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.previewUrl = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        },
-    
-        formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        },
-    
-        clearFileInput() {
-            if (this.$refs.fileInput) {
-                this.$refs.fileInput.value = '';
-            }
-    
-            @if($wireModel)
-            this.$wire.set('{{ $wireModel }}', null);
-            @endif
-        },
-    
-        removeFile() {
-            this.fileName = '';
-            this.fileSize = '';
-            this.previewUrl = null;
-            this.error = null;
-            this.clearFileInput();
-        },
-    
-        triggerFileInput() {
-            if (this.$refs.fileInput) {
-                this.$refs.fileInput.click();
-            }
-        },
-    
-        // Handle drag-and-drop for Livewire mode
-        handleDrop(event) {
-            const files = event.dataTransfer.files;
-    
-            if (files.length > 0 && this.$refs.fileInput) {
-                // Set the files to the input element so Livewire can pick them up
-                this.$refs.fileInput.files = files;
-    
-                // Manually trigger change event for Livewire to detect
-                const changeEvent = new Event('change', { bubbles: true });
-                this.$refs.fileInput.dispatchEvent(changeEvent);
-            }
-        },
-    
-        // Livewire upload event handlers
-        handleLivewireUploadStart() {
-            this.error = null;
-    
-            // Get file info from the input
-            if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
-                const file = this.$refs.fileInput.files[0];
-                this.fileName = file.name;
-                this.fileSize = this.formatFileSize(file.size);
-    
-                // Show preview for images
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.previewUrl = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-        },
-    
-        handleLivewireUploadFinish(event) {
-            // Upload completed successfully
-        },
-    
-        handleLivewireUploadError() {
-            this.error = 'Upload failed. Please try again.';
-            this.removeFile();
-        }
-    }"
-    x-init="// Watch for wire:model changes to clear preview
-    @if($wireModel)
-    $watch('$wire.{{ $wireModel }}', value => {
-        if (value === null || value === '') {
-            // Only clear the UI, don't touch the file input during upload
-            this.fileName = '';
-            this.fileSize = '';
-            this.previewUrl = null;
-        }
-    });
-    @endif"
+    x-data="synapseDragDrop()"
     x-on:dragndrop-clear-input.window="removeFile()"
 >
     <!-- Hidden File Input -->
@@ -182,7 +46,7 @@
         @click="triggerFileInput()"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
-        @drop.prevent="isDragging = false; @if ($wireModel) handleDrop($event) @else handleFiles($event.dataTransfer.files) @endif"
+        @drop.prevent="onDrop($event)"
         :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'"
     >
         <!-- Preview Area -->
@@ -300,3 +164,157 @@
         display: none !important;
     }
 </style>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseDragDrop', () => ({
+            fileName: '',
+            fileSize: '',
+            previewUrl: null,
+            isDragging: false,
+            error: null,
+            accept: @js($acceptTypes),
+            maxSize: @js($maxSize),
+            maxWidth: @js($maxWidth),
+            maxHeight: @js($maxHeight),
+
+            init() {
+                // Watch for wire:model changes to clear preview
+                @if ($wireModel)
+                    this.$watch('$wire.{{ $wireModel }}', (value) => {
+                        if (value === null || value === '') {
+                            // Only clear the UI, don't touch the file input during upload
+                            this.fileName = '';
+                            this.fileSize = '';
+                            this.previewUrl = null;
+                        }
+                    });
+                @endif
+            },
+
+            handleFiles(files) {
+                if (files.length === 0) return;
+
+                const file = files[0];
+                this.error = null;
+
+                if (this.accept && !this.accept.split(',').some(type => file.type === type
+                        .trim())) {
+                    this.error = 'Invalid file type. Accepted types: ' +
+                        @js($acceptExtensions);
+                    this.clearFileInput();
+                    return;
+                }
+
+                const fileSizeKB = Math.round(file.size / 1024);
+                if (this.maxSize && fileSizeKB > this.maxSize) {
+                    this.error =
+                        `File size exceeds maximum allowed size of ${this.maxSize}KB (${Math.round(this.maxSize / 1024)}MB)`;
+                    this.clearFileInput();
+                    return;
+                }
+
+                this.setFileInfo(file);
+            },
+
+            setFileInfo(file) {
+                this.fileName = file.name;
+                this.fileSize = this.formatFileSize(file.size);
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.previewUrl = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            },
+
+            clearFileInput() {
+                if (this.$refs.fileInput) {
+                    this.$refs.fileInput.value = '';
+                }
+
+                @if ($wireModel)
+                    this.$wire.set('{{ $wireModel }}', null);
+                @endif
+            },
+
+            removeFile() {
+                this.fileName = '';
+                this.fileSize = '';
+                this.previewUrl = null;
+                this.error = null;
+                this.clearFileInput();
+            },
+
+            triggerFileInput() {
+                if (this.$refs.fileInput) {
+                    this.$refs.fileInput.click();
+                }
+            },
+
+            onDrop(event) {
+                this.isDragging = false;
+                @if ($wireModel)
+                    this.handleDrop(event);
+                @else
+                    this.handleFiles(event.dataTransfer.files);
+                @endif
+            },
+
+            handleDrop(event) {
+                const files = event.dataTransfer.files;
+
+                if (files.length > 0 && this.$refs.fileInput) {
+                    this.$refs.fileInput.files = files;
+                    const changeEvent = new Event('change', {
+                        bubbles: true
+                    });
+                    this.$refs.fileInput.dispatchEvent(changeEvent);
+                }
+            },
+
+            handleLivewireUploadStart() {
+                this.error = null;
+
+                if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
+                    const file = this.$refs.fileInput.files[0];
+                    this.fileName = file.name;
+                    this.fileSize = this.formatFileSize(file.size);
+
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.previewUrl = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            },
+
+            handleLivewireUploadFinish(event) {
+                // Upload completed successfully
+            },
+
+            handleLivewireUploadError() {
+                this.error = 'Upload failed. Please try again.';
+                this.removeFile();
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

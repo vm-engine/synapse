@@ -211,24 +211,7 @@
         @if ($this->hasMore)
             <div
                 class="flex justify-center py-8"
-                x-data="{
-                    observer: null,
-                    init() {
-                        this.observer = new IntersectionObserver((entries) => {
-                            if (entries[0].isIntersecting) {
-                                @this.call('loadMore')
-                            }
-                        }, {
-                            rootMargin: '100px'
-                        })
-                        this.observer.observe(this.$el)
-                    },
-                    destroy() {
-                        if (this.observer) {
-                            this.observer.disconnect()
-                        }
-                    }
-                }"
+                x-data="todoListLoadMore()"
             >
                 <div
                     class="flex items-center gap-2 text-gray-500 dark:text-gray-400"
@@ -242,3 +225,32 @@
         @endif
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('todoListLoadMore', () => ({
+            observer: null,
+            init() {
+                this.observer = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) {
+                        @this.call('loadMore')
+                    }
+                }, {
+                    rootMargin: '100px'
+                })
+                this.observer.observe(this.$el)
+            },
+            destroy() {
+                if (this.observer) {
+                    this.observer.disconnect()
+                }
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

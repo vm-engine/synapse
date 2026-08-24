@@ -184,12 +184,12 @@
                 <div
                     class="relative"
                     x-cloak
-                    x-data="{ dropdownOpen: false, notifying: true }"
+                    x-data="synapseNotificationMenu()"
                     @click.outside="dropdownOpen = false"
                 >
                     <button
                         class="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
-                        @click.prevent="dropdownOpen = ! dropdownOpen; notifying = false"
+                        @click.prevent="toggleDropdown()"
                     >
                         <span
                             class="z-1 absolute right-0 top-0.5 h-2 w-2 rounded-full bg-orange-400"
@@ -409,3 +409,22 @@
         </div>
     </div>
 </header>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseNotificationMenu', () => ({
+            dropdownOpen: false,
+            notifying: true,
+            toggleDropdown() {
+                this.dropdownOpen = !this.dropdownOpen;
+                this.notifying = false;
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

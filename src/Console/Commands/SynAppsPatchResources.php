@@ -1278,6 +1278,14 @@ window.withBack = (url) => {
     return url + separator + 'back=' + encodeURIComponent(window.location.href);
 };
 
+// Expose withBack as an Alpine magic ($withBack) so CSP-safe Alpine
+// expressions can call it — Alpine's CSP evaluator only resolves its own
+// reactive scope + registered magics, not arbitrary window globals.
+// Registered inside alpine:init so it works regardless of script load order.
+document.addEventListener('alpine:init', () => {
+    Alpine.magic('withBack', () => window.withBack);
+});
+
 // Re-compute the back URL at click time.
 // Livewire updates the browser URL AFTER DOM morph, so Alpine's :href
 // bindings capture a stale URL (e.g. missing ?page=11 after pagination).

@@ -47,8 +47,7 @@
         {{-- Header --}}
         <header
             class="fe-header"
-            x-data="{ scrolled: false }"
-            x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
+            x-data="frontendHeaderScroll()"
             :class="{ 'fe-header--scrolled': scrolled }"
         >
             <div class="fe-header__inner">
@@ -122,6 +121,25 @@
     @themeScripts('frontend')
     @livewireScripts
     @stack('scripts')
+
+    <script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+            Alpine.data('frontendHeaderScroll', () => ({
+                scrolled: false,
+                init() {
+                    window.addEventListener('scroll', () => {
+                        this.scrolled = window.scrollY > 20;
+                    });
+                }
+            }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+    </script>
 </body>
 
 </html>

@@ -82,12 +82,12 @@
             @foreach (synav()->backend() as $key => $menu)
                 @canAccess($menu['acl'] ?? null)
                 <li
-                    @isset($menu['sub']) x-data="{ open: selected.startsWith('{{ $key }}') }" @endisset>
+                    @isset($menu['sub']) x-data="synapseSidebarSubmenu(selected.startsWith('{{ $key }}'))" @endisset>
                     @isset($menu['sub'])
                         {{-- Menu item with submenu --}}
                         <button
                             class="menu-item {{ synav()->is($key) ? 'menu-item-active' : '' }} group relative w-full"
-                            @click="open = !open; selected = selected === '{{ $key }}' ? '' : '{{ $key }}'"
+                            @click="toggle('{{ $key }}')"
                             :class="{ 'justify-center': sidebarCollapsed }"
                         >
                             <div class="flex min-w-0 flex-1 items-center gap-3">
@@ -263,3 +263,21 @@
         </div>
     </div>
 </aside>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+            Alpine.data('synapseSidebarSubmenu', (initialOpen) => ({
+                open: initialOpen,
+                toggle(key) {
+                    this.open = !this.open;
+                    this.selected = this.selected === key ? '' : key;
+                },
+            }));
+        };
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
+    })();
+</script>

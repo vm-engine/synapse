@@ -28,13 +28,8 @@
 
 <body
     class="bg-gray-50 font-sans antialiased transition-colors duration-300 dark:bg-gray-950"
-    x-data="{
-        darkMode: $persist(false).as('m4vm_dark_mode_app'),
-        sidebarOpen: $persist(true).as('m4vm_sidebar_open'),
-        sidebarCollapsed: $persist(false).as('m4vm_sidebar_collapsed')
-    }"
+    x-data="synapseAppShell()"
     :class="{ 'dark': darkMode }"
-    x-init="darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')"
 >
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR: Darker, Independently Scrollable -->
@@ -200,6 +195,31 @@
     @themeScripts('app')
 
     @stack('scripts')
+
+    <script nonce="{{ csp_nonce() }}">
+        (() => {
+            const register = () => {
+                Alpine.data('synapseAppShell', () => ({
+                    darkMode: Alpine.$persist(false).as('m4vm_dark_mode_app'),
+                    sidebarOpen: Alpine.$persist(true).as('m4vm_sidebar_open'),
+                    sidebarCollapsed: Alpine.$persist(false).as('m4vm_sidebar_collapsed'),
+                    init() {
+                        this.darkMode ? document.documentElement.classList.add('dark') : document
+                            .documentElement.classList.remove('dark');
+                    },
+                    toggleDarkMode() {
+                        this.darkMode = !this.darkMode;
+                        this.darkMode ? document.documentElement.classList.add('dark') : document
+                            .documentElement.classList.remove('dark');
+                    },
+                }));
+            };
+            document.addEventListener('alpine:init', register);
+            if (window.Alpine) {
+                register();
+            }
+        })();
+    </script>
 </body>
 
 </html>

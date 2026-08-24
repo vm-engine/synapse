@@ -30,61 +30,7 @@
 <div
     style="display: none;"
     wire:ignore
-    x-data="{
-        show: false,
-        title: '{{ $title }}',
-        message: '{{ $message }}',
-        confirmText: '{{ $confirmText }}',
-        cancelText: '{{ $cancelText }}',
-        confirmColor: '{{ $confirmColor }}',
-        icon: '{{ $icon }}',
-        onConfirm: null,
-        onCancel: null,
-        wireMethod: null,
-        wireParams: null,
-        wireComponent: null,
-        open(data) {
-            this.title = data.title || '{{ $title }}';
-            this.message = data.message || '{{ $message }}';
-            this.confirmText = data.confirmText || '{{ $confirmText }}';
-            this.cancelText = data.cancelText || '{{ $cancelText }}';
-            this.confirmColor = data.confirmColor || '{{ $confirmColor }}';
-            this.icon = data.icon || '{{ $icon }}';
-            this.onConfirm = data.onConfirm || null;
-            this.onCancel = data.onCancel || null;
-            this.wireMethod = data.wireMethod || null;
-            this.wireParams = data.wireParams || null;
-            this.wireComponent = data.wireComponent || null;
-            this.show = true;
-        },
-        close() {
-            this.show = false;
-        },
-        confirm() {
-            // Try Livewire wire method first (for paginated content)
-            if (this.wireMethod && this.wireComponent) {
-                const component = Livewire.find(this.wireComponent);
-                if (component && typeof component[this.wireMethod] === 'function') {
-                    if (this.wireParams && Array.isArray(this.wireParams)) {
-                        component[this.wireMethod](...this.wireParams);
-                    } else {
-                        component[this.wireMethod]();
-                    }
-                }
-            }
-            // Fallback to onConfirm callback
-            else if (this.onConfirm && typeof this.onConfirm === 'function') {
-                this.onConfirm();
-            }
-            // this.close();
-        },
-        cancel() {
-            if (this.onCancel && typeof this.onCancel === 'function') {
-                this.onCancel();
-            }
-            this.close();
-        }
-    }"
+    x-data="synapseConfirmDialog()"
     @confirm-dialog.window="open($event.detail)"
     @keydown.escape.window="show && close()"
     x-show="show"
@@ -166,7 +112,7 @@
             <div class="p-5">
                 <p
                     class="text-sm text-gray-600 dark:text-gray-300"
-                    x-html="message"
+                    x-text="message"
                 ></p>
             </div>
 
@@ -199,3 +145,65 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseConfirmDialog', () => ({
+            show: false,
+            title: '{{ $title }}',
+            message: '{{ $message }}',
+            confirmText: '{{ $confirmText }}',
+            cancelText: '{{ $cancelText }}',
+            confirmColor: '{{ $confirmColor }}',
+            icon: '{{ $icon }}',
+            onConfirm: null,
+            onCancel: null,
+            wireMethod: null,
+            wireParams: null,
+            wireComponent: null,
+            open(data) {
+                this.title = data.title || '{{ $title }}';
+                this.message = data.message || '{{ $message }}';
+                this.confirmText = data.confirmText || '{{ $confirmText }}';
+                this.cancelText = data.cancelText || '{{ $cancelText }}';
+                this.confirmColor = data.confirmColor || '{{ $confirmColor }}';
+                this.icon = data.icon || '{{ $icon }}';
+                this.onConfirm = data.onConfirm || null;
+                this.onCancel = data.onCancel || null;
+                this.wireMethod = data.wireMethod || null;
+                this.wireParams = data.wireParams || null;
+                this.wireComponent = data.wireComponent || null;
+                this.show = true;
+            },
+            close() {
+                this.show = false;
+            },
+            confirm() {
+                if (this.wireMethod && this.wireComponent) {
+                    const component = Livewire.find(this.wireComponent);
+                    if (component && typeof component[this.wireMethod] === 'function') {
+                        if (this.wireParams && Array.isArray(this.wireParams)) {
+                            component[this.wireMethod](...this.wireParams);
+                        } else {
+                            component[this.wireMethod]();
+                        }
+                    }
+                } else if (this.onConfirm && typeof this.onConfirm === 'function') {
+                    this.onConfirm();
+                }
+            },
+            cancel() {
+                if (this.onCancel && typeof this.onCancel === 'function') {
+                    this.onCancel();
+                }
+                this.close();
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

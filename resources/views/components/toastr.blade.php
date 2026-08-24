@@ -42,59 +42,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 <!-- Notifications -->
 <div
     wire:ignore
-    x-data="{
-        notifications: [],
-        displayDuration: 8000,
-        soundEffect: false,
-    
-        addNotification({ variant = 'info', sender = null, title = null, message = null }) {
-            const id = Date.now()
-            const notification = { id, variant, sender, title, message }
-    
-            // Keep only the most recent 20 notifications
-            if (this.notifications.length >= 20) {
-                this.notifications.splice(0, this.notifications.length - 19)
-            }
-    
-            // Add the new notification to the notifications stack
-            this.notifications.push(notification)
-    
-            if (this.soundEffect) {
-                // Play the notification sound
-                const notificationSound = new Audio('https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3')
-                notificationSound.play().catch((error) => {
-                    console.error('Error playing the sound:', error)
-                })
-            }
-        },
-        removeNotification(id) {
-            setTimeout(() => {
-                this.notifications = this.notifications.filter(
-                    (notification) => notification.id !== id,
-                )
-            }, 400);
-        },
-    }"
-    @notify.window="
-        addNotification({
-            variant: $event.detail.variant || $event.detail[0]?.variant,
-            sender: $event.detail.sender || $event.detail[0]?.sender,
-            title: $event.detail.title || $event.detail[0]?.title,
-            message: $event.detail.message || $event.detail[0]?.message,
-        })
-    "
-    x-init="@if(session('success'))
-    addNotification({ variant: 'success', title: 'Success', message: '{{ addslashes(session('success')) }}' });
-    @endif
-    @if(session('info'))
-    addNotification({ variant: 'info', title: 'Information', message: '{{ addslashes(session('info')) }}' });
-    @endif
-    @if(session('danger'))
-    addNotification({ variant: 'danger', title: 'Error', message: '{{ addslashes(session('danger')) }}' });
-    @endif
-    @if(session('warning'))
-    addNotification({ variant: 'warning', title: 'Warning', message: '{{ addslashes(session('warning')) }}' });
-    @endif"
+    x-data="toastrRoot({{ Js::from(
+        collect(['success' => 'Success', 'info' => 'Information', 'danger' => 'Error', 'warning' => 'Warning'])->filter(fn($title, $variant) => session($variant))->map(fn($title, $variant) => ['variant' => $variant, 'title' => $title, 'message' => session($variant)])->values(),
+    ) }})"
+    @notify.window="handleNotifyEvent($event)"
+    x-init="initFlashNotifications()"
 >
 
     <div
@@ -113,12 +65,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                     <div
                         class="rounded-radius border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
-                        x-data="{ isVisible: false, timeout: null }"
+                        x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
                         x-show="isVisible"
-                        x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
-                        x-on:resume-auto-dismiss.window=" timeout = setTimeout(() => {(isVisible = false), removeNotification(notification.id) }, displayDuration)"
-                        x-init="$nextTick(() => { isVisible = true }), (timeout = setTimeout(() => { isVisible = false, removeNotification(notification.id) }, displayDuration))"
+                        x-on:pause-auto-dismiss.window="pause"
+                        x-on:resume-auto-dismiss.window="resume"
                         x-transition:enter="transition duration-300 ease-out"
                         x-transition:enter-end="translate-y-0"
                         x-transition:enter-start="translate-y-8"
@@ -170,7 +121,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                 class="ml-auto"
                                 type="button"
                                 aria-label="dismiss notification"
-                                x-on:click="(isVisible = false), removeNotification(notification.id)"
+                                x-on:click="dismiss"
                             >
                                 <svg
                                     class="size-5 shrink-0"
@@ -197,12 +148,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                     <div
                         class="rounded-radius border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
-                        x-data="{ isVisible: false, timeout: null }"
+                        x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
                         x-show="isVisible"
-                        x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
-                        x-on:resume-auto-dismiss.window=" timeout = setTimeout(() => {(isVisible = false), removeNotification(notification.id) }, displayDuration)"
-                        x-init="$nextTick(() => { isVisible = true }), (timeout = setTimeout(() => { isVisible = false, removeNotification(notification.id) }, displayDuration))"
+                        x-on:pause-auto-dismiss.window="pause"
+                        x-on:resume-auto-dismiss.window="resume"
                         x-transition:enter="transition duration-300 ease-out"
                         x-transition:enter-end="translate-y-0"
                         x-transition:enter-start="translate-y-8"
@@ -254,7 +204,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                 class="ml-auto"
                                 type="button"
                                 aria-label="dismiss notification"
-                                x-on:click="(isVisible = false), removeNotification(notification.id)"
+                                x-on:click="dismiss"
                             >
                                 <svg
                                     class="size-5 shrink-0"
@@ -281,12 +231,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                     <div
                         class="rounded-radius border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
-                        x-data="{ isVisible: false, timeout: null }"
+                        x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
                         x-show="isVisible"
-                        x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
-                        x-on:resume-auto-dismiss.window=" timeout = setTimeout(() => {(isVisible = false), removeNotification(notification.id) }, displayDuration)"
-                        x-init="$nextTick(() => { isVisible = true }), (timeout = setTimeout(() => { isVisible = false, removeNotification(notification.id) }, displayDuration))"
+                        x-on:pause-auto-dismiss.window="pause"
+                        x-on:resume-auto-dismiss.window="resume"
                         x-transition:enter="transition duration-300 ease-out"
                         x-transition:enter-end="translate-y-0"
                         x-transition:enter-start="translate-y-8"
@@ -338,7 +287,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                 class="ml-auto"
                                 type="button"
                                 aria-label="dismiss notification"
-                                x-on:click="(isVisible = false), removeNotification(notification.id)"
+                                x-on:click="dismiss"
                             >
                                 <svg
                                     class="size-5 shrink-0"
@@ -365,12 +314,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                     <div
                         class="rounded-radius border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
-                        x-data="{ isVisible: false, timeout: null }"
+                        x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
                         x-show="isVisible"
-                        x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
-                        x-on:resume-auto-dismiss.window=" timeout = setTimeout(() => {(isVisible = false), removeNotification(notification.id) }, displayDuration)"
-                        x-init="$nextTick(() => { isVisible = true }), (timeout = setTimeout(() => { isVisible = false, removeNotification(notification.id) }, displayDuration))"
+                        x-on:pause-auto-dismiss.window="pause"
+                        x-on:resume-auto-dismiss.window="resume"
                         x-transition:enter="transition duration-300 ease-out"
                         x-transition:enter-end="translate-y-0"
                         x-transition:enter-start="translate-y-8"
@@ -422,7 +370,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                 class="ml-auto"
                                 type="button"
                                 aria-label="dismiss notification"
-                                x-on:click="(isVisible = false), removeNotification(notification.id)"
+                                x-on:click="dismiss"
                             >
                                 <svg
                                     class="size-5 shrink-0"
@@ -449,12 +397,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                     <div
                         class="rounded-radius border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
                         role="alert"
-                        x-data="{ isVisible: false, timeout: null }"
+                        x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
                         x-show="isVisible"
-                        x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
-                        x-on:resume-auto-dismiss.window="timeout = setTimeout(() => { isVisible = false, removeNotification(notification.id) }, displayDuration)"
-                        x-init="$nextTick(() => { isVisible = true }), (timeout = setTimeout(() => { isVisible = false, removeNotification(notification.id) }, displayDuration))"
+                        x-on:pause-auto-dismiss.window="pause"
+                        x-on:resume-auto-dismiss.window="resume"
                         x-transition:enter="transition duration-300 ease-out"
                         x-transition:enter-end="translate-y-0"
                         x-transition:enter-start="translate-y-8"
@@ -499,7 +446,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                         <button
                                             class="text-on-surface dark:text-on-surface-dark whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide transition hover:opacity-75 active:opacity-100"
                                             type="button"
-                                            x-on:click=" (isVisible = false), setTimeout(() => { removeNotification(notification.id) }, 400)"
+                                            x-on:click="dismissDelayed()"
                                         >Dismiss</button>
                                     </div>
                                 </div>
@@ -510,7 +457,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                                 class="ml-auto"
                                 type="button"
                                 aria-label="dismiss notification"
-                                x-on:click="(isVisible = false), removeNotification(notification.id)"
+                                x-on:click="dismiss"
                             >
                                 <svg
                                     class="size-5 shrink-0"
@@ -536,3 +483,106 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
         </template>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+            Alpine.data('toastrNotification', (notification, displayDuration, removeNotification) => ({
+                isVisible: false,
+                timeout: null,
+                init() {
+                    this.$nextTick(() => {
+                        this.isVisible = true;
+                    });
+                    this.timeout = setTimeout(() => {
+                        this.isVisible = false;
+                        removeNotification(notification.id);
+                    }, displayDuration);
+                },
+                pause() {
+                    clearTimeout(this.timeout);
+                },
+                resume() {
+                    this.timeout = setTimeout(() => {
+                        this.isVisible = false;
+                        removeNotification(notification.id);
+                    }, displayDuration);
+                },
+                dismiss() {
+                    this.isVisible = false;
+                    removeNotification(notification.id);
+                },
+                dismissDelayed(delay = 400) {
+                    this.isVisible = false;
+                    setTimeout(() => removeNotification(notification.id), delay);
+                },
+            }));
+
+            Alpine.data('toastrRoot', (flashNotifications) => ({
+                notifications: [],
+                displayDuration: 8000,
+                soundEffect: false,
+
+                initFlashNotifications() {
+                    flashNotifications.forEach((notification) => this.addNotification(
+                    notification));
+                },
+
+                handleNotifyEvent(event) {
+                    const detail = Array.isArray(event.detail) ? event.detail[0] : event.detail;
+                    this.addNotification({
+                        variant: detail.variant,
+                        sender: detail.sender,
+                        title: detail.title,
+                        message: detail.message,
+                    });
+                },
+
+                addNotification({
+                    variant = 'info',
+                    sender = null,
+                    title = null,
+                    message = null
+                }) {
+                    const id = Date.now()
+                    const notification = {
+                        id,
+                        variant,
+                        sender,
+                        title,
+                        message
+                    }
+
+                    // Keep only the most recent 20 notifications
+                    if (this.notifications.length >= 20) {
+                        this.notifications.splice(0, this.notifications.length - 19)
+                    }
+
+                    // Add the new notification to the notifications stack
+                    this.notifications.push(notification)
+
+                    if (this.soundEffect) {
+                        // Play the notification sound
+                        const notificationSound = new Audio(
+                            'https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3'
+                        )
+                        notificationSound.play().catch((error) => {
+                            console.error('Error playing the sound:', error)
+                        })
+                    }
+                },
+                removeNotification(id) {
+                    setTimeout(() => {
+                        this.notifications = this.notifications.filter(
+                            (notification) => notification.id !== id,
+                        )
+                    }, 400);
+                },
+            }));
+        };
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
+    })();
+</script>

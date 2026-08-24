@@ -4,21 +4,7 @@
 >
     <input
         type="date"
-        x-data="{
-            flatpickrInstance: null,
-            value: @entangle($attributes->wire('model'))
-        }"
-        x-init="flatpickrInstance = flatpickr($el, Object.assign({}, {{ $flatpickr }}, {
-            defaultDate: value || null,
-            onChange: function(selectedDates, dateStr, instance) {
-                value = dateStr;
-            }
-        }));
-        $watch('value', val => {
-            if (flatpickrInstance && val !== flatpickrInstance.input.value) {
-                flatpickrInstance.setDate(val || null, false);
-            }
-        });"
+        x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'), {{ $flatpickr }})"
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
     <span class="input-group-item right pointer-events-none">
@@ -39,3 +25,32 @@
         </svg>
     </span>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('synapseDatepicker', (initialValue, flatpickrOptions) => ({
+            flatpickrInstance: null,
+            value: initialValue,
+            init() {
+                this.flatpickrInstance = flatpickr(this.$el, Object.assign({}, flatpickrOptions, {
+                    defaultDate: this.value || null,
+                    onChange: (selectedDates, dateStr, instance) => {
+                        this.value = dateStr;
+                    }
+                }));
+                this.$watch('value', (val) => {
+                    if (this.flatpickrInstance && val !== this.flatpickrInstance.input
+                        .value) {
+                        this.flatpickrInstance.setDate(val || null, false);
+                    }
+                });
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

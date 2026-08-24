@@ -64,7 +64,7 @@ See [Database Services](SERVICES.md#dblang-service) for more details.
 
 Appends the current page URL as a `back` query parameter to a given URL, enabling form pages to redirect back to the correct list page after saving.
 
-Injected into `resources/js/app.js` by `synapps:patch-resources`. Available globally as `window.withBack()`.
+Injected into `resources/js/app.js` by `synapps:patch-resources`. Available globally as `window.withBack()`, and registered as the Alpine magic `$withBack()` for use inside Alpine expressions — Alpine's CSP-safe evaluator (on by default) only resolves its own scope and registered magics, not arbitrary `window.*` globals.
 
 ```js
 // Basic usage
@@ -85,13 +85,13 @@ withBack('/posts/create?draft=1')
 
 ```blade
 {{-- Simple link --}}
-<a :href="withBack('{{ route('posts.create') }}')" wire:navigate>
+<a :href="$withBack('{{ route('posts.create') }}')" wire:navigate>
     Create Post
 </a>
 
 {{-- In a loop --}}
 @foreach($posts as $post)
-    <a :href="withBack('{{ route('posts.edit', $post) }}')" wire:navigate>
+    <a :href="$withBack('{{ route('posts.edit', $post) }}')" wire:navigate>
         Edit
     </a>
 @endforeach

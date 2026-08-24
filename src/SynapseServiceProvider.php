@@ -217,13 +217,14 @@ class SynapseServiceProvider extends ServiceProvider
         if (SynapseUtils::isSynAppsAutoloaded() && $this->isSynAppsConfigured()) {
             $this->registerSynapseFinder();
             $this->bindAlias();
-            $this->bindPublicPath();
             $this->bindInterface();
             $this->bindClass();
             $this->registerSynAppsServiceProviders();
             $this->registerLangFiles();
             $this->registerConfigs();
             $this->overrideConfigs();
+            $this->overrideAppUrl();
+            $this->overrideLivewireCsp();
         }
     }
 
@@ -251,15 +252,6 @@ class SynapseServiceProvider extends ServiceProvider
                 foreach ($classList as $classAliasName => $className) {
                     $loader->alias($classAliasName, $className);
                 }
-            });
-        }
-    }
-
-    private function bindPublicPath()
-    {
-        if (config('synapps.system.public_path')) {
-            $this->app->bind('path.public', function () {
-                return realpath(base_path(config('synapps.system.public_path')));
             });
         }
     }
@@ -380,6 +372,40 @@ class SynapseServiceProvider extends ServiceProvider
                 }
             }
         }
+    }
+
+    /**
+     * Override Laravel's default app.url with the domain configured in
+     * synapps.apps.urls.domain, picking dev/prod based on the current environment.
+     */
+    private function overrideAppUrl(): void
+    {
+        $isProduction = $this->app->environment('production');
+        $domain = config('synapps.apps.urls.domain.'.($isProduction ? 'prod' : 'dev'));
+        $originalAppUrl = config('app.url');
+
+        config([
+            'app.url' => empty($domain)
+                ? $originalAppUrl
+                : ($isProduction ? 'https://' : 'http://').$domain,
+        ]);
+    }
+
+    /**
+     * Force Livewire's CSP-safe mode on for every synapse-based project.
+     *
+     * Livewire 4's `csp_safe` config flag swaps Alpine's evaluator to its
+     * CSP-safe build (no `new Function()`/`eval()`), which is required for
+     * `SecureHeaders::buildContentSecurityPolicy()` to drop `'unsafe-eval'`.
+     * Set unconditionally here (not via `overrideConfigs()`'s
+     * synapps/config/override/*.php mechanism) because that mechanism only
+     * applies when the target config file is already published — this must
+     * be active even on a fresh synapse project that never ran
+     * `vendor:publish --tag=livewire-config`.
+     */
+    private function overrideLivewireCsp(): void
+    {
+        config(['livewire.csp_safe' => true]);
     }
 
     /**

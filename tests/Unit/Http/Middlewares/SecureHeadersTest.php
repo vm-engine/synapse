@@ -33,13 +33,14 @@ test('sets Content-Security-Policy header outside local environment', function (
         ->and($csp)->not->toContain('https:');
 });
 
-test('script-src no longer allows unsafe-inline but carries a nonce', function () {
+test('script-src carries a nonce and no longer needs unsafe-eval', function () {
     app()->detectEnvironment(fn () => 'testing');
 
     $response = runSecureHeaders();
     $csp = $response->headers->get('Content-Security-Policy');
 
-    expect($csp)->toContain("script-src 'self' 'unsafe-eval' 'nonce-")
+    expect($csp)->toContain("script-src 'self' 'nonce-")
+        ->and($csp)->not->toContain('unsafe-eval')
         ->and($csp)->not->toContain("script-src 'self' https: 'unsafe-inline'");
 });
 

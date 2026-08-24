@@ -31,11 +31,6 @@ class Binding extends BuilderBase
 
     public function postLoop()
     {
-        $this->mergeBinding('interface');
-        $this->mergeBinding('class');
-        $this->mergeBinding('alias');
-        $this->mergeBinding('route');
-
         if (! empty($this->providers)) {
             $baseSystem = $this->synapps->config['system']['providers'] ?? [];
             $this->synapps->config['system']['providers'] = array_merge(
@@ -43,17 +38,6 @@ class Binding extends BuilderBase
                 $this->providers
             );
         }
-    }
-
-    private function mergeBinding($key)
-    {
-        $systemConfig = $this->synapps->config['system']['binding'][$key] ?? null;
-        if ($systemConfig) {
-            foreach ($systemConfig as $contract => $service) {
-                $this->synapps->config['binding'][$key][$contract] = $service;
-            }
-        }
-
     }
 
     public function finalize()

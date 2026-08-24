@@ -8,13 +8,11 @@ use VmEngine\Synapse\Services\ConfigGenerator\Builder\Auth;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Binding;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Modules;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Navigation;
-use VmEngine\Synapse\Services\ConfigGenerator\Builder\System;
 
 class Builder
 {
     protected $configBuilder = [
         'apps' => Apps::class,
-        'system' => System::class,
         'modules' => Modules::class,
         'binding' => Binding::class,
         'navigation' => Navigation::class,
@@ -57,7 +55,6 @@ class Builder
 
         $this->config = [
             'apps' => [],
-            'system' => [],
             'binding' => [],
             'modules' => [],
             'modules_ori' => [], // config2 default dari module dan lib (tidak akan masuk ke config AppConfig)

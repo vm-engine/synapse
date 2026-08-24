@@ -44,10 +44,9 @@ class SynapseConfigGenerator
         }
 
         // If the compiled file exists but invalid, also return the default empty configurations
-        $system = self::loadCompiledConfigFile('system');
         $apps = self::loadCompiledConfigFile('apps');
 
-        if (! $system || ! $apps) {
+        if (! $apps) {
             return self::$defaultConfig;
         }
 
@@ -90,8 +89,7 @@ class SynapseConfigGenerator
             mkdir(base_path('synapps/config/compiled'), 0775, true);
         }
 
-        return file_exists(base_path('synapps/config/compiled/apps.json')) &&
-            file_exists(base_path('synapps/config/compiled/system.json'));
+        return file_exists(base_path('synapps/config/compiled/apps.json'));
     }
 
     /**
