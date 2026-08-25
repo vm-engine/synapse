@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - Unreleased
 
+### Fixed
+- `SynapseConfigGenerator::setDatabasePaths()` no longer appends the package's own `database/seeders` path when it doesn't exist, which previously polluted `seed_path` with a `false` from `realpath()`.
+
+### Added
+- Module migrations under `database/migrations/central/` are now included in `migration_path` when the project has tenancy enabled (`synapps/config/tenancy.json` present).
+
 ### Changed
 - **Requires PHP ^8.5 and Laravel ^13.0** (dropped `12.x|13.x` dual support) — dev dependencies bumped accordingly: Pest ^5.0, Pest Plugin Laravel ^5.0, Orchestra Testbench ^11.0, LaraDumps ^5.0.
 - **Alpine.js is now CSP-safe by default.** `SynapseServiceProvider` auto-forces `config('livewire.csp_safe') = true` on boot (`overrideLivewireCsp()`), so every Synapse-based project ships with Livewire's CSP-safe Alpine build without any manual config edit. `SecureHeaders`'s `script-src` directive no longer includes `unsafe-eval`.

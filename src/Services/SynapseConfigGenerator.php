@@ -180,6 +180,16 @@ class SynapseConfigGenerator
             $config['namespaces']['general'],
             'database'.DS.'migrations'
         );
+
+        $centralMigrationPaths = [];
+        if (file_exists(synapps_path('config/tenancy.json'))) {
+            $centralMigrationPaths = SynapseUtils::listModuleResources(
+                $config['namespaces']['general'],
+                'database'.DS.'migrations'.DS.'central'
+            );
+        }
+        $migrationPaths = array_merge($migrationPaths, $centralMigrationPaths);
+
         $seedPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
             'database'.DS.'seeders',
@@ -189,7 +199,6 @@ class SynapseConfigGenerator
         );
 
         $migrationPaths[] = realpath(__DIR__.DS.'..'.DS.'..'.DS.'database'.DS.'migrations');
-        $seedPaths[] = realpath(__DIR__.DS.'..'.DS.'..'.DS.'database'.DS.'seeders');
 
         $config['migration_path'] = ['general' => $migrationPaths];
         $config['seed_path'] = ['general' => $seedPaths];
