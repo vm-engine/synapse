@@ -7,14 +7,18 @@ namespace VmEngine\Synapse\Services\Excel\Readers;
 use Generator;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Reader\CSV\Reader as CsvReader;
-use OpenSpout\Reader\ReaderInterface as SpoutReaderInterface;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 use RuntimeException;
 use VmEngine\Synapse\Services\Excel\Contracts\ReaderInterface;
 
 class SpoutReader implements ReaderInterface
 {
-    private ?SpoutReaderInterface $reader = null;
+    /**
+     * openspout's CsvReader/XlsxReader don't close AbstractReader's generic
+     * template parameter, so PHPStan can't verify them against a fully
+     * generic ReaderInterface type — use the concrete union instead.
+     */
+    private CsvReader|XlsxReader|null $reader = null;
 
     private string $filePath = '';
 
@@ -77,8 +81,12 @@ class SpoutReader implements ReaderInterface
 
     /**
      * Create the appropriate reader based on file extension.
+     *
+     * openspout's CsvReader/XlsxReader don't close AbstractReader's generic
+     * template parameter, so PHPStan can't verify them against a fully
+     * generic ReaderInterface return type — return the concrete union instead.
      */
-    private function createReader(string $filePath): SpoutReaderInterface
+    private function createReader(string $filePath): CsvReader|XlsxReader
     {
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 

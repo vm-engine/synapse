@@ -136,6 +136,7 @@ class ProcessExcelExport implements ShouldQueue
      * Filters are passed to the constructor via Laravel's container.
      *
      * @param  array<string, mixed>  $filters
+     * @return Builder<Model>|\Illuminate\Database\Query\Builder
      */
     private function resolveQuery(?string $queryClass, array $filters = []): Builder|\Illuminate\Database\Query\Builder
     {

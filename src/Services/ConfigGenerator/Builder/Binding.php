@@ -1,20 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Binding extends BuilderBase
 {
-    protected $providers = [];
+    /** @var array<int, mixed> */
+    protected array $providers = [];
 
-    public function init()
+    public function init(): void
     {
         $synapseConfig = include config_path('synapse.php');
         $this->synapps->config['binding'] = $synapseConfig['bindings'];
     }
 
-    public function loop($namespace, $config)
+    /** @param  array<string, mixed>  $config */
+    public function loop(string $namespace, array $config): void
     {
         if (isset($config['binding']) && isset($config['binding']['interface'])) {
             foreach ($config['binding']['interface'] as $contract => $service) {
@@ -29,7 +33,7 @@ class Binding extends BuilderBase
         }
     }
 
-    public function postLoop()
+    public function postLoop(): void
     {
         if (! empty($this->providers)) {
             $baseSystem = $this->synapps->config['system']['providers'] ?? [];
@@ -40,7 +44,7 @@ class Binding extends BuilderBase
         }
     }
 
-    public function finalize()
+    public function finalize(): void
     {
         file_put_contents(
             synapps_path('config/compiled/binding.json'),

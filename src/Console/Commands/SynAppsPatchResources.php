@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -1125,6 +1127,8 @@ SERVER;
 
     /**
      * Check if there are other route definitions beyond the default welcome route.
+     *
+     * @param  array<int, string>  $lines
      */
     protected function hasOtherRouteDefinitions(array $lines, string $defaultRoutePattern): bool
     {
@@ -1168,6 +1172,8 @@ SERVER;
 
     /**
      * Comment out the default Laravel route (handles multi-line).
+     *
+     * @param  array<int, string>  $lines
      */
     protected function commentOutDefaultRoute(array &$lines, string $defaultRoutePattern): bool
     {
@@ -1379,11 +1385,7 @@ JS;
             return false;
         }
 
-        $packageJson = json_decode(file_get_contents($packageJsonPath), true);
-
-        if (! is_array($packageJson)) {
-            return false;
-        }
+        $packageJson = read_json_file($packageJsonPath);
 
         // Ensure scripts section exists
         if (! isset($packageJson['scripts'])) {

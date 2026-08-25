@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 beforeEach(function () {
     $this->fixtureRoot = sys_get_temp_dir().'/synapse-upgrade-audit-script-'.uniqid();
     mkdir($this->fixtureRoot.'/resources/views', 0777, true);

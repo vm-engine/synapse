@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 test('csp_nonce returns empty string when nothing bound', function () {
     expect(csp_nonce())->toBe('');
 });

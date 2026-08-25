@@ -41,6 +41,9 @@ class MakeComponentCommand extends BaseGeneratorCommand
         return $result;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         // Name might not be set yet if from prompt, so use generic view path

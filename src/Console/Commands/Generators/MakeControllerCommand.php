@@ -20,6 +20,9 @@ class MakeControllerCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'controller';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

@@ -124,6 +124,9 @@ abstract class BaseGeneratorCommand extends Command
      * Get component-specific options
      * Override in subclasses to add custom options
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [];

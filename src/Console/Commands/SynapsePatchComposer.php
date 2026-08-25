@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -105,6 +107,10 @@ class SynapsePatchComposer extends Command
 
     /**
      * Deep merge two arrays recursively
+     *
+     * @param  array<string, mixed>  $base
+     * @param  array<string, mixed>  $override
+     * @return array<string, mixed>
      */
     private function deepMerge(array $base, array $override): array
     {

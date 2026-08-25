@@ -18,6 +18,9 @@ class MakeMigrationCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'migration';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

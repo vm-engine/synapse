@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Apps extends BuilderBase
 {
-    public function init()
+    public function init(): void
     {
         $synappsPath = $this->synapps->synappsPath;
 
@@ -17,25 +19,19 @@ class Apps extends BuilderBase
             );
         }
 
-        $this->synapps->config['apps'] = json_decode(
-            file_get_contents($synappsPath.'/config/apps.json'),
-            true
-        );
+        $this->synapps->config['apps'] = read_json_file($synappsPath.'/config/apps.json');
         if (! file_exists($synappsPath.'/config/apps.dev.json')) {
             file_put_contents($synappsPath.'/config/apps.dev.json', '{}');
         }
 
-        $tmpEnvClient = json_decode(
-            file_get_contents($synappsPath.'/config/apps.dev.json'),
-            true
-        );
+        $tmpEnvClient = read_json_file($synappsPath.'/config/apps.dev.json');
         $this->synapps->config['apps'] = array_replace_recursive(
             $this->synapps->config['apps'],
             $tmpEnvClient
         );
     }
 
-    public function finalize()
+    public function finalize(): void
     {
         // Load and merge active theme configuration
         $this->loadActiveThemeConfig();
@@ -47,7 +43,7 @@ class Apps extends BuilderBase
         app('config')->set('app.name', $this->synapps->config['apps']['app_name']);
     }
 
-    protected function loadActiveThemeConfig()
+    protected function loadActiveThemeConfig(): void
     {
         // Get active theme name
         $activeTheme = $this->synapps->config['apps']['themes']['active'] ?? 'default';
@@ -65,7 +61,7 @@ class Apps extends BuilderBase
 
         // Load theme configuration if it exists
         if (file_exists($themeJsonPath)) {
-            $themeConfig = json_decode(file_get_contents($themeJsonPath), true);
+            $themeConfig = read_json_file($themeJsonPath);
 
             // Merge theme CDN resources into apps config. The set of layout
             // buckets is read from the theme.json itself so custom layouts

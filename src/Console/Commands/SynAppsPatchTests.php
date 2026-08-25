@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -20,6 +22,7 @@ class SynAppsPatchTests extends Command
      */
     protected $description = 'Configure testing infrastructure (Pest.php, .env.testing, phpunit.xml) for module tests';
 
+    /** @var array<int, string> */
     private array $pathsToAdd = [
         'Unit', // Add Unit directory for unit tests
         '../vendor/vm-engine/synapse/tests/Feature', // Synapse Feature tests
@@ -330,6 +333,7 @@ ENV;
         return preg_replace($pattern, $newContent, $content);
     }
 
+    /** @return array<int, string> */
     private function parseExistingPaths(string $pathsString): array
     {
         $paths = [];
@@ -343,6 +347,7 @@ ENV;
         return $paths;
     }
 
+    /** @param  array<int, string>  $paths */
     private function buildPathsString(array $paths): string
     {
         $indent = "\n        ";
@@ -456,6 +461,10 @@ ENV;
         return $result->length > 0;
     }
 
+    /**
+     * @param  array<int, string>  $directories
+     * @param  array<int, string>  $excludes
+     */
     private function addTestSuite(\DOMDocument $dom, \DOMElement $testsuites, string $name, array $directories, array $excludes = []): void
     {
         $testsuite = $dom->createElement('testsuite');

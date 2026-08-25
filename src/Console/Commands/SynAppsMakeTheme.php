@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -116,11 +118,7 @@ class SynAppsMakeTheme extends Command
             return;
         }
 
-        $config = json_decode(file_get_contents($jsonPath), true);
-
-        if (! is_array($config)) {
-            return;
-        }
+        $config = read_json_file($jsonPath);
 
         $config['id'] = $name;
         $config['name'] = Str::title(str_replace('-', ' ', $name)).' Theme';

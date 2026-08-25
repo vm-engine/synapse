@@ -17,6 +17,9 @@ class MakeFactoryCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'factory';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

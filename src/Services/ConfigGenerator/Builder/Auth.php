@@ -1,20 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Auth extends BuilderBase
 {
-    public function init()
+    public function init(): void
     {
         if (! $this->hasAuth()) {
             return;
         }
-        $authJson = json_decode(
-            file_get_contents(synapps_path('config/auth.json')),
-            true
-        );
+        $authJson = read_json_file(synapps_path('config/auth.json'));
 
         $this->synapps->config['auth'] = $authJson;
         $this->synapps->config['acl'] = [];
@@ -23,17 +22,15 @@ class Auth extends BuilderBase
             file_put_contents(synapps_path('config/auth.dev.json'), '{}');
         }
 
-        $tmpEnvAuth = json_decode(
-            file_get_contents(synapps_path('config/auth.dev.json')),
-            true
-        );
+        $tmpEnvAuth = read_json_file(synapps_path('config/auth.dev.json'));
         $this->synapps->config['auth'] = array_replace_recursive(
             $this->synapps->config['auth'],
             $tmpEnvAuth
         );
     }
 
-    public function loop($packageNamespace, $packageConfig)
+    /** @param  array<string, mixed>  $packageConfig */
+    public function loop(string $packageNamespace, array $packageConfig): void
     {
         if (! $this->hasAuth()) {
             return;
@@ -52,7 +49,7 @@ class Auth extends BuilderBase
         $this->synapps->config['acl'][$packageNamespace] = $packageConfig['acl'];
     }
 
-    public function finalize()
+    public function finalize(): void
     {
         if (! $this->hasAuth()) {
             return;
@@ -64,7 +61,7 @@ class Auth extends BuilderBase
         unset($this->synapps->config['acl']);
     }
 
-    private function hasAuth()
+    private function hasAuth(): bool
     {
         return file_exists(synapps_path('config/auth.json'));
     }

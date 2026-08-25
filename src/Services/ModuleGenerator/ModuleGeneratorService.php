@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Services\ModuleGenerator;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
@@ -14,6 +15,7 @@ class ModuleGeneratorService
 
     protected string $basePath;
 
+    /** @var array<string, mixed> */
     protected array $moduleConfig = [];
 
     protected bool $isPackage = false;
@@ -57,6 +59,7 @@ class ModuleGeneratorService
     /**
      * Set or load module configuration
      */
+    /** @param  array<string, mixed>  $config */
     public function setModuleConfig(array $config): self
     {
         $this->moduleConfig = $config;
@@ -77,6 +80,7 @@ class ModuleGeneratorService
     /**
      * Generate complete module structure
      */
+    /** @param  array<string, mixed>  $options */
     public function generateModule(string $name, array $options = []): bool
     {
         $modulePath = $this->getModulePath($name);
@@ -120,6 +124,7 @@ class ModuleGeneratorService
     /**
      * Generate individual component within module
      */
+    /** @param  array<string, mixed>  $options */
     public function generateComponent(string $type, string $name, array $options = []): string
     {
         $moduleName = $options['module'] ?? '';
@@ -310,6 +315,7 @@ class ModuleGeneratorService
     /**
      * Generate module.json configuration file
      */
+    /** @param  array<string, mixed>  $options */
     protected function generateModuleJson(string $modulePath, string $name, array $options): void
     {
         $idCases = $this->namespaceResolver->generateIdCases($name);
@@ -417,6 +423,7 @@ class ModuleGeneratorService
     /**
      * Determine stub name based on component type and options
      */
+    /** @param  array<string, mixed>  $options */
     protected function getStubName(string $type, array $options): string
     {
         $stubMap = [
@@ -464,6 +471,7 @@ class ModuleGeneratorService
     /**
      * Get exception stub variant
      */
+    /** @param  array<string, mixed>  $options */
     protected function getExceptionStub(array $options): string
     {
         $render = $options['render'] ?? false;
@@ -487,6 +495,7 @@ class ModuleGeneratorService
     /**
      * Get controller stub variant
      */
+    /** @param  array<string, mixed>  $options */
     protected function getControllerStub(array $options): string
     {
         if ($options['api'] ?? false) {
@@ -507,6 +516,7 @@ class ModuleGeneratorService
     /**
      * Get migration stub variant
      */
+    /** @param  array<string, mixed>  $options */
     protected function getMigrationStub(array $options): string
     {
         if (isset($options['create'])) {
@@ -522,6 +532,9 @@ class ModuleGeneratorService
 
     /**
      * Prepare variables for stub rendering
+     *
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
      */
     protected function prepareVariables(
         string $moduleName,
@@ -576,6 +589,31 @@ class ModuleGeneratorService
         $baseName = preg_replace('/(Factory|Controller|Policy|Seeder)$/', '', $name);
         $modelName = $options['model'] ?? Str::studly($baseName);
 
+        // Observers type-hint a specific model and need a real `use` import,
+        // since the model normally lives in a different namespace
+        // ({rootNamespace}\Models) than the observer itself. A short --model
+        // name resolves against the module's own Models namespace; a name
+        // that already contains a namespace separator is used as-is. With no
+        // --model given, fall back to the base Eloquent Model.
+        $modelImport = '';
+        $modelVariable = '';
+        if ($type === 'observer') {
+            $modelFqcn = isset($options['model']) && $options['model'] !== ''
+                ? (str_contains($options['model'], '\\')
+                    ? $options['model']
+                    : $baseNamespace.'\\Models\\'.$options['model'])
+                : Model::class;
+
+            $modelName = class_basename($modelFqcn);
+            $modelVariable = lcfirst($modelName);
+            $modelImport = "use {$modelFqcn};";
+
+            // Already fully resolved above — don't let the raw --model value
+            // (which may be a FQCN) override the computed short class name
+            // in the final options merge below.
+            unset($options['model']);
+        }
+
         // View name (for Livewire components)
         // Handle subdirectories: Admin/PostList => admin.post-list (dots for Blade view paths)
         $cleanName = str_replace(['Component', 'Livewire'], '', $name);
@@ -594,6 +632,8 @@ class ModuleGeneratorService
             'moduleStudly' => $idCases['studly'],
             'table' => $tableName,
             'model' => $modelName,
+            'modelImport' => $modelImport,
+            'modelVariable' => $modelVariable,
             'view' => $viewName,
             'factoryNamespace' => $factoryNamespace,
             'seederNamespace' => $seederNamespace,

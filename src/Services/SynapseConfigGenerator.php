@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services;
 
 use Illuminate\Support\Str;
@@ -16,8 +18,10 @@ class SynapseConfigGenerator
 {
     /**
      * Default Empty Configuration
+     *
+     * @var array<string, mixed>
      */
-    public static $defaultConfig = [
+    public static array $defaultConfig = [
         'bindings' => [
             'controller' => [],
             'interface' => [],
@@ -34,9 +38,9 @@ class SynapseConfigGenerator
     /**
      * Generate The Configuration
      *
-     * @return array Generated Config Arrays
+     * @return array<string, mixed> Generated Config Arrays
      */
-    public static function generate()
+    public static function generate(): array
     {
         // If the compiled configuration Json file is not exists, return the default empty configurations
         if (! self::hasCompiledConfigFile()) {
@@ -65,25 +69,21 @@ class SynapseConfigGenerator
         return $config;
     }
 
-    public static function config()
+    /** @return array<string, mixed> */
+    public static function config(): array
     {
         if (! file_exists(synapps_path('config/compiled/synapse.json'))) {
             return self::generate();
         }
 
-        return json_decode(
-            file_get_contents(synapps_path('config/compiled/synapse.json')),
-            true
-        );
+        return read_json_file(synapps_path('config/compiled/synapse.json'));
     }
 
     /**
      * Check if compiled Json configuration file already exists
      * If the folder does not exists, it will be created
-     *
-     * @return bool
      */
-    public static function hasCompiledConfigFile()
+    public static function hasCompiledConfigFile(): bool
     {
         if (! file_exists(base_path('synapps/config/compiled'))) {
             mkdir(base_path('synapps/config/compiled'), 0775, true);
@@ -95,16 +95,13 @@ class SynapseConfigGenerator
     /**
      * Load the compiled configuration Json file
      *
-     * @param  string  $file
-     * @return array|null
+     * @return array<string, mixed>|null
      */
-    private static function loadCompiledConfigFile($file = 'client')
+    private static function loadCompiledConfigFile(string $file = 'client'): ?array
     {
         $filePath = base_path('synapps/config/compiled/'.$file.'.json');
         if (file_exists($filePath)) {
-            $content = file_get_contents($filePath);
-
-            return json_decode($content, true);
+            return read_json_file($filePath);
         }
 
         return null;
@@ -113,10 +110,9 @@ class SynapseConfigGenerator
     /**
      * Set Base Array of paths to look up
      *
-     * @param  array  $config  Config Pointer
-     * @return void
+     * @param  array<string, mixed>  $config  Config Pointer
      */
-    private static function setGeneralNamespaces(&$config)
+    private static function setGeneralNamespaces(array &$config): void
     {
         $config['namespaces']['general']['SynApps\Modules'] = [
             synapps_path('modules'),
@@ -129,7 +125,8 @@ class SynapseConfigGenerator
         ];
     }
 
-    private static function setModuleNamespaces(&$config)
+    /** @param  array<string, mixed>  $config */
+    private static function setModuleNamespaces(array &$config): void
     {
         $modulePaths = ['general' => []];
         $tmpModulePaths = SynapseUtils::listModuleNamespaces(
@@ -146,7 +143,8 @@ class SynapseConfigGenerator
         $config['module_path'] = $modulePaths;
     }
 
-    private static function setResourcesPaths(&$config)
+    /** @param  array<string, mixed>  $config */
+    private static function setResourcesPaths(array &$config): void
     {
         $langPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],
@@ -175,7 +173,8 @@ class SynapseConfigGenerator
         $config['view_path'] = ['general' => $viewPaths];
     }
 
-    private static function setDatabasePaths(&$config)
+    /** @param  array<string, mixed>  $config */
+    private static function setDatabasePaths(array &$config): void
     {
         $migrationPaths = SynapseUtils::listModuleResources(
             $config['namespaces']['general'],

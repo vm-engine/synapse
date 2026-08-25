@@ -165,6 +165,9 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         return (bool) config('livewire.make_command.emoji', true);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
 use Database\Seeders\DatabaseSeeder;
@@ -243,7 +245,7 @@ class SynapseServiceProvider extends ServiceProvider
         });
     }
 
-    private function bindAlias()
+    private function bindAlias(): void
     {
         if (config('synapps.binding.alias')) {
             $this->app->booting(function () {
@@ -256,7 +258,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function bindInterface()
+    private function bindInterface(): void
     {
         foreach (config('synapse.binding.interface', []) as $contract => $service) {
             $this->app->bind(
@@ -266,7 +268,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function bindClass()
+    private function bindClass(): void
     {
         foreach (config('synapps.binding.class', []) as $class => $newClass) {
             $this->app->bind($class, function ($app, $args) use ($newClass) {
@@ -279,7 +281,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerSynAppsServiceProviders()
+    private function registerSynAppsServiceProviders(): void
     {
         $moduleConfigs = config('synapps.modules', []);
 
@@ -298,7 +300,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function bootDbOverride()
+    private function bootDbOverride(): void
     {
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
@@ -317,7 +319,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerLangFiles()
+    private function registerLangFiles(): void
     {
         $langPath = config('synapse.lang_path.general', []);
         $that = $this;
@@ -329,7 +331,7 @@ class SynapseServiceProvider extends ServiceProvider
         );
     }
 
-    private function registerConfigs()
+    private function registerConfigs(): void
     {
         $modules = config('synapps.modules', []);
         foreach ($modules as $module) {
@@ -346,7 +348,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function overrideConfigs()
+    private function overrideConfigs(): void
     {
         $path = synapps_path('config'.DS.'override');
         if (! file_exists($path)) {
@@ -410,6 +412,10 @@ class SynapseServiceProvider extends ServiceProvider
 
     /**
      * Deep merge configuration arrays
+     *
+     * @param  array<string, mixed>  $base
+     * @param  array<string, mixed>  $override
+     * @return array<string, mixed>
      */
     private function deepMergeConfig(array $base, array $override): array
     {

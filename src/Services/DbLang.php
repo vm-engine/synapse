@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services;
 
 use Illuminate\Database\Eloquent\Collection;
@@ -7,12 +9,14 @@ use VmEngine\Synapse\Models\Language;
 
 class DbLang
 {
+    /** @var array<string, string> */
     private array $cache = [];
 
     private string $currentLanguage = 'en';
 
     private bool $multiLanguageEnabled = false;
 
+    /** @var array<int, string> */
     private array $enabledLanguages = [];
 
     public function __construct(?string $languageCode = null)

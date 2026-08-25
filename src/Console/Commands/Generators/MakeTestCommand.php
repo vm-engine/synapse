@@ -17,6 +17,9 @@ class MakeTestCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'test';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

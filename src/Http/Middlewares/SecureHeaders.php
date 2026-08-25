@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Http\Middlewares;
 
 use Closure;
 use Illuminate\Foundation\Vite;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class SecureHeaders
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         // Bound before $next() so views rendered during the request can
         // read csp_nonce() and stamp it onto their inline <script> tags.

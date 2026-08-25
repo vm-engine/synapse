@@ -17,6 +17,9 @@ class MakeResourceCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'resource';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

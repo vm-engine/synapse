@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // use VmEngine\Synapse\Services\ConfigGenerator\Builder;
 //
 // describe('Builder', function () {

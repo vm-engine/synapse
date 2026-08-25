@@ -17,6 +17,9 @@ class MakeClassCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'class';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

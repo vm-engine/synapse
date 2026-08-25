@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Components;
 
 use Illuminate\View\Component;
@@ -8,8 +10,10 @@ class PasswordGenerator extends Component
 {
     public int $length;
 
+    /** @var string|array<int|string, mixed>|null */
     public string|array|null $model;
 
+    /** @param  string|array<int|string, mixed>|null  $model */
     public function __construct(
         string|array|null $model = null,
         int $length = 12,

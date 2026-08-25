@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Blade;
 use VmEngine\Synapse\Components\Alert;
 use VmEngine\Synapse\Components\Checkboxes;

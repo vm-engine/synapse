@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use VmEngine\Synapse\Models\Config;
 
 test('dbconf helper can get config value', function () {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use VmEngine\Synapse\Facades\DbLang;
 use VmEngine\Synapse\Models\Language;
 

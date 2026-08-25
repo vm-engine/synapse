@@ -21,6 +21,9 @@ class MakeModelCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'model';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         $options = [

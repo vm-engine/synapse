@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Traits;
 
 use Illuminate\Support\Facades\Crypt;

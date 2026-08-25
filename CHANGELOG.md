@@ -33,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Test coverage for the welcome-route detection fix (`tests/Feature/Commands/SynAppsPatchResourcesWebRoutesTest.php`).
 - Test coverage for the automatic `livewire.csp_safe` config override (`tests/Unit/SynapseServiceProviderCspTest.php`).
+- `synmod-make class <module> <name>` now dispatches to `synapps:make-class`, joining the rest of the unified generator menu (was already implemented as a standalone command but missing from `synmod-make`'s type map).
+
+### Changed
+- **`declare(strict_types=1)` added across the package** (`src/`, `tests/`, `database/`, root scripts) and `phpstan.neon` bumped from level 5 to level 6, with every resulting finding fixed with real types rather than suppressed.
+- Added a shared `read_json_file()` helper and switched every `json_decode(file_get_contents(...), true)` call site in config/module generation to it, so a missing or malformed JSON file now throws a clear error instead of silently producing `null`/a `TypeError` under strict types.
+
+### Fixed
+- **`is_decimal()` threw a `TypeError` under strict types** — it passed a numeric string straight into `floor()`, which no longer coerces automatically. Fixed with an explicit `(float)` cast.
+- **`synapps:make-observer` never emitted a `use` import for the model, and left `{{ modelImport }}`/`{{ modelVariable }}` unreplaced in some paths.** Model resolution (short name → module's own `Models` namespace, FQCN used as-is, or a fallback to the base Eloquent `Model`) is now computed centrally in `ModuleGeneratorService::prepareVariables()`, matching the pattern already used by `factory.stub`.
 
 ## [2.4.13] - 2026-08-12
 

@@ -96,6 +96,8 @@ class MakeModuleCommand extends BaseGeneratorCommand
 
     /**
      * Get module configuration options
+     *
+     * @return array<string, mixed>
      */
     protected function getModuleOptions(): array
     {

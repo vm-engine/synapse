@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
 use Illuminate\Support\Facades\Blade;
@@ -44,7 +46,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $this->registerSynapseComponents();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $blade = app('blade.compiler');
 
@@ -65,7 +67,7 @@ class SynapseViewServiceProvider extends ServiceProvider
     /**
      * Register theme view paths with fallback mechanism
      */
-    protected function registerThemeViews()
+    protected function registerThemeViews(): void
     {
         $activeTheme = config('synapps.apps.themes.active', 'default');
         $fallbackTheme = config('synapps.apps.themes.fallback', 'default');
@@ -87,7 +89,7 @@ class SynapseViewServiceProvider extends ServiceProvider
     /**
      * Set default Livewire layout to app.blade.php
      */
-    protected function setDynamicLayout()
+    protected function setDynamicLayout(): void
     {
         // Always use 'app' layout as default
         $layoutView = theme_service()->resolveThemeLayout('app');
@@ -95,7 +97,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         config(['livewire.component_layout' => $layoutView]);
     }
 
-    private function registerSynapseComponents()
+    private function registerSynapseComponents(): void
     {
         // Use app('blade.compiler') directly instead of the Blade facade to avoid
         // stale facade instance issue where the Facade root and the container-resolved

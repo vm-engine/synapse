@@ -17,25 +17,17 @@ class MakeObserverCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'observer';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
-        $model = $this->option('model');
-
-        if ($model) {
-            $modelClass = class_basename($model);
-            $modelVariable = lcfirst($modelClass);
-
-            return [
-                'model' => $modelClass,
-                'modelVariable' => $modelVariable,
-                'modelImport' => $model !== $modelClass ? "use {$model};" : '',
-            ];
-        }
-
+        // Model resolution (short name -> module's Models namespace, or a given
+        // fully-qualified class name used as-is) and the resulting `modelImport`/
+        // `modelVariable` stub variables are computed centrally in
+        // ModuleGeneratorService::prepareVariables() — see its "Model" section.
         return [
-            'model' => 'Model',
-            'modelVariable' => 'model',
-            'modelImport' => 'use Illuminate\Database\Eloquent\Model;',
+            'model' => $this->option('model'),
         ];
     }
 }

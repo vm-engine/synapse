@@ -25,11 +25,14 @@ class SynmodMakeCommand extends Command
 
     /**
      * Map of component types to their make commands
+     *
+     * @var array<string, string>
      */
     protected array $componentTypes = [
         'cast' => 'synapps:make-cast',
         'data' => 'synapps:make-data',
         'channel' => 'synapps:make-channel',
+        'class' => 'synapps:make-class',
         'command' => 'synapps:make-command',
         'component' => 'synapps:make-component',
         'config' => 'synapps:make-config',

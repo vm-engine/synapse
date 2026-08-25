@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 describe('array_is_list()', function () {
     it('returns true for empty array', function () {
         expect(array_is_list([]))->toBeTrue();

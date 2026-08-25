@@ -18,6 +18,9 @@ class MakeExceptionCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'exception';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

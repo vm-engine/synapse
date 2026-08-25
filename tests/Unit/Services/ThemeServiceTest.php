@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\File;
 use VmEngine\Synapse\Services\ThemeService;

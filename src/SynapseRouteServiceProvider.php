@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
@@ -16,14 +18,14 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
         parent::register();
     }
 
-    public function map()
+    public function map(): void
     {
         if (SynapseUtils::isSynAppsAutoloaded()) {
             $this->registerRoutes();
         }
     }
 
-    protected function registerRoutes()
+    protected function registerRoutes(): void
     {
         $modulePaths = config('synapse.module_path.general', []);
 
