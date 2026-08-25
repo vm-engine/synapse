@@ -50,7 +50,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 >
 
     <div
-        class="z-999 group pointer-events-none fixed inset-x-8 top-0 flex max-w-full flex-col gap-2 bg-transparent px-6 py-6 md:bottom-0 md:left-[unset] md:right-0 md:top-[unset] md:max-w-sm"
+        class="syn-toastr-container"
         x-on:mouseenter="$dispatch('pause-auto-dismiss')"
         x-on:mouseleave="$dispatch('resume-auto-dismiss')"
     >
@@ -63,7 +63,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Info Notification  -->
                 <template x-if="notification.variant === 'info'">
                     <div
-                        class="rounded-radius border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
+                        class="syn-toastr syn-toastr-info"
                         role="alert"
                         x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
@@ -77,12 +77,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-end="-translate-x-24 opacity-0 md:translate-x-24"
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
-                        <div
-                            class="bg-info/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
+                        <div class="syn-toastr-body">
 
                             <!-- Icon -->
                             <div
-                                class="bg-info/15 text-info rounded-full p-0.5"
+                                class="syn-toastr-icon-wrap"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -101,15 +100,15 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             </div>
 
                             <!-- Title & Message -->
-                            <div class="flex flex-col gap-2">
+                            <div class="syn-toastr-text">
                                 <h3
-                                    class="text-info text-sm font-semibold"
+                                    class="syn-toastr-title"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
                                 ></h3>
                                 <p
-                                    class="text-pretty text-sm"
+                                    class="syn-toastr-msg"
                                     x-cloak
                                     x-show="notification.message"
                                     x-text="notification.message"
@@ -118,7 +117,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 
                             <!--Dismiss Button -->
                             <button
-                                class="ml-auto"
+                                class="syn-toastr-dismiss"
                                 type="button"
                                 aria-label="dismiss notification"
                                 x-on:click="dismiss"
@@ -146,7 +145,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Success Notification  -->
                 <template x-if="notification.variant === 'success'">
                     <div
-                        class="rounded-radius border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
+                        class="syn-toastr syn-toastr-success"
                         role="alert"
                         x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
@@ -160,12 +159,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-end="-translate-x-24 opacity-0 md:translate-x-24"
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
-                        <div
-                            class="bg-success/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
+                        <div class="syn-toastr-body">
 
                             <!-- Icon -->
                             <div
-                                class="bg-success/15 text-success rounded-full p-0.5"
+                                class="syn-toastr-icon-wrap"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -184,15 +182,15 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             </div>
 
                             <!-- Title & Message -->
-                            <div class="flex flex-col gap-2">
+                            <div class="syn-toastr-text">
                                 <h3
-                                    class="text-success text-sm font-semibold"
+                                    class="syn-toastr-title"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
                                 ></h3>
                                 <p
-                                    class="text-pretty text-sm"
+                                    class="syn-toastr-msg"
                                     x-cloak
                                     x-show="notification.message"
                                     x-text="notification.message"
@@ -201,7 +199,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 
                             <!--Dismiss Button -->
                             <button
-                                class="ml-auto"
+                                class="syn-toastr-dismiss"
                                 type="button"
                                 aria-label="dismiss notification"
                                 x-on:click="dismiss"
@@ -229,7 +227,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Warning Notification  -->
                 <template x-if="notification.variant === 'warning'">
                     <div
-                        class="rounded-radius border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
+                        class="syn-toastr syn-toastr-warning"
                         role="alert"
                         x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
@@ -243,12 +241,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-end="-translate-x-24 opacity-0 md:translate-x-24"
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
-                        <div
-                            class="bg-warning/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
+                        <div class="syn-toastr-body">
 
                             <!-- Icon -->
                             <div
-                                class="bg-warning/15 text-warning rounded-full p-0.5"
+                                class="syn-toastr-icon-wrap"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -267,15 +264,15 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             </div>
 
                             <!-- Title & Message -->
-                            <div class="flex flex-col gap-2">
+                            <div class="syn-toastr-text">
                                 <h3
-                                    class="text-warning text-sm font-semibold"
+                                    class="syn-toastr-title"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
                                 ></h3>
                                 <p
-                                    class="text-pretty text-sm"
+                                    class="syn-toastr-msg"
                                     x-cloak
                                     x-show="notification.message"
                                     x-text="notification.message"
@@ -284,7 +281,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 
                             <!--Dismiss Button -->
                             <button
-                                class="ml-auto"
+                                class="syn-toastr-dismiss"
                                 type="button"
                                 aria-label="dismiss notification"
                                 x-on:click="dismiss"
@@ -312,7 +309,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Danger Notification  -->
                 <template x-if="notification.variant === 'danger'">
                     <div
-                        class="rounded-radius border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
+                        class="syn-toastr syn-toastr-danger"
                         role="alert"
                         x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
@@ -326,12 +323,11 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-end="-translate-x-24 opacity-0 md:translate-x-24"
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
-                        <div
-                            class="bg-danger/10 rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300">
+                        <div class="syn-toastr-body">
 
                             <!-- Icon -->
                             <div
-                                class="bg-danger/15 text-danger rounded-full p-0.5"
+                                class="syn-toastr-icon-wrap"
                                 aria-hidden="true"
                             >
                                 <svg
@@ -350,15 +346,15 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             </div>
 
                             <!-- Title & Message -->
-                            <div class="flex flex-col gap-2">
+                            <div class="syn-toastr-text">
                                 <h3
-                                    class="text-danger text-sm font-semibold"
+                                    class="syn-toastr-title"
                                     x-cloak
                                     x-show="notification.title"
                                     x-text="notification.title"
                                 ></h3>
                                 <p
-                                    class="text-pretty text-sm"
+                                    class="syn-toastr-msg"
                                     x-cloak
                                     x-show="notification.message"
                                     x-text="notification.message"
@@ -367,7 +363,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 
                             <!--Dismiss Button -->
                             <button
-                                class="ml-auto"
+                                class="syn-toastr-dismiss"
                                 type="button"
                                 aria-label="dismiss notification"
                                 x-on:click="dismiss"
@@ -395,7 +391,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                 <!-- Message Notification  -->
                 <template x-if="notification.variant === 'message'">
                     <div
-                        class="rounded-radius border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark toastr-notification pointer-events-auto relative border"
+                        class="syn-toastr syn-toastr-message"
                         role="alert"
                         x-data="toastrNotification(notification, displayDuration, removeNotification)"
                         x-cloak
@@ -409,42 +405,41 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                         x-transition:leave-end="-translate-x-24 opacity-0 md:translate-x-24"
                         x-transition:leave-start="translate-x-0 opacity-100"
                     >
-                        <div
-                            class="rounded-radius bg-surface-alt dark:bg-surface-dark-alt flex w-full items-center gap-2.5 p-4 transition-all duration-300">
-                            <div class="flex w-full items-center gap-2.5">
+                        <div class="syn-toastr-body">
+                            <div class="syn-toastr-message-body">
 
                                 <!-- Avatar -->
                                 <img
-                                    class="mr-2 size-12 rounded-full"
+                                    class="syn-toastr-avatar"
                                     alt="avatar"
                                     aria-hidden="true"
                                     x-cloak
                                     x-show="notification.sender.avatar"
                                     x-bind:src="notification.sender.avatar"
                                 />
-                                <div class="flex flex-col items-start gap-2">
+                                <div class="syn-toastr-sender">
                                     <!-- Title & Message -->
                                     <h3
-                                        class="text-on-surface-strong dark:text-on-surface-dark-strong text-sm font-semibold"
+                                        class="syn-toastr-sender-name"
                                         x-cloak
                                         x-show="notification.sender.name"
                                         x-text="notification.sender.name"
                                     ></h3>
                                     <p
-                                        class="text-pretty text-sm"
+                                        class="syn-toastr-msg"
                                         x-cloak
                                         x-show="notification.message"
                                         x-text="notification.message"
                                     ></p>
 
                                     <!-- Action Buttons -->
-                                    <div class="flex items-center gap-4">
+                                    <div class="syn-toastr-actions">
                                         <button
-                                            class="text-primary dark:text-primary-dark whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide transition hover:opacity-75 active:opacity-100"
+                                            class="syn-toastr-action"
                                             type="button"
                                         >Reply</button>
                                         <button
-                                            class="text-on-surface dark:text-on-surface-dark whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide transition hover:opacity-75 active:opacity-100"
+                                            class="syn-toastr-action syn-toastr-action-secondary"
                                             type="button"
                                             x-on:click="dismissDelayed()"
                                         >Dismiss</button>
@@ -454,7 +449,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 
                             <!-- Dismiss Button -->
                             <button
-                                class="ml-auto"
+                                class="syn-toastr-dismiss"
                                 type="button"
                                 aria-label="dismiss notification"
                                 x-on:click="dismiss"
@@ -525,7 +520,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 
                 initFlashNotifications() {
                     flashNotifications.forEach((notification) => this.addNotification(
-                    notification));
+                        notification));
                 },
 
                 handleNotifyEvent(event) {

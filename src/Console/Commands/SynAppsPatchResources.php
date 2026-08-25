@@ -103,6 +103,7 @@ class SynAppsPatchResources extends Command
             'synapps/resources/css — synapps-{base,app,frontend,guest}.css' => $this->createSynappsIntermediaryCss(),
             'synapps/resources/js  — synapps-{base,app,frontend,guest}.js' => $this->createSynappsIntermediaryJs(),
             'synapps/resources/css/tailwind-ref.css' => $this->createTailwindRefCss(),
+            'synapps/resources/css — lta.css → synapse-components.css migration' => $this->migrateLtaCssToComponentsCss(),
             'resources/css/base.css' => $this->createBaseCss(),
             'resources/css/frontend.css' => $this->createFrontendCss(),
             'resources/css/guest.css' => $this->createGuestCss(),
@@ -169,13 +170,13 @@ class SynAppsPatchResources extends Command
             ' * Minimal Tailwind v4 reference file — used by layout-specific CSS entry points',
             " * (resources/css/app.css, etc.) that need @apply but aren't the main CSS entry point.",
             ' *',
-            ' * Contains: @import "tailwindcss" + all custom @theme tokens (lta + theme-base).',
+            ' * Contains: @import "tailwindcss" + all custom @theme tokens (synapse-components + theme-base).',
             ' * NO @source directives — avoids re-scanning all blade/js files.',
             ' *',
             ' * Usage: @reference "../../synapps/resources/css/tailwind-ref.css";',
             ' */',
             '@import "tailwindcss";',
-            "@import './lta.css';",
+            "@import './synapse-components.css';",
             "@import '../themes/{$activeTheme}/css/theme-base.css';",
         ]);
 
@@ -479,6 +480,60 @@ class SynAppsPatchResources extends Command
                 file_put_contents($filePath, $updated);
                 $patched = true;
             }
+        }
+
+        return $patched;
+    }
+
+    /**
+     * Migrate an already-set-up project off the retired lta.css:
+     * 1. Copy synapse-components.css into the project if missing.
+     * 2. Rewrite synapps.css / tailwind-ref.css imports from ./lta.css to
+     *    ./synapse-components.css.
+     * 3. Delete the now-unused synapps/resources/css/lta.css.
+     *
+     * Idempotent — returns false once the project has already migrated.
+     */
+    protected function migrateLtaCssToComponentsCss(): bool
+    {
+        $cssDir = synapps_path('resources/css');
+        $ltaPath = $cssDir.'/lta.css';
+        $componentsPath = $cssDir.'/synapse-components.css';
+        $patched = false;
+
+        if (! file_exists($ltaPath) && file_exists($componentsPath)) {
+            return false;
+        }
+
+        if (! file_exists($componentsPath)) {
+            $stubPath = __DIR__.'/../../../stubs/synapps/resources/css/synapse-components.css';
+            file_put_contents($componentsPath, file_get_contents($stubPath));
+            $patched = true;
+        }
+
+        foreach (['synapps.css', 'tailwind-ref.css'] as $filename) {
+            $filePath = $cssDir.'/'.$filename;
+
+            if (! file_exists($filePath)) {
+                continue;
+            }
+
+            $content = file_get_contents($filePath);
+            $updated = preg_replace(
+                "/@import\s+['\"]\.\/lta\.css['\"]\s*;/",
+                "@import './synapse-components.css';",
+                $content
+            );
+
+            if ($updated !== $content) {
+                file_put_contents($filePath, $updated);
+                $patched = true;
+            }
+        }
+
+        if (file_exists($ltaPath)) {
+            unlink($ltaPath);
+            $patched = true;
         }
 
         return $patched;

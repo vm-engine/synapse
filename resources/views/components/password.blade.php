@@ -1,5 +1,5 @@
 <div
-    class="relative password-input"
+    class="syn-password"
     x-data="{ showPassword: false }"
 >
     <input
@@ -8,11 +8,11 @@
         {{ $attributes->merge(['class' => 'form-input']) }}
     />
     <span
-        class="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer"
+        class="syn-password-toggle"
         @click="showPassword = !showPassword"
     >
         <svg
-            class="fill-gray-500 dark:fill-gray-400"
+            class="syn-password-icon"
             x-show="!showPassword"
             width="20"
             height="20"
@@ -28,7 +28,7 @@
         </svg>
 
         <svg
-            class="fill-gray-500 dark:fill-gray-400"
+            class="syn-password-icon"
             x-show="showPassword"
             width="20"
             height="20"

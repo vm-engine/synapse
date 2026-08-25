@@ -45,52 +45,11 @@
 --}}
 
 @php
-    // Define color classes based on type and style
-    $colorClasses = [
-        'success' => [
-            'bg' => $solid ? 'bg-green-600' : 'bg-green-50 dark:bg-green-900/20',
-            'border' => 'border-green-500',
-            'text' => $solid ? 'text-white' : 'text-green-800 dark:text-green-200',
-            'icon' => $solid ? 'text-white' : 'text-green-600 dark:text-green-400',
-            'close' => $solid
-                ? 'text-white hover:text-green-100'
-                : 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200',
-        ],
-        'warning' => [
-            'bg' => $solid ? 'bg-yellow-600' : 'bg-yellow-50 dark:bg-yellow-900/20',
-            'border' => 'border-yellow-500',
-            'text' => $solid ? 'text-white' : 'text-yellow-800 dark:text-yellow-200',
-            'icon' => $solid ? 'text-white' : 'text-yellow-600 dark:text-yellow-400',
-            'close' => $solid
-                ? 'text-white hover:text-yellow-100'
-                : 'text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-200',
-        ],
-        'danger' => [
-            'bg' => $solid ? 'bg-red-600' : 'bg-red-50 dark:bg-red-900/20',
-            'border' => 'border-red-500',
-            'text' => $solid ? 'text-white' : 'text-red-800 dark:text-red-200',
-            'icon' => $solid ? 'text-white' : 'text-red-600 dark:text-red-400',
-            'close' => $solid
-                ? 'text-white hover:text-red-100'
-                : 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200',
-        ],
-        'info' => [
-            'bg' => $solid ? 'bg-blue-600' : 'bg-blue-50 dark:bg-blue-900/20',
-            'border' => 'border-blue-500',
-            'text' => $solid ? 'text-white' : 'text-blue-800 dark:text-blue-200',
-            'icon' => $solid ? 'text-white' : 'text-blue-600 dark:text-blue-400',
-            'close' => $solid
-                ? 'text-white hover:text-blue-100'
-                : 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200',
-        ],
-    ];
-
-    $colors = $colorClasses[$type] ?? $colorClasses['info'];
-    $borderClass = $border ? "border-l-4 {$colors['border']}" : '';
+    $typeClass = in_array($type, ['success', 'warning', 'danger', 'info']) ? $type : 'info';
 @endphp
 
 <div
-    class="{{ $colors['bg'] }} {{ $borderClass }} relative rounded-lg p-4"
+    class="syn-alert syn-{{ $typeClass }} {{ $border ? 'syn-alert-bordered' : '' }} {{ $solid ? 'syn-alert-solid' : '' }}"
     role="alert"
     x-data="{ show: true }"
     x-show="show"
@@ -102,30 +61,30 @@
     x-transition:leave-end="opacity-0 transform scale-95"
     {{ $attributes }}
 >
-    <div class="flex items-start gap-3">
+    <div class="syn-alert-body">
         {{-- Icon --}}
         @if ($icon)
-            <div class="mt-0.5 shrink-0">
-                <i class="{{ $icon }} {{ $colors['icon'] }} text-lg"></i>
+            <div class="syn-alert-icon-wrap">
+                <i class="{{ $icon }} syn-alert-icon"></i>
             </div>
         @endif
 
         {{-- Content --}}
-        <div class="min-w-0 flex-1">
+        <div class="syn-alert-content">
             @if ($title)
-                <h3 class="{{ $colors['text'] }} mb-1 font-semibold">
+                <h3 class="syn-alert-title">
                     {{ $title }}
                 </h3>
             @endif
 
             @if ($message)
-                <p class="{{ $colors['text'] }} text-sm">
+                <p class="syn-alert-message">
                     {{ $message }}
                 </p>
             @endif
 
             @if ($slot->isNotEmpty())
-                <div class="{{ $colors['text'] }} text-sm">
+                <div class="syn-alert-message">
                     {{ $slot }}
                 </div>
             @endif
@@ -134,7 +93,7 @@
         {{-- Dismiss Button --}}
         @if ($dismissible)
             <button
-                class="{{ $colors['close'] }} focus:ring-{{ $type === 'danger' ? 'red' : ($type === 'warning' ? 'yellow' : ($type === 'success' ? 'green' : 'blue')) }}-500 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                class="syn-alert-close"
                 type="button"
                 aria-label="Close alert"
                 @click="show = false"

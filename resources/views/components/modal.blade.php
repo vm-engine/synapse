@@ -31,7 +31,7 @@
 >
     <!-- Backdrop -->
     <div
-        class="fixed inset-0 z-50 bg-gray-900/50 dark:bg-gray-900/80"
+        class="syn-modal-backdrop"
         x-show="show"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
@@ -44,12 +44,12 @@
 
     <!-- Modal Container -->
     <div
-        class="fixed inset-0 z-[51] flex items-center justify-center p-4"
+        class="syn-modal-container"
         x-show="show"
         @click.self="close()"
     >
         <div
-            class="{{ $maxWidthClass }} relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-y-auto rounded-2xl bg-white shadow-xl dark:bg-gray-800"
+            class="syn-modal-panel {{ $maxWidthClass }}"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -66,21 +66,21 @@
 <script nonce="{{ csp_nonce() }}">
     (() => {
         const register = () => {
-        Alpine.data('synapseModal', () => ({
-            show: false,
-            open() {
-                this.show = true;
-            },
-            close() {
-                if (!this.show) return;
-                this.show = false;
-                this.$dispatch('closed-modal-{{ $name }}');
-            }
-        }));
+            Alpine.data('synapseModal', () => ({
+                show: false,
+                open() {
+                    this.show = true;
+                },
+                close() {
+                    if (!this.show) return;
+                    this.show = false;
+                    this.$dispatch('closed-modal-{{ $name }}');
+                }
+            }));
         };
-    document.addEventListener('alpine:init', register);
-    if (window.Alpine) {
-        register();
-    }
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
     })();
 </script>

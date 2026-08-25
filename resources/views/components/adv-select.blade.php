@@ -122,14 +122,14 @@ Version: 1.0.0
 --}}
 
 <div
-    class="adv-select-container relative w-full"
+    class="adv-select-container"
     x-data="synapseAdvSelect(@js($preload ?? []), {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', @js($options), {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }})"
     x-init="init()"
     wire:ignore
 >
     {{-- Select box --}}
     <div
-        class="adv-select-input-box shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 focus:ring-3 focus:outline-hidden flex w-full flex-wrap gap-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+        class="adv-select-input-box"
         @click="focusInput"
         {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
              stopPropagation() on click, which would otherwise prevent this
@@ -143,12 +143,10 @@ Version: 1.0.0
                 x-for="(item, index) in selected"
                 :key="item[valueField]"
             >
-                <span
-                    class="adv-select-item-multiple flex items-center space-x-1 rounded-md bg-blue-100 px-2 py-1 text-blue-700"
-                >
+                <span class="adv-select-item-multiple">
                     <span x-text="item[labelField]"></span>
                     <button
-                        class="ml-1 text-sm"
+                        class="adv-select-item-remove"
                         type="button"
                         @click.stop="remove(index)"
                     >
@@ -161,14 +159,14 @@ Version: 1.0.0
         {{-- Single select display --}}
         <template x-if="!multiple && selected.length">
             <span
-                class="adv-select-item-single text-gray-800"
+                class="adv-select-item-single"
                 x-text="selected[0][labelField]"
             ></span>
         </template>
 
         {{-- Input --}}
         <input
-            class="adv-select-input flex-1 focus:outline-none"
+            class="adv-select-input"
             type="text"
             x-ref="search"
             x-model="search"
@@ -182,7 +180,7 @@ Version: 1.0.0
         {{-- Clear button for single select --}}
         <template x-if="!multiple && selected.length">
             <button
-                class="adv-select-clear ml-auto text-sm text-gray-400 hover:text-gray-700"
+                class="adv-select-clear"
                 type="button"
                 @click.stop="clearSelection"
             >
@@ -193,7 +191,7 @@ Version: 1.0.0
 
     {{-- Dropdown --}}
     <div
-        class="adv-select-dropdown absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-md dark:border-gray-700 dark:bg-gray-900"
+        class="adv-select-dropdown"
         x-show="open && (results.length > 0 || (allowCreate && search.trim()))"
         x-transition
     >
@@ -202,7 +200,7 @@ Version: 1.0.0
             :key="item[valueField]"
         >
             <div
-                class="adv-select-option cursor-pointer p-2 hover:bg-blue-100 dark:hover:bg-gray-800"
+                class="adv-select-option"
                 x-text="item[labelField]"
                 @click="select(item)"
             ></div>
@@ -211,10 +209,10 @@ Version: 1.0.0
         {{-- Create new option hint --}}
         <template x-if="allowCreate && search.trim() && results.length === 0">
             <div
-                class="adv-select-option-create cursor-pointer border-t border-gray-200 p-2 hover:bg-green-100 dark:border-gray-700 dark:hover:bg-green-900/20"
+                class="adv-select-option-create"
                 @click="createNew()"
             >
-                <span class="text-green-600 dark:text-green-400">
+                <span class="adv-select-create-hint">
                     <i class="fa-solid fa-plus mr-1"></i>
                     Create "<span x-text="search"></span>"
                 </span>
@@ -226,192 +224,204 @@ Version: 1.0.0
 <script nonce="{{ csp_nonce() }}">
     (() => {
         const register = () => {
-        Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wireModel, labelField, valueField,
-            staticOptions, minSearchLength, isLive, allowCreate, autoLoad) => ({
-            search: '',
-            results: [],
-            selected: preload,
-            multiple,
-            open: false,
-            searchMethod,
-            loadMethod,
-            wireModel,
-            labelField,
-            valueField,
-            staticOptions,
-            minSearchLength,
-            isLive,
-            allowCreate,
-            autoLoad,
+            Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wireModel, labelField,
+                valueField,
+                staticOptions, minSearchLength, isLive, allowCreate, autoLoad) => ({
+                search: '',
+                results: [],
+                selected: preload,
+                multiple,
+                open: false,
+                searchMethod,
+                loadMethod,
+                wireModel,
+                labelField,
+                valueField,
+                staticOptions,
+                minSearchLength,
+                isLive,
+                allowCreate,
+                autoLoad,
 
-            async init() {
-                if (this.autoLoad && this.selected.length === 0) {
-                    await this.loadInitialValues();
-                }
+                async init() {
+                    if (this.autoLoad && this.selected.length === 0) {
+                        await this.loadInitialValues();
+                    }
 
-                if (this.selected && this.selected.length > 0) {
-                    this.syncWithWire();
-                }
+                    if (this.selected && this.selected.length > 0) {
+                        this.syncWithWire();
+                    }
 
-                Livewire.interceptMessage(({
-                    onSuccess
-                }) => {
-                    onSuccess(() => {
-                        if (document.activeElement === this.$refs.search && this.search
-                            .length > 0) {
-                            this.open = true;
-                        }
+                    Livewire.interceptMessage(({
+                        onSuccess
+                    }) => {
+                        onSuccess(() => {
+                            if (document.activeElement === this.$refs.search &&
+                                this.search
+                                .length > 0) {
+                                this.open = true;
+                            }
+                        });
                     });
-                });
 
-                window.addEventListener('reset-tag-input', () => {
-                    this.clearSelection();
-                });
-            },
+                    window.addEventListener('reset-tag-input', () => {
+                        this.clearSelection();
+                    });
+                },
 
-            async loadInitialValues() {
-                if (!this.$wire) return;
+                async loadInitialValues() {
+                    if (!this.$wire) return;
 
-                try {
-                    const currentValue = this.$wire.get(this.wireModel);
+                    try {
+                        const currentValue = this.$wire.get(this.wireModel);
 
-                    if (currentValue === null || currentValue === undefined || (Array.isArray(
-                            currentValue) && currentValue.length === 0)) {
-                        return;
-                    }
-
-                    const values = Array.isArray(currentValue) ? currentValue : [currentValue];
-
-                    const foundInStatic = [];
-                    for (const val of values) {
-                        const found = this.staticOptions.find(o => o[this.valueField] == val);
-                        if (found) {
-                            foundInStatic.push(found);
-                        }
-                    }
-
-                    if (foundInStatic.length === values.length) {
-                        this.selected = foundInStatic;
-                        return;
-                    }
-
-                    if (this.loadMethod && this.$wire?.call) {
-                        const loaded = await this.$wire.call(this.loadMethod, this.multiple ? values :
-                            values[0]);
-
-                        if (loaded) {
-                            this.selected = Array.isArray(loaded) ? loaded : [loaded];
+                        if (currentValue === null || currentValue === undefined || (Array
+                                .isArray(
+                                    currentValue) && currentValue.length === 0)) {
                             return;
                         }
-                    }
 
-                    this.selected = values.map(val => ({
-                        [this.valueField]: val,
-                        [this.labelField]: val
-                    }));
-                } catch (e) {
-                    console.error('Error loading initial values:', e);
-                }
-            },
+                        const values = Array.isArray(currentValue) ? currentValue : [
+                            currentValue
+                        ];
 
-            focusInput() {
-                this.$refs.search.classList.remove('hidden');
-                this.$refs.search.focus();
-                this.open = true;
-            },
-
-            async fetch() {
-                const query = this.search.toLowerCase();
-
-                let staticResults = this.staticOptions.filter(o =>
-                    o[this.labelField].toLowerCase().includes(query)
-                );
-
-                if (this.searchMethod && query.length > this.minSearchLength && this.$wire?.call) {
-                    try {
-                        const res = await this.$wire.call(this.searchMethod, this.search);
-                        const remoteResults = Array.isArray(res) ? res : [];
-                        const merged = [...staticResults];
-                        for (const r of remoteResults) {
-                            if (!merged.find(o => o[this.valueField] == r[this.valueField])) {
-                                merged.push(r);
+                        const foundInStatic = [];
+                        for (const val of values) {
+                            const found = this.staticOptions.find(o => o[this.valueField] ==
+                                val);
+                            if (found) {
+                                foundInStatic.push(found);
                             }
                         }
-                        this.results = merged;
+
+                        if (foundInStatic.length === values.length) {
+                            this.selected = foundInStatic;
+                            return;
+                        }
+
+                        if (this.loadMethod && this.$wire?.call) {
+                            const loaded = await this.$wire.call(this.loadMethod, this
+                                .multiple ? values :
+                                values[0]);
+
+                            if (loaded) {
+                                this.selected = Array.isArray(loaded) ? loaded : [loaded];
+                                return;
+                            }
+                        }
+
+                        this.selected = values.map(val => ({
+                            [this.valueField]: val,
+                            [this.labelField]: val
+                        }));
                     } catch (e) {
-                        console.error('search error', e);
+                        console.error('Error loading initial values:', e);
+                    }
+                },
+
+                focusInput() {
+                    this.$refs.search.classList.remove('hidden');
+                    this.$refs.search.focus();
+                    this.open = true;
+                },
+
+                async fetch() {
+                    const query = this.search.toLowerCase();
+
+                    let staticResults = this.staticOptions.filter(o =>
+                        o[this.labelField].toLowerCase().includes(query)
+                    );
+
+                    if (this.searchMethod && query.length > this.minSearchLength && this.$wire
+                        ?.call) {
+                        try {
+                            const res = await this.$wire.call(this.searchMethod, this.search);
+                            const remoteResults = Array.isArray(res) ? res : [];
+                            const merged = [...staticResults];
+                            for (const r of remoteResults) {
+                                if (!merged.find(o => o[this.valueField] == r[this
+                                        .valueField])) {
+                                    merged.push(r);
+                                }
+                            }
+                            this.results = merged;
+                        } catch (e) {
+                            console.error('search error', e);
+                            this.results = staticResults;
+                        }
+                    } else {
                         this.results = staticResults;
                     }
-                } else {
-                    this.results = staticResults;
-                }
 
-                this.open = this.results.length > 0 || (this.allowCreate && this.search.trim() !== '');
-            },
+                    this.open = this.results.length > 0 || (this.allowCreate && this.search
+                        .trim() !== '');
+                },
 
-            select(item) {
-                if (this.multiple) {
-                    if (!this.selected.find(i => i[this.valueField] == item[this.valueField])) {
-                        this.selected.push(item);
+                select(item) {
+                    if (this.multiple) {
+                        if (!this.selected.find(i => i[this.valueField] == item[this.valueField])) {
+                            this.selected.push(item);
+                        }
+                    } else {
+                        this.selected = [item];
+                        this.$refs.search.blur();
                     }
-                } else {
-                    this.selected = [item];
-                    this.$refs.search.blur();
-                }
-                this.search = '';
-                this.results = [];
-                this.open = false;
-                this.syncWithWire();
-            },
+                    this.search = '';
+                    this.results = [];
+                    this.open = false;
+                    this.syncWithWire();
+                },
 
-            createNew() {
-                if (!this.allowCreate || !this.search.trim()) return;
+                createNew() {
+                    if (!this.allowCreate || !this.search.trim()) return;
 
-                const newItem = {
-                    [this.valueField]: this.search.trim(),
-                    [this.labelField]: this.search.trim()
-                };
+                    const newItem = {
+                        [this.valueField]: this.search.trim(),
+                        [this.labelField]: this.search.trim()
+                    };
 
-                this.staticOptions.push(newItem);
-                this.select(newItem);
-            },
+                    this.staticOptions.push(newItem);
+                    this.select(newItem);
+                },
 
-            handleKeydown(e) {
-                if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
-                    e.preventDefault();
-                    this.createNew();
-                }
-            },
+                handleKeydown(e) {
+                    if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results
+                        .length === 0) {
+                        e.preventDefault();
+                        this.createNew();
+                    }
+                },
 
-            remove(index) {
-                this.selected.splice(index, 1);
-                this.syncWithWire();
-            },
+                remove(index) {
+                    this.selected.splice(index, 1);
+                    this.syncWithWire();
+                },
 
-            clearSelection() {
-                this.selected = [];
-                this.syncWithWire();
-                this.focusInput();
-            },
+                clearSelection() {
+                    this.selected = [];
+                    this.syncWithWire();
+                    this.focusInput();
+                },
 
-            syncWithWire() {
-                if (!this.$wire) return;
+                syncWithWire() {
+                    if (!this.$wire) return;
 
-                const ids = this.selected.map(i => i[this.valueField]);
+                    const ids = this.selected.map(i => i[this.valueField]);
 
-                if (!this._initialized) {
-                    this._initialized = true;
-                    if (ids.length === 0) return;
-                }
+                    if (!this._initialized) {
+                        this._initialized = true;
+                        if (ids.length === 0) return;
+                    }
 
-                this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] : null), this
-                    .live);
-            },
-        }));
+                    this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] :
+                            null), this
+                        .live);
+                },
+            }));
         };
-    document.addEventListener('alpine:init', register);
-    if (window.Alpine) {
-        register();
-    }
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
     })();
 </script>

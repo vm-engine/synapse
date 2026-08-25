@@ -19,8 +19,8 @@
     "Mobile-optimized layouts"
   ],
   "color_scheme": {
-    "primary": "TailAdmin brand blue (#465fff, from lta.css design tokens)",
-    "dark_mode": "Supported via .dark class toggle (Alpine darkMode, persisted), matching lta.css's @custom-variant dark (&:is(.dark *))"
+    "primary": "TailAdmin brand blue (#465fff, from synapse-components.css design tokens)",
+    "dark_mode": "Supported via .dark class toggle (Alpine darkMode, persisted), matching synapse-components.css's @custom-variant dark (&:is(.dark *))"
   },
   "css": {
     "all": [],

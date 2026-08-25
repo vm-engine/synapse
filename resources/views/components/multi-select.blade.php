@@ -23,7 +23,7 @@
     </select>
 
     <div
-        class="flex flex-col items-center"
+        class="syn-multi-select"
         x-data="synapseMultiSelect('{{ $name }}')"
     >
         <div class="relative z-20 inline-block w-full">
@@ -33,15 +33,13 @@
                     id="multi-select-{{ $name }}"
                     @click="open()"
                 >
-                    <div
-                        {{ $attributes->merge(['class' => 'form-input shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900'])->only('class') }}>
-                        <div class="flex flex-auto flex-wrap gap-2">
+                    <div {{ $attributes->merge(['class' => 'form-input syn-multi-select-box'])->only('class') }}>
+                        <div class="syn-multi-select-tags">
                             <template
                                 x-for="(option,index) in selected"
                                 :key="index"
                             >
-                                <div
-                                    class="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pr-2 pl-2.5 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800">
+                                <div class="syn-multi-select-tag group">
                                     <div
                                         class="max-w-full flex-initial"
                                         x-model="options[option]"
@@ -49,7 +47,7 @@
                                     ></div>
                                     <div class="flex flex-auto flex-row-reverse">
                                         <div
-                                            class="cursor-pointer pl-2 text-gray-500 group-hover:text-gray-400 dark:text-gray-400"
+                                            class="syn-multi-select-tag-remove"
                                             @click="remove(index,option)"
                                         >
                                             <svg
@@ -73,11 +71,11 @@
                                 </div>
                             </template>
                             <div
-                                class="flex-1"
+                                class="syn-multi-select-placeholder-wrap"
                                 x-show="selected.length == 0"
                             >
                                 <input
-                                    class="h-full w-full appearance-none border-0 bg-transparent p-1 pr-2 text-sm outline-hidden placeholder:text-gray-800 focus:border-0 focus:ring-0 focus:outline-hidden dark:placeholder:text-white/90"
+                                    class="syn-multi-select-placeholder-input"
                                     placeholder="Select option"
                                     readonly
                                 />
@@ -85,7 +83,7 @@
                         </div>
                         <div class="flex w-7 items-center py-1 pr-1 pl-1">
                             <button
-                                class="h-5 w-5 cursor-pointer text-gray-700 outline-hidden focus:outline-hidden dark:text-gray-400"
+                                class="syn-multi-select-toggle"
                                 type="button"
                                 @click="open()"
                                 :class="isOpen() === true ? 'rotate-180' : ''"
@@ -112,7 +110,7 @@
                 </div>
                 <div class="w-full px-4">
                     <div
-                        class="max-h-select absolute top-full left-0 z-40 w-full overflow-y-auto rounded-lg bg-white shadow-sm dark:bg-gray-900"
+                        class="syn-multi-select-dropdown"
                         x-show.transition.origin.top="isOpen()"
                         @click.outside="close()"
                     >
@@ -123,16 +121,16 @@
                             >
                                 <div class="multi-select-item">
                                     <div
-                                        class="hover:bg-primary/5 w-full cursor-pointer rounded-t border-b border-gray-200 dark:border-gray-800"
+                                        class="syn-multi-select-option-row"
                                         @click="select(index,$event)"
                                     >
                                         <div
-                                            class="relative flex w-full items-center border-l-2 border-transparent p-2 pl-2"
+                                            class="syn-multi-select-option"
                                             :class="option.selected ? 'border-primary' : ''"
                                         >
                                             <div class="flex w-full items-center">
                                                 <div
-                                                    class="mx-2 leading-6 text-gray-800 dark:text-white/90"
+                                                    class="syn-multi-select-option-label"
                                                     x-model="option"
                                                     x-text="option.text"
                                                 ></div>

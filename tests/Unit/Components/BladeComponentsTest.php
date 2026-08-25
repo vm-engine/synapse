@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Blade;
 use VmEngine\Synapse\Components\Alert;
 use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\ConfirmDialog;
@@ -693,5 +694,34 @@ describe('PasswordGenerator Component', function () {
         $component = new PasswordGenerator;
 
         expect(method_exists($component, 'render'))->toBeTrue();
+    });
+});
+
+describe('Semantic CSS classes', function () {
+    beforeEach(function () {
+        // SynapseViewServiceProvider (which registers the synapse:: view
+        // namespace and the <x-synapse-*> component tags) only boots when
+        // SynapseUtils::isSynAppsAutoloaded() is true, which this package's
+        // TestCase deliberately doesn't set up. Register just what these two
+        // tests need directly, without touching TestCase/production wiring.
+        view()->addNamespace('synapse', __DIR__.'/../../../resources/views');
+        Blade::component(Alert::class, 'synapse-alert');
+        Blade::component(Drawer::class, 'synapse-drawer');
+    });
+
+    it('renders alert with syn-alert classes', function () {
+        $html = Blade::render('<x-synapse-alert type="success" title="Saved" message="All good" />');
+
+        expect($html)->toContain('syn-alert')
+            ->toContain('syn-success')
+            ->not->toContain('bg-green-50');
+    });
+
+    it('renders drawer with syn-drawer classes', function () {
+        $html = Blade::render('<x-synapse-drawer title="Details">Body</x-synapse-drawer>');
+
+        expect($html)->toContain('syn-drawer-backdrop')
+            ->toContain('syn-drawer-panel')
+            ->not->toContain('translate-x-full text-gray-500');
     });
 });

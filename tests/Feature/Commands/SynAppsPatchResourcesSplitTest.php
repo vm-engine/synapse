@@ -164,7 +164,7 @@ test('creates tailwind-ref.css with tailwind import and theme tokens', function 
 
     $content = File::get($path);
     expect($content)->toContain('@import "tailwindcss";')
-        ->and($content)->toContain("@import './lta.css';")
+        ->and($content)->toContain("@import './synapse-components.css';")
         ->and($content)->toContain("@import '../themes/default/css/theme-base.css';")
         ->and($content)->not->toContain("@source '");
 });
@@ -175,6 +175,32 @@ test('does not overwrite existing tailwind-ref.css', function () {
     $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
 
     expect(File::get(base_path('synapps/resources/css/tailwind-ref.css')))->toBe("/* custom */\n");
+});
+
+// ─── migrateLtaCssToComponentsCss ─────────────────────────────────────────────
+
+test('migrates lta.css to synapse-components.css on an already-set-up project', function () {
+    $cssDir = base_path('synapps/resources/css');
+    File::put($cssDir.'/lta.css', "@theme {\n    --color-brand-500: #465fff;\n}\n");
+    File::put($cssDir.'/synapps.css', "@import \"@fortawesome/fontawesome-free/css/all.min.css\";\n@import \"./lta.css\";\n");
+    File::put($cssDir.'/tailwind-ref.css', "@import \"tailwindcss\";\n@import './lta.css';\n@import '../themes/default/css/theme-base.css';\n");
+
+    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+
+    expect(File::exists($cssDir.'/lta.css'))->toBeFalse()
+        ->and(File::exists($cssDir.'/synapse-components.css'))->toBeTrue()
+        ->and(File::get($cssDir.'/synapps.css'))->toContain("@import './synapse-components.css';")
+        ->and(File::get($cssDir.'/tailwind-ref.css'))->toContain("@import './synapse-components.css';");
+});
+
+test('does not re-migrate a project that already migrated', function () {
+    $cssDir = base_path('synapps/resources/css');
+    File::put($cssDir.'/synapse-components.css', "/* already migrated */\n");
+    File::put($cssDir.'/synapps.css', "@import \"./synapse-components.css\";\n");
+
+    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+
+    expect(File::get($cssDir.'/synapse-components.css'))->toBe("/* already migrated */\n");
 });
 
 // ─── createBaseJs / rewriteAppJsToFocused ─────────────────────────────────────

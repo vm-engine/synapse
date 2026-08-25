@@ -1,0 +1,1099 @@
+/**
+ * Synapse Component CSS — tokens and semantic classes the 19 Blade
+ * components in packages/synapse/resources/views/components/ depend on.
+ *
+ * Always loaded (imported from synapps.css, independent of active theme).
+ * Theme files (theme-base.css etc.) load AFTER this file and may override
+ * any .syn-* rule at equal specificity — that's the whole point.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --breakpoint-*: initial;
+    --breakpoint-2xsm: 375px;
+    --breakpoint-xsm: 425px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+
+    --text-theme-xs: 12px;
+    --text-theme-xs--line-height: 18px;
+    --text-theme-sm: 14px;
+    --text-theme-sm--line-height: 20px;
+
+    --color-brand-25: #f2f7ff;
+    --color-brand-50: #ecf3ff;
+    --color-brand-100: #dde9ff;
+    --color-brand-200: #c2d6ff;
+    --color-brand-300: #9cb9ff;
+    --color-brand-400: #7592ff;
+    --color-brand-500: #465fff;
+    --color-brand-600: #3641f5;
+    --color-brand-700: #2a31d8;
+    --color-brand-800: #252dae;
+    --color-brand-900: #262e89;
+    --color-brand-950: #161950;
+
+    --color-gray-25: #fcfcfd;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f2f4f7;
+    --color-gray-200: #e4e7ec;
+    --color-gray-300: #d0d5dd;
+    --color-gray-400: #98a2b3;
+    --color-gray-500: #667085;
+    --color-gray-600: #475467;
+    --color-gray-700: #344054;
+    --color-gray-800: #1d2939;
+    --color-gray-900: #101828;
+    --color-gray-950: #0c111d;
+    --color-gray-dark: #1a2231;
+
+    --color-error-25: #fffbfa;
+    --color-error-50: #fef3f2;
+    --color-error-100: #fee4e2;
+    --color-error-200: #fecdca;
+    --color-error-300: #fda29b;
+    --color-error-400: #f97066;
+    --color-error-500: #f04438;
+    --color-error-600: #d92d20;
+    --color-error-700: #b42318;
+    --color-error-800: #912018;
+    --color-error-900: #7a271a;
+    --color-error-950: #55160c;
+
+    --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    --shadow-theme-sm: 0px 1px 3px 0px rgba(16, 24, 40, 0.1),
+        0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+    --shadow-theme-md: 0px 4px 8px -2px rgba(16, 24, 40, 0.1),
+        0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+    --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08),
+        0px 8px 8px -4px rgba(16, 24, 40, 0.03);
+    --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
+    --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+
+    --z-index-1: 1;
+    --z-index-9: 9;
+    --z-index-99: 99;
+    --z-index-999: 999;
+    --z-index-9999: 9999;
+    --z-index-99999: 99999;
+    --z-index-999999: 999999;
+
+    --radius-radius: var(--radius-lg);
+
+    /* toastr semantic aliases — light */
+    --color-surface: var(--color-white);
+    --color-surface-alt: var(--color-slate-100);
+    --color-on-surface: var(--color-slate-700);
+    --color-on-surface-strong: var(--color-black);
+    --color-primary: var(--color-blue-700);
+    --color-on-primary: var(--color-slate-100);
+    --color-outline: var(--color-slate-300);
+    --color-outline-strong: var(--color-slate-800);
+
+    /* toastr semantic aliases — dark */
+    --color-surface-dark: var(--color-slate-900);
+    --color-surface-dark-alt: var(--color-slate-800);
+    --color-on-surface-dark: var(--color-slate-300);
+    --color-on-surface-dark-strong: var(--color-white);
+    --color-primary-dark: var(--color-blue-600);
+    --color-on-primary-dark: var(--color-slate-100);
+    --color-outline-dark: var(--color-slate-700);
+    --color-outline-dark-strong: var(--color-slate-300);
+
+    /* toastr semantic aliases — shared */
+    --color-info: var(--color-sky-600);
+    --color-on-info: var(--color-white);
+    --color-success: var(--color-green-600);
+    --color-on-success: var(--color-white);
+    --color-warning: var(--color-amber-500);
+    --color-on-warning: var(--color-white);
+    --color-danger: var(--color-red-600);
+    --color-on-danger: var(--color-white);
+}
+
+/*
+ * Alpine x-cloak — MUST be always-loaded, not scoped to one component.
+ * (Previously only defined inside drag-n-drop.blade.php's inline <style>,
+ * which meant x-cloak silently didn't work on any page that didn't also
+ * render drag-n-drop. modal/confirm-dialog/multi-select/toastr/file-drop
+ * all use x-cloak and need this globally.)
+ */
+[x-cloak] {
+    display: none !important;
+}
+
+/* ========================================
+   SHARED FORM CLASSES
+   Used by: password, password-generator, select, multi-select, currency,
+   datepicker (via .form-input / .form-box / .input-group)
+   ======================================== */
+.form-box > label {
+    @apply mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400;
+}
+
+.form-box.required > label {
+    @apply after:ml-0.5 after:text-red-500 after:content-['*'];
+}
+
+.form-input {
+    @apply shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30;
+    &.has-error {
+        @apply border-error-300 focus:border-error-300 focus:ring-error-500/10 dark:border-error-700 dark:focus:border-error-800;
+        & + .error-icon {
+            @apply text-error-500 absolute top-1/2 right-3.5 -translate-y-1/2;
+        }
+    }
+}
+.form-input[type="file"] {
+    @apply p-0! focus:ring-brand-300 focus:file:ring-brand-300 overflow-hidden text-gray-500! transition-colors file:mr-5 file:border-collapse file:cursor-pointer file:rounded-l-lg file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-50 file:py-3 file:pr-3 file:pl-3.5 file:text-sm file:text-gray-700 placeholder:text-gray-400! hover:file:bg-gray-100 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:file:border-gray-800 dark:file:bg-white/[0.03] dark:file:text-gray-400 dark:placeholder:text-gray-400!;
+}
+.form-input[type="color"] {
+    @apply w-14;
+}
+select.form-input {
+    @apply appearance-none bg-none pr-11;
+    & > option {
+        @apply text-gray-700 dark:bg-gray-900 dark:text-gray-400;
+    }
+}
+textarea.form-input {
+    @apply h-auto!;
+}
+
+.syn-password {
+    @apply relative;
+    & input.form-input {
+        @apply appearance-none bg-none pr-11 pl-4;
+    }
+}
+
+.input-group {
+    @apply relative;
+    & > .input-group-item {
+        @apply absolute inline-flex -translate-y-1/2 items-center gap-1 border-gray-200 py-3 pr-3 pl-3 text-sm font-medium text-gray-700 dark:border-gray-800 dark:text-gray-400;
+    }
+    & > .input-group-item.left {
+        @apply border-r top-1/2 left-0;
+    }
+    & > .input-group-item.right {
+        @apply top-1/2 right-0 border-l;
+    }
+    & > .input-group-item.btn {
+        @apply cursor-pointer rounded-none border-0;
+    }
+}
+
+.form-error-message {
+    @apply text-theme-xs text-error-500 mt-1.5;
+}
+
+/* ========================================
+   FLATPICKR OVERRIDES — used by datepicker.blade.php only
+   ======================================== */
+.flatpickr-wrapper {
+    @apply w-full;
+}
+.flatpickr-calendar {
+    @apply dark:bg-gray-dark! dark:shadow-theme-xl! 2xsm:w-auto! mt-2 rounded-xl! p-5! text-gray-500! dark:text-gray-400!;
+}
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    @apply stroke-brand-500;
+}
+.flatpickr-calendar.arrowTop:before,
+.flatpickr-calendar.arrowTop:after {
+    @apply hidden;
+}
+.flatpickr-current-month .cur-month,
+.flatpickr-current-month input.cur-year {
+    @apply h-auto! pt-0! text-lg! font-medium! text-gray-800! dark:text-white/90!;
+}
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    @apply p-0!;
+}
+.flatpickr-weekdays {
+    @apply h-auto mt-6 mb-4;
+}
+.flatpickr-weekday {
+    @apply text-theme-sm! font-medium! text-gray-500! dark:text-gray-400!;
+}
+.flatpickr-day {
+    @apply text-theme-sm! flex! items-center! font-medium! text-gray-800! dark:text-white/90! dark:hover:border-gray-300! dark:hover:bg-gray-900!;
+}
+.flatpickr-day.nextMonthDay,
+.flatpickr-day.prevMonthDay {
+    @apply text-gray-400!;
+}
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    @apply top-7! dark:fill-white! dark:text-white!;
+}
+.flatpickr-months .flatpickr-prev-month.flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month.flatpickr-prev-month {
+    @apply left-7!;
+}
+.flatpickr-months .flatpickr-prev-month.flatpickr-next-month,
+.flatpickr-months .flatpickr-next-month.flatpickr-next-month {
+    @apply right-7!;
+}
+span.flatpickr-weekday,
+.flatpickr-months .flatpickr-month {
+    @apply dark:fill-white! dark:text-white!;
+}
+.flatpickr-day.inRange {
+    box-shadow: -5px 0 0 #f9fafb, 5px 0 0 #f9fafb !important;
+    @apply dark:shadow-datepicker!;
+}
+.flatpickr-day.inRange,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.today.inRange,
+.flatpickr-day.nextMonthDay.today.inRange,
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover,
+.flatpickr-day:focus,
+.flatpickr-day.prevMonthDay:focus,
+.flatpickr-day.nextMonthDay:focus {
+    @apply border-gray-50! bg-gray-50! dark:border-0! dark:border-white/5! dark:bg-white/5!;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.selected,
+.flatpickr-day.endRange {
+    @apply text-white! dark:text-white!;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+    background: #465fff;
+    @apply border-brand-500! bg-brand-500! hover:border-brand-500! hover:bg-brand-500!;
+}
+.flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
+.flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
+.flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
+    box-shadow: -10px 0 0 #465fff;
+}
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg,
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    @apply hover:fill-none!;
+}
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    fill: none !important;
+}
+.flatpickr-calendar.static {
+    @apply right-0;
+}
+
+/* ========================================
+   COMPONENT CLASSES (.syn-*) — filled in by Tasks 4-21
+   ======================================== */
+.syn-alert {
+    @apply relative rounded-lg p-4;
+}
+.syn-alert-body {
+    @apply flex items-start gap-3;
+}
+.syn-alert-icon-wrap {
+    @apply mt-0.5 shrink-0;
+}
+.syn-alert-icon {
+    @apply text-lg;
+}
+.syn-alert-content {
+    @apply min-w-0 flex-1;
+}
+.syn-alert-title {
+    @apply mb-1 font-semibold;
+}
+.syn-alert-message {
+    @apply text-sm;
+}
+.syn-alert-close {
+    @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.syn-alert.syn-success {
+    @apply bg-green-50 dark:bg-green-900/20;
+    & .syn-alert-title,
+    & .syn-alert-message,
+    & .syn-alert-content {
+        @apply text-green-800 dark:text-green-200;
+    }
+    & .syn-alert-icon {
+        @apply text-green-600 dark:text-green-400;
+    }
+    & .syn-alert-close {
+        @apply text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 focus:ring-green-500;
+    }
+    &.syn-alert-bordered {
+        @apply border-l-4 border-green-500;
+    }
+    &.syn-alert-solid {
+        @apply bg-green-600;
+        & .syn-alert-title,
+        & .syn-alert-message,
+        & .syn-alert-content,
+        & .syn-alert-icon {
+            @apply text-white;
+        }
+        & .syn-alert-close {
+            @apply text-white hover:text-green-100;
+        }
+    }
+}
+
+.syn-alert.syn-warning {
+    @apply bg-yellow-50 dark:bg-yellow-900/20;
+    & .syn-alert-title,
+    & .syn-alert-message,
+    & .syn-alert-content {
+        @apply text-yellow-800 dark:text-yellow-200;
+    }
+    & .syn-alert-icon {
+        @apply text-yellow-600 dark:text-yellow-400;
+    }
+    & .syn-alert-close {
+        @apply text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-200 focus:ring-yellow-500;
+    }
+    &.syn-alert-bordered {
+        @apply border-l-4 border-yellow-500;
+    }
+    &.syn-alert-solid {
+        @apply bg-yellow-600;
+        & .syn-alert-title,
+        & .syn-alert-message,
+        & .syn-alert-content,
+        & .syn-alert-icon {
+            @apply text-white;
+        }
+        & .syn-alert-close {
+            @apply text-white hover:text-yellow-100;
+        }
+    }
+}
+
+.syn-alert.syn-danger {
+    @apply bg-red-50 dark:bg-red-900/20;
+    & .syn-alert-title,
+    & .syn-alert-message,
+    & .syn-alert-content {
+        @apply text-red-800 dark:text-red-200;
+    }
+    & .syn-alert-icon {
+        @apply text-red-600 dark:text-red-400;
+    }
+    & .syn-alert-close {
+        @apply text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 focus:ring-red-500;
+    }
+    &.syn-alert-bordered {
+        @apply border-l-4 border-red-500;
+    }
+    &.syn-alert-solid {
+        @apply bg-red-600;
+        & .syn-alert-title,
+        & .syn-alert-message,
+        & .syn-alert-content,
+        & .syn-alert-icon {
+            @apply text-white;
+        }
+        & .syn-alert-close {
+            @apply text-white hover:text-red-100;
+        }
+    }
+}
+
+.syn-alert.syn-info {
+    @apply bg-blue-50 dark:bg-blue-900/20;
+    & .syn-alert-title,
+    & .syn-alert-message,
+    & .syn-alert-content {
+        @apply text-blue-800 dark:text-blue-200;
+    }
+    & .syn-alert-icon {
+        @apply text-blue-600 dark:text-blue-400;
+    }
+    & .syn-alert-close {
+        @apply text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 focus:ring-blue-500;
+    }
+    &.syn-alert-bordered {
+        @apply border-l-4 border-blue-500;
+    }
+    &.syn-alert-solid {
+        @apply bg-blue-600;
+        & .syn-alert-title,
+        & .syn-alert-message,
+        & .syn-alert-content,
+        & .syn-alert-icon {
+            @apply text-white;
+        }
+        & .syn-alert-close {
+            @apply text-white hover:text-blue-100;
+        }
+    }
+}
+.syn-modal-backdrop {
+    @apply fixed inset-0 z-50 bg-gray-900/50 dark:bg-gray-900/80;
+}
+.syn-modal-container {
+    @apply fixed inset-0 z-[51] flex items-center justify-center p-4;
+}
+.syn-modal-panel {
+    @apply relative flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-y-auto rounded-2xl bg-white shadow-xl dark:bg-gray-800;
+}
+.syn-drawer-backdrop {
+    @apply fixed top-0 left-0 z-39 h-screen w-full bg-gray-900/50;
+}
+.syn-drawer-panel {
+    @apply fixed top-0 right-0 z-40 h-screen w-80 overflow-y-auto bg-white p-4 transition-transform dark:bg-gray-800;
+    box-shadow: -4px 0px 4px 0px rgba(0, 0, 0, 0.1);
+}
+.syn-drawer-title {
+    @apply mb-4 inline-flex items-center text-base font-semibold text-gray-500 dark:text-gray-400;
+}
+.syn-drawer-close {
+    @apply absolute top-2.5 end-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white;
+}
+.syn-toastr-container {
+    @apply z-999 pointer-events-none fixed inset-x-8 top-0 flex max-w-full flex-col gap-2 bg-transparent px-6 py-6 md:bottom-0 md:left-[unset] md:right-0 md:top-[unset] md:max-w-sm;
+}
+.syn-toastr {
+    @apply rounded-radius pointer-events-auto relative border;
+}
+.syn-toastr-body {
+    @apply rounded-radius flex w-full items-center gap-2.5 p-4 transition-all duration-300;
+}
+.syn-toastr-icon-wrap {
+    @apply rounded-full p-0.5;
+}
+.syn-toastr-text {
+    @apply flex flex-col gap-2;
+}
+.syn-toastr-title {
+    @apply text-sm font-semibold;
+}
+.syn-toastr-msg {
+    @apply text-pretty text-sm;
+}
+.syn-toastr-dismiss {
+    @apply ml-auto;
+}
+
+.syn-toastr-info {
+    @apply border-info bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark;
+    & .syn-toastr-body { @apply bg-info/10; }
+    & .syn-toastr-icon-wrap { @apply bg-info/15 text-info; }
+    & .syn-toastr-title { @apply text-info; }
+}
+.syn-toastr-success {
+    @apply border-success bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark;
+    & .syn-toastr-body { @apply bg-success/10; }
+    & .syn-toastr-icon-wrap { @apply bg-success/15 text-success; }
+    & .syn-toastr-title { @apply text-success; }
+}
+.syn-toastr-warning {
+    @apply border-warning bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark;
+    & .syn-toastr-body { @apply bg-warning/10; }
+    & .syn-toastr-icon-wrap { @apply bg-warning/15 text-warning; }
+    & .syn-toastr-title { @apply text-warning; }
+}
+.syn-toastr-danger {
+    @apply border-danger bg-surface text-on-surface dark:bg-surface-dark dark:text-on-surface-dark;
+    & .syn-toastr-body { @apply bg-danger/10; }
+    & .syn-toastr-icon-wrap { @apply bg-danger/15 text-danger; }
+    & .syn-toastr-title { @apply text-danger; }
+}
+.syn-toastr-message {
+    @apply border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark;
+    & .syn-toastr-body { @apply bg-surface-alt dark:bg-surface-dark-alt; }
+}
+
+.syn-toastr-message-body {
+    @apply flex w-full items-center gap-2.5;
+}
+.syn-toastr-avatar {
+    @apply mr-2 size-12 rounded-full;
+}
+.syn-toastr-sender {
+    @apply flex flex-col items-start gap-2;
+}
+.syn-toastr-sender-name {
+    @apply text-on-surface-strong dark:text-on-surface-dark-strong text-sm font-semibold;
+}
+.syn-toastr-actions {
+    @apply flex items-center gap-4;
+}
+.syn-toastr-action {
+    @apply text-on-surface dark:text-on-surface-dark whitespace-nowrap bg-transparent text-center text-sm font-bold tracking-wide transition hover:opacity-75 active:opacity-100;
+}
+.syn-toastr-action:not(.syn-toastr-action-secondary) {
+    @apply text-primary dark:text-primary-dark;
+}
+.syn-select-wrap {
+    @apply relative z-20 bg-transparent;
+}
+.syn-select-arrow {
+    @apply pointer-events-none absolute right-4 top-1/2 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400;
+}
+.syn-multi-select {
+    @apply flex flex-col items-center;
+}
+.syn-multi-select-box {
+    @apply shadow-theme-xs focus:border-brand-300 focus:shadow-focus-ring dark:focus:border-brand-300 mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pr-3 pl-3 outline-hidden transition dark:border-gray-700 dark:bg-gray-900;
+}
+.syn-multi-select-tags {
+    @apply flex flex-auto flex-wrap gap-2;
+}
+.syn-multi-select-tag {
+    /* .group utility stays a literal class in the markup — @apply group
+       is a no-op in Tailwind v4 since it produces no declarations itself. */
+    @apply flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pr-2 pl-2.5 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800;
+}
+.syn-multi-select-tag-remove {
+    @apply cursor-pointer pl-2 text-gray-500 group-hover:text-gray-400 dark:text-gray-400;
+}
+.syn-multi-select-placeholder-wrap {
+    @apply flex-1;
+}
+.syn-multi-select-placeholder-input {
+    @apply h-full w-full appearance-none border-0 bg-transparent p-1 pr-2 text-sm outline-hidden placeholder:text-gray-800 focus:border-0 focus:ring-0 focus:outline-hidden dark:placeholder:text-white/90;
+}
+.syn-multi-select-toggle {
+    @apply h-5 w-5 cursor-pointer text-gray-700 outline-hidden focus:outline-hidden dark:text-gray-400;
+}
+.syn-multi-select-dropdown {
+    /* max-h-select was in the original inline class list but isn't a real
+       Tailwind utility — silently ignored there, dropped here since @apply
+       rejects unknown candidates outright. No behavior change either way. */
+    @apply absolute top-full left-0 z-40 w-full overflow-y-auto rounded-lg bg-white shadow-sm dark:bg-gray-900;
+}
+.syn-multi-select-option-row {
+    @apply hover:bg-primary/5 w-full cursor-pointer rounded-t border-b border-gray-200 dark:border-gray-800;
+}
+.syn-multi-select-option {
+    @apply relative flex w-full items-center border-l-2 border-transparent p-2 pl-2;
+}
+.syn-multi-select-option-label {
+    @apply mx-2 leading-6 text-gray-800 dark:text-white/90;
+}
+.syn-checkboxes,
+.syn-radio-buttons {
+    @apply px-5 py-2 sm:px-6 sm:py-3;
+}
+.syn-checkboxes-row,
+.syn-radio-buttons-row {
+    @apply flex flex-wrap items-center gap-8;
+}
+.syn-checkbox-label,
+.syn-radio-label {
+    @apply flex cursor-pointer items-center text-sm font-medium text-gray-700 select-none dark:text-gray-400;
+}
+.syn-checkbox-box {
+    @apply hover:border-brand-500 dark:hover:border-brand-500 mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px];
+}
+.syn-radio-box {
+    @apply hover:border-brand-500 dark:hover:border-brand-500 mr-3 flex h-5 w-5 items-center justify-center rounded-full border-[1.25px];
+}
+.syn-radio-dot {
+    @apply h-2 w-2 rounded-full;
+}
+.syn-password-toggle {
+    @apply absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer;
+}
+.syn-password-icon {
+    @apply fill-gray-500 dark:fill-gray-400;
+}
+.syn-password-generator {
+    @apply relative;
+}
+.syn-password-generator-actions {
+    @apply absolute right-2 top-1/2 z-30 flex -translate-y-1/2 items-center gap-1;
+}
+.syn-password-generator-btn {
+    @apply rounded p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700;
+}
+.syn-password-generator-icon {
+    @apply fill-gray-500 dark:fill-gray-400;
+}
+.syn-confirm-backdrop {
+    @apply fixed inset-0 z-50 bg-gray-900/50 dark:bg-gray-900/80;
+}
+.syn-confirm-container {
+    @apply fixed inset-0 z-[51] flex items-center justify-center overflow-y-auto p-4;
+}
+.syn-confirm-panel {
+    @apply relative w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800;
+}
+.syn-confirm-header {
+    @apply flex items-start justify-between border-b border-gray-200 p-5 dark:border-gray-700;
+}
+.syn-confirm-header-left {
+    @apply flex items-center gap-3;
+}
+.syn-confirm-icon {
+    @apply flex h-10 w-10 items-center justify-center rounded-full;
+}
+.syn-confirm-icon.syn-confirm-danger {
+    @apply bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400;
+}
+.syn-confirm-icon.syn-confirm-warning {
+    @apply bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400;
+}
+.syn-confirm-icon.syn-confirm-primary {
+    @apply bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400;
+}
+.syn-confirm-icon.syn-confirm-success {
+    @apply bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400;
+}
+.syn-confirm-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+.syn-confirm-close {
+    @apply text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
+}
+.syn-confirm-body {
+    @apply p-5;
+}
+.syn-confirm-message {
+    @apply text-sm text-gray-600 dark:text-gray-300;
+}
+.syn-confirm-footer {
+    @apply flex items-center justify-end gap-3 border-t border-gray-200 p-5 dark:border-gray-700;
+}
+.syn-confirm-cancel {
+    @apply rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600;
+}
+.syn-confirm-submit {
+    @apply rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+.syn-confirm-submit.syn-confirm-danger {
+    @apply bg-red-600 hover:bg-red-700 focus:ring-red-500;
+}
+.syn-confirm-submit.syn-confirm-warning {
+    @apply bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500;
+}
+.syn-confirm-submit.syn-confirm-primary {
+    @apply bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+}
+.syn-confirm-submit.syn-confirm-success {
+    @apply bg-green-600 hover:bg-green-700 focus:ring-green-500;
+}
+/* adv-select — class names kept unprefixed (not renamed to syn-*): these
+   selectors are already depended on by packages/synapse/stubs/themes/
+   application/css/theme-base.css, a shipped alternate theme. */
+.adv-select-container {
+    @apply relative w-full;
+}
+.adv-select-input-box {
+    @apply shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 focus:ring-3 focus:outline-hidden flex w-full flex-wrap gap-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30;
+}
+.adv-select-item-multiple {
+    @apply flex items-center space-x-1 rounded-md bg-blue-100 px-2 py-1 text-blue-700;
+}
+.adv-select-item-remove {
+    @apply ml-1 text-sm;
+}
+.adv-select-item-single {
+    @apply text-gray-800;
+}
+.adv-select-input {
+    @apply flex-1 focus:outline-none;
+}
+.adv-select-clear {
+    @apply ml-auto text-sm text-gray-400 hover:text-gray-700;
+}
+.adv-select-dropdown {
+    @apply absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-md dark:border-gray-700 dark:bg-gray-900;
+}
+.adv-select-option {
+    @apply cursor-pointer p-2 hover:bg-blue-100 dark:hover:bg-gray-800;
+}
+.adv-select-option-create {
+    @apply cursor-pointer border-t border-gray-200 p-2 hover:bg-green-100 dark:border-gray-700 dark:hover:bg-green-900/20;
+}
+.adv-select-create-hint {
+    @apply text-green-600 dark:text-green-400;
+}
+/* Select2 third-party library overrides — used by select2.blade.php,
+   relocated verbatim from its inline @assets <style> block. */
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.375rem 0.5rem;
+}
+.dark .select2-container--default .select2-selection--multiple {
+    background-color: rgb(17 24 39);
+    border-color: rgb(55 65 81);
+}
+.select2-container--default .select2-selection--single {
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+}
+.dark .select2-container--default .select2-selection--single {
+    background-color: rgb(17 24 39);
+    border-color: rgb(55 65 81);
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding-left: 0.75rem;
+    padding-right: 2rem;
+    line-height: 2.75rem;
+    color: rgb(17 24 39);
+}
+.dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: rgb(229 231 235);
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: rgb(107 114 128);
+}
+.dark .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: rgb(156 163 175);
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 2.75rem;
+    right: 0.75rem;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: rgb(107 114 128) transparent transparent transparent;
+    border-width: 6px 6px 0 6px;
+    margin-left: -6px;
+    margin-top: -3px;
+    left: 50%;
+    top: 50%;
+}
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent rgb(107 114 128) transparent;
+    border-width: 0 6px 6px 6px;
+}
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    margin-right: 0;
+    color: rgb(107 114 128);
+    font-size: 1.5rem;
+    height: auto;
+    padding: 0.25rem 0.5rem;
+    background-color: lightgray;
+    border-radius: 0.1rem;
+}
+.dark .select2-container--default .select2-selection--single .select2-selection__clear {
+    color: rgb(156 163 175);
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: rgb(219 234 254);
+    border: none;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    color: rgb(29 78 216);
+}
+.dark .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: rgba(29, 78, 216, 0.3);
+    color: rgb(147 197 253);
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    padding-left: 0.7rem !important;
+}
+.select2-container--default .select2-results__option--highlighted {
+    background-color: rgb(219 234 254);
+    color: rgb(29 78 216);
+}
+.dark .select2-dropdown {
+    background-color: rgb(17 24 39);
+    border-color: rgb(55 65 81);
+}
+.dark .select2-container--default .select2-results__option {
+    color: rgb(229 231 235);
+}
+.dark .select2-container--default .select2-search--dropdown .select2-search__field {
+    background-color: rgb(31 41 55);
+    border-color: rgb(55 65 81);
+    color: rgb(229 231 235);
+}
+.select2-container {
+    width: 100% !important;
+}
+/* file-drop — already-semantic CSS, relocated from file-drop.blade.php's inline <style> */
+.synapse-file-drop {
+    position: relative;
+    width: 100%;
+}
+.synapse-file-drop__zone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 28px 20px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #fafbfc;
+    color: #475569;
+    cursor: pointer;
+    text-align: center;
+    transition:
+        border-color 150ms ease,
+        background 150ms ease,
+        color 150ms ease,
+        box-shadow 150ms ease,
+        transform 150ms ease;
+}
+.synapse-file-drop__zone:hover {
+    border-color: #00a2b9;
+    background: #e7f8fb;
+    color: #006b7a;
+    box-shadow: 0 4px 12px rgba(0, 162, 185, 0.12);
+    transform: translateY(-1px);
+}
+.synapse-file-drop__zone.is-dragging {
+    border-color: #00a2b9;
+    border-style: solid;
+    background: #cdeff4;
+    color: #006b7a;
+    box-shadow: 0 0 0 4px rgba(0, 162, 185, 0.18);
+}
+.synapse-file-drop__zone:focus-within {
+    outline: none;
+    border-color: #00a2b9;
+    box-shadow: 0 0 0 3px rgba(0, 162, 185, 0.2);
+}
+.synapse-file-drop__zone:active {
+    transform: translateY(0);
+}
+.synapse-file-drop__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: rgba(0, 162, 185, 0.1);
+    color: #00a2b9;
+    font-size: 1.125rem;
+    transition:
+        background 150ms ease,
+        transform 150ms ease;
+}
+.synapse-file-drop__zone:hover .synapse-file-drop__icon {
+    background: rgba(0, 162, 185, 0.18);
+    transform: scale(1.05);
+}
+.synapse-file-drop__primary {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.4;
+}
+.synapse-file-drop__zone:hover .synapse-file-drop__primary {
+    color: #003a43;
+}
+.synapse-file-drop__primary em {
+    font-style: normal;
+    color: #00a2b9;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+.synapse-file-drop__hint {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+.synapse-file-drop__counter {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 2px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.synapse-file-drop__zone:hover .synapse-file-drop__counter {
+    border-color: #00a2b9;
+    color: #006b7a;
+}
+.synapse-file-drop__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 0;
+    color: transparent;
+}
+.synapse-file-drop__input::file-selector-button,
+.synapse-file-drop__input::-webkit-file-upload-button {
+    display: none;
+}
+.synapse-file-drop__full {
+    margin: 0;
+    padding: 16px;
+    font-size: 0.8125rem;
+    color: #64748b;
+    text-align: center;
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+}
+.synapse-file-drop__error {
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    color: #be123c;
+}
+.synapse-file-drop__uploading {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #006b7a;
+    font-weight: 500;
+}
+.synapse-file-drop__uploading::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 2px solid #00a2b9;
+    border-top-color: transparent;
+    animation: synapse-file-drop-spin 0.7s linear infinite;
+}
+@keyframes synapse-file-drop-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.syn-drag-drop {
+    @apply w-full;
+}
+.syn-drag-drop-zone {
+    @apply relative cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors duration-200 hover:border-gray-400;
+}
+.syn-drag-drop-zone-active {
+    @apply border-blue-500 bg-blue-50;
+}
+.syn-drag-drop-zone-idle {
+    @apply border-gray-300 bg-white;
+}
+.syn-drag-drop-preview {
+    @apply mb-4;
+}
+.syn-drag-drop-preview-wrap {
+    @apply relative mx-auto inline-block;
+}
+.syn-drag-drop-preview-img {
+    @apply max-h-48 rounded-lg shadow-md;
+}
+.syn-drag-drop-remove-btn {
+    @apply absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600;
+}
+.syn-drag-drop-filename {
+    @apply mt-2 text-sm text-gray-600;
+}
+.syn-drag-drop-file-name {
+    @apply text-sm font-medium text-gray-700;
+}
+.syn-drag-drop-filesize,
+.syn-drag-drop-file-size {
+    @apply text-xs text-gray-500;
+}
+.syn-drag-drop-empty-icon-wrap {
+    @apply mb-6 flex justify-center;
+}
+.syn-drag-drop-empty-icon-circle {
+    @apply flex h-16 w-16 items-center justify-center rounded-full bg-gray-100;
+}
+.syn-drag-drop-empty-icon {
+    @apply h-8 w-8 text-gray-400;
+}
+.syn-drag-drop-label {
+    @apply mb-3 text-xl font-semibold text-gray-700;
+}
+.syn-drag-drop-desc {
+    @apply mx-auto mb-5 block max-w-sm text-sm text-gray-500;
+}
+.syn-drag-drop-browse {
+    @apply text-sm font-medium text-blue-600 underline hover:text-blue-700;
+}
+.syn-drag-drop-file-info {
+    @apply mt-4;
+}
+.syn-drag-drop-remove-link {
+    @apply mt-2 text-xs text-red-600 hover:text-red-700;
+}
+.syn-drag-drop-error {
+    @apply mt-2 text-sm text-red-600;
+}
+.syn-toggler-label,
+.syn-toggler-label-inline {
+    @apply flex cursor-pointer select-none items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-400;
+}
+.syn-toggler-label-inline {
+    @apply gap-2;
+}
+.syn-toggler-track {
+    @apply block h-6 w-11 rounded-full transition-colors;
+}
+.syn-toggler-off {
+    @apply bg-gray-300 dark:bg-gray-600;
+}
+.syn-toggler-green {
+    @apply bg-green-500 dark:bg-green-500;
+}
+.syn-toggler-blue {
+    @apply bg-blue-500 dark:bg-blue-500;
+}
+.syn-toggler-brand {
+    @apply bg-brand-500 dark:bg-brand-500;
+}
+.syn-toggler-red {
+    @apply bg-red-500 dark:bg-red-500;
+}
+.syn-toggler-yellow {
+    @apply bg-yellow-500 dark:bg-yellow-500;
+}
+.syn-toggler-purple {
+    @apply bg-purple-500 dark:bg-purple-500;
+}
+.syn-toggler-thumb {
+    @apply absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out;
+}
+.syn-per-page-selector {
+    @apply flex gap-2 p-3;
+}
+.syn-per-page-select {
+    @apply shadow-theme-sm rounded-sm p-1;
+}

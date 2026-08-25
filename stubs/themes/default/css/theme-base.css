@@ -6,8 +6,9 @@
  * Loaded on EVERY page via resources/css/base.css.
  *
  * NOTE: --color-brand-* is intentionally NOT redeclared here — it is
- * defined in synapps/resources/css/lta.css (TailAdmin's real brand scale,
- * #465fff etc.), which this file is imported after. Tailwind v4 @theme
+ * defined in synapps/resources/css/synapse-components.css (TailAdmin's real
+ * brand scale, #465fff etc., formerly lta.css), which this file is imported
+ * after. Tailwind v4 @theme
  * values merge with later imports winning per-name, so redeclaring
  * --color-brand-* here would silently override the real TailAdmin tokens.
  */
@@ -475,3 +476,116 @@ input[type="radio"] {
 
 /* Inline paragraph text */
 .dark p { color: rgb(209 213 219); }   /* gray-300 */
+
+/* ========================================
+   MOVED FROM lta.css (Aug 2026 semantic-CSS migration)
+   Not used by any packages/synapse component — general theme/reset rules.
+   .btn / .card / .tooltip duplicates from lta.css were DROPPED here, not
+   merged — theme-base.css's existing versions above are canonical.
+   ======================================== */
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+@utility no-scrollbar {
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@utility custom-scrollbar {
+    &::-webkit-scrollbar {
+        @apply size-1.5;
+    }
+    &::-webkit-scrollbar-track {
+        @apply rounded-full;
+    }
+    &::-webkit-scrollbar-thumb {
+        @apply bg-gray-200 rounded-full;
+    }
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #344054;
+}
+
+.form-check-input:checked ~ span {
+    @apply border-brand-500 dark:border-brand-500 border-[6px];
+}
+
+.has-tooltip {
+    @apply relative inline-block;
+}
+
+.tooltip {
+    @apply invisible absolute left-1/2 -translate-x-1/2 -translate-y-full rounded-md bg-gray-700 px-2 py-1 text-center text-xs text-white;
+}
+
+.has-tooltip > .tooltip {
+    @apply group-hover:visible;
+}
+
+/* Swiper carousel overrides */
+.swiper-button-prev svg,
+.swiper-button-next svg {
+    @apply h-auto! w-auto!;
+}
+.carouselTwo .swiper-button-next:after,
+.carouselTwo .swiper-button-prev:after,
+.carouselFour .swiper-button-next:after,
+.carouselFour .swiper-button-prev:after {
+    @apply hidden;
+}
+.carouselTwo .swiper-button-next.swiper-button-disabled,
+.carouselTwo .swiper-button-prev.swiper-button-disabled,
+.carouselFour .swiper-button-next.swiper-button-disabled,
+.carouselFour .swiper-button-prev.swiper-button-disabled {
+    @apply bg-white/60 opacity-100!;
+}
+.carouselTwo .swiper-button-next,
+.carouselTwo .swiper-button-prev,
+.carouselFour .swiper-button-next,
+.carouselFour .swiper-button-prev {
+    @apply h-10 w-10 rounded-full border-[0.5px] border-white/10 bg-white/90 text-gray-700! backdrop-blur-[10px];
+    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.1), 0px 1px 3px 0px rgba(16, 24, 40, 0.1);
+}
+.carouselTwo .swiper-button-prev,
+.carouselFour .swiper-button-prev {
+    @apply left-3! sm:left-4!;
+}
+.carouselTwo .swiper-button-next,
+.carouselFour .swiper-button-next {
+    @apply right-3! sm:right-4!;
+}
+.carouselThree .swiper-pagination,
+.carouselFour .swiper-pagination {
+    @apply bottom-3! left-1/2! inline-flex w-auto! -translate-x-1/2 items-center gap-1.5 rounded-[40px] border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 backdrop-blur-[10px] sm:bottom-5!;
+    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.1), 0px 1px 3px 0px rgba(16, 24, 40, 0.1);
+}
+.carouselThree .swiper-pagination-bullet,
+.carouselFour .swiper-pagination-bullet {
+    @apply m-0! h-2.5 w-2.5 bg-white opacity-100 duration-200 ease-in-out;
+    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+}
+.carouselThree .swiper-pagination-bullet-active,
+.carouselFour .swiper-pagination-bullet-active {
+    @apply w-6.5 rounded-xl;
+}

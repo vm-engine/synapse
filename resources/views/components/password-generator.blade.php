@@ -1,5 +1,5 @@
 <div
-    class="password-generator relative"
+    class="syn-password-generator"
     x-data="synapsePasswordGenerator({{ $length }})"
 >
     <input
@@ -10,10 +10,10 @@
         {{ $attributes->merge(['class' => 'form-input pr-32']) }}
     />
 
-    <div class="absolute right-2 top-1/2 z-30 flex -translate-y-1/2 items-center gap-1">
+    <div class="syn-password-generator-actions">
         <!-- Generate Password Button -->
         <button
-            class="rounded p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+            class="syn-password-generator-btn"
             type="button"
             title="Generate Password"
             @click="generate()"
@@ -24,13 +24,13 @@
         @if ($model)
             <!-- Set Property Button -->
             <button
-                class="rounded p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                class="syn-password-generator-btn"
                 type="button"
                 title="Apply Password"
                 @click="setProperty()"
             >
                 <svg
-                    class="fill-gray-500 dark:fill-gray-400"
+                    class="syn-password-generator-icon"
                     width="18"
                     height="18"
                     viewBox="0 0 24 24"
@@ -44,13 +44,13 @@
 
         <!-- Copy Password Button -->
         <button
-            class="rounded p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+            class="syn-password-generator-btn"
             type="button"
             title="Copy Password"
             @click="copyPassword()"
         >
             <svg
-                class="fill-gray-500 dark:fill-gray-400"
+                class="syn-password-generator-icon"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
@@ -68,74 +68,74 @@
 <script nonce="{{ csp_nonce() }}">
     (() => {
         const register = () => {
-        Alpine.data('synapsePasswordGenerator', (initialLength) => ({
-            showPassword: false,
-            passwordLength: initialLength,
+            Alpine.data('synapsePasswordGenerator', (initialLength) => ({
+                showPassword: false,
+                passwordLength: initialLength,
 
-            generatePassword(length) {
-                const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-                const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                const numbers = '0123456789';
-                const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-                const allChars = lowercase + uppercase + numbers + symbols;
+                generatePassword(length) {
+                    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+                    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const numbers = '0123456789';
+                    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                    const allChars = lowercase + uppercase + numbers + symbols;
 
-                let password = [
-                    lowercase[Math.floor(Math.random() * lowercase.length)],
-                    uppercase[Math.floor(Math.random() * uppercase.length)],
-                    numbers[Math.floor(Math.random() * numbers.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)]
-                ];
+                    let password = [
+                        lowercase[Math.floor(Math.random() * lowercase.length)],
+                        uppercase[Math.floor(Math.random() * uppercase.length)],
+                        numbers[Math.floor(Math.random() * numbers.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)]
+                    ];
 
-                for (let i = password.length; i < length; i++) {
-                    password.push(allChars[Math.floor(Math.random() * allChars.length)]);
-                }
+                    for (let i = password.length; i < length; i++) {
+                        password.push(allChars[Math.floor(Math.random() * allChars.length)]);
+                    }
 
-                for (let i = password.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [password[i], password[j]] = [password[j], password[i]];
-                }
+                    for (let i = password.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [password[i], password[j]] = [password[j], password[i]];
+                    }
 
-                return password.join('');
-            },
+                    return password.join('');
+                },
 
-            generate() {
-                const newPassword = this.generatePassword(this.passwordLength);
-                this.$refs.passwordInput.value = newPassword;
-                this.$refs.passwordInput.dispatchEvent(new Event('input'));
-            },
+                generate() {
+                    const newPassword = this.generatePassword(this.passwordLength);
+                    this.$refs.passwordInput.value = newPassword;
+                    this.$refs.passwordInput.dispatchEvent(new Event('input'));
+                },
 
-            setProperty() {
-                const password = this.$refs.passwordInput.value;
-                if (password) {
-                    @if ($model)
-                        @if (is_array($model))
-                            @foreach ($model as $property)
-                                $wire.set('{{ $property }}', password);
-                            @endforeach
-                        @else
-                            $wire.set('{{ $model }}', password);
+                setProperty() {
+                    const password = this.$refs.passwordInput.value;
+                    if (password) {
+                        @if ($model)
+                            @if (is_array($model))
+                                @foreach ($model as $property)
+                                    $wire.set('{{ $property }}', password);
+                                @endforeach
+                            @else
+                                $wire.set('{{ $model }}', password);
+                            @endif
                         @endif
-                    @endif
-                    this.$dispatch('password-set');
-                }
-            },
+                        this.$dispatch('password-set');
+                    }
+                },
 
-            async copyPassword() {
-                const password = this.$refs.passwordInput.value;
-                if (password) {
-                    try {
-                        await navigator.clipboard.writeText(password);
-                        this.$dispatch('password-copied');
-                    } catch (err) {
-                        console.error('Failed to copy password:', err);
+                async copyPassword() {
+                    const password = this.$refs.passwordInput.value;
+                    if (password) {
+                        try {
+                            await navigator.clipboard.writeText(password);
+                            this.$dispatch('password-copied');
+                        } catch (err) {
+                            console.error('Failed to copy password:', err);
+                        }
                     }
                 }
-            }
-        }));
+            }));
         };
-    document.addEventListener('alpine:init', register);
-    if (window.Alpine) {
-        register();
-    }
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
     })();
 </script>

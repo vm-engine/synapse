@@ -1,5 +1,5 @@
 <div
-    class="relative z-20 bg-transparent"
+    class="syn-select-wrap"
     x-data="{ isOptionSelected: false }"
 >
     <select
@@ -14,7 +14,7 @@
             >{{ $option }}</option>
         @endforeach
     </select>
-    <span class="pointer-events-none absolute right-4 top-1/2 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+    <span class="syn-select-arrow">
         <svg
             class="stroke-current"
             width="20"

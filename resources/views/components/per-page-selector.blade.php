@@ -1,6 +1,9 @@
-<div class="flex gap-2 p-3">
+<div class="syn-per-page-selector">
     <div class="flex-none p-1">
-        <select class="shadow-theme-sm rounded-sm p-1" wire:model.live="perPage">
+        <select
+            class="syn-per-page-select"
+            wire:model.live="perPage"
+        >
             <option value="10">10</option>
             <option value="15">15</option>
             <option value="25">25</option>

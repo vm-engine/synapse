@@ -1,10 +1,10 @@
-<div class="px-5 py-2 sm:px-6 sm:py-3">
+<div class="syn-checkboxes">
     <!-- Elements -->
-    <div class="flex flex-wrap items-center gap-8">
+    <div class="syn-checkboxes-row">
         @foreach ($options as $key => $option)
             <div x-data="{ checked: {{ in_array($key, $model) ? 'true' : 'false' }} }">
                 <label
-                    class="flex cursor-pointer items-center text-sm font-medium text-gray-700 select-none dark:text-gray-400"
+                    class="syn-checkbox-label"
                     for="{{ $name }}-{{ $key }}"
                 >
                     <div class="relative">
@@ -18,7 +18,7 @@
                             {{ $attributes }}
                         />
                         <div
-                            class="f hover:border-brand-500 dark:hover:border-brand-500 mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]"
+                            class="syn-checkbox-box"
                             :class="checked ? 'border-brand-500 bg-brand-500' :
                                 'bg-transparent border-gray-300 dark:border-gray-700'"
                         >
