@@ -25,10 +25,10 @@ describe('SsrfGuard::isSafeUrl', function () {
         expect(SsrfGuard::isSafeUrl('http://[::1]/'))->toBeFalse();
     });
 
-    it('rejects RFC1918 private ranges', function () {
-        expect(SsrfGuard::isSafeUrl('http://10.0.0.5/'))->toBeFalse();
-        expect(SsrfGuard::isSafeUrl('http://172.16.0.5/'))->toBeFalse();
-        expect(SsrfGuard::isSafeUrl('http://192.168.1.1/'))->toBeFalse();
+    it('allows RFC1918 private ranges (e.g. VPN/leased-line bank endpoints)', function () {
+        expect(SsrfGuard::isSafeUrl('http://10.0.119.14:801/'))->toBeTrue();
+        expect(SsrfGuard::isSafeUrl('http://172.16.0.5/'))->toBeTrue();
+        expect(SsrfGuard::isSafeUrl('http://192.168.1.1/'))->toBeTrue();
     });
 
     it('rejects link-local addresses including cloud metadata', function () {

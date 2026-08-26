@@ -53,17 +53,19 @@ class SsrfGuard
     }
 
     /**
-     * Whether the given IP address is a public, routable address —
-     * i.e. not private (RFC1918), loopback, link-local, or otherwise
-     * reserved, for either IPv4 or IPv6.
+     * Whether the given IP address is safe to fetch — a public address,
+     * or an RFC1918/ULA private address (common for VPN/leased-line
+     * partner endpoints, e.g. bank sandbox/production APIs). Loopback,
+     * link-local (including the 169.254.169.254 cloud metadata address),
+     * and other non-private reserved ranges are still rejected, for
+     * either IPv4 or IPv6.
      */
     protected static function isPublicIp(string $ip): bool
     {
-        return filter_var(
-            $ip,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-        ) !== false;
+        $isPrivate = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE) === false;
+        $isReserved = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) === false;
+
+        return ! $isReserved || $isPrivate;
     }
 
     /**

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-08-26
+
+### Fixed
+- **`SsrfGuard` rejected legitimate RFC1918/ULA private-network endpoints** — bank sandbox/production APIs are commonly reachable only via VPN/leased-line on a private IP (e.g. `10.0.119.14`), but `isPublicIp()` blocked all private ranges outright, making it impossible to save such a provider URL at all. It now only rejects loopback, link-local (including the `169.254.169.254` cloud metadata address), and other non-private reserved ranges; RFC1918/ULA private addresses are allowed.
+
 ## [2.5.0] - 2026-08-26
 
 ### Added
