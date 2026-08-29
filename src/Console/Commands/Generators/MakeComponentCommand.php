@@ -23,14 +23,14 @@ class MakeComponentCommand extends BaseGeneratorCommand
     {
         // Store component name before parent handle
         $this->componentName = $this->hasArgument('name') && $this->argument('name')
-            ? $this->argument('name')
+            ? $this->stringArgument('name')
             : '';
 
         $result = parent::handle();
 
         // If name was from prompt, get it from argument now
         if (empty($this->componentName)) {
-            $this->componentName = $this->argument('name') ?? '';
+            $this->componentName = $this->hasArgument('name') && $this->argument('name') ? $this->stringArgument('name') : '';
         }
 
         // Create view file unless inline
@@ -47,7 +47,7 @@ class MakeComponentCommand extends BaseGeneratorCommand
     protected function getComponentOptions(): array
     {
         // Name might not be set yet if from prompt, so use generic view path
-        $name = $this->componentName ?: ($this->hasArgument('name') ? $this->argument('name') : 'component');
+        $name = $this->componentName ?: ($this->hasArgument('name') ? $this->stringArgument('name') : 'component');
         $viewName = strtolower(str_replace(['\\', '/'], '.', $name));
 
         return [
@@ -57,8 +57,8 @@ class MakeComponentCommand extends BaseGeneratorCommand
 
     protected function createView(): void
     {
-        $module = $this->argument('module');
-        $name = $this->componentName ?: $this->argument('name');
+        $module = $this->stringArgument('module');
+        $name = $this->componentName ?: $this->stringArgument('name');
 
         $viewName = strtolower(str_replace(['\\', '/'], '.', $name));
         $className = class_basename($name);

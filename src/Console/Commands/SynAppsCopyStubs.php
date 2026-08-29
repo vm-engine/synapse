@@ -98,14 +98,16 @@ class SynAppsCopyStubs extends Command
     private function resolveModules(array $requested, array $available): array
     {
         // Filter out empty strings (no argument passed)
-        $requested = array_filter($requested);
+        $requested = array_values(array_filter($requested));
 
         if (empty($requested)) {
-            return multiselect(
+            $selected = multiselect(
                 label: 'Select stub modules to copy',
                 options: array_combine($available, $available),
                 required: true,
             );
+
+            return array_map(strval(...), array_values($selected));
         }
 
         $invalid = array_diff($requested, $available);

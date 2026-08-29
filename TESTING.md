@@ -194,7 +194,7 @@ tests/
 #### 8. Artisan Commands (`SynAppsCommandsTest.php`)
 **9 test cases** (6 active, 3 skipped):
 
-- **synapps:patch-resources** (4 tests)
+- **synapps:patch** (4 tests)
   - JS file patching
   - CSS file patching
   - Idempotent execution

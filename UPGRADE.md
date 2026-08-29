@@ -154,7 +154,7 @@ All features from beta are now stable. See [CHANGELOG.md](CHANGELOG.md) for full
 #### Recommendations
 
 - ✅ Review and update `.gitignore` to exclude compiled configs
-- ✅ Set up testing with `synapps:patch-tests`
+- ✅ Set up testing with `synapps:patch tests`
 - ✅ Configure error views with `synapps:link-errors`
 
 ---

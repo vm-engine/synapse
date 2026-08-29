@@ -49,7 +49,7 @@ class MakeModuleCommand extends BaseGeneratorCommand
             $this->generator->generateModule($name, $options);
 
             $modulePath = $this->generator->isPackageModule()
-                ? $this->option('path')
+                ? $this->stringOption('path')
                 : base_path('synapps/modules/'.strtolower($name));
 
             $this->components->success('Module created successfully!');
@@ -80,7 +80,7 @@ class MakeModuleCommand extends BaseGeneratorCommand
     protected function getModuleName(): string
     {
         if ($this->argument('name')) {
-            return $this->argument('name');
+            return $this->stringArgument('name');
         }
 
         if ($this->option('no-interaction')) {
@@ -148,7 +148,7 @@ class MakeModuleCommand extends BaseGeneratorCommand
 
         if ($customPath) {
             // Custom path provided
-            $this->generator->setBasePath($customPath);
+            $this->generator->setBasePath($this->stringOption('path'));
         } elseif ($type === 'package') {
             // Package module - needs vendor/org/synmod-name structure
             $vendorPath = base_path('vendor/vm-engine/synmod-'.strtolower($name));

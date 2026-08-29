@@ -23,8 +23,7 @@ Lists all available Artisan commands, including Synapse-specific commands.
 - `synapps:setup` - Interactive setup wizard
 - `synapps:config` - Regenerate configuration files
 - `synapps:discover` - Discover modules and dependencies
-- `synapps:patch-resources` - Integrate Synapse resources
-- `synapps:patch-tests` - Configure testing infrastructure
+- `synapps:patch` - Integrate Synapse resources and configure testing infrastructure
 - `synapps:link-errors` - Link custom error views
 - `synapps:publish-settings` - Publish Settings module
 - `synapse:db-config` - Manage database configuration

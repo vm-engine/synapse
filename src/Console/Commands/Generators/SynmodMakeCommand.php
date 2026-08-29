@@ -7,9 +7,12 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use VmEngine\Synapse\Traits\HasTypedInput;
 
 class SynmodMakeCommand extends Command
 {
+    use HasTypedInput;
+
     protected $signature = 'synmod-make
                             {type? : The type of component to create}
                             {module? : The module name}
@@ -68,15 +71,18 @@ class SynmodMakeCommand extends Command
      */
     public function handle(): int
     {
-        $type = $this->argument('type');
+        $type = $this->stringArgument('type');
 
         // If no type provided, show menu
-        if (! $type) {
-            $type = $this->choice(
+        if ($type === '') {
+            // choice() is typed array|string because of its $multiple flag,
+            // which we never pass — this call always returns a single string.
+            $choice = $this->choice(
                 'What type of component do you want to create?',
                 array_keys($this->componentTypes),
                 0
             );
+            $type = is_array($choice) ? (string) ($choice[0] ?? '') : $choice;
         }
 
         // Validate type
@@ -88,8 +94,8 @@ class SynmodMakeCommand extends Command
         }
 
         // Get module and name
-        $module = $this->argument('module');
-        $name = $this->argument('name');
+        $module = $this->stringArgument('module');
+        $name = $this->stringArgument('name');
 
         // Build command arguments
         $arguments = [

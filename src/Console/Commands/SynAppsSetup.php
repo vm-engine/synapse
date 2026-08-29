@@ -191,10 +191,10 @@ class SynAppsSetup extends Command
         if (! file_exists(base_path('synapps'))) {
             mkdir(base_path('synapps'), 0755);
         }
-        if (! SynapseUtils::copyDirectory(
-            realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'synapps'),
-            base_path('synapps')
-        )) {
+
+        $stubsPath = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'synapps');
+
+        if ($stubsPath === false || ! SynapseUtils::copyDirectory($stubsPath, base_path('synapps'))) {
             $this->components->error('Failed to copy synapps folder');
 
             return 1;
@@ -214,8 +214,7 @@ class SynAppsSetup extends Command
         ]);
         $this->call('synapps:config');
         $this->call('synapps:link-errors');
-        $this->call('synapps:patch-resources');
-        $this->call('synapps:patch-tests');
+        $this->call('synapps:patch');
         $this->call('synapps:discover');
         $this->call('migrate');
 
@@ -240,7 +239,7 @@ class SynAppsSetup extends Command
         $defaultThemeStub = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'themes'.DS.'default');
         $defaultThemeDest = $themesPath.'/default';
 
-        if (is_dir($defaultThemeStub) && ! is_dir($defaultThemeDest)) {
+        if ($defaultThemeStub !== false && is_dir($defaultThemeStub) && ! is_dir($defaultThemeDest)) {
             if (SynapseUtils::copyDirectory($defaultThemeStub, $defaultThemeDest)) {
                 $this->components->info('Default theme installed.');
             }

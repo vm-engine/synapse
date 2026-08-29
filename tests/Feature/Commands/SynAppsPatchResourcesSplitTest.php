@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\File;
 
 /**
- * Tests for SynAppsPatchResources --split-layouts operations.
+ * Tests for SynAppsPatchResources layouts operations.
  *
  * Files are created in the Testbench Laravel root (base_path()) and cleaned up after each test.
  */
@@ -84,7 +84,7 @@ afterEach(function () {
 // ─── createSynappsIntermediaryCss ────────────────────────────────────────────
 
 test('creates synapps-base.css with correct imports', function () {
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('synapps/resources/css/synapps-base.css'));
 
@@ -93,7 +93,7 @@ test('creates synapps-base.css with correct imports', function () {
 });
 
 test('creates synapps-app.css with correct theme import', function () {
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('synapps/resources/css/synapps-app.css'));
 
@@ -101,14 +101,14 @@ test('creates synapps-app.css with correct theme import', function () {
 });
 
 test('creates synapps-frontend.css and synapps-guest.css', function () {
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::exists(base_path('synapps/resources/css/synapps-frontend.css')))->toBeTrue()
         ->and(File::exists(base_path('synapps/resources/css/synapps-guest.css')))->toBeTrue();
 });
 
 test('creates synapps-base.js with correct imports', function () {
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('synapps/resources/js/synapps-base.js'));
 
@@ -117,7 +117,7 @@ test('creates synapps-base.js with correct imports', function () {
 });
 
 test('creates synapps-app.js and layout-specific js files', function () {
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::exists(base_path('synapps/resources/js/synapps-app.js')))->toBeTrue()
         ->and(File::exists(base_path('synapps/resources/js/synapps-frontend.js')))->toBeTrue()
@@ -129,7 +129,7 @@ test('creates synapps-app.js and layout-specific js files', function () {
 test('creates base.css from monolith app.css and rewrites app.css', function () {
     File::put(resource_path('css/app.css'), $this->monolithCss);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::exists(resource_path('css/base.css')))->toBeTrue();
 
@@ -147,7 +147,7 @@ test('creates base.css from monolith app.css and rewrites app.css', function () 
 test('creates frontend.css and guest.css layout entry files', function () {
     File::put(resource_path('css/app.css'), $this->monolithCss);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get(resource_path('css/frontend.css')))
         ->toBe("@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-frontend.css';\n");
@@ -159,7 +159,7 @@ test('creates frontend.css and guest.css layout entry files', function () {
 // ─── createTailwindRefCss ─────────────────────────────────────────────────────
 
 test('creates tailwind-ref.css with tailwind import and theme tokens', function () {
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $path = base_path('synapps/resources/css/tailwind-ref.css');
     expect(File::exists($path))->toBeTrue();
@@ -174,7 +174,7 @@ test('creates tailwind-ref.css with tailwind import and theme tokens', function 
 test('does not overwrite existing tailwind-ref.css', function () {
     File::put(base_path('synapps/resources/css/tailwind-ref.css'), "/* custom */\n");
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get(base_path('synapps/resources/css/tailwind-ref.css')))->toBe("/* custom */\n");
 });
@@ -187,7 +187,7 @@ test('migrates lta.css to synapse-components.css on an already-set-up project', 
     File::put($cssDir.'/synapps.css', "@import \"@fortawesome/fontawesome-free/css/all.min.css\";\n@import \"./lta.css\";\n");
     File::put($cssDir.'/tailwind-ref.css', "@import \"tailwindcss\";\n@import './lta.css';\n@import '../themes/default/css/theme-base.css';\n");
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::exists($cssDir.'/lta.css'))->toBeFalse()
         ->and(File::exists($cssDir.'/synapse-components.css'))->toBeTrue()
@@ -200,7 +200,7 @@ test('does not re-migrate a project that already migrated', function () {
     File::put($cssDir.'/synapse-components.css', "/* already migrated */\n");
     File::put($cssDir.'/synapps.css', "@import \"./synapse-components.css\";\n");
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get($cssDir.'/synapse-components.css'))->toBe("/* already migrated */\n");
 });
@@ -210,7 +210,7 @@ test('does not re-migrate a project that already migrated', function () {
 test('creates base.js from monolith app.js and rewrites app.js', function () {
     File::put(resource_path('js/app.js'), $this->monolithJs);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::exists(resource_path('js/base.js')))->toBeTrue();
 
@@ -226,7 +226,7 @@ test('creates base.js from monolith app.js and rewrites app.js', function () {
 test('creates frontend.js and guest.js layout entry files', function () {
     File::put(resource_path('js/app.js'), $this->monolithJs);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get(resource_path('js/frontend.js')))
         ->toBe("import '../../synapps/resources/js/synapps-frontend.js';\n");
@@ -244,7 +244,7 @@ test('patchThemeImportLines updates synapps-base.css to active theme', function 
 
     config(['synapps.apps.themes.active' => 'new-theme']);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('synapps/resources/css/synapps-base.css'));
     expect($content)->toContain("@import '../themes/new-theme/css/theme-base.css';")
@@ -257,7 +257,7 @@ test('patchThemeImportLines updates synapps-base.js to active theme', function (
 
     config(['synapps.apps.themes.active' => 'new-theme']);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('synapps/resources/js/synapps-base.js'));
     expect($content)->toContain("import '../themes/new-theme/js/theme-base.js';")
@@ -281,7 +281,7 @@ test('expandViteInputs adds all 8 entry points to vite.config.js', function () {
 
     File::put(base_path('vite.config.js'), $viteConfig);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('vite.config.js'));
     expect($content)->toContain("'resources/css/base.css'")
@@ -296,14 +296,14 @@ test('expandViteInputs adds all 8 entry points to vite.config.js', function () {
 
 // ─── Idempotency ──────────────────────────────────────────────────────────────
 
-test('running split-layouts twice produces identical files', function () {
+test('running layouts twice produces identical files', function () {
     File::put(resource_path('css/app.css'), $this->monolithCss);
     File::put(resource_path('js/app.js'), $this->monolithJs);
 
     $viteConfig = "import laravel from 'laravel-vite-plugin';\nexport default { plugins: [laravel({ input: ['resources/css/app.css', 'resources/js/app.js'], refresh: true })] };\n";
     File::put(base_path('vite.config.js'), $viteConfig);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     // Capture state after first run
     $firstRun = [
@@ -316,7 +316,7 @@ test('running split-layouts twice produces identical files', function () {
         'vite.config.js' => File::get(base_path('vite.config.js')),
     ];
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     // All files must be identical after second run
     expect(File::get(base_path('synapps/resources/css/synapps-base.css')))->toBe($firstRun['synapps-base.css'])
@@ -332,8 +332,8 @@ test('vite.config.js not patched twice (no duplicate entries)', function () {
     $viteConfig = "import laravel from 'laravel-vite-plugin';\nexport default { plugins: [laravel({ input: ['resources/css/app.css', 'resources/js/app.js'], refresh: true })] };\n";
     File::put(base_path('vite.config.js'), $viteConfig);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     $content = File::get(base_path('vite.config.js'));
 
@@ -345,7 +345,7 @@ test('app.css not rewritten if already in focused form', function () {
     $focusedCss = "@import '../../synapps/resources/css/synapps-app.css';\n";
     File::put(resource_path('css/app.css'), $focusedCss);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get(resource_path('css/app.css')))->toBe($focusedCss);
 });
@@ -354,7 +354,7 @@ test('app.js not rewritten if already in focused form', function () {
     $focusedJs = "import '../../synapps/resources/js/synapps-app.js';\n";
     File::put(resource_path('js/app.js'), $focusedJs);
 
-    $this->artisan('synapps:patch-resources', ['--split-layouts' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get(resource_path('js/app.js')))->toBe($focusedJs);
 });

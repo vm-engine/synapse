@@ -9,8 +9,7 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
 | `synapps:config` | Regenerate config files | After config changes | Yes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
-| `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
-| `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
+| `synapps:patch` | Patch JS/CSS/Vite/routes/seeder/tests | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
 | `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
@@ -43,8 +42,7 @@ php artisan synapps:setup
    - `vendor:publish --tag=synapse-config --force` - Publishes Synapse configuration files
    - `synapps:config` - Regenerates SynApps & Synapse configuration files
    - `synapps:link-errors` - Links custom error views
-   - `synapps:patch-resources` - Patches JS/CSS imports
-   - `synapps:patch-tests` - Configures testing infrastructure
+   - `synapps:patch` - Patches JS/CSS imports and configures testing infrastructure
    - `synapps:discover` - Discovers modules and updates dependencies
 
 ### Configuration files published
@@ -114,43 +112,49 @@ php artisan synapps:discover
 
 ---
 
-## synapps:patch-resources
+## synapps:patch
 
 Integrates Synapse resources into your Laravel application, wires up the per-layout CSS/JS split (since v2.4.0), and cleans up default Laravel files.
 
 ```bash
-php artisan synapps:patch-resources
+php artisan synapps:patch
 ```
 
-With no options, **all patch operations run**, including the per-layout split — this brings a project all the way from a fresh Laravel install to the current 8-entry-point structure in one call.
+With no arguments, **all patch operations run**, including the per-layout split — this brings a project all the way from a fresh Laravel install to the current 8-entry-point structure in one call.
 
-### Options
+### Arguments
 
-Pass one or more flags to run only that subset of patches (useful for re-running a single patch after manually reverting a file):
+Pass one or more object names to run only that subset of patches (useful for re-running a single patch after manually reverting a file):
 
-| Option | Restricts to |
+```bash
+php artisan synapps:patch layouts
+php artisan synapps:patch theme vite
+```
+
+| Object | Restricts to |
 |---|---|
-| `--theme` | Legacy monolith theme import into `app.css`/`app.js` (only applies if a theme still has a single `theme.css`/`theme.js`, pre-2.4.0 style) |
-| `--comment-default` | Commenting out the default Laravel welcome route and `User::factory()` seeder call |
-| `--css-sources` | Tailwind `@source` directives in `resources/css/app.css` |
-| `--npm-watch` | `package.json` `"watch": "vite build --watch"` script |
-| `--js-back` | `window.withBack()` global JS helper in `resources/js/app.js` |
-| `--vite` | `vite.config.js` static-asset-copy plugin + dev-server watch config |
-| `--split-layouts` | Per-layout CSS/JS split only (see below) |
+| `theme` | Legacy monolith theme import into `app.css`/`app.js` (only applies if a theme still has a single `theme.css`/`theme.js`, pre-2.4.0 style) |
+| `seeder` | Commenting out the default Laravel welcome route and `User::factory()` seeder call |
+| `css` | Tailwind `@source` directives in `resources/css/app.css` |
+| `npm` | `package.json` `"watch": "vite build --watch"` script |
+| `js` | `window.withBack()` global JS helper in `resources/js/app.js` |
+| `vite` | `vite.config.js` static-asset-copy plugin + dev-server watch config |
+| `layouts` | Per-layout CSS/JS split only (see below) |
+| `tests` | Testing infrastructure only (see below) |
 
-### What it does (no options — full run)
+### What it does (no arguments — full run)
 
 1. **Base synapps imports** — adds `import '../../synapps/resources/js/synapps.js';` to `resources/js/app.js` and `@import '../../synapps/resources/css/synapps.css';` to `resources/css/app.css`
 2. **Tailwind `@source` directives** — adds `@source` entries covering `synapps/`, active theme, and `synmod-*`/`synapps-*` vendor package Blade/JS files
-3. **Legacy theme import** (`--theme`) — only if the active theme still has a single `theme.css`/`theme.js` (pre-split); no-ops for themes already using the 4+4 split structure
+3. **Legacy theme import** (`theme`) — only if the active theme still has a single `theme.css`/`theme.js` (pre-split); no-ops for themes already using the 4+4 split structure
 4. **`vite.config.js`** — converts to function-based config (for `--watch` detection), adds the `vite-plugin-static-copy` plugin (wrapped so it's skipped during `--watch` for faster HMR) to copy assets from `synapps/resources/assets/`, per-theme `assets/`, and `vendor/*/synmod-*` / `vendor/vm-engine/synapps-*` packages, and ensures `server.watch` has the right `ignored` paths + polling config for cross-platform file watching
 5. **`routes/web.php`** — comments out the default Laravel welcome route, but only if no other routes are defined in the file
 6. **`database/seeders/DatabaseSeeder.php`** — comments out the default `User::factory()` call (handles multi-line calls too)
 7. **`package.json`** — adds a `"watch": "vite build --watch"` script
 8. **`resources/js/app.js`** — appends the global `window.withBack()` helper plus a `mousedown` interceptor that recomputes the `?back=` URL at click time (fixes stale URLs after Livewire pagination)
-9. **Per-layout CSS/JS split** (`--split-layouts`) — see below
+9. **Per-layout CSS/JS split** (`layouts`) — see below
 
-### Per-layout CSS/JS split (`--split-layouts`)
+### Per-layout CSS/JS split (`layouts`)
 
 Brings the project from the single `app.css`/`app.js` monolith to the 8-entry-point structure introduced in v2.4.0:
 
@@ -160,7 +164,7 @@ Brings the project from the single `app.css`/`app.js` monolith to the 8-entry-po
 4. Patches the active-theme import line in all 8 `synapps-*.css`/`.js` files whenever the active theme changes (e.g. after `synapps:reconfig` or editing `apps.json` directly) — idempotent, only writes when the theme path actually differs
 5. Expands `vite.config.js`'s `input` array to all 8 entry points (`resources/{css,js}/{base,app,frontend,guest}.*`)
 
-> **Breaking in v2.4.0:** themes without the 4+4 split (`theme-{base,app,frontend,guest}.{css,js}`) will fail `npm run build` once `--split-layouts` has run, since `synapps-base.css` imports `theme-base.css`. See the [Theme System docs](../docs/THEMES.md) for the split-theme layout.
+> **Breaking in v2.4.0:** themes without the 4+4 split (`theme-{base,app,frontend,guest}.{css,js}`) will fail `npm run build` once `layouts` has run, since `synapps-base.css` imports `theme-base.css`. See the [Theme System docs](../docs/THEMES.md) for the split-theme layout.
 
 ### Backup files
 
@@ -182,33 +186,15 @@ Patched: resources/js/app.js — rewrite to focused import
 Patched: vite.config.js — expand input array
 ```
 
-### Safe to run multiple times
-
-Every operation is idempotent — only patches if the change is not already present, so re-running (with or without options) is always safe.
-
-### When to run
-
-- After fresh installation
-- If Synapse assets are not loading
-- After switching the active theme, to repropagate the theme import lines (`--split-layouts`, or just re-run with no options)
-- **Automatically called by `synapps:setup`**
-
-### See Also
-
-- [Theme System Documentation](../docs/THEMES.md) - Per-layout theme file structure
-- [synapps:reconfig](#synapps-reconfig) - Changing the active theme without resetting it
-
----
-
-## synapps:patch-tests
+### Testing infrastructure (`tests`)
 
 Configures comprehensive testing infrastructure for Synapse modules.
 
 ```bash
-php artisan synapps:patch-tests
+php artisan synapps:patch tests
 ```
 
-### What it does - patches 4 files
+#### What it does - patches 4 files
 
 1. **`tests/Pest.php`** - Adds module test discovery paths:
    ```php
@@ -231,7 +217,7 @@ php artisan synapps:patch-tests
 
 4. **`phpunit.xml`** - Adds 3 test suites (Browser, Modules, Packages) with proper exclusions
 
-### Run test suites
+#### Run test suites
 
 ```bash
 php artisan test                        # All tests
@@ -240,15 +226,22 @@ php artisan test --testsuite=Modules    # Module tests only
 php artisan test --testsuite=Packages   # Package tests only
 ```
 
-### Backup files
+### Safe to run multiple times
 
-Before modifying `tests/Pest.php` and `.env.testing`, the command creates `.bak` backups. The backup is only created once — subsequent runs will not overwrite it.
+Every operation is idempotent — only patches if the change is not already present, so re-running (with or without arguments) is always safe.
 
 ### When to run
 
 - After fresh installation
+- If Synapse assets are not loading
+- After switching the active theme, to repropagate the theme import lines (`layouts`, or just re-run with no arguments)
 - After adding new modules with tests
 - **Automatically called by `synapps:setup`**
+
+### See Also
+
+- [Theme System Documentation](../docs/THEMES.md) - Per-layout theme file structure
+- [synapps:reconfig](#synapps-reconfig) - Changing the active theme without resetting it
 
 ---
 

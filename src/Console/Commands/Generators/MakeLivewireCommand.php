@@ -76,7 +76,7 @@ class MakeLivewireCommand extends BaseGeneratorCommand
         $dirPrefix = $this->shouldUseEmoji() ? "\u{26A1}" : '';
 
         // Split name by / or \ to support nested paths (e.g., Forms/ContactForm)
-        $segments = preg_split('/[\/\\\\]/', $name);
+        $segments = preg_split('/[\/\\\\]/', $name) ?: [$name];
         $segments = array_map(fn (string $segment): string => Str::kebab($segment), $segments);
 
         // Last segment is the component name (gets emoji prefix on directory)
@@ -177,8 +177,8 @@ class MakeLivewireCommand extends BaseGeneratorCommand
 
     protected function createView(): void
     {
-        $module = $this->argument('module');
-        $name = $this->argument('name');
+        $module = $this->stringArgument('module');
+        $name = $this->stringArgument('name');
 
         try {
             $this->generator->generateComponent('livewire-view', $name, [
@@ -195,7 +195,7 @@ class MakeLivewireCommand extends BaseGeneratorCommand
     {
         $this->call('synapps:make-test', [
             'module' => $this->argument('module'),
-            'name' => $this->argument('name').'Test',
+            'name' => $this->stringArgument('name').'Test',
             '--no-interaction' => true,
         ]);
     }

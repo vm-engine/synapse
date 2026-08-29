@@ -481,7 +481,7 @@ This prevents conflicts with Tailwind utilities and other plugins.
 **Theme assets not copying?**
 ```bash
 # Re-run patch command
-php artisan synapps:patch-resources
+php artisan synapps:patch
 
 # Rebuild assets
 npm run build

@@ -30,10 +30,10 @@ class Modules extends BuilderBase
     private function loadModulePackageConfig(): void
     {
         $modules = array_merge(
-            glob(synapps_path('modules/*/module.json')),
-            glob(base_path('vendor/*/synmod-*/module.json')),
-            glob(base_path('vendor/*/synmodule-*/module.json')),
-            glob(base_path('vendor/*/synapps-*/module.json')),
+            glob(synapps_path('modules/*/module.json')) ?: [],
+            glob(base_path('vendor/*/synmod-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synmodule-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synapps-*/module.json')) ?: [],
         );
 
         foreach ($modules as $modulePath) {

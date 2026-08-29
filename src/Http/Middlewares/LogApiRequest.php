@@ -111,7 +111,13 @@ class LogApiRequest
             return null;
         }
 
-        $decoded = json_decode($response->getContent(), true);
+        $content = $response->getContent();
+
+        if ($content === false) {
+            return null;
+        }
+
+        $decoded = json_decode($content, true);
 
         if (! is_array($decoded)) {
             return null;

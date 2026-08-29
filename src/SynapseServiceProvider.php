@@ -53,7 +53,6 @@ use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
 use VmEngine\Synapse\Console\Commands\SynAppsMakeTheme;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
-use VmEngine\Synapse\Console\Commands\SynAppsPatchTests;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
@@ -104,7 +103,6 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsDiscover::class,
                 SynAppsCopyResources::class,
                 SynAppsPatchResources::class,
-                SynAppsPatchTests::class,
                 SynAppsLinkErrors::class,
                 SynAppsConfig::class,
                 SynAppsReconfig::class,
@@ -338,7 +336,7 @@ class SynapseServiceProvider extends ServiceProvider
             if (! $module['is_package']) {
                 $configPath = synapps_path('modules'.DS.$module['id'].DS.'config');
                 if (file_exists($configPath)) {
-                    $configs = glob($configPath.DS.'*.php');
+                    $configs = glob($configPath.DS.'*.php') ?: [];
                     foreach ($configs as $config) {
                         $configName = basename($config, '.php');
                         $this->mergeConfigFrom($config, $configName);
@@ -355,7 +353,7 @@ class SynapseServiceProvider extends ServiceProvider
             return;
         }
 
-        $configs = glob($path.DS.'*.php');
+        $configs = glob($path.DS.'*.php') ?: [];
         foreach ($configs as $config) {
             $configName = basename($config, '.php');
             if (file_exists(base_path('config'.DS.$configName.'.php'))) {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\File;
 
 /**
- * Tests for SynAppsPatchResources --comment-default (patchWebRoutes) welcome-route detection.
+ * Tests for SynAppsPatchResources seeder (patchWebRoutes) welcome-route detection.
  *
  * Files are created in the Testbench Laravel root (base_path()) and cleaned up after each test.
  */
@@ -25,7 +25,7 @@ it('comments out the closure-based default route', function () {
         });
         PHP);
 
-    $this->artisan('synapps:patch-resources', ['--comment-default' => true]);
+    $this->artisan('synapps:patch', ['object' => ['seeder']]);
 
     expect(File::get(base_path('routes/web.php')))
         ->toContain("// Route::get('/', function () {");
@@ -41,7 +41,7 @@ it('comments out the Route::view based default route (newer Laravel skeleton)', 
         Route::view('/', 'welcome')->name('home');
         PHP);
 
-    $this->artisan('synapps:patch-resources', ['--comment-default' => true]);
+    $this->artisan('synapps:patch', ['object' => ['seeder']]);
 
     expect(File::get(base_path('routes/web.php')))
         ->toContain("// Route::view('/', 'welcome')->name('home');");
@@ -58,7 +58,7 @@ it('leaves the default route alone when other routes already exist in the file',
         Route::get('/status', fn () => 'ok');
         PHP);
 
-    $this->artisan('synapps:patch-resources', ['--comment-default' => true]);
+    $this->artisan('synapps:patch', ['object' => ['seeder']]);
 
     expect(File::get(base_path('routes/web.php')))
         ->toContain("Route::view('/', 'welcome')->name('home');")

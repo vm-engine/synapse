@@ -813,7 +813,7 @@ class PostForm extends Component
 
 #### 2. Generate back-URL links from list pages
 
-Use the `$withBack()` Alpine magic (backed by the global `window.withBack()` helper, both injected by `synapps:patch-resources`) to append the current URL as the `back` parameter:
+Use the `$withBack()` Alpine magic (backed by the global `window.withBack()` helper, both injected by `synapps:patch`) to append the current URL as the `back` parameter:
 
 ```blade
 <!-- Blade view (list page) -->

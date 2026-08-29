@@ -58,7 +58,7 @@ class SensitiveDataRedactor
         $encoded = json_encode($this->redact($data));
 
         if ($encoded === false) {
-            return json_encode(['_error' => 'unserializable']);
+            return '{"_error":"unserializable"}';
         }
 
         if (strlen($encoded) <= $this->maxBodySize) {
@@ -69,7 +69,7 @@ class SensitiveDataRedactor
             '_truncated' => true,
             'original_size' => strlen($encoded),
             'preview' => substr($encoded, 0, $this->maxBodySize),
-        ]);
+        ]) ?: '{"_error":"unserializable"}';
     }
 
     protected function isSensitiveKey(string $key): bool

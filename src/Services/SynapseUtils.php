@@ -87,7 +87,7 @@ class SynapseUtils
                     $namespaceValue[1] = [$namespaceValue[1]];
                 }
                 foreach ($namespaceValue[1] as $prefix) {
-                    $paths = glob($namespaceValue[0].DS.$prefix.'*'.DS);
+                    $paths = glob($namespaceValue[0].DS.$prefix.'*'.DS) ?: [];
 
                     $tmp = array_merge(
                         $tmp,
@@ -95,7 +95,7 @@ class SynapseUtils
                     );
                 }
             } else {
-                $tmp = glob($namespaceValue[0].DS.'*', GLOB_ONLYDIR);
+                $tmp = glob($namespaceValue[0].DS.'*', GLOB_ONLYDIR) ?: [];
             }
             foreach ($tmp as $modulePath) {
                 $moduleName = last(explode(DS, trim($modulePath, DS)));

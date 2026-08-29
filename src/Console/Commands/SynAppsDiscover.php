@@ -70,7 +70,7 @@ class SynAppsDiscover extends Command
 
     private function discoverSynapseModules(): void
     {
-        $moduleConfigPaths = glob(synapps_path('modules'.DS.'*'.DS.'module.json'));
+        $moduleConfigPaths = glob(synapps_path('modules'.DS.'*'.DS.'module.json')) ?: [];
 
         foreach ($moduleConfigPaths as $moduleConfigPath) {
             $moduleConfig = read_json_file($moduleConfigPath);
@@ -93,9 +93,9 @@ class SynAppsDiscover extends Command
     private function discoverModuleDeps(): void
     {
         $modulePackages = array_merge(
-            glob(base_path('vendor/*/synmod-*/module.json')),
-            glob(base_path('vendor/*/synmodule-*/module.json')),
-            glob(base_path('vendor/*/synapps-*/module.json')),
+            glob(base_path('vendor/*/synmod-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synmodule-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synapps-*/module.json')) ?: [],
         );
         foreach ($modulePackages as $packageConfigPath) {
             $moduleConfig = read_json_file($packageConfigPath);

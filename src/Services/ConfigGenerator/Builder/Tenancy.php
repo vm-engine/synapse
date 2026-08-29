@@ -33,19 +33,13 @@ class Tenancy extends BuilderBase
 
     private function loadTenancyConfig(): void
     {
-        $tenancyJson = json_decode(
-            file_get_contents(synapps_path('config/tenancy.json')),
-            true
-        );
+        $tenancyJson = read_json_file(synapps_path('config/tenancy.json'));
 
         if (! file_exists(synapps_path('config/tenancy.dev.json'))) {
             file_put_contents(synapps_path('config/tenancy.dev.json'), '{}');
         }
 
-        $tmpEnvTenancy = json_decode(
-            file_get_contents(synapps_path('config/tenancy.dev.json')),
-            true
-        );
+        $tmpEnvTenancy = read_json_file(synapps_path('config/tenancy.dev.json'));
 
         $this->synapps->config['tenancy'] = array_replace_recursive(
             $tenancyJson,
@@ -81,10 +75,10 @@ class Tenancy extends BuilderBase
     private function loadModuleTenancyConfig(): void
     {
         $modules = array_merge(
-            glob(synapps_path('modules/*/tenancy.json')),
-            glob(base_path('vendor/*/synmod-*/tenancy.json')),
-            glob(base_path('vendor/*/synmodule-*/tenancy.json')),
-            glob(base_path('vendor/*/synapps-*/tenancy.json')),
+            glob(synapps_path('modules/*/tenancy.json')) ?: [],
+            glob(base_path('vendor/*/synmod-*/tenancy.json')) ?: [],
+            glob(base_path('vendor/*/synmodule-*/tenancy.json')) ?: [],
+            glob(base_path('vendor/*/synapps-*/tenancy.json')) ?: [],
         );
 
         foreach ($modules as $modulePath) {

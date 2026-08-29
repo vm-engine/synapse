@@ -66,6 +66,12 @@ class SynapsePatchComposer extends Command
         $composerContent = file_get_contents($composerPath);
         $composerLocalContent = file_get_contents($composerLocalPath);
 
+        if ($composerContent === false || $composerLocalContent === false) {
+            $this->components->error('Failed to read composer.json or composer.local.json');
+
+            return 1;
+        }
+
         $composer = json_decode($composerContent, true);
         $composerLocal = json_decode($composerLocalContent, true);
 
@@ -148,7 +154,7 @@ class SynapsePatchComposer extends Command
         }
 
         $gitignoreContent = file_get_contents($gitignorePath);
-        $lines = explode(PHP_EOL, $gitignoreContent);
+        $lines = explode(PHP_EOL, $gitignoreContent === false ? '' : $gitignoreContent);
         $modified = false;
 
         foreach ($entries as $entry) {

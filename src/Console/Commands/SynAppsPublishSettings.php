@@ -34,8 +34,16 @@ class SynAppsPublishSettings extends Command
             return 1;
         }
 
+        $stubsPath = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'modules'.DS.'settings');
+
+        if ($stubsPath === false) {
+            $this->components->error('Settings stub directory not found.');
+
+            return 1;
+        }
+
         SynapseUtils::copyDirectory(
-            realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'modules'.DS.'settings'),
+            $stubsPath,
             synapps_path('modules'.DS.'settings')
         );
         $this->components->info('Settings module has been published');

@@ -74,7 +74,7 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
                     ->group($routesPath.'api.override.php');
             }
 
-            $apiVersions = glob($routesPath.'api.v[0-9]*.php');
+            $apiVersions = glob($routesPath.'api.v[0-9]*.php') ?: [];
             foreach ($apiVersions as $versionPath) {
                 $version = explode('.', pathinfo($versionPath, PATHINFO_FILENAME))[1]; // extract version from filename
                 Route::middleware('api')

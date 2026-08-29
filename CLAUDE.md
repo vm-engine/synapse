@@ -33,8 +33,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
 | `synapps:config` | Regenerate config files | After config changes | Yes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
-| `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
-| `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
+| `synapps:patch` | Patch JS/CSS/Vite/routes/seeder/tests | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
 | `synapps:reconfig` | Interactively update core `apps.json` fields | Renaming app/changing domains after setup | Yes | No |
@@ -72,8 +71,7 @@ Interactive wizard that:
    - `vendor:publish --tag=synapse-config --force` - Publish config files (`config/synapse.php`, `config/synapps.php`)
    - `synapps:config` - Regenerate SynApps & Synapse configuration files
    - `synapps:link-errors` - Create symlink for error views
-   - `synapps:patch-resources` - Patch JS/CSS imports
-   - `synapps:patch-tests` - Configure testing infrastructure
+   - `synapps:patch` - Patch JS/CSS imports and configure testing infrastructure
    - `synapps:discover` - Discover modules and update dependencies
 
 **No follow-up required** - All configuration is automatically generated
@@ -116,7 +114,7 @@ Critical command that:
 
 **Run after:** Creating modules, modifying `module.json`, changing dependencies
 
-### synapps:patch-resources
+### synapps:patch
 Patches Laravel resource files, wires per-layout CSS/JS split, and cleans up default Laravel files:
 
 **Creates per-layout entry files (if missing):**
@@ -146,10 +144,7 @@ Patches Laravel resource files, wires per-layout CSS/JS split, and cleans up def
 
 **Required npm packages:** `vite-plugin-static-copy` and `glob` (automatically included in `synapps:setup` dependencies)
 
-Safe to run multiple times — all operations are idempotent.
-
-### synapps:patch-tests
-Comprehensive test configuration that patches **4 files**:
+**Also configures testing infrastructure** (the `tests` object), patching **4 files**:
 
 **1. tests/Pest.php** - Adds module test paths to `->in()`:
 ```php
@@ -847,7 +842,7 @@ class PostForm extends Component
 **Methods:**
 - `redirectBack(string $defaultRoute, array $parameters = [])` - Redirect to back URL or named route
 
-**JavaScript helper:** `withBack(url)` — global JS function (injected by `synapps:patch-resources`) that appends `?back=<current-url>` to a URL for use in Blade links.
+**JavaScript helper:** `withBack(url)` — global JS function (injected by `synapps:patch`) that appends `?back=<current-url>` to a URL for use in Blade links.
 
 See [docs/TRAITS.md#withreturnurl](docs/TRAITS.md#withreturnurl) for complete documentation.
 

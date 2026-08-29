@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
+use VmEngine\Synapse\Traits\HasTypedInput;
 
 class SynapseDbConfig extends Command
 {
+    use HasTypedInput;
+
     /**
      * The name and signature of the console command.
      *
@@ -30,7 +33,7 @@ class SynapseDbConfig extends Command
      */
     public function handle(): int
     {
-        [$group, $key] = explode('.', $this->argument('key'), 2);
+        [$group, $key] = explode('.', $this->stringArgument('key'), 2);
 
         $value = $this->argument('value');
 

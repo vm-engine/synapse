@@ -34,11 +34,11 @@ class ModuleGeneratorService
                 $this->basePath = base_path('synapps/modules');
             } catch (\Throwable $e) {
                 // Laravel not bootstrapped, use current directory
-                $this->basePath = getcwd();
+                $this->basePath = getcwd() ?: '.';
             }
         } else {
             // Running standalone without Laravel
-            $this->basePath = getcwd();
+            $this->basePath = getcwd() ?: '.';
         }
     }
 
@@ -344,6 +344,11 @@ class ModuleGeneratorService
         ];
 
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        if ($json === false) {
+            throw new \RuntimeException('Failed to encode module.json: '.json_last_error_msg());
+        }
+
         $this->files->put($modulePath.'/module.json', $json);
 
         $this->moduleConfig = $config;
