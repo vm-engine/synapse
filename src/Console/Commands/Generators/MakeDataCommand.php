@@ -9,6 +9,8 @@ use Spatie\LaravelData\Data;
 
 class MakeDataCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-data
                             {module : The module name}
                             {name? : The name of the data class}

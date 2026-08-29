@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeJobMiddlewareCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-job-middleware
                             {module : The module name}
                             {name? : The name of the job middleware}

@@ -9,6 +9,8 @@ use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
 
 class MakeLivewireCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-livewire
                             {module : The module name}
                             {name? : The name of the Livewire component}

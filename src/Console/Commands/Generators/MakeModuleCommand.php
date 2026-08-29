@@ -10,6 +10,8 @@ use function Laravel\Prompts\text;
 
 class MakeModuleCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-module
                             {name? : The name of the module}
                             {--path= : Custom base path for module}

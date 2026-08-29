@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeListenerCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-listener
                             {module : The module name}
                             {name? : The name of the listener}

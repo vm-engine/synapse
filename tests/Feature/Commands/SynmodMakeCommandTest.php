@@ -38,3 +38,18 @@ test('synmod-make rejects an unknown component type', function () {
         'name' => 'Helper',
     ])->assertFailed();
 });
+
+test('synmod-make recognizes the module type (previously missing from the map)', function () {
+    // Full end-to-end module generation isn't exercised here: it depends on
+    // ModuleGeneratorService's package-vs-directory path heuristic, which is
+    // unrelated to this fix and misfires under Testbench's vendor-nested test
+    // skeleton. What this pins down is the actual bug being fixed: 'module'
+    // used to fail before ever reaching synapps:make-module.
+    $this->artisan('synmod-make', [
+        'type' => 'module',
+        'module' => 'widgets',
+        '--no-interaction' => true,
+    ])->expectsOutputToContain('Running: synapps:make-module');
+
+    (new Filesystem)->deleteDirectory(base_path('synapps/modules/widgets'));
+});

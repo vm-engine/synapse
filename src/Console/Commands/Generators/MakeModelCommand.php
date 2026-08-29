@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeModelCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-model
                             {module : The module name}
                             {name? : The name of the model}

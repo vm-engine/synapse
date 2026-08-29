@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `SynapseConfigGenerator::setDatabasePaths()` no longer appends the package's own `database/seeders` path when it doesn't exist, which previously polluted `seed_path` with a `false` from `realpath()`.
+- `synapps:make-view` (and `synapps:make view` / `synmod-make view`) generated a Blade file with a literal, never-substituted `{{ name }}` in its doc comment — the stub referenced a `name` variable that's never passed to it. Fixed to use `{{ class }}`, the same variable the sibling `component-view.stub` already used correctly. Found via a full smoke test of every `synapps:make` component type.
 
 ### Added
 - Module migrations under `database/migrations/central/` are now included in `migration_path` when the project has tenancy enabled (`synapps/config/tenancy.json` present).
+- `synapps:make {object} {module} {name?}` — unified command to create a component for a `synapps/modules` module, replacing the 34 individually-listed `synapps:make-*` generator commands as the documented primary entry point. `name` is required for every type except `module` (which has no separate name to give).
 
 ### Changed
+- The 34 individual `synapps:make-*` generator commands are now hidden from `artisan list` (still fully functional, both directly and via `synapps:make`/`synmod-make`).
+- `synmod-make` gained the two component types (`exception`, `module`) it was previously missing from its dispatch map.
 - **`synapps:patch-resources` replaced by `synapps:patch {object?*}`** — option flags (`--theme`, `--comment-default`, `--css-sources`, `--npm-watch`, `--js-back`, `--vite`, `--split-layouts`) are now positional object arguments (`theme`, `seeder`, `css`, `npm`, `js`, `vite`, `layouts`), e.g. `php artisan synapps:patch layouts`. Omit the argument to patch everything, as before.
 - **`synapps:patch-tests` folded into `synapps:patch`** as the new `tests` object — testing infrastructure (`tests/Pest.php`, `.env.testing`, composer's test script, `phpunit.xml`) is now configured by `synapps:patch` (or `synapps:patch tests` to run just that step) instead of a separate command. `synapps:setup` no longer calls `synapps:patch-tests` separately.
 - **PHPStan raised from level 6 to level 7** — fixed all resulting findings across the package (nullable/false return narrowing on `file_get_contents()`, `glob()`, `realpath()`, `json_encode()`, `DOMXPath::query()`, and Artisan `argument()`/`option()` mixed-type reads). Added `Traits\HasTypedInput` (`stringArgument()`/`stringOption()`) shared across Artisan commands for type-safe input access.

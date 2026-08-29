@@ -12,6 +12,7 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:patch` | Patch JS/CSS/Vite/routes/seeder/tests | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
+| `synapps:make` | Create a component in a synapps/modules module | Building out a module | Yes | No |
 | `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
 | `synapps:reconfig` | Interactively update `apps.json` | Changing app code/domains/dependencies after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes (per theme) | No |

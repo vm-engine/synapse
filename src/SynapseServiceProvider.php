@@ -51,6 +51,7 @@ use VmEngine\Synapse\Console\Commands\SynAppsCopyStubs;
 use VmEngine\Synapse\Console\Commands\SynAppsCopyThemes;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
+use VmEngine\Synapse\Console\Commands\SynAppsMake;
 use VmEngine\Synapse\Console\Commands\SynAppsMakeTheme;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
@@ -117,6 +118,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynapseRestoreComposer::class,
                 SynapseExcelCleanup::class,
                 SynAppsUpgradeAudit::class,
+                SynAppsMake::class,
                 // Generator Commands
                 MakeModuleCommand::class,
                 MakeModelCommand::class,

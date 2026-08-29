@@ -7,11 +7,13 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use VmEngine\Synapse\Console\Commands\Generators\Concerns\MapsComponentTypes;
 use VmEngine\Synapse\Traits\HasTypedInput;
 
 class SynmodMakeCommand extends Command
 {
     use HasTypedInput;
+    use MapsComponentTypes;
 
     protected $signature = 'synmod-make
                             {type? : The type of component to create}
@@ -27,50 +29,11 @@ class SynmodMakeCommand extends Command
     protected $description = 'Unified command to create any component type for a module';
 
     /**
-     * Map of component types to their make commands
-     *
-     * @var array<string, string>
-     */
-    protected array $componentTypes = [
-        'cast' => 'synapps:make-cast',
-        'data' => 'synapps:make-data',
-        'channel' => 'synapps:make-channel',
-        'class' => 'synapps:make-class',
-        'command' => 'synapps:make-command',
-        'component' => 'synapps:make-component',
-        'config' => 'synapps:make-config',
-        'controller' => 'synapps:make-controller',
-        'enum' => 'synapps:make-enum',
-        'event' => 'synapps:make-event',
-        'factory' => 'synapps:make-factory',
-        'interface' => 'synapps:make-interface',
-        'job' => 'synapps:make-job',
-        'job-middleware' => 'synapps:make-job-middleware',
-        'listener' => 'synapps:make-listener',
-        'livewire' => 'synapps:make-livewire',
-        'mail' => 'synapps:make-mail',
-        'middleware' => 'synapps:make-middleware',
-        'migration' => 'synapps:make-migration',
-        'model' => 'synapps:make-model',
-        'notification' => 'synapps:make-notification',
-        'observer' => 'synapps:make-observer',
-        'policy' => 'synapps:make-policy',
-        'provider' => 'synapps:make-provider',
-        'request' => 'synapps:make-request',
-        'resource' => 'synapps:make-resource',
-        'rule' => 'synapps:make-rule',
-        'scope' => 'synapps:make-scope',
-        'seeder' => 'synapps:make-seeder',
-        'test' => 'synapps:make-test',
-        'trait' => 'synapps:make-trait',
-        'view' => 'synapps:make-view',
-    ];
-
-    /**
      * Execute the console command.
      */
     public function handle(): int
     {
+        $map = $this->componentTypeMap();
         $type = $this->stringArgument('type');
 
         // If no type provided, show menu
@@ -79,16 +42,16 @@ class SynmodMakeCommand extends Command
             // which we never pass — this call always returns a single string.
             $choice = $this->choice(
                 'What type of component do you want to create?',
-                array_keys($this->componentTypes),
+                array_keys($map),
                 0
             );
             $type = is_array($choice) ? (string) ($choice[0] ?? '') : $choice;
         }
 
         // Validate type
-        if (! isset($this->componentTypes[$type])) {
+        if (! isset($map[$type])) {
             $this->components->error("Invalid component type: {$type}");
-            $this->components->info('Available types: '.implode(', ', array_keys($this->componentTypes)));
+            $this->components->info('Available types: '.implode(', ', array_keys($map)));
 
             return Command::FAILURE;
         }
@@ -98,10 +61,7 @@ class SynmodMakeCommand extends Command
         $name = $this->stringArgument('name');
 
         // Build command arguments
-        $arguments = [
-            'module' => $module,
-            'name' => $name,
-        ];
+        $arguments = $this->buildComponentArguments($type, $module, $name);
 
         // Add path option if provided
         if ($this->option('path')) {
@@ -127,8 +87,12 @@ class SynmodMakeCommand extends Command
             }
         }
 
+        if ($this->option('no-interaction')) {
+            $arguments['--no-interaction'] = true;
+        }
+
         // Call the specific make command
-        $command = $this->componentTypes[$type];
+        $command = $map[$type];
         $this->components->info("Running: {$command}");
 
         return $this->call($command, $arguments);
