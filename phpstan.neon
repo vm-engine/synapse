@@ -30,6 +30,14 @@ parameters:
             message: "#Trait .* is used zero times and is not analysed#"
             paths:
                 - src/Traits/*.php
+                - src/Notifications/Concerns/*.php
+
+        # vm-engine/synapps-auth is an optional, uninstalled runtime dependency
+        # in this package's own dev environment (see NotificationSetup::authInstalled()
+        # guard at the call site) — its Role model can't be resolved here.
+        -
+            message: "#Call to static method whereIn\\(\\) on an unknown class VmEngine\\\\SynAuth\\\\Models\\\\Role#"
+            path: src/Notifications/Notify.php
 
         # Eloquent casts enum comparison - PHPDoc infers string but runtime is enum
         -

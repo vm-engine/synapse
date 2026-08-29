@@ -6,6 +6,7 @@ namespace VmEngine\Synapse;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use VmEngine\Synapse\Components\AdvSelect;
 use VmEngine\Synapse\Components\Alert;
 use VmEngine\Synapse\Components\Checkboxes;
@@ -62,6 +63,10 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->directive('themeHeaders', function ($layoutType) {
             return "<?php echo app('synapse.theme')->renderHeaders({$layoutType}); ?>";
         });
+
+        // Makes <livewire:synotif::bell /> and <livewire:synotif::list /> resolvable
+        // from the MFC pairs under resources/views/components/notifications/.
+        Livewire::addNamespace('synotif', __DIR__.'/../resources/views/components/notifications');
     }
 
     /**

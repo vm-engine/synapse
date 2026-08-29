@@ -15,6 +15,7 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:make` | Create a component in a synapps/modules module | Building out a module | Yes | No |
 | `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
 | `synapps:reconfig` | Interactively update `apps.json` | Changing app code/domains/dependencies after setup | Yes | No |
+| `synotif:setup` | Enable/configure in-app notifications | Turning on notifications after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes (per theme) | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
@@ -439,6 +440,7 @@ php artisan synapps:reconfig
 ### What it does
 
 1. Prompts for each core field, defaulting to the current value already in `config('synapps.apps.*')` so blank/unchanged answers don't erase existing data
+   - Also prompts to enable/configure in-app notifications (same two questions as `synotif:setup` below) — only if `vm-engine/synapps-auth` is installed, otherwise this step is skipped
 2. **Preserves, rather than resets, these blocks** — read from the current config and carried forward as-is unless you edit `apps.json` directly:
    - `themes` (active/fallback theme, per-layout CSS/JS/headers)
    - `dependencies` (npm/composer packages, including any added manually)
@@ -458,6 +460,28 @@ php artisan synapps:config
 ```
 
 > **Note:** Prior to v2.4.7, `themes`, `dependencies`, and `git_repo` were reset to hardcoded defaults on every run. Upgrade if you rely on `synapps:reconfig` and have customized any of these.
+
+---
+
+## synotif:setup
+
+Enable/configure the in-app notification system (see [README.md#notifications](../README.md#notifications) for usage). Requires `vm-engine/synapps-auth` — aborts with an explanatory error if it isn't installed, since role-based targeting depends on it.
+
+```bash
+php artisan synotif:setup
+```
+
+### What it does
+
+1. Prompts: enable notifications (default from current config), and a log channel for skipped/disabled notifications (blank = silent)
+2. If enabling and the `notifications` table doesn't exist yet: publishes the `notifications:table` migration (skipped if a matching migration file already exists) and runs `migrate`
+3. Writes an `notifications` block (`enabled`, `log_channel`) into `synapps/config/apps.json`, preserving everything else
+4. Runs `synapps:config` to recompile
+
+### When to run
+
+- Turning notifications on (or off, or changing the log channel) after initial `synapps:setup`
+- `synapps:setup` and `synapps:reconfig` ask the same two questions inline, so this command is mainly for toggling the feature standalone after the fact
 
 ---
 

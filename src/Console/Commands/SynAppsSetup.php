@@ -7,6 +7,7 @@ namespace VmEngine\Synapse\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use stdClass;
+use VmEngine\Synapse\Notifications\NotificationSetup;
 use VmEngine\Synapse\Services\SynapseUtils;
 
 use function Laravel\Prompts\confirm;
@@ -94,6 +95,25 @@ class SynAppsSetup extends Command
             $enabledLanguages = array_map('trim', explode(',', $languagesInput));
         }
 
+        $notificationsEnabled = false;
+        $notificationsLogChannel = null;
+
+        if (NotificationSetup::authInstalled()) {
+            $notificationsEnabled = confirm(
+                label: 'Enable in-app notifications?',
+                default: false,
+            );
+
+            if ($notificationsEnabled) {
+                $notificationsLogChannelInput = text(
+                    label: 'Log channel for skipped/disabled notifications (blank = silent)',
+                );
+                $notificationsLogChannel = $notificationsLogChannelInput === '' ? null : $notificationsLogChannelInput;
+            }
+        } else {
+            $this->components->info('Notifications skipped — install vm-engine/synapps-auth to enable.');
+        }
+
         $appsJson = [
             'app_code' => $appCode,
             'app_name' => $appName,
@@ -113,6 +133,10 @@ class SynAppsSetup extends Command
             'description' => $appDesc,
             'multi_language' => $multiLanguage,
             'enabled_languages' => $enabledLanguages,
+            'notifications' => [
+                'enabled' => $notificationsEnabled,
+                'log_channel' => $notificationsLogChannel,
+            ],
             'dependencies' => [
                 'npm' => [
                     'main' => [
@@ -216,6 +240,11 @@ class SynAppsSetup extends Command
         $this->call('synapps:link-errors');
         $this->call('synapps:patch');
         $this->call('synapps:discover');
+
+        if ($notificationsEnabled) {
+            NotificationSetup::ensureMigration($this);
+        }
+
         $this->call('migrate');
 
         $this->components->success('Setup complete.');

@@ -22,4 +22,11 @@ describe('config preservation on reconfig', function () {
 
         expect($source)->toContain("default: config('synapps.apps.git_repo', '')");
     });
+
+    it('prompts for notifications settings, defaulting from current config', function () {
+        $source = file_get_contents((new ReflectionClass(SynAppsReconfig::class))->getFileName());
+
+        expect($source)->toContain("default: config('synapps.apps.notifications.enabled', false)")
+            ->and($source)->toContain("'notifications' => [");
+    });
 });

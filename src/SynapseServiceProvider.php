@@ -64,6 +64,7 @@ use VmEngine\Synapse\Console\Commands\SynapseDbLang;
 use VmEngine\Synapse\Console\Commands\SynapseExcelCleanup;
 use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
+use VmEngine\Synapse\Console\Commands\SynotifSetup;
 use VmEngine\Synapse\Finder\SynapseFinder;
 use VmEngine\Synapse\Http\Middlewares\LogApiRequest;
 use VmEngine\Synapse\Http\Middlewares\NoCacheHeaders;
@@ -101,6 +102,7 @@ class SynapseServiceProvider extends ServiceProvider
 
             $this->commands([
                 SynAppsSetup::class,
+                SynotifSetup::class,
                 SynAppsDiscover::class,
                 SynAppsCopyResources::class,
                 SynAppsPatchResources::class,

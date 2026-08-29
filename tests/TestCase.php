@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use VmEngine\Synapse\Facades\DbConfig;
 use VmEngine\Synapse\Facades\DbLang;
@@ -17,6 +18,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
+            LivewireServiceProvider::class,
             SynapseServiceProvider::class,
         ];
     }

@@ -1097,3 +1097,64 @@ span.flatpickr-weekday,
 .syn-per-page-select {
     @apply shadow-theme-sm rounded-sm p-1;
 }
+
+/* Notifications (synotif) */
+.synotif-bell {
+    @apply relative inline-flex;
+}
+.synotif-bell-trigger {
+    @apply text-on-surface dark:text-on-surface-dark relative inline-flex items-center justify-center bg-transparent;
+}
+.synotif-badge {
+    @apply bg-danger text-on-danger absolute -right-1 -top-1 min-w-[1.1rem] rounded-full px-1 text-center text-[0.65rem] leading-[1.1rem];
+}
+.synotif-dropdown {
+    @apply bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark absolute right-0 top-full z-40 w-[22rem] max-w-[90vw] rounded-lg border shadow-xl;
+}
+.synotif-dropdown-header,
+.synotif-dropdown-footer {
+    @apply border-outline dark:border-outline-dark flex items-center justify-between border-b px-4 py-3;
+}
+.synotif-dropdown-footer {
+    @apply border-b-0 border-t justify-center;
+}
+.synotif-mark-all,
+.synotif-view-all {
+    @apply text-primary dark:text-primary-dark bg-transparent text-sm;
+}
+.synotif-item-list {
+    @apply m-0 max-h-96 list-none overflow-y-auto p-0;
+}
+.synotif-item {
+    @apply border-outline dark:border-outline-dark flex items-start gap-2 border-b px-4 py-3;
+}
+.synotif-item-unread {
+    @apply bg-primary/5;
+}
+.synotif-item-empty {
+    @apply text-on-surface/70 dark:text-on-surface-dark/70 px-4 py-6 text-center;
+}
+.synotif-read-marker {
+    @apply bg-outline dark:bg-outline-dark mt-1.5 size-2.5 flex-none rounded-full border-0;
+}
+.synotif-item-unread .synotif-read-marker {
+    @apply bg-primary dark:bg-primary-dark;
+}
+.synotif-item-body {
+    @apply text-on-surface dark:text-on-surface-dark flex flex-1 flex-col gap-0.5 no-underline;
+}
+.synotif-item-icon {
+    @apply mr-1.5;
+}
+.synotif-item-title {
+    @apply font-semibold;
+}
+.synotif-item-message {
+    @apply text-on-surface/70 dark:text-on-surface-dark/70 text-sm;
+}
+.synotif-modal-list .synotif-item-list {
+    @apply max-h-none;
+}
+.synotif-modal-pagination {
+    @apply px-4 py-3;
+}

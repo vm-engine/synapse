@@ -7,6 +7,7 @@ namespace VmEngine\Synapse\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use stdClass;
+use VmEngine\Synapse\Notifications\NotificationSetup;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
@@ -97,6 +98,26 @@ class SynAppsReconfig extends Command
             $enabledLanguages = array_map('trim', explode(',', $languagesInput));
         }
 
+        $notificationsEnabled = false;
+        $notificationsLogChannel = config('synapps.apps.notifications.log_channel', null);
+
+        if (NotificationSetup::authInstalled()) {
+            $notificationsEnabled = confirm(
+                label: 'Enable in-app notifications?',
+                default: config('synapps.apps.notifications.enabled', false),
+            );
+
+            if ($notificationsEnabled) {
+                $notificationsLogChannelInput = text(
+                    label: 'Log channel for skipped/disabled notifications (blank = silent)',
+                    default: $notificationsLogChannel ?? '',
+                );
+                $notificationsLogChannel = $notificationsLogChannelInput === '' ? null : $notificationsLogChannelInput;
+            }
+        } else {
+            $this->components->info('Notifications skipped — install vm-engine/synapps-auth to enable.');
+        }
+
         $appsJson = [
             'app_code' => $appCode,
             'app_name' => $appName,
@@ -116,6 +137,10 @@ class SynAppsReconfig extends Command
             'description' => $appDesc,
             'multi_language' => $multiLanguage,
             'enabled_languages' => $enabledLanguages,
+            'notifications' => [
+                'enabled' => $notificationsEnabled,
+                'log_channel' => $notificationsLogChannel,
+            ],
             'dependencies' => config('synapps.apps.dependencies', [
                 'npm' => [
                     'main' => [
@@ -195,6 +220,10 @@ class SynAppsReconfig extends Command
             base_path('synapps'.DS.'config'.DS.'apps.json'),
             json_encode($appsJson, JSON_PRETTY_PRINT)
         );
+
+        if ($notificationsEnabled) {
+            NotificationSetup::ensureMigration($this);
+        }
 
         $this->components->success('Configuration updated.');
 
