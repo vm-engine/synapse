@@ -170,6 +170,9 @@ class SynAppsReconfig extends Command
                 'img_src' => [],
                 'connect_src' => [],
             ]),
+            'security' => config('synapps.apps.security', [
+                'ssrf_allow_loopback' => false,
+            ]),
             'logging' => config('synapps.apps.logging', [
                 'sensitive_keys' => [
                     'password',

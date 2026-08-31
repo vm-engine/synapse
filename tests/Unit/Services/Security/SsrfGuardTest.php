@@ -46,3 +46,34 @@ describe('SsrfGuard::isSafeUrl', function () {
         expect(SsrfGuard::isSafeUrl('https://8.8.8.8/'))->toBeTrue();
     });
 });
+
+describe('SsrfGuard loopback bypass (synapps.apps.security.ssrf_allow_loopback)', function () {
+    afterEach(function () {
+        config(['synapps.apps.security.ssrf_allow_loopback' => false]);
+        app()->instance('env', 'testing');
+    });
+
+    it('still rejects loopback when the flag is unset', function () {
+        expect(SsrfGuard::isSafeUrl('http://127.0.0.1/'))->toBeFalse();
+    });
+
+    it('allows loopback outside production when the flag is enabled', function () {
+        config(['synapps.apps.security.ssrf_allow_loopback' => true]);
+
+        expect(SsrfGuard::isSafeUrl('http://127.0.0.1/'))->toBeTrue()
+            ->and(SsrfGuard::isSafeUrl('http://127.0.0.1:8899/'))->toBeTrue();
+    });
+
+    it('never allows loopback in production, even with the flag enabled', function () {
+        config(['synapps.apps.security.ssrf_allow_loopback' => true]);
+        app()->instance('env', 'production');
+
+        expect(SsrfGuard::isSafeUrl('http://127.0.0.1/'))->toBeFalse();
+    });
+
+    it('still rejects non-loopback reserved addresses even with the flag enabled', function () {
+        config(['synapps.apps.security.ssrf_allow_loopback' => true]);
+
+        expect(SsrfGuard::isSafeUrl('http://169.254.169.254/latest/meta-data/'))->toBeFalse();
+    });
+});

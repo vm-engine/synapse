@@ -58,14 +58,37 @@ class SsrfGuard
      * partner endpoints, e.g. bank sandbox/production APIs). Loopback,
      * link-local (including the 169.254.169.254 cloud metadata address),
      * and other non-private reserved ranges are still rejected, for
-     * either IPv4 or IPv6.
+     * either IPv4 or IPv6 — unless the config flag opts loopback back in
+     * outside production (see loopbackAllowed()).
      */
     protected static function isPublicIp(string $ip): bool
     {
+        if (static::isLoopback($ip) && static::loopbackAllowed()) {
+            return true;
+        }
+
         $isPrivate = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE) === false;
         $isReserved = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) === false;
 
         return ! $isReserved || $isPrivate;
+    }
+
+    protected static function isLoopback(string $ip): bool
+    {
+        return $ip === '::1' || str_starts_with($ip, '127.');
+    }
+
+    /**
+     * ponytail: temporary local-dev escape hatch for pointing a sandbox
+     * base_url at 127.0.0.1 without a tunnel — remove once no longer
+     * needed. Never honored in production regardless of the config value.
+     * Toggle via `security.ssrf_allow_loopback` in synapps/config/apps.json,
+     * then run `php artisan synapps:config` — see config('synapps.apps.security').
+     */
+    protected static function loopbackAllowed(): bool
+    {
+        return ! app()->environment('production')
+            && filter_var(config('synapps.apps.security.ssrf_allow_loopback', false), FILTER_VALIDATE_BOOL);
     }
 
     /**

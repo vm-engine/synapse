@@ -17,6 +17,12 @@ describe('config preservation on reconfig', function () {
         expect($source)->toContain("'dependencies' => config('synapps.apps.dependencies',");
     });
 
+    it('preserves existing security config via config() default in SynAppsReconfig source', function () {
+        $source = file_get_contents((new ReflectionClass(SynAppsReconfig::class))->getFileName());
+
+        expect($source)->toContain("'security' => config('synapps.apps.security',");
+    });
+
     it('pre-fills the git_repo prompt with the existing config value', function () {
         $source = file_get_contents((new ReflectionClass(SynAppsReconfig::class))->getFileName());
 

@@ -192,7 +192,7 @@ Interactive updater for core `apps.json` fields (app code, name, author, domains
 php artisan synapps:reconfig
 ```
 
-**Preserves (not reset) on every run:** `themes`, `dependencies`, `csp`, `logging` — read from current config and carried forward unless `apps.json` is edited directly.
+**Preserves (not reset) on every run:** `themes`, `dependencies`, `csp`, `logging`, `security` — read from current config and carried forward unless `apps.json` is edited directly.
 
 > Prior to v2.4.7 these four blocks were hardcoded and wiped on every run — upgrade if you use `synapps:reconfig` with customized themes/dependencies/CSP/logging.
 

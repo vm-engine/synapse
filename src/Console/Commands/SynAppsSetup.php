@@ -167,6 +167,9 @@ class SynAppsSetup extends Command
                 'img_src' => [],
                 'connect_src' => [],
             ],
+            'security' => [
+                'ssrf_allow_loopback' => false,
+            ],
             'logging' => [
                 'sensitive_keys' => [
                     'password',
