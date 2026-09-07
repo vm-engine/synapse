@@ -9,11 +9,9 @@ use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\Drawer;
-use VmEngine\Synapse\Components\MultiSelect;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
 use VmEngine\Synapse\Components\RadioButtons;
-use VmEngine\Synapse\Components\Select;
 use VmEngine\Synapse\Components\Toastr;
 use VmEngine\Synapse\Components\Toggler;
 
@@ -129,72 +127,6 @@ describe('RadioButtons Component', function () {
         );
 
         expect($component->model)->toBe('');
-    });
-});
-
-describe('Select Component', function () {
-    it('can be instantiated', function () {
-        $component = new Select(options: ['option1', 'option2']);
-
-        expect($component)->toBeInstanceOf(Select::class);
-    });
-
-    it('stores options property', function () {
-        $options = ['option1', 'option2', 'option3'];
-        $component = new Select(options: $options);
-
-        expect($component->options)->toBe($options);
-    });
-
-    it('accepts empty options', function () {
-        $component = new Select(options: []);
-
-        expect($component->options)->toBe([]);
-    });
-});
-
-describe('MultiSelect Component', function () {
-    it('can be instantiated', function () {
-        $component = new MultiSelect(
-            name: 'tags',
-            options: ['tag1', 'tag2'],
-            model: []
-        );
-
-        expect($component)->toBeInstanceOf(MultiSelect::class);
-    });
-
-    it('stores name property', function () {
-        $component = new MultiSelect(
-            name: 'tags',
-            options: [],
-            model: []
-        );
-
-        expect($component->name)->toBe('tags');
-    });
-
-    it('stores options and model', function () {
-        $options = ['tag1', 'tag2', 'tag3'];
-        $model = ['tag1', 'tag2'];
-
-        $component = new MultiSelect(
-            name: 'test',
-            options: $options,
-            model: $model
-        );
-
-        expect($component->options)->toBe($options)
-            ->and($component->model)->toBe($model);
-    });
-
-    it('defaults model to empty array', function () {
-        $component = new MultiSelect(
-            name: 'test',
-            options: ['opt1'],
-        );
-
-        expect($component->model)->toBe([]);
     });
 });
 

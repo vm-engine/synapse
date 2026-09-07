@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - Unreleased
 
+### Changed
+- `<x-adv-select>` reworked: the search input now lives inside the dropdown instead of nested inside the bordered main box (fixing a double-border look under themes that border both the box and the input), gained a rotating dropdown-arrow indicator, and its clear/pill-remove buttons now use FontAwesome icons instead of a bare `✕` glyph.
+
+### Removed
+- **BREAKING: `select` / `multi-select` / `select2` Blade components removed** (`<x-synapse-select>`, `<x-synapse-multiselect>`, and the third-party Select2 wrapper) in favor of `<x-adv-select>`. `select2` had no usages anywhere in the codebase. `select`/`multi-select` are still used by 33 files across `synapps-auth`, `synapps-fallback`, `synmod-cms`, `synmod-example`, `synmod-pm`, and the `todos` module stub — see `.claude/plans/2026-09-07-select-migration-note.md` for the full list and migration shape; those call sites must be migrated to `<x-adv-select>` before this version ships.
+
 ### Fixed
 - `SynapseConfigGenerator::setDatabasePaths()` no longer appends the package's own `database/seeders` path when it doesn't exist, which previously polluted `seed_path` with a `false` from `realpath()`.
 - `synapps:make-view` (and `synapps:make view` / `synmod-make view`) generated a Blade file with a literal, never-substituted `{{ name }}` in its doc comment — the stub referenced a `name` variable that's never passed to it. Fixed to use `{{ class }}`, the same variable the sibling `component-view.stub` already used correctly. Found via a full smoke test of every `synapps:make` component type.

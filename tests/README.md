@@ -125,8 +125,6 @@ Tests for the configuration builder system:
 Tests for all Blade components in `src/Components/`:
 - ✓ **Checkboxes** - Multiple checkbox inputs
 - ✓ **RadioButtons** - Radio button groups
-- ✓ **Select** - Dropdown selects
-- ✓ **MultiSelect** - Multi-selection dropdowns
 - ✓ **Password** - Password input with toggle
 - ✓ **Currency** - Currency input formatting
 - ✓ **Datepicker** - Date picker with Flatpickr

@@ -884,8 +884,6 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 **Form Components:**
 - `<x-synapse::checkboxes name="" :options="[]" :model="[]" />`
 - `<x-synapse::radio-buttons name="" :options="[]" :model="" />`
-- `<x-synapse::select :options="[]" />`
-- `<x-synapse::multi-select name="" :options="[]" :model="[]" />`
 - `<x-synapse::password />`
 - `<x-synapse::currency currency="$" />`
 - `<x-synapse::datepicker :flatpickr="{}" />`

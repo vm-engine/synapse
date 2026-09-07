@@ -292,7 +292,11 @@ pre {
     transition: all 150ms ease-in-out;
 }
 
-.adv-select-input-box:focus-within {
+.adv-select-input-box {
+    cursor: pointer;
+}
+
+.adv-select-input-box.is-open {
     border-color: rgb(59 130 246);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -302,7 +306,7 @@ pre {
     background: rgb(17 24 39);
 }
 
-.dark .adv-select-input-box:focus-within {
+.dark .adv-select-input-box.is-open {
     border-color: rgb(59 130 246);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
@@ -333,11 +337,26 @@ pre {
     color: rgb(243 244 246);
 }
 
-/* Search input */
+/* Placeholder (nothing selected) */
+.adv-select-placeholder {
+    color: rgb(156 163 175);
+}
+
+.dark .adv-select-placeholder {
+    color: rgb(107 114 128);
+}
+
+/* Search input — now its own row inside the dropdown, not nested in
+   the bordered .adv-select-input-box */
 .adv-select-input {
+    width: 100%;
+    padding: 0.625rem 1rem;
     background: transparent;
     color: rgb(17 24 39);
     font-size: 0.875rem;
+    border: none;
+    border-bottom: 1px solid rgb(229 231 235);
+    outline: none;
 }
 
 .adv-select-input::placeholder {
@@ -346,6 +365,7 @@ pre {
 
 .dark .adv-select-input {
     color: rgb(243 244 246);
+    border-bottom-color: rgb(55 65 81);
 }
 
 .dark .adv-select-input::placeholder {
@@ -364,6 +384,22 @@ pre {
 
 .dark .adv-select-clear:hover {
     color: rgb(209 213 219);
+}
+
+/* Dropdown arrow */
+.adv-select-arrow {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: rgb(156 163 175);
+    transition: transform 150ms ease-in-out;
+}
+
+.adv-select-arrow.is-open {
+    transform: rotate(180deg);
+}
+
+.dark .adv-select-arrow {
+    color: rgb(107 114 128);
 }
 
 /* Dropdown */

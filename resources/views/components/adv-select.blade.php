@@ -117,7 +117,9 @@ public function loadUser(int|array $ids): array
 
 Component: VmEngine\Synapse\Components\AdvSelect
 View: synapse::components.adv-select
-Version: 1.0.0
+Version: 1.1.0 — search input moved into the dropdown (no longer nested
+inside the bordered main box), added a dropdown arrow, single-select
+clear button now uses a FontAwesome icon.
 --------------------------------------------------------------------
 --}}
 
@@ -126,17 +128,26 @@ Version: 1.0.0
     x-data="synapseAdvSelect(@js($preload ?? []), {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', @js($options), {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }})"
     x-init="init()"
     wire:ignore
+    {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
+         stopPropagation() on click, which would otherwise prevent this
+         bubble-phase document listener from ever firing inside a modal.
+         Capture-phase runs before that stopPropagation() takes effect.
+         This lives on the container (not just the input box) because the
+         dropdown's search input is now a container descendant, not a box
+         descendant — clicking into it must not count as "away". --}}
+    @click.away.capture="open = false"
 >
-    {{-- Select box --}}
+    {{-- Select box (display-only: placeholder / selection / pills + clear + arrow) --}}
     <div
         class="adv-select-input-box"
+        :class="{ 'is-open': open }"
         @click="focusInput"
-        {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
-             stopPropagation() on click, which would otherwise prevent this
-             bubble-phase document listener from ever firing inside a modal.
-             Capture-phase runs before that stopPropagation() takes effect. --}}
-        @click.away.capture="open = false"
     >
+        {{-- Placeholder (nothing selected, either mode) --}}
+        <template x-if="selected.length === 0">
+            <span class="adv-select-placeholder">{{ $placeholder }}</span>
+        </template>
+
         {{-- Selected items (multiple mode) --}}
         <template x-if="multiple">
             <template
@@ -150,7 +161,7 @@ Version: 1.0.0
                         type="button"
                         @click.stop="remove(index)"
                     >
-                        ✕
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 </span>
             </template>
@@ -164,7 +175,31 @@ Version: 1.0.0
             ></span>
         </template>
 
-        {{-- Input --}}
+        {{-- Clear button for single select --}}
+        <template x-if="!multiple && selected.length">
+            <button
+                class="adv-select-clear"
+                type="button"
+                @click.stop="clearSelection"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </template>
+
+        {{-- Dropdown arrow --}}
+        <i
+            class="fa-solid fa-chevron-down adv-select-arrow"
+            :class="{ 'is-open': open }"
+        ></i>
+    </div>
+
+    {{-- Dropdown --}}
+    <div
+        class="adv-select-dropdown"
+        x-show="open"
+        x-transition
+    >
+        {{-- Search input --}}
         <input
             class="adv-select-input"
             type="text"
@@ -174,27 +209,8 @@ Version: 1.0.0
             x-on:input.debounce.300ms="fetch()"
             x-on:keydown="handleKeydown($event)"
             placeholder="{{ $placeholder }}"
-            :class="{ 'hidden': !multiple && selected.length }"
         />
 
-        {{-- Clear button for single select --}}
-        <template x-if="!multiple && selected.length">
-            <button
-                class="adv-select-clear"
-                type="button"
-                @click.stop="clearSelection"
-            >
-                ✕
-            </button>
-        </template>
-    </div>
-
-    {{-- Dropdown --}}
-    <div
-        class="adv-select-dropdown"
-        x-show="open && (results.length > 0 || (allowCreate && search.trim()))"
-        x-transition
-    >
         <template
             x-for="item in results"
             :key="item[valueField]"
@@ -320,9 +336,8 @@ Version: 1.0.0
                 },
 
                 focusInput() {
-                    this.$refs.search.classList.remove('hidden');
-                    this.$refs.search.focus();
                     this.open = true;
+                    this.$nextTick(() => this.$refs.search?.focus());
                 },
 
                 async fetch() {
@@ -352,9 +367,6 @@ Version: 1.0.0
                     } else {
                         this.results = staticResults;
                     }
-
-                    this.open = this.results.length > 0 || (this.allowCreate && this.search
-                        .trim() !== '');
                 },
 
                 select(item) {
@@ -389,6 +401,10 @@ Version: 1.0.0
                         .length === 0) {
                         e.preventDefault();
                         this.createNew();
+                    }
+                    if (e.key === 'Escape') {
+                        this.open = false;
+                        this.$refs.search.blur();
                     }
                 },
 
