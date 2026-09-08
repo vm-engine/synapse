@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - Unreleased
 
+### Added
+- `<x-synapse-badge>` — pill-shaped status badge with color variants (`gray`, `brand`, `success`, `warning`, `danger`, `info`), two sizes, and an optional icon.
+- `<x-synapse-panel>` — card-shell wrapper for list/form pages (title + optional `toolbar` slot), replacing the hand-rolled `rounded-2xl border ... dark:bg-white/3` markup duplicated across list/form views. Supports `collapsible`/`collapsed` for a click-to-toggle body using the existing `@alpinejs/collapse` plugin.
+- `<x-synapse-search-box>` — text input with a left-aligned search icon and an optional `trailing` slot (e.g. a filter-drawer toggle button); all other attributes (`wire:model`, `id`, ...) pass through to the `<input>`.
+- `<x-synapse-stat-tile>` — single-metric card component. `variant="tile"` (default): icon square + label/value, with a `bordered` toggle for the plain flat "quick stats" look. `variant="card"`: title-row layout with `iconPosition` (`left`/`title`/`background`), optional whole-card `tinted` color wash, `sublabel`, and `href`/`clickable` affordance. `label`/`value`/`sublabel` can be overridden with matching named slots for rich content. `iconBackground` (both variants) toggles the colored icon square/circle off for a bare icon glyph.
+
 ### Changed
 - `<x-adv-select>` reworked: the search input now lives inside the dropdown instead of nested inside the bordered main box (fixing a double-border look under themes that border both the box and the input), gained a rotating dropdown-arrow indicator, and its clear/pill-remove buttons now use FontAwesome icons instead of a bare `✕` glyph.
 

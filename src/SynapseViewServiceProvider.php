@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use VmEngine\Synapse\Components\AdvSelect;
 use VmEngine\Synapse\Components\Alert;
+use VmEngine\Synapse\Components\Badge;
 use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
@@ -17,11 +18,14 @@ use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\FileDrop;
 use VmEngine\Synapse\Components\Modal;
+use VmEngine\Synapse\Components\Panel;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
 use VmEngine\Synapse\Components\PerPageSelector;
 use VmEngine\Synapse\Components\RadioButtons;
+use VmEngine\Synapse\Components\SearchBox;
 use VmEngine\Synapse\Components\SortIcon;
+use VmEngine\Synapse\Components\StatTile;
 use VmEngine\Synapse\Components\Toastr;
 use VmEngine\Synapse\Components\Toggler;
 use VmEngine\Synapse\Services\SynapseUtils;
@@ -107,6 +111,8 @@ class SynapseViewServiceProvider extends ServiceProvider
         // BladeCompiler diverge (especially during testing with Livewire v4).
         $blade = app('blade.compiler');
         $blade->component(Alert::class, 'synapse-alert');
+        $blade->component(Badge::class, 'synapse-badge');
+        $blade->component(Panel::class, 'synapse-panel');
         $blade->component(Drawer::class, 'synapse-drawer');
         $blade->component(Modal::class, 'synapse-modal');
         $blade->component(AdvSelect::class, 'synapse-adv-select');
@@ -123,5 +129,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(FileDrop::class, 'synapse-file-drop');
         $blade->component(SortIcon::class, 'synapse-sort-icon');
         $blade->component(PerPageSelector::class, 'synapse-per-page-selector');
+        $blade->component(SearchBox::class, 'synapse-search-box');
+        $blade->component(StatTile::class, 'synapse-stat-tile');
     }
 }
