@@ -145,7 +145,7 @@ Text input with a fixed left search icon and an optional trailing slot:
 <x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q">
     <x-slot:trailing>
         <button type="button" class="btn" @click="drawerOpen = true">
-            <span class="fa-solid fa-filter"></span>
+            <span class="ph ph-funnel"></span>
         </button>
     </x-slot:trailing>
 </x-synapse-search-box>
@@ -275,13 +275,13 @@ Pill-shaped status/label badge with color variants and an optional icon:
 ```blade
 <x-synapse-badge color="success">Active</x-synapse-badge>
 <x-synapse-badge color="danger" size="sm">Overdue</x-synapse-badge>
-<x-synapse-badge color="success" icon="fa-solid fa-check">Verified</x-synapse-badge>
+<x-synapse-badge color="success" icon="ph ph-check">Verified</x-synapse-badge>
 ```
 
 **Props:**
 - `color` (string, default: 'gray') - `'gray'`, `'brand'`, `'success'`, `'warning'`, `'danger'`, `'info'`
 - `size` (string, default: 'md') - `'sm'`, `'md'`
-- `icon` (string, optional) - FontAwesome icon class, e.g. `'fa-solid fa-check'`
+- `icon` (string, optional) - Icon class — Phosphor (recommended) e.g. `'ph ph-check'`, or FontAwesome e.g. `'fa-solid fa-check'` (see [Icons](../README.md#icons))
 
 ---
 
@@ -321,7 +321,7 @@ Single-metric card. Two variants:
 
 ```blade
 {{-- variant="tile" (default): icon square + label/value --}}
-<x-synapse-stat-tile icon="fa-solid fa-file-invoice" color="blue" label="Total Invoices" value="2.613" />
+<x-synapse-stat-tile icon="ph ph-invoice" color="blue" label="Total Invoices" value="2.613" />
 
 {{-- :bordered="false" — flat gray-50 "quick stats" look, no icon --}}
 <x-synapse-stat-tile label="Progress" value="42%" :bordered="false">
@@ -332,7 +332,7 @@ Single-metric card. Two variants:
 
 {{-- variant="card": title-row layout, optional whole-card color tint --}}
 <x-synapse-stat-tile
-    variant="card" icon="fa-solid fa-hourglass-half" color="red" tinted
+    variant="card" icon="ph ph-hourglass-medium" color="red" tinted
     label="Stuck Transactions" value="4,277" sublabel="> 30 min old"
 />
 
@@ -344,7 +344,7 @@ Single-metric card. Two variants:
 ```
 
 **Props:**
-- `icon` (string, optional) - FontAwesome icon class
+- `icon` (string, optional) - Icon class — Phosphor (recommended) e.g. `'ph ph-invoice'`, or FontAwesome e.g. `'fa-solid fa-file-invoice'` (see [Icons](../README.md#icons))
 - `color` (string, default: 'gray') - `'gray'`, `'blue'`, `'indigo'`, `'purple'`, `'red'`, `'orange'`, `'green'`
 - `label` / `value` (string, optional) - Caption / already-formatted value (caller formats numbers/currency); each can be overridden with a matching `<x-slot:label>` / `<x-slot:value>` for rich content
 - `valueColor` (string, optional) - `variant="tile"` only - value text color override, same palette as `color`
@@ -374,7 +374,7 @@ Modal confirmation for destructive actions:
     confirmText="Delete"
     cancelText="Cancel"
     confirmColor="danger"
-    icon="fa-solid fa-trash" />
+    icon="ph ph-trash" />
 ```
 
 **Props:**
@@ -383,7 +383,7 @@ Modal confirmation for destructive actions:
 - `confirmText` (string, default: 'Confirm')
 - `cancelText` (string, default: 'Cancel')
 - `confirmColor` (string, default: 'danger')
-- `icon` (string, default: 'fa-solid fa-circle-exclamation')
+- `icon` (string, default: 'ph ph-warning-circle')
 
 ---
 
@@ -461,7 +461,7 @@ Flexible alert component with dismissible functionality:
 <!-- Custom icon -->
 <x-synapse-alert
     type="success"
-    icon="fa-solid fa-check-double"
+    icon="ph ph-checks"
     message="Verified successfully!" />
 ```
 
@@ -470,7 +470,7 @@ Flexible alert component with dismissible functionality:
 - `title` (string, optional) - Alert title
 - `message` (string, optional) - Alert message (can also use slot for HTML)
 - `dismissible` (boolean, default: true) - Whether alert can be closed
-- `icon` (string, auto-assigned) - FontAwesome icon class (auto-assigned based on type)
+- `icon` (string, auto-assigned) - Icon class, Phosphor by default (auto-assigned based on type) — pass a FontAwesome class instead to override (see [Icons](../README.md#icons))
 - `border` (boolean, default: false) - Show left border accent
 - `solid` (boolean, default: false) - Use solid background instead of light variant
 
@@ -483,10 +483,10 @@ Flexible alert component with dismissible functionality:
 - Accessible with ARIA attributes
 
 **Default Icons:**
-- Success: `fa-solid fa-circle-check`
-- Warning: `fa-solid fa-triangle-exclamation`
-- Danger/Error: `fa-solid fa-circle-exclamation`
-- Info: `fa-solid fa-circle-info`
+- Success: `ph ph-check-circle`
+- Warning: `ph ph-warning`
+- Danger/Error: `ph ph-warning-circle`
+- Info: `ph ph-info`
 
 **Common Use Cases:**
 

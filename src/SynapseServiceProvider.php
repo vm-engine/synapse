@@ -56,6 +56,7 @@ use VmEngine\Synapse\Console\Commands\SynAppsMakeTheme;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
+use VmEngine\Synapse\Console\Commands\SynAppsRemoveModule;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Console\Commands\SynAppsUpgradeAudit;
 use VmEngine\Synapse\Console\Commands\SynAppsVendorFonts;
@@ -109,6 +110,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynAppsLinkErrors::class,
                 SynAppsConfig::class,
                 SynAppsReconfig::class,
+                SynAppsRemoveModule::class,
                 SynAppsPublishSettings::class,
                 SynAppsCopyStubs::class,
                 SynAppsCopyThemes::class,
