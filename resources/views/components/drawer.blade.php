@@ -23,7 +23,7 @@
             aria-controls="drawer-example"
             @click="drawerOpen = false"
         >
-            <span class="fa-reguler fa-xmark"></span>
+            <span class="ph ph-x"></span>
             <span class="sr-only">Close</span>
         </button>
 

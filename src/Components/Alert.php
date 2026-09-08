@@ -20,11 +20,11 @@ class Alert extends Component
         // Auto-assign icons based on type if not provided
         if ($this->icon === null) {
             $this->icon = match ($this->type) {
-                'success' => 'fa-solid fa-circle-check',
-                'warning' => 'fa-solid fa-triangle-exclamation',
-                'error', 'danger' => 'fa-solid fa-circle-exclamation',
-                'info' => 'fa-solid fa-circle-info',
-                default => 'fa-solid fa-circle-info',
+                'success' => 'ph ph-check-circle',
+                'warning' => 'ph ph-warning',
+                'error', 'danger' => 'ph ph-warning-circle',
+                'info' => 'ph ph-info',
+                default => 'ph ph-info',
             };
         }
 

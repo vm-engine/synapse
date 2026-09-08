@@ -70,8 +70,8 @@ php artisan synapps:config
 
 1. Runs **SynAppsConfigGenerator** to generate `config/synapps.php`
 2. Runs **SynapseConfigGenerator** to generate `config/synapse.php`
-3. Reads source configs from `synapps/config/{apps,system,modules}.json` and `.dev.json` overrides
-4. Executes all config builders (Apps, System, Modules, Binding) through their lifecycle phases
+3. Reads source configs from `synapps/config/{apps,modules}.json` and `.dev.json` overrides
+4. Executes all config builders (Apps, Modules, Binding) through their lifecycle phases
 5. Generates compiled configs in `synapps/config/compiled/`
 
 ### When to run

@@ -275,7 +275,7 @@ describe('ConfirmDialog Component', function () {
     it('uses default icon', function () {
         $component = new ConfirmDialog;
 
-        expect($component->icon)->toBe('fa-solid fa-circle-exclamation');
+        expect($component->icon)->toBe('ph ph-warning-circle');
     });
 });
 
@@ -385,10 +385,10 @@ describe('Alert Component', function () {
 
     it('auto-assigns icon based on type', function () {
         $expectedIcons = [
-            'success' => 'fa-solid fa-circle-check',
-            'warning' => 'fa-solid fa-triangle-exclamation',
-            'danger' => 'fa-solid fa-circle-exclamation',
-            'info' => 'fa-solid fa-circle-info',
+            'success' => 'ph ph-check-circle',
+            'warning' => 'ph ph-warning',
+            'danger' => 'ph ph-warning-circle',
+            'info' => 'ph ph-info',
         ];
 
         foreach ($expectedIcons as $type => $expectedIcon) {
@@ -400,7 +400,7 @@ describe('Alert Component', function () {
     it('auto-assigns icon for error type as danger icon', function () {
         $component = new Alert(type: 'error');
 
-        expect($component->icon)->toBe('fa-solid fa-circle-exclamation');
+        expect($component->icon)->toBe('ph ph-warning-circle');
     });
 
     it('accepts custom icon', function () {
@@ -824,7 +824,7 @@ describe('SearchBox Component', function () {
         $html = Blade::render('<x-synapse-search-box placeholder="Search..." />');
 
         expect($html)->toContain('syn-search-box-icon')
-            ->toContain('fa-search')
+            ->toContain('ph-magnifying-glass')
             ->not->toContain('syn-search-box-trailing');
     });
 

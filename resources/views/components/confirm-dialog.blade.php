@@ -20,7 +20,7 @@
         confirmText: 'Yes, do it',
         cancelText: 'No, cancel',
         confirmColor: 'danger',
-        icon: 'fa-solid fa-trash',
+        icon: 'ph ph-trash',
         onConfirm: () => { $wire.customAction() }
     })">
         Action
@@ -136,7 +136,7 @@
                     @click="confirm()"
                 >
                     <span
-                        class="fa-solid fa-spinner fa-spin"
+                        class="ph ph-spinner-gap syn-spin"
                         wire:loading
                     ></span>
                     {{ $confirmText }}

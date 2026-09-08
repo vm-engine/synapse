@@ -88,8 +88,8 @@ php artisan synapps:config
 ```
 
 **What it does:**
-- Reads source configs from `synapps/config/{apps,system,modules}.json` and `.dev.json` overrides
-- Executes all config builders (Apps, System, Modules, Binding) through their lifecycle phases
+- Reads source configs from `synapps/config/{apps,modules}.json` and `.dev.json` overrides
+- Executes all config builders (Apps, Modules, Binding) through their lifecycle phases
 - Generates compiled configs in `synapps/config/compiled/`
 - Writes final configs to `config/synapps.php` and `config/synapse.php`
 
@@ -285,7 +285,6 @@ composer update
 - `::config()` - **Optimized method** - reads from cached `synapps.json`, generates if missing
 - `::generate()` - **Legacy method** - always regenerates configuration
 - **Apps Builder**: App-level config (`apps.json` + `apps.dev.json`)
-- **System Builder**: System config with protected keys (`system.json` + `system.dev.json`)
 - **Modules Builder**: Module discovery and merging (`modules.json` + `modules.dev.json`)
 - **Binding Builder**: Service container bindings
 
@@ -321,12 +320,12 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 **Configuration Files:**
 
 *Source:*
-- `synapps/config/{apps,system,modules}.json` - Base configs
-- `synapps/config/{apps,system,modules}.dev.json` - Dev overrides
+- `synapps/config/{apps,modules}.json` - Base configs
+- `synapps/config/{apps,modules}.dev.json` - Dev overrides
 - `config.json` - Protection rules
 
 *Compiled:*
-- `synapps/config/compiled/{apps,system,modules,binding}.json`
+- `synapps/config/compiled/{apps,modules,binding}.json`
 - `synapps/config/compiled/checksum` - Config hash
 
 ### Module Discovery Flow
@@ -881,18 +880,26 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 
 ## Blade Components
 
+> Registered tag is `synapse-{name}` (single hyphen, e.g. `<x-synapse-alert>`), not the `x-synapse::{name}` namespace notation — components are registered individually via `$blade->component(...)` in `SynapseViewServiceProvider`, not via a Blade component namespace.
+
 **Form Components:**
-- `<x-synapse::checkboxes name="" :options="[]" :model="[]" />`
-- `<x-synapse::radio-buttons name="" :options="[]" :model="" />`
-- `<x-synapse::password />`
-- `<x-synapse::currency currency="$" />`
-- `<x-synapse::datepicker :flatpickr="{}" />`
+- `<x-synapse-checkboxes name="" :options="[]" :model="[]" />`
+- `<x-synapse-radio-buttons name="" :options="[]" :model="" />`
+- `<x-synapse-password />`
+- `<x-synapse-currency currency="$" />`
+- `<x-synapse-datepicker :flatpickr="{}" />`
+- `<x-synapse-search-box placeholder="" />` — left search icon, optional `trailing` slot, all other attributes (`wire:model`, ...) pass through to the `<input>`.
+
+**Layout Components:**
+- `<x-synapse-panel title="">` — card-shell wrapper with a `toolbar` slot; `collapsible`/`collapsed` for a click-to-toggle body.
+- `<x-synapse-stat-tile icon="" color="" label="" value="" />` — single-metric card. `variant="tile"` (default, icon square + label/value) or `variant="card"` (title-row layout, `iconPosition`, `tinted`, `sublabel`, `href`/`clickable`). `label`/`value`/(`sublabel`) accept matching named slots for rich content.
 
 **UI Components:**
-- `<x-synapse::confirm-dialog title="" message="" confirmText="" />`
-- `<x-synapse::drawer title="" />`
-- `<x-synapse::toastr />`
-- `<x-synapse::alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`
+- `<x-synapse-confirm-dialog title="" message="" confirmText="" />`
+- `<x-synapse-drawer title="" />`
+- `<x-synapse-toastr />`
+- `<x-synapse-alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`
+- `<x-synapse-badge color="gray|brand|success|warning|danger|info" size="sm|md" icon="">` — pill status badge.
 
 **Alert Component (Detailed):**
 
@@ -905,15 +912,15 @@ Auto-assigns icons by type:
 Features: Alpine.js animations, dark mode, slot content, ARIA attributes
 
 ```blade
-<x-synapse::alert type="success" message="Saved!" />
+<x-synapse-alert type="success" message="Saved!" />
 
-<x-synapse::alert type="danger" title="Errors" :dismissible="false">
+<x-synapse-alert type="danger" title="Errors" :dismissible="false">
     <ul class="list-disc list-inside">
         @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
         @endforeach
     </ul>
-</x-synapse::alert>
+</x-synapse-alert>
 ```
 
 ---

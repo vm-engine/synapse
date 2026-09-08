@@ -167,18 +167,26 @@ tests/
   - File structure validation
 
 #### 6. Blade Components (`BladeComponentsTest.php`)
-**70+ test cases** for all UI components:
+**130+ test cases** for all UI components:
 
-- **Checkboxes** (7 tests) - Name, options, model storage
-- **RadioButtons** (7 tests) - Single selection inputs
-- **Select** (3 tests) - Dropdown options
-- **MultiSelect** (5 tests) - Multiple selection with model
+- **Checkboxes** (6 tests) - Name, options, model storage
+- **RadioButtons** (5 tests) - Single selection inputs
 - **Password** (2 tests) - Password input with toggle
+- **PasswordGenerator** (11 tests) - Generate/apply/copy, multi-property model
 - **Currency** (4 tests) - Currency symbol handling
 - **Datepicker** (4 tests) - Flatpickr configuration
+- **Toggler** (12 tests) - Colors, inline mode, entangle
 - **ConfirmDialog** (10 tests) - Title, message, buttons, colors, icons
 - **Drawer** (4 tests) - Title and rendering
 - **Toastr** (2 tests) - Toast notifications
+- **Alert** (19 tests) - Types, icons, dismissible, border/solid variants
+- **Badge** (8 tests) - Colors, sizes, optional icon
+- **Panel** (9 tests) - Title, toolbar slot, collapsible/collapsed
+- **SearchBox** (7 tests) - Placeholder, attribute pass-through, trailing slot
+- **StatTile** (26 tests) - Tile/card variants, icon positioning, tinting, slot overrides
+- **Semantic CSS classes** (2 tests) - `syn-*` class output, no raw Tailwind leakage
+
+> `Select`, `MultiSelect`, and the `select2` wrapper were removed in v3.0.0 — see [UPGRADE.md](UPGRADE.md#upgrading-to-v300). `<x-adv-select>` has its own dedicated test file (`AdvSelectComponentTest.php`).
 
 #### 7. Service Providers (`ServiceProvidersTest.php`)
 **10 test cases** for provider registration:

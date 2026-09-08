@@ -95,8 +95,8 @@ DbConfig::set('app.site_name', 'My Site');
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 12.x
+- PHP 8.5+
+- Laravel 13.x
 - Livewire 4.x
 - Composer
 - Node.js & NPM
@@ -115,11 +115,12 @@ php artisan synapps:discover
 # Regenerate configs
 php artisan synapps:config
 
-# Generate module components
-php artisan synapps:make-module blog --author="Your Name"
-php artisan synapps:make-model blog Post -mfs
-php artisan synapps:make-controller blog PostController --resource
-php artisan synapps:make-livewire blog PostList
+# Generate module components (unified command)
+php artisan synapps:make module blog --author="Your Name"
+php artisan synapps:make model blog Post -mfs
+php artisan synapps:make controller blog PostController --resource
+php artisan synapps:make livewire blog PostList
+# ...or the individual synapps:make-{type} commands still work the same way
 
 # Manage database config
 php artisan synapse:db-config app.maintenance_mode true
@@ -171,17 +172,35 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-checkboxes name="permissions" :options="$opts" :model="$selected" />
 <x-synapse-datepicker />
 <x-synapse-currency currency="$" />
+<x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q" />
 
 <!-- File upload -->
 <x-synapse-drag-n-drop wireModel="avatar" />          {{-- single image, with preview --}}
 <x-synapse-file-drop wire-model="docs" multiple       {{-- multi-file, any type --}}
     :max-count="3" :allowed-types="['pdf','jpg']" />
 
+<!-- Layout components -->
+<x-synapse-panel title="Clients">...</x-synapse-panel>
+<x-synapse-stat-tile icon="ph ph-invoice" color="blue" label="Total Invoices" value="2,613" />
+<x-synapse-badge color="success">Active</x-synapse-badge>
+
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
 <x-synapse-drawer title="Settings">...</x-synapse-drawer>
 <x-synapse-toastr />
 ```
+
+### Icons
+
+Synapse-provided components (badge, panel, search-box, confirm-dialog, ...) accept a plain icon *class string*, so any icon font works — pick one and pass its class:
+
+```blade
+<x-synapse-badge color="success" icon="ph ph-check">Verified</x-synapse-badge>
+```
+
+**Phosphor Icons** (`@phosphor-icons/web`, loaded from `node_modules` — no CDN) is the recommended set: 9,000+ icons, and — unlike FontAwesome Free — every icon has a real glyph in every weight it ships. Classes look like `ph ph-<name>` (e.g. `ph ph-house`, `ph ph-trash`, `ph ph-check-circle`). Only the `regular` weight is imported by default (`@import "@phosphor-icons/web/regular";` in `synapps.css`) to keep the CSS bundle small; to add another weight (`bold`, `fill`, `duotone`, `light`, `thin`), add its import next to it and use the matching class prefix documented at [phosphoricons.com](https://phosphoricons.com).
+
+**FontAwesome Free** (`@fortawesome/fontawesome-free`) remains installed and available as an alternative — classes look like `fa-solid fa-<name>`. Watch out: FA Free ships one font file per style (solid/regular/brands), and **most icons only have a glyph in the solid font** — `fa-regular`/`fa-light`/`fa-duotone` render nothing for the vast majority of icons in the free tier (those weights are Pro-only per-icon). Stick to `fa-solid` unless you've confirmed the specific icon has a free non-solid glyph.
 
 ## Notifications
 

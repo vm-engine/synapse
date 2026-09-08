@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 12.x|13.x
+- PHP 8.5+
+- Laravel 13.x
 - Livewire ^4.0 (installed transitively as a dependency of this package)
 - Composer
 - Node.js & NPM

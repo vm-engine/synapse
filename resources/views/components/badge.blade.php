@@ -6,13 +6,13 @@
     Props:
     - color (string): 'gray', 'brand', 'success', 'warning', 'danger', 'info' (default: 'gray')
     - size (string): 'sm', 'md' (default: 'md')
-    - icon (string): Optional FontAwesome icon class, e.g. 'fa-solid fa-check'
+    - icon (string): Optional icon class — Phosphor (recommended) e.g. 'ph ph-check', or FontAwesome e.g. 'fa-solid fa-check'
 
     Usage Examples:
 
     <x-synapse-badge color="success">Active</x-synapse-badge>
     <x-synapse-badge color="danger" size="sm">Overdue</x-synapse-badge>
-    <x-synapse-badge color="success" icon="fa-solid fa-check">Verified</x-synapse-badge>
+    <x-synapse-badge color="success" icon="ph ph-check">Verified</x-synapse-badge>
 --}}
 
 <span

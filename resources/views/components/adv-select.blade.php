@@ -119,7 +119,7 @@ Component: VmEngine\Synapse\Components\AdvSelect
 View: synapse::components.adv-select
 Version: 1.1.0 — search input moved into the dropdown (no longer nested
 inside the bordered main box), added a dropdown arrow, single-select
-clear button now uses a FontAwesome icon.
+clear button now uses a Phosphor icon.
 --------------------------------------------------------------------
 --}}
 
@@ -161,7 +161,7 @@ clear button now uses a FontAwesome icon.
                         type="button"
                         @click.stop="remove(index)"
                     >
-                        <i class="fa-solid fa-xmark"></i>
+                        <i class="ph ph-x"></i>
                     </button>
                 </span>
             </template>
@@ -182,13 +182,13 @@ clear button now uses a FontAwesome icon.
                 type="button"
                 @click.stop="clearSelection"
             >
-                <i class="fa-solid fa-xmark"></i>
+                <i class="ph ph-x"></i>
             </button>
         </template>
 
         {{-- Dropdown arrow --}}
         <i
-            class="fa-solid fa-chevron-down adv-select-arrow"
+            class="ph ph-caret-down adv-select-arrow"
             :class="{ 'is-open': open }"
         ></i>
     </div>
@@ -229,7 +229,7 @@ clear button now uses a FontAwesome icon.
                 @click="createNew()"
             >
                 <span class="adv-select-create-hint">
-                    <i class="fa-solid fa-plus mr-1"></i>
+                    <i class="ph ph-plus mr-1"></i>
                     Create "<span x-text="search"></span>"
                 </span>
             </div>

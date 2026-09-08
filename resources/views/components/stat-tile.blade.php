@@ -12,7 +12,7 @@
       color tint, and optional clickable/hover-shadow affordance.
 
     Props:
-    - icon (string): Optional FontAwesome icon class, e.g. 'fa-solid fa-file-invoice'
+    - icon (string): Optional icon class — Phosphor (recommended) e.g. 'ph ph-invoice', or FontAwesome e.g. 'fa-solid fa-file-invoice'
     - color (string): Accent color — 'gray', 'blue', 'indigo', 'purple', 'red', 'orange', 'green' (default: 'gray')
     - label (string): Caption. Can be overridden with <x-slot:label>.
     - value (string): Already-formatted value (caller formats numbers/currency). Can be overridden with <x-slot:value>.
@@ -40,10 +40,10 @@
 
     Usage Examples:
 
-    <x-synapse-stat-tile icon="fa-solid fa-file-invoice" color="blue" label="Total Invoices" value="2.613" />
+    <x-synapse-stat-tile icon="ph ph-invoice" color="blue" label="Total Invoices" value="2.613" />
 
     <x-synapse-stat-tile
-        variant="card" icon="fa-solid fa-hourglass-half" color="red" tinted
+        variant="card" icon="ph ph-hourglass-medium" color="red" tinted
         label="Stuck Transactions" value="4,277" sublabel="> 30 min old"
     />
 

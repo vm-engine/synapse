@@ -22,7 +22,7 @@
     <x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q">
         <x-slot:trailing>
             <button type="button" class="btn" @click="drawerOpen = true">
-                <span class="fa-solid fa-filter"></span>
+                <span class="ph ph-funnel"></span>
             </button>
         </x-slot:trailing>
     </x-synapse-search-box>
@@ -30,7 +30,7 @@
 
 <div class="syn-search-box">
     <span class="syn-search-box-icon">
-        <i class="fa-solid fa-search"></i>
+        <i class="ph ph-magnifying-glass"></i>
     </span>
 
     <input

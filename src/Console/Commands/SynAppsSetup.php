@@ -151,6 +151,7 @@ class SynAppsSetup extends Command
                         '@alpinejs/morph' => '^3.15.0',
                         '@alpinejs/sort' => '^3.15.0',
                         '@fortawesome/fontawesome-free' => '^7.1.0',
+                        '@phosphor-icons/web' => '^2.1.2',
                         'flatpickr' => '^4.6.13',
                         'vite-plugin-static-copy' => '^3.1.4',
                     ],

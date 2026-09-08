@@ -40,37 +40,7 @@ Radio button group for single selection:
 
 ---
 
-### Select Dropdown
-
-Standard dropdown select:
-
-```blade
-<x-synapse-select
-    :options="['option1' => 'Option 1', 'option2' => 'Option 2']" />
-```
-
-**Props:**
-- `options` (array, required) - Select options
-
----
-
-### Multi-Select
-
-Multiple selection dropdown:
-
-```blade
-<x-synapse-multiselect
-    name="tags"
-    :options="$availableTags"
-    :model="$selectedTags" />
-```
-
-**Props:**
-- `name` (string, required) - Input name
-- `options` (array, required) - Available options
-- `model` (array, default: []) - Selected values
-
----
+> **`<x-synapse-select>` and `<x-synapse-multiselect>` were removed in v3.0.0.** Use [Advanced Select](#advanced-select) (`<x-adv-select>`) instead — it covers both single and multiple selection, plus searchable/remote data. See [UPGRADE.md](../UPGRADE.md#upgrading-to-v300) for the migration shape.
 
 ### Password Input
 
@@ -158,6 +128,35 @@ Date picker using Flatpickr:
 
 **Props:**
 - `flatpickr` (string, default: '{}') - JSON configuration for Flatpickr
+
+---
+
+### Search Box
+
+Text input with a fixed left search icon and an optional trailing slot:
+
+```blade
+<x-synapse-search-box
+    :placeholder="__('pm::client.search_placeholder')"
+    wire:model.live.debounce="q"
+/>
+
+{{-- With a trailing element, e.g. a filter-drawer toggle --}}
+<x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q">
+    <x-slot:trailing>
+        <button type="button" class="btn" @click="drawerOpen = true">
+            <span class="fa-solid fa-filter"></span>
+        </button>
+    </x-slot:trailing>
+</x-synapse-search-box>
+```
+
+**Props:**
+- `placeholder` (string, optional) - Input placeholder (no hardcoded default — pass a translated string)
+- All other attributes (`wire:model`, `id`, `name`, ...) pass through to the `<input>`
+
+**Slots:**
+- `trailing` (optional) - Element appended after the input
 
 ---
 
@@ -268,6 +267,101 @@ The label supports inline HTML — `<em>` is styled by the component as a brand-
 ---
 
 ## UI Components
+
+### Badge
+
+Pill-shaped status/label badge with color variants and an optional icon:
+
+```blade
+<x-synapse-badge color="success">Active</x-synapse-badge>
+<x-synapse-badge color="danger" size="sm">Overdue</x-synapse-badge>
+<x-synapse-badge color="success" icon="fa-solid fa-check">Verified</x-synapse-badge>
+```
+
+**Props:**
+- `color` (string, default: 'gray') - `'gray'`, `'brand'`, `'success'`, `'warning'`, `'danger'`, `'info'`
+- `size` (string, default: 'md') - `'sm'`, `'md'`
+- `icon` (string, optional) - FontAwesome icon class, e.g. `'fa-solid fa-check'`
+
+---
+
+### Panel
+
+Card-shell wrapper for list/form pages — a header (title + optional toolbar) and a body slot. Replaces the hand-rolled `rounded-2xl border ... dark:bg-white/3` card markup:
+
+```blade
+<x-synapse-panel :title="__('pm::client.list_title')">
+    <x-slot:toolbar>
+        <a class="btn primary" href="{{ backend_route('pm.client.create') }}">Add</a>
+    </x-slot:toolbar>
+
+    <table>...</table>
+</x-synapse-panel>
+
+{{-- Collapsible --}}
+<x-synapse-panel title="Filters" collapsible collapsed>
+    <table>...</table>
+</x-synapse-panel>
+```
+
+**Props:**
+- `title` (string, optional) - Panel header title
+- `collapsible` (bool, default: false) - Make the body collapsible via the header
+- `collapsed` (bool, default: false) - Start collapsed (only applies when `collapsible`)
+
+**Slots:**
+- Default - Panel body (table, form, etc.), unstyled
+- `toolbar` (optional) - Header-right actions (add button, search, filter toggle), always visible even when collapsed
+
+---
+
+### Stat Tile
+
+Single-metric card. Two variants:
+
+```blade
+{{-- variant="tile" (default): icon square + label/value --}}
+<x-synapse-stat-tile icon="fa-solid fa-file-invoice" color="blue" label="Total Invoices" value="2.613" />
+
+{{-- :bordered="false" — flat gray-50 "quick stats" look, no icon --}}
+<x-synapse-stat-tile label="Progress" value="42%" :bordered="false">
+    <div class="mt-2 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+        <div class="h-2.5 rounded-full bg-blue-600" style="width: 42%"></div>
+    </div>
+</x-synapse-stat-tile>
+
+{{-- variant="card": title-row layout, optional whole-card color tint --}}
+<x-synapse-stat-tile
+    variant="card" icon="fa-solid fa-hourglass-half" color="red" tinted
+    label="Stuck Transactions" value="4,277" sublabel="> 30 min old"
+/>
+
+{{-- clickable card with a trend sublabel --}}
+<x-synapse-stat-tile
+    variant="card" clickable href="{{ route('...') }}"
+    label="Transactions Today" value="0" sublabel="+0% vs yesterday (0)" sublabelColor="green"
+/>
+```
+
+**Props:**
+- `icon` (string, optional) - FontAwesome icon class
+- `color` (string, default: 'gray') - `'gray'`, `'blue'`, `'indigo'`, `'purple'`, `'red'`, `'orange'`, `'green'`
+- `label` / `value` (string, optional) - Caption / already-formatted value (caller formats numbers/currency); each can be overridden with a matching `<x-slot:label>` / `<x-slot:value>` for rich content
+- `valueColor` (string, optional) - `variant="tile"` only - value text color override, same palette as `color`
+- `bordered` (bool, default: true) - `variant="tile"` only - white card + border + rounded-xl vs gray-50 flat + rounded-lg (`false`)
+- `variant` (string, default: 'tile') - `'tile'` or `'card'`
+- `iconPosition` (string, default: 'left') - `variant="card"` only - `'left'` (icon square beside stacked title/value/sublabel), `'title'` (bare/circle icon inline in the title row), or `'background'` (large, low-opacity, cropped icon in the bottom-right corner)
+- `iconBackground` (bool, default: true) - both variants - colored square/circle behind the icon (`true`) vs a bare colored icon glyph (`false`)
+- `tinted` (bool, default: false) - `variant="card"` only - wash the whole card in `color` (bg/border/title/value/icon) vs a plain white card with a muted icon
+- `sublabel` / `sublabelColor` (string, optional) - `variant="card"` only - small caption line under the value; `sublabel` can be overridden with `<x-slot:sublabel>`
+- `href` (string, optional) - `variant="card"` only - wraps the tile in an `<a>`, implies clickable
+- `clickable` (bool, default: false) - `variant="card"` only - hover-shadow/cursor-pointer affordance without requiring `href` (e.g. a `wire:click` card)
+
+**Slots:**
+- Default - Extra content below the value (a badge, a progress bar)
+- `label` / `value` / `sublabel` - Override the matching prop with rich content
+
+---
 
 ### Confirm Dialog
 
@@ -429,7 +523,9 @@ Flexible alert component with dismissible functionality:
 
 ## Advanced Select
 
-A fully featured, reusable **Livewire + Alpine.js select component**.
+A fully featured, reusable **Livewire + Alpine.js select component**. The replacement for the removed `select`/`multi-select` components (see the note above).
+
+> **v3.0.0:** the search input now lives inside the dropdown instead of nested in the bordered main box (fixes a double-border look under themes that border both), gained a rotating dropdown-arrow indicator, and the clear/pill-remove buttons now use Phosphor icons instead of a bare `✕` glyph.
 
 Supports:
 

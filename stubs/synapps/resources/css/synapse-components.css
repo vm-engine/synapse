@@ -1292,3 +1292,14 @@ span.flatpickr-weekday,
 .synotif-modal-pagination {
     @apply px-4 py-3;
 }
+
+/* Spin utility — pairs with ph-spinner-gap; Phosphor ships no built-in
+   spin animation, unlike FontAwesome's fa-spin. */
+@keyframes syn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.syn-spin {
+    animation: syn-spin 1s linear infinite;
+}

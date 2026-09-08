@@ -46,7 +46,7 @@
                     <h3 class="syn-panel-title">{{ $title }}</h3>
                     @if ($collapsible)
                         <span
-                            class="fa-solid fa-chevron-down syn-panel-chevron"
+                            class="ph ph-caret-down syn-panel-chevron"
                             :class="{ 'syn-panel-chevron-open': open }"
                         ></span>
                     @endif

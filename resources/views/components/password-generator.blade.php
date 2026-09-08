@@ -18,7 +18,7 @@
             title="Generate Password"
             @click="generate()"
         >
-            <span class="fa-solid fa-refresh"></span>
+            <span class="ph ph-arrow-clockwise"></span>
         </button>
 
         @if ($model)
