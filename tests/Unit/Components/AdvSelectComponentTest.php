@@ -89,4 +89,16 @@ describe('AdvSelect Component', function () {
 
         expect(method_exists($component, 'render'))->toBeTrue();
     });
+
+    it('defaults disabled to false', function () {
+        $component = new AdvSelect(wireModel: 'role');
+
+        expect($component->disabled)->toBeFalse();
+    });
+
+    it('accepts disabled', function () {
+        $component = new AdvSelect(wireModel: 'role', disabled: true);
+
+        expect($component->disabled)->toBeTrue();
+    });
 });

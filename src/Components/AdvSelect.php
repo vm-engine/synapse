@@ -26,6 +26,7 @@ class AdvSelect extends Component
         public bool $live = false,
         public bool $allowCreate = false,
         public bool $autoLoad = true,
+        public bool $disabled = false,
     ) {}
 
     public function render()

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `<x-adv-select>` reworked: the search input now lives inside the dropdown instead of nested inside the bordered main box (fixing a double-border look under themes that border both the box and the input), gained a rotating dropdown-arrow indicator, and its clear/pill-remove buttons now use Phosphor icons instead of a bare `✕` glyph.
+- `<x-adv-select>` gained a `disabled` prop (native `disabled` on the search input and clear/remove buttons, an `is-disabled` CSS class dimming the box, `focusInput()` a no-op while disabled) — needed to migrate fields off the removed `select`/`multi-select` components that relied on their `disabled` prop.
 - All FontAwesome usages inside the package itself (`badge`, `panel`, `search-box`, `file-drop`, `drawer`, `adv-select`, `sort-icon`, `password-generator`, `confirm-dialog`, `stat-tile` doc examples, `Alert`'s auto-assigned icons, `ConfirmDialog`'s default icon) were converted to Phosphor. A new `.syn-spin` CSS keyframe utility replaces FontAwesome's built-in `fa-spin`, which Phosphor doesn't ship (paired with `ph-spinner-gap` for loading spinners). FontAwesome usages in other packages/modules are unaffected and not yet migrated.
 
 ### Removed

@@ -30,6 +30,7 @@ A fully featured, reactive select component that supports:
 | live              | bool        | false               | If true, updates Livewire immediately on change. |
 | allowCreate       | bool        | false               | If true, allows user to create new options by pressing Enter. |
 | autoLoad          | bool        | true                | If true, auto-loads selected values from wireModel on init. |
+| disabled          | bool        | false               | If true, the select is non-interactive and visually dimmed. |
 
 --------------------------------------------------------------------
 💡 Examples
@@ -117,15 +118,15 @@ public function loadUser(int|array $ids): array
 
 Component: VmEngine\Synapse\Components\AdvSelect
 View: synapse::components.adv-select
-Version: 1.1.0 — search input moved into the dropdown (no longer nested
-inside the bordered main box), added a dropdown arrow, single-select
-clear button now uses a Phosphor icon.
+Version: 1.2.0 — added a `disabled` prop (native disabled on the search
+input and clear/remove buttons, `is-disabled` CSS class, and
+focusInput() is a no-op while disabled).
 --------------------------------------------------------------------
 --}}
 
 <div
     class="adv-select-container"
-    x-data="synapseAdvSelect(@js($preload ?? []), {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', @js($options), {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }})"
+    x-data="synapseAdvSelect(@js($preload ?? []), {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', @js($options), {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }}, {{ $disabled ? 'true' : 'false' }})"
     x-init="init()"
     wire:ignore
     {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
@@ -140,7 +141,8 @@ clear button now uses a Phosphor icon.
     {{-- Select box (display-only: placeholder / selection / pills + clear + arrow) --}}
     <div
         class="adv-select-input-box"
-        :class="{ 'is-open': open }"
+        :class="{ 'is-open': open, 'is-disabled': disabled }"
+        :aria-disabled="disabled"
         @click="focusInput"
     >
         {{-- Placeholder (nothing selected, either mode) --}}
@@ -159,6 +161,7 @@ clear button now uses a Phosphor icon.
                     <button
                         class="adv-select-item-remove"
                         type="button"
+                        :disabled="disabled"
                         @click.stop="remove(index)"
                     >
                         <i class="ph ph-x"></i>
@@ -180,6 +183,7 @@ clear button now uses a Phosphor icon.
             <button
                 class="adv-select-clear"
                 type="button"
+                :disabled="disabled"
                 @click.stop="clearSelection"
             >
                 <i class="ph ph-x"></i>
@@ -205,6 +209,7 @@ clear button now uses a Phosphor icon.
             type="text"
             x-ref="search"
             x-model="search"
+            :disabled="disabled"
             x-on:focus="fetch()"
             x-on:input.debounce.300ms="fetch()"
             x-on:keydown="handleKeydown($event)"
@@ -242,7 +247,7 @@ clear button now uses a Phosphor icon.
         const register = () => {
             Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wireModel, labelField,
                 valueField,
-                staticOptions, minSearchLength, isLive, allowCreate, autoLoad) => ({
+                staticOptions, minSearchLength, isLive, allowCreate, autoLoad, disabled) => ({
                 search: '',
                 results: [],
                 selected: preload,
@@ -258,6 +263,7 @@ clear button now uses a Phosphor icon.
                 isLive,
                 allowCreate,
                 autoLoad,
+                disabled,
 
                 async init() {
                     if (this.autoLoad && this.selected.length === 0) {
@@ -336,6 +342,7 @@ clear button now uses a Phosphor icon.
                 },
 
                 focusInput() {
+                    if (this.disabled) return;
                     this.open = true;
                     this.$nextTick(() => this.$refs.search?.focus());
                 },
