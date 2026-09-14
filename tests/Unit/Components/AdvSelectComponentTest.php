@@ -2,9 +2,32 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Blade;
 use VmEngine\Synapse\Components\AdvSelect;
 
 describe('AdvSelect Component', function () {
+    it('renders x-data as raw JSON literals, not JSON.parse(), for CSP-safe Alpine', function () {
+        // SynapseViewServiceProvider (which registers <x-synapse-*> tags)
+        // only boots when SynapseUtils::isSynAppsAutoloaded() is true, which
+        // this package's TestCase deliberately doesn't set up (see
+        // BladeComponentsTest.php). Register just this tag directly.
+        view()->addNamespace('synapse', __DIR__.'/../../../resources/views');
+        Blade::component(AdvSelect::class, 'synapse-adv-select');
+
+        // Livewire's csp_safe evaluator (forced on by
+        // SynapseServiceProvider::overrideLivewireCsp()) has no access to the
+        // `JSON` global, so @js()'s JSON.parse(...) wrapper silently breaks
+        // x-data init. Regression test for that bug.
+        $html = Blade::render(
+            '<x-synapse-adv-select wire-model="filterRole" :live="true" :options="$options" />',
+            ['options' => [['value' => 1, 'label' => 'Admin "Role"']]],
+        );
+
+        expect($html)->not->toContain('JSON.parse')
+            ->and($html)->toContain('&quot;value&quot;:1')
+            ->and($html)->toContain('&quot;label&quot;:&quot;Admin \\&quot;Role\\&quot;&quot;');
+    });
+
     it('can be instantiated with only the required wireModel', function () {
         $component = new AdvSelect(wireModel: 'selectedUser');
 

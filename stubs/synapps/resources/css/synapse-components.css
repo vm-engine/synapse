@@ -1075,15 +1075,20 @@ span.flatpickr-weekday,
 /* Search Box */
 .syn-search-box {
     @apply relative flex items-center;
+
+    /* Specificity must beat theme-base.css's `input[type="text"]` (0,1,1) —
+       plain `.syn-search-box-input` (0,1,0) loses to it and falls back to
+       that rule's px-4, breaking the icon/text layout. Nest under the
+       parent class like .syn-password does for the same reason. */
+    & .syn-search-box-input {
+        @apply shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30;
+    }
+    & .syn-search-box-has-trailing {
+        @apply pr-11;
+    }
 }
 .syn-search-box-icon {
     @apply pointer-events-none absolute left-3 text-gray-400 dark:text-gray-500;
-}
-.syn-search-box-input {
-    @apply shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30;
-}
-.syn-search-box-has-trailing {
-    @apply pr-11;
 }
 .syn-search-box-trailing {
     @apply absolute top-1/2 right-2 flex -translate-y-1/2 items-center;
@@ -1305,4 +1310,122 @@ span.flatpickr-weekday,
 }
 .syn-spin {
     animation: syn-spin 1s linear infinite;
+}
+
+/* ========================================
+   DATA TABLE
+   ======================================== */
+.datatable {
+    @apply min-w-full;
+
+    & > thead > tr {
+        @apply border-b border-gray-100 dark:border-gray-800;
+
+        & > th {
+            @apply px-5 py-3 sm:px-6;
+
+            & p {
+                @apply font-medium text-sm text-gray-800 dark:text-gray-400;
+            }
+        }
+
+        & > th.sortable > div {
+            @apply flex justify-between gap-2 items-center;
+
+            & > a {
+                @apply flex-none;
+            }
+        }
+    }
+}
+
+.datatable > tbody {
+    @apply divide-y divide-gray-100 dark:divide-gray-800;
+
+    & > tr {
+        @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+
+        & > td {
+            @apply px-5 py-4 sm:px-6;
+
+            & p {
+                @apply text-sm text-gray-500 dark:text-gray-400;
+            }
+        }
+    }
+}
+
+.datatable > tfoot td {
+    @apply px-5 py-4 sm:px-6;
+}
+
+/* Variants — composable, mix on the <table class="datatable ..."> */
+.datatable-sm > thead > tr > th,
+.datatable-sm > tbody > tr > td {
+    @apply px-3 py-2;
+}
+.datatable-sm > thead > tr > th p,
+.datatable-sm > tbody > tr > td p {
+    @apply text-xs;
+}
+
+.datatable-striped > tbody > tr:nth-child(even) {
+    @apply bg-gray-50 dark:bg-white/[0.02];
+}
+
+.datatable-bordered {
+    @apply border border-gray-100 dark:border-gray-800;
+}
+.datatable-bordered > thead > tr > th,
+.datatable-bordered > tbody > tr > td {
+    @apply border border-gray-100 dark:border-gray-800;
+}
+
+.datatable-borderless > thead > tr {
+    @apply border-b-0;
+}
+.datatable-borderless > tbody {
+    @apply divide-y-0;
+}
+
+.datatable-no-hover > tbody > tr {
+    @apply hover:bg-transparent dark:hover:bg-transparent;
+}
+
+/* Mobile card view — default at < 640px, opt out with .datatable-scroll.
+   Labels come from data-label, set at runtime by initDatatableLabels() in
+   synapps.js (cloned from each column's <th> text — no Blade edits needed). */
+.datatable:not(.datatable-scroll) {
+    @apply max-sm:block max-sm:min-w-0;
+}
+.datatable:not(.datatable-scroll) > thead {
+    @apply max-sm:hidden;
+}
+.datatable:not(.datatable-scroll) > tbody {
+    @apply max-sm:block max-sm:space-y-3 max-sm:divide-y-0;
+}
+.datatable:not(.datatable-scroll) > tbody > tr {
+    @apply max-sm:dark:bg-white/3 max-sm:block max-sm:rounded-xl max-sm:border max-sm:border-gray-200 max-sm:bg-white max-sm:p-3 max-sm:dark:border-gray-800;
+}
+.datatable:not(.datatable-scroll) > tbody > tr > td {
+    @apply max-sm:flex max-sm:flex-col max-sm:gap-0.5 max-sm:border-0 max-sm:px-0 max-sm:py-1.5;
+}
+.datatable:not(.datatable-scroll) > tbody > tr > td.datatable-col-checkbox {
+    @apply max-sm:order-first max-sm:flex-row max-sm:justify-end max-sm:pb-2;
+}
+.datatable:not(.datatable-scroll) > tbody > tr > td.datatable-col-actions {
+    @apply max-sm:order-last max-sm:flex-row max-sm:justify-end max-sm:gap-2 max-sm:border-t max-sm:border-gray-100 max-sm:pt-2 max-sm:dark:border-gray-800;
+}
+
+/* content: attr() isn't a Tailwind utility — plain CSS, same 640px cutoff
+   as the max-sm: rules above (Tailwind v4 default sm breakpoint). */
+@media (max-width: 39.9975rem) {
+    .datatable:not(.datatable-scroll) > tbody > tr > td[data-label]::before {
+        content: attr(data-label);
+        @apply text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500;
+    }
+    .datatable:not(.datatable-scroll) > tbody > tr > td.datatable-col-checkbox::before,
+    .datatable:not(.datatable-scroll) > tbody > tr > td.datatable-col-actions::before {
+        content: none;
+    }
 }

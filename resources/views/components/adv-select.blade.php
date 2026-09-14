@@ -126,7 +126,13 @@ focusInput() is a no-op while disabled).
 
 <div
     class="adv-select-container"
-    x-data="synapseAdvSelect(@js($preload ?? []), {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', @js($options), {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }}, {{ $disabled ? 'true' : 'false' }})"
+    {{-- Options/preload are inlined as raw JSON array/object literals (not
+         Blade's @js(), which wraps them in JSON.parse(...)) because Livewire's
+         CSP-safe Alpine evaluator (see SynapseServiceProvider::overrideLivewireCsp())
+         has no access to the `JSON` global — JSON.parse() inside an x-data
+         expression throws "Undefined variable: JSON" and silently falls back
+         to an empty data object, breaking every binding in this component. --}}
+    x-data="synapseAdvSelect({{ json_encode($preload ?? []) }}, {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', {{ json_encode($options) }}, {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }}, {{ $disabled ? 'true' : 'false' }})"
     x-init="init()"
     wire:ignore
     {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
@@ -143,7 +149,7 @@ focusInput() is a no-op while disabled).
         class="adv-select-input-box"
         :class="{ 'is-open': open, 'is-disabled': disabled }"
         :aria-disabled="disabled"
-        @click="focusInput"
+        @click="toggleOpen"
     >
         {{-- Placeholder (nothing selected, either mode) --}}
         <template x-if="selected.length === 0">
@@ -347,6 +353,16 @@ focusInput() is a no-op while disabled).
                     this.$nextTick(() => this.$refs.search?.focus());
                 },
 
+                toggleOpen() {
+                    if (this.disabled) return;
+                    if (this.open) {
+                        this.open = false;
+                        this.$refs.search?.blur();
+                    } else {
+                        this.focusInput();
+                    }
+                },
+
                 async fetch() {
                     const query = this.search.toLowerCase();
 
@@ -438,7 +454,7 @@ focusInput() is a no-op while disabled).
 
                     this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] :
                             null), this
-                        .live);
+                        .isLive);
                 },
             }));
         };
