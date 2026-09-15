@@ -1429,3 +1429,60 @@ span.flatpickr-weekday,
         content: none;
     }
 }
+
+/* Simple underline tab nav (e.g. settings pages). Add/remove .syn-tab-active
+   on click — it does not manage state itself. */
+.syn-tabs {
+    @apply flex border-b border-gray-200 dark:border-gray-800;
+}
+.syn-tab {
+    @apply px-6 py-4 text-sm font-medium text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200;
+}
+.syn-tab-active {
+    @apply border-b-2 border-blue-500 text-blue-600 dark:text-blue-400;
+}
+
+/* .syn-panel's default slot is intentionally unstyled (caller keeps its own
+   padding) — these two helpers cover the recurring divider-under-header and
+   divider-above-footer-actions shapes seen inside that slot. */
+.syn-panel-body {
+    @apply border-t border-gray-100 dark:border-gray-800;
+}
+.syn-panel-footer {
+    @apply border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:px-6 sm:py-5;
+}
+
+/* Circular icon badge used beside a modal/notice heading (e.g. "Ban User",
+   "Token Generated"). Recurs across user-list.blade.php's ban modal and
+   api-user-form.blade.php's two token-reveal modals. */
+.syn-icon-badge {
+    @apply flex h-12 w-12 items-center justify-center rounded-full;
+}
+.syn-icon-badge-warning {
+    @apply bg-warning/10 text-warning;
+}
+.syn-icon-badge-success {
+    @apply bg-success/10 text-success;
+}
+.syn-icon-badge-danger {
+    @apply bg-danger/10 text-danger;
+}
+.syn-icon-badge-primary {
+    @apply bg-primary/10 text-primary;
+}
+
+/* One-time secret/token reveal box: monospace value + a copy button pinned
+   top-right. Recurs across api-user-form.blade.php's token and
+   signing-secret display modals. */
+.syn-secret-reveal {
+    @apply relative rounded-lg bg-gray-100 p-4 pr-12 dark:bg-gray-800;
+}
+.syn-secret-reveal-copy {
+    @apply absolute right-2 top-2;
+}
+
+/* Label/status + action row on a muted background — recurs across
+   security.blade.php's 2FA and TOTP status panels. */
+.syn-status-row {
+    @apply flex items-center justify-between rounded-lg bg-gray-50 p-4;
+}
