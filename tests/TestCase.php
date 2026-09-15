@@ -49,6 +49,22 @@ abstract class TestCase extends Orchestra
     }
 
     /**
+     * Register the package's own Blade views under the "synapse" namespace.
+     *
+     * In a full application this is wired up by SynapseConfigGenerator via
+     * config('synapse.view_path.general'), which only exists once SynApps
+     * config has been generated. Isolated package tests never generate that
+     * config, so components calling view('synapse::components.*') in
+     * render() would otherwise fail to resolve the namespace.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app['view']->addNamespace('synapse', __DIR__.'/../resources/views');
+    }
+
+    /**
      * Define database migrations.
      */
     protected function defineDatabaseMigrations(): void

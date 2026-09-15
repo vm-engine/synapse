@@ -16,6 +16,7 @@ use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\ExcelExportButton;
 use VmEngine\Synapse\Components\FileDrop;
 use VmEngine\Synapse\Components\Modal;
 use VmEngine\Synapse\Components\Panel;
@@ -129,6 +130,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(FileDrop::class, 'synapse-file-drop');
         $blade->component(SortIcon::class, 'synapse-sort-icon');
         $blade->component(PerPageSelector::class, 'synapse-per-page-selector');
+        $blade->component(ExcelExportButton::class, 'synapse-excel-export-button');
         $blade->component(SearchBox::class, 'synapse-search-box');
         $blade->component(StatTile::class, 'synapse-stat-tile');
     }
