@@ -30,7 +30,14 @@ class SynAppsRemoveModule extends Command
 
     public function handle(Filesystem $files): int
     {
-        $moduleName = (string) $this->argument('moduleName');
+        $moduleName = $this->argument('moduleName');
+
+        if (! is_string($moduleName)) {
+            $this->components->error('Module name must be a string.');
+
+            return self::INVALID;
+        }
+
         $modulePath = synapps_path('modules'.DS.$moduleName);
 
         if (! $files->isDirectory($modulePath) || ! $files->exists($modulePath.DS.'module.json')) {
@@ -89,7 +96,9 @@ class SynAppsRemoveModule extends Command
 
         $contents = $files->get($gitignorePath);
 
-        $alreadyIgnored = collect(preg_split('/\r\n|\r|\n/', $contents))
+        $lines = preg_split('/\r\n|\r|\n/', $contents) ?: [];
+
+        $alreadyIgnored = collect($lines)
             ->contains(fn (string $line) => trim($line) === '/.trash');
 
         if ($alreadyIgnored) {
