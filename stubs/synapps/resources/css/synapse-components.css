@@ -1515,3 +1515,156 @@ span.flatpickr-weekday,
 .syn-form-action-bar {
     @apply fixed bottom-0 left-0 right-0 z-9 flex items-center justify-between border-t border-gray-200 bg-white px-5 py-3 dark:border-gray-700 dark:bg-gray-900;
 }
+
+/* Full-screen image preview (<x-synapse-lightbox>). */
+.syn-lightbox {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/80;
+}
+.syn-lightbox-frame {
+    @apply relative max-h-[90vh] max-w-[90vw];
+}
+.syn-lightbox-close {
+    @apply absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm text-gray-800 shadow-lg hover:bg-gray-100;
+}
+.syn-lightbox-img {
+    @apply max-h-[85vh] max-w-[85vw] rounded-lg object-contain shadow-2xl;
+}
+
+/* Modal content helpers for <x-synapse-modal>'s unstyled slot. */
+.syn-modal-header {
+    @apply flex items-center justify-between border-b border-gray-200 p-5 dark:border-gray-700;
+}
+.syn-modal-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+.syn-modal-close {
+    @apply text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
+}
+.syn-modal-body {
+    @apply p-6;
+}
+.syn-modal-footer {
+    @apply flex justify-end gap-3 border-t border-gray-200 p-5 dark:border-gray-700;
+}
+
+.form-help {
+    @apply mt-1 text-xs text-gray-500 dark:text-gray-400;
+}
+
+/* Path breadcrumb inside a toolbar (file browsers). */
+.syn-breadcrumb-link {
+    @apply rounded px-2 py-1 text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-900/20;
+}
+.syn-breadcrumb-sep {
+    @apply text-gray-400;
+}
+
+/* Small uppercase section heading ("Folders"). */
+.syn-section-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400;
+}
+
+.syn-folder-chip {
+    @apply flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-300 dark:hover:border-brand-600 dark:hover:bg-brand-900/20 dark:hover:text-brand-300;
+}
+.syn-folder-chip-sm {
+    @apply rounded-lg px-3 py-2;
+}
+.syn-folder-chip-icon {
+    @apply text-yellow-500 dark:text-yellow-400;
+}
+
+.syn-empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-600;
+}
+.syn-empty-state-icon {
+    @apply mb-3 text-4xl;
+}
+.syn-empty-state-text {
+    @apply text-sm;
+}
+
+/* Drag-and-drop upload overlay covering a relative container. */
+.syn-drop-overlay {
+    @apply absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-brand-400 bg-brand-50/90 dark:bg-brand-900/80;
+}
+.syn-drop-overlay-icon {
+    @apply text-4xl text-brand-500;
+}
+.syn-drop-overlay-text {
+    @apply text-sm font-semibold text-brand-600 dark:text-brand-300;
+}
+
+/* Two-button segmented toggle (grid/list view). */
+.syn-segmented {
+    @apply flex rounded-lg border border-gray-200 dark:border-gray-700;
+}
+.syn-segmented-item {
+    @apply px-3 py-2 text-sm text-gray-600 transition first:rounded-l-lg last:rounded-r-lg hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800;
+}
+.syn-segmented-item-active {
+    @apply bg-brand-600 text-white hover:bg-brand-600 dark:text-white dark:hover:bg-brand-600;
+}
+
+/* Standalone brand-tinted bulk-action bar (vs .syn-selection-bar, which
+   is a strip inside a panel). */
+.syn-selection-bar-card {
+    @apply flex flex-wrap items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-3 dark:border-brand-800 dark:bg-brand-900/20;
+}
+.syn-selection-bar-count {
+    @apply text-sm font-medium text-brand-700 dark:text-brand-300;
+}
+
+.syn-row-selected {
+    @apply bg-brand-50 dark:bg-brand-900/10;
+}
+
+/* File grid tile (keep `group` inline on the element). */
+.syn-file-tile {
+    @apply relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-gray-600;
+}
+.syn-file-tile-selected {
+    @apply border-brand-500 bg-brand-50 hover:border-brand-500 dark:border-brand-500 dark:bg-brand-900/20 dark:hover:border-brand-500;
+}
+.syn-file-tile-pickable {
+    @apply text-left hover:border-brand-400 hover:shadow-md dark:hover:border-brand-400;
+}
+.syn-file-tile-thumb {
+    @apply flex h-28 items-center justify-center bg-gray-100 dark:bg-gray-900/40;
+}
+.syn-file-tile-thumb-sm {
+    @apply h-20;
+}
+.syn-file-tile-img {
+    @apply h-full w-full object-cover;
+}
+.syn-file-tile-name {
+    @apply truncate text-xs font-medium text-gray-700 dark:text-gray-300;
+}
+.syn-file-tile-meta {
+    @apply text-[11px] text-gray-400 dark:text-gray-600;
+}
+.syn-file-tile-check {
+    @apply flex h-5 w-5 items-center justify-center rounded-full border-2 border-white/70 bg-black/20 opacity-0 group-hover:opacity-100;
+}
+.syn-file-tile-check-on {
+    @apply border-brand-500 bg-brand-500 opacity-100;
+}
+.syn-file-tile-actions {
+    @apply absolute right-1 top-1 flex items-center gap-0.5 rounded-md bg-white/90 px-1 py-0.5 opacity-0 shadow transition group-hover:opacity-100 dark:bg-gray-800/90;
+}
+.syn-file-tile-action {
+    @apply inline-flex h-5 w-5 items-center justify-center text-xs;
+}
+
+/* File thumbnail/icon inside a table row. */
+.syn-file-thumb-sm {
+    @apply h-8 w-8 rounded object-cover;
+}
+.syn-file-icon-sm {
+    @apply w-8 text-center text-lg;
+}
+
+.syn-sort-header {
+    @apply flex items-center gap-1 font-semibold hover:text-brand-600;
+}

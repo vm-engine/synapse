@@ -187,6 +187,7 @@ $cssPath = theme_path('css/theme.css');
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
 <x-synapse-drawer title="Settings">...</x-synapse-drawer>
+<x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />
 ```
 

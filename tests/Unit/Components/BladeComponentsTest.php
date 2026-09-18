@@ -10,6 +10,7 @@ use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\Lightbox;
 use VmEngine\Synapse\Components\Panel;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
@@ -1059,5 +1060,28 @@ describe('StatTile Component', function () {
             ->toContain('<small>Slot Sub</small>')
             ->not->toContain('Fallback Label')
             ->not->toContain('Fallback Sub');
+    });
+});
+
+describe('Lightbox Component', function () {
+    beforeEach(function () {
+        view()->addNamespace('synapse', __DIR__.'/../../../resources/views');
+        Blade::component(Lightbox::class, 'synapse-lightbox');
+    });
+
+    it('defaults name to lightbox', function () {
+        expect((new Lightbox)->name)->toBe('lightbox');
+    });
+
+    it('renders syn-lightbox classes and name-scoped open/close events', function () {
+        $html = Blade::render('<x-synapse-lightbox name="preview" />');
+
+        expect($html)->toContain('syn-lightbox')
+            ->toContain('syn-lightbox-frame')
+            ->toContain('syn-lightbox-close')
+            ->toContain('syn-lightbox-img')
+            ->toContain('open-lightbox-preview')
+            ->toContain('close-lightbox-preview')
+            ->not->toContain('bg-black/80');
     });
 });

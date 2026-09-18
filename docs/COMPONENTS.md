@@ -405,6 +405,29 @@ Slide-out side panel:
 
 ---
 
+### Lightbox
+
+Full-screen image preview on a dark backdrop. Place it once, then open it from anywhere with a window event:
+
+```blade
+<x-synapse-lightbox name="preview" />
+
+<button type="button" @click="$dispatch('open-lightbox-preview', { url: '/storage/photo.jpg', alt: 'Photo' })">
+    Preview
+</button>
+```
+
+**Props:**
+- `name` (string, default: 'lightbox') - Scopes the open/close events
+
+**Events (window):**
+- `open-lightbox-{name}` - Opens with detail `{ url, alt? }`
+- `close-lightbox-{name}` - Closes
+
+Also closes on backdrop click, the close button, or Escape.
+
+---
+
 ### Toastr Notifications
 
 Toast notifications for user feedback:

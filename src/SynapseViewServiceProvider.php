@@ -18,6 +18,7 @@ use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
 use VmEngine\Synapse\Components\ExcelExportButton;
 use VmEngine\Synapse\Components\FileDrop;
+use VmEngine\Synapse\Components\Lightbox;
 use VmEngine\Synapse\Components\Modal;
 use VmEngine\Synapse\Components\Panel;
 use VmEngine\Synapse\Components\Password;
@@ -116,6 +117,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(Panel::class, 'synapse-panel');
         $blade->component(Drawer::class, 'synapse-drawer');
         $blade->component(Modal::class, 'synapse-modal');
+        $blade->component(Lightbox::class, 'synapse-lightbox');
         $blade->component(AdvSelect::class, 'synapse-adv-select');
         $blade->component(Password::class, 'synapse-password');
         $blade->component(PasswordGenerator::class, 'synapse-password-generator');
