@@ -13,7 +13,7 @@ interface ExportQuery
     /**
      * Build and return the query for export.
      *
-     * @return EloquentBuilder<Model>|QueryBuilder
+     * @return EloquentBuilder<covariant Model>|QueryBuilder
      */
     public function __invoke(): EloquentBuilder|QueryBuilder;
 }

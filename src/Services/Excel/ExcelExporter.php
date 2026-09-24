@@ -22,7 +22,7 @@ use VmEngine\Synapse\Services\Excel\Writers\TemplateWriter;
 
 class ExcelExporter
 {
-    /** @var EloquentBuilder<Model>|QueryBuilder|null */
+    /** @var EloquentBuilder<covariant Model>|QueryBuilder|null */
     private EloquentBuilder|QueryBuilder|null $query = null;
 
     /** @var class-string<ExportQuery>|null */
@@ -54,7 +54,7 @@ class ExcelExporter
     /** @var array<string, mixed> */
     private array $filters = [];
 
-    /** @param  EloquentBuilder<Model>|QueryBuilder|string  $source */
+    /** @param  EloquentBuilder<covariant Model>|QueryBuilder|string  $source */
     private function __construct(EloquentBuilder|QueryBuilder|string $source)
     {
         if (is_string($source)) {
@@ -70,7 +70,7 @@ class ExcelExporter
     /**
      * Create a new exporter.
      *
-     * @param  EloquentBuilder<Model>|QueryBuilder|class-string<ExportQuery>  $source
+     * @param  EloquentBuilder<covariant Model>|QueryBuilder|class-string<ExportQuery>  $source
      */
     public static function make(EloquentBuilder|QueryBuilder|string $source): self
     {
@@ -360,7 +360,7 @@ class ExcelExporter
     /**
      * Resolve the query builder from the source.
      *
-     * @return EloquentBuilder<Model>|QueryBuilder
+     * @return EloquentBuilder<covariant Model>|QueryBuilder
      */
     private function resolveQuery(): EloquentBuilder|QueryBuilder
     {

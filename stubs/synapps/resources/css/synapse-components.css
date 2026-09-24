@@ -1054,7 +1054,7 @@ span.flatpickr-weekday,
     @apply flex flex-col justify-between sm:flex-row sm:items-center;
 }
 .syn-panel-title-wrap {
-    @apply px-5 py-4 sm:px-6 sm:py-5;
+    @apply flex items-center px-5 py-4 sm:px-6 sm:py-5;
 }
 .syn-panel-title {
     @apply text-base font-medium text-gray-800 dark:text-white/90;
@@ -1667,4 +1667,52 @@ span.flatpickr-weekday,
 
 .syn-sort-header {
     @apply flex items-center gap-1 font-semibold hover:text-brand-600;
+}
+
+/* ------------------------------------------------------------------
+   synmod-pm semantic CSS pass (Phase 1)
+   ------------------------------------------------------------------ */
+
+/* Inline-add / sub-row in an editable datatable (pm masters). Keeps the
+   !important of the original utilities: it must beat the datatable mobile
+   card background (max-sm:bg-white) and row hover. */
+.syn-row-muted {
+    @apply !bg-gray-50/50 dark:!bg-white/[0.02];
+}
+
+/* Tiny uppercase caption above a value in a dense table cell. */
+.syn-field-caption {
+    @apply block text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500;
+}
+
+/* Media card: image/logo header + body + action row (issuer, signature,
+   bank-account masters). Image height stays inline (h-24 / h-32). */
+.syn-media-card {
+    @apply overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800;
+}
+.syn-media-card-img {
+    @apply overflow-hidden bg-gray-100 dark:bg-gray-700;
+}
+.syn-media-card-placeholder {
+    @apply flex h-full w-full items-center justify-center text-4xl text-gray-400;
+}
+.syn-media-card-body {
+    @apply p-4;
+}
+.syn-media-card-title {
+    @apply mb-2 text-lg font-semibold text-gray-900 dark:text-white;
+}
+.syn-media-card-actions {
+    @apply mt-4 flex gap-2 border-t border-gray-200 pt-4 dark:border-gray-700;
+}
+
+/* Row-action overflow menu, teleported to <body> and positioned via inline
+   top/left. Restores member4vm lta.css .icon-dropdown(-item), never ported.
+   Item selector is (0,3,0) to beat theme-base's
+   button[type="button"]:not(.btn-icon) reset (0,2,1). */
+.syn-icon-dropdown {
+    @apply shadow-lg fixed z-[9999] w-48 rounded-lg border border-gray-200 bg-white py-1 dark:border-gray-700 dark:bg-gray-800;
+}
+.syn-icon-dropdown .syn-icon-dropdown-item:not(.btn-icon) {
+    @apply flex w-full items-center justify-start gap-2 rounded-none px-4 py-2 text-left text-sm font-normal text-gray-700 shadow-none hover:bg-gray-100 hover:shadow-none dark:text-gray-300 dark:hover:bg-gray-700;
 }
