@@ -3,7 +3,7 @@
     wire:ignore
 >
     <input
-        type="date"
+        type="text"
         x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'), {{ $flatpickr }})"
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
@@ -26,31 +26,3 @@
     </span>
 </div>
 
-<script nonce="{{ csp_nonce() }}">
-    (() => {
-        const register = () => {
-        Alpine.data('synapseDatepicker', (initialValue, flatpickrOptions) => ({
-            flatpickrInstance: null,
-            value: initialValue,
-            init() {
-                this.flatpickrInstance = flatpickr(this.$el, Object.assign({}, flatpickrOptions, {
-                    defaultDate: this.value || null,
-                    onChange: (selectedDates, dateStr, instance) => {
-                        this.value = dateStr;
-                    }
-                }));
-                this.$watch('value', (val) => {
-                    if (this.flatpickrInstance && val !== this.flatpickrInstance.input
-                        .value) {
-                        this.flatpickrInstance.setDate(val || null, false);
-                    }
-                });
-            }
-        }));
-        };
-    document.addEventListener('alpine:init', register);
-    if (window.Alpine) {
-        register();
-    }
-    })();
-</script>

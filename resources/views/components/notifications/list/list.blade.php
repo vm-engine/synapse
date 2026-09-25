@@ -1,5 +1,6 @@
-@if ($enabled)
-    <div class="synotif-modal-list">
+{{-- Unconditional root: see the note in bell.blade.php. --}}
+<div @class(['synotif-modal-list' => $enabled])>
+    @if ($enabled)
         <div class="synotif-dropdown-header">
             <span>{{ __('All notifications') }}</span>
             <button
@@ -42,5 +43,5 @@
         <div class="synotif-modal-pagination">
             {{ $items->links() }}
         </div>
-    </div>
-@endif
+    @endif
+</div>

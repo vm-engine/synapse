@@ -76,29 +76,3 @@
     </div>
 @endif
 
-<script nonce="{{ csp_nonce() }}">
-    (() => {
-        const register = () => {
-            Alpine.data('synapseTogglerInline', (checkedValue) => ({
-                active: checkedValue,
-                init() {
-                    this.active = this.$el.dataset.checked === 'true';
-                    new MutationObserver(() => {
-                        this.active = this.$el.dataset.checked === 'true';
-                    }).observe(this.$el, {
-                        attributes: true,
-                        attributeFilter: ['data-checked']
-                    });
-                }
-            }));
-
-            Alpine.data('synapseToggler', (initialActive) => ({
-                active: initialActive,
-            }));
-        };
-        document.addEventListener('alpine:init', register);
-        if (window.Alpine) {
-            register();
-        }
-    })();
-</script>

@@ -99,3 +99,17 @@ it('marks all as read', function () {
 
     expect($this->user->fresh()->unreadNotifications()->count())->toBe(0);
 });
+
+it('puts the Livewire root on the outer list wrapper so items and pagination belong to the component', function () {
+    $html = Livewire::test('synotif::list')->html();
+
+    preg_match('/<[a-z]+\b[^>]*\bwire:id="[^"]*"[^>]*>/i', $html, $rootTag);
+
+    expect($rootTag[0] ?? '')->toContain('synotif-modal-list');
+});
+
+it('still renders a single root element when notifications are disabled', function () {
+    config(['synapps.apps.notifications.enabled' => false]);
+
+    expect(Livewire::test('synotif::list')->html())->toMatch('/<div\b[^>]*\bwire:id="/');
+});

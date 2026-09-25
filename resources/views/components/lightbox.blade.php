@@ -45,26 +45,3 @@
     </div>
 </div>
 
-<script nonce="{{ csp_nonce() }}">
-    (() => {
-        const register = () => {
-            Alpine.data('synapseLightbox', () => ({
-                show: false,
-                url: '',
-                alt: '',
-                open(detail) {
-                    this.url = detail?.url ?? '';
-                    this.alt = detail?.alt ?? '';
-                    this.show = true;
-                },
-                close() {
-                    this.show = false;
-                },
-            }));
-        };
-        document.addEventListener('alpine:init', register);
-        if (window.Alpine) {
-            register();
-        }
-    })();
-</script>

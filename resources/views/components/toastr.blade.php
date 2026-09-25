@@ -42,7 +42,9 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
 <!-- Notifications -->
 <div
     wire:ignore
-    x-data="toastrRoot({{ Js::from(
+    {{-- Raw JSON literal, not Js::from()/@js(): those emit JSON.parse(...), and the
+         CSP-safe Alpine evaluator has no `JSON` global (same as adv-select). --}}
+    x-data="toastrRoot({{ json_encode(
         collect(['success' => 'Success', 'info' => 'Information', 'danger' => 'Error', 'warning' => 'Warning'])->filter(fn($title, $variant) => session($variant))->map(fn($title, $variant) => ['variant' => $variant, 'title' => $title, 'message' => session($variant)])->values(),
     ) }})"
     @notify.window="handleNotifyEvent($event)"
@@ -479,105 +481,3 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
     </div>
 </div>
 
-<script nonce="{{ csp_nonce() }}">
-    (() => {
-        const register = () => {
-            Alpine.data('toastrNotification', (notification, displayDuration, removeNotification) => ({
-                isVisible: false,
-                timeout: null,
-                init() {
-                    this.$nextTick(() => {
-                        this.isVisible = true;
-                    });
-                    this.timeout = setTimeout(() => {
-                        this.isVisible = false;
-                        removeNotification(notification.id);
-                    }, displayDuration);
-                },
-                pause() {
-                    clearTimeout(this.timeout);
-                },
-                resume() {
-                    this.timeout = setTimeout(() => {
-                        this.isVisible = false;
-                        removeNotification(notification.id);
-                    }, displayDuration);
-                },
-                dismiss() {
-                    this.isVisible = false;
-                    removeNotification(notification.id);
-                },
-                dismissDelayed(delay = 400) {
-                    this.isVisible = false;
-                    setTimeout(() => removeNotification(notification.id), delay);
-                },
-            }));
-
-            Alpine.data('toastrRoot', (flashNotifications) => ({
-                notifications: [],
-                displayDuration: 8000,
-                soundEffect: false,
-
-                initFlashNotifications() {
-                    flashNotifications.forEach((notification) => this.addNotification(
-                        notification));
-                },
-
-                handleNotifyEvent(event) {
-                    const detail = Array.isArray(event.detail) ? event.detail[0] : event.detail;
-                    this.addNotification({
-                        variant: detail.variant,
-                        sender: detail.sender,
-                        title: detail.title,
-                        message: detail.message,
-                    });
-                },
-
-                addNotification({
-                    variant = 'info',
-                    sender = null,
-                    title = null,
-                    message = null
-                }) {
-                    const id = Date.now()
-                    const notification = {
-                        id,
-                        variant,
-                        sender,
-                        title,
-                        message
-                    }
-
-                    // Keep only the most recent 20 notifications
-                    if (this.notifications.length >= 20) {
-                        this.notifications.splice(0, this.notifications.length - 19)
-                    }
-
-                    // Add the new notification to the notifications stack
-                    this.notifications.push(notification)
-
-                    if (this.soundEffect) {
-                        // Play the notification sound
-                        const notificationSound = new Audio(
-                            'https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3'
-                        )
-                        notificationSound.play().catch((error) => {
-                            console.error('Error playing the sound:', error)
-                        })
-                    }
-                },
-                removeNotification(id) {
-                    setTimeout(() => {
-                        this.notifications = this.notifications.filter(
-                            (notification) => notification.id !== id,
-                        )
-                    }, 400);
-                },
-            }));
-        };
-        document.addEventListener('alpine:init', register);
-        if (window.Alpine) {
-            register();
-        }
-    })();
-</script>

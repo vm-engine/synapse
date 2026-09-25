@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - Unreleased
 
 ### Added
+- **`synapse-components.js`** — all component `Alpine.data()` registrations (adv-select, confirm-dialog, datepicker, drag-n-drop, file-drop, lightbox, modal, password-generator, search palette, toastr, toggler) moved out of per-view inline `<script>`s into one file imported by `synapps.js`, like `synapse-components.css`. Inline scripts never ran when a component first appeared through a Livewire morph (e.g. status togglers after leaving a trash view). Blade values are passed through `x-data` arguments. `synapps:patch` installs the file and the import in existing projects.
+- `RemembersQueryParams` now reflects session-restored values in the address bar (browser event + `history.replaceState`), honouring `#[Url(as:)]` aliases.
+- `.syn-diff-table` / `.syn-diff-pre` / `.syn-diff-empty` CSS primitives (Field / Before / After change tables).
+- `<x-synapse-drawer>` closes on Escape.
 - **Global search (opt-in).** `searchables` table, `SynSearchable` facade / `synsearchable()` helper (`put`, `forget`, `forgetSource`, `search`), `synapps:searchable-setup` (imports backend nav + module.json `searchables`, per enabled language) and `synapps:searchable-forget`. Ctrl/⌘+K command palette `<livewire:synsearch::palette />` mounted in the header stub. Eloquent search by default; optional Laravel Scout engine via `synapps.apps.searchable.engine = scout`.
 
 ### Changed
@@ -17,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `pestphp/pest-plugin-phpstan` dev dependency.
 
 ### Fixed
+- **Flash toasts after a redirect never showed**: `<x-synapse-toastr>` passed session flash through `Js::from()`, which emits `JSON.parse(...)` — not available to the CSP-safe Alpine evaluator — so the whole toastr failed on any page reached with a flash message.
+- Dismissing a toast threw `this.notifications.filter is not a function` (an app-registered `Alpine.data('notifications')` shadowed the toastr's array); `removeNotification` is now bound to the toastr root.
+- **Notification bell/list**: templates opened with `@if`, so Livewire put the component root on an inner element — `wire:poll` refresh, "Mark all read" and item clicks were outside the component. Disabled notifications threw `RootTagMissingFromViewException`. "View all" failed the CSP parser (two statements).
+- `<x-synapse-password-generator>` "set" called an undefined bare `$wire` and never set the model(s).
+- `<x-synapse-confirm-dialog>` ignored the `confirmText` passed via the `confirm-dialog` event.
+- `<x-synapse-datepicker>` rendered `type="date"`, so datetime values triggered browser format warnings before flatpickr took over.
+- App layout: `.main-container` lacked `min-w-0`, so wide tables squeezed the sidebar.
 - `ExcelImport::$status` docblock declared `string` although the column is cast to `ExcelTaskStatus`.
 
 ### Removed

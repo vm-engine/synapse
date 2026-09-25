@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Traits;
 
+use Livewire\Attributes\Url;
+use Livewire\Component;
+
 /**
  * Persists declared Livewire properties to session so list pages
  * automatically restore filters, search, and pagination when the
@@ -55,6 +58,7 @@ trait RemembersQueryParams
         }
 
         $urlParams = $this->resolveCurrentUrlParams($params);
+        $restored = [];
 
         foreach ($params as $param) {
             if (! property_exists($this, $param)) {
@@ -66,9 +70,86 @@ trait RemembersQueryParams
             }
 
             if (array_key_exists($param, $stored)) {
+                if ($stored[$param] !== $this->{$param}) {
+                    $restored[$param] = $stored[$param];
+                }
+
                 $this->{$param} = $stored[$param];
             }
         }
+
+        // Livewire's #[Url] tracking takes the restored value as its baseline and never
+        // writes it to the address bar, so the page would show filtered/trashed results
+        // under a bare URL. synapse-components.js merges this into the URL (replaceState).
+        $query = $this->restoredQuery($restored);
+
+        if ($query !== [] && $this instanceof Component) {
+            $this->dispatch('synapse-restored-query', query: $query);
+        }
+    }
+
+    /**
+     * Flat query-string pairs for the restored values: #[Url] aliases as keys, nulls
+     * dropped, arrays flattened to key[i] / key[a][b] (the form Livewire reads back as
+     * arrays — a plain "1,2" would hydrate an array property as a string).
+     *
+     * @param  array<string, mixed>  $restored
+     * @return array<string, scalar>
+     */
+    protected function restoredQuery(array $restored): array
+    {
+        $query = [];
+
+        foreach ($restored as $param => $value) {
+            $this->flattenQueryValue($query, $this->queryStringName($param), $value);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param  array<string, scalar>  $query
+     */
+    private function flattenQueryValue(array &$query, string $key, mixed $value): void
+    {
+        if ($value === null) {
+            return;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $childKey => $childValue) {
+                $this->flattenQueryValue($query, "{$key}[{$childKey}]", $childValue);
+            }
+
+            return;
+        }
+
+        if (! is_scalar($value)) {
+            return;
+        }
+
+        // Livewire writes booleans to the URL as true/false and reads them back that way.
+        $query[$key] = is_bool($value) ? ($value ? 'true' : 'false') : $value;
+    }
+
+    /**
+     * The query-string key for a property: its #[Url(as: ...)] alias, else its name.
+     */
+    protected function queryStringName(string $param): string
+    {
+        if (! property_exists($this, $param)) {
+            return $param;
+        }
+
+        foreach ((new \ReflectionProperty($this, $param))->getAttributes(Url::class) as $attribute) {
+            $alias = $attribute->getArguments()['as'] ?? null;
+
+            if (is_string($alias) && $alias !== '') {
+                return $alias;
+            }
+        }
+
+        return $param;
     }
 
     /**
@@ -141,7 +222,7 @@ trait RemembersQueryParams
 
         $found = [];
         foreach ($params as $param) {
-            if (array_key_exists($param, $parsed)) {
+            if (array_key_exists($this->queryStringName($param), $parsed)) {
                 $found[] = $param;
             }
         }

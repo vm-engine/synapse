@@ -1,4 +1,7 @@
-<div x-cloak>
+<div
+    x-cloak
+    @keydown.escape.window="drawerOpen = false"
+>
     <div
         class="syn-drawer-backdrop"
         @click="drawerOpen = false"

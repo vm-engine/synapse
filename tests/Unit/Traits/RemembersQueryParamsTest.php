@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\Livewire;
 use VmEngine\Synapse\Traits\RemembersQueryParams;
 
 function createRemembersQueryParamsComponent(array $params = [], ?string $key = null, array $properties = []): object
@@ -14,6 +17,7 @@ function createRemembersQueryParamsComponent(array $params = [], ?string $key = 
             forgetRememberedParams as public;
             getRememberedParamValues as public;
             resolveCurrentUrlParams as public;
+            restoredQuery as public;
             rememberedParams as protected traitRememberedParams;
             rememberKey as protected traitRememberKey;
         }
@@ -30,6 +34,8 @@ function createRemembersQueryParamsComponent(array $params = [], ?string $key = 
         public string $sortField = 'name';
 
         public ?string $filter = null;
+
+        public bool $showTrashed = false;
 
         protected function rememberedParams(): array
         {
@@ -357,3 +363,100 @@ test('URL params take precedence over session values', function () {
     // Clean up
     request()->server->set('QUERY_STRING', '');
 });
+
+// --- Reflecting session-restored values in the URL ---
+
+test('restoredQuery encodes bools as true/false like Livewire does', function () {
+    $component = createRemembersQueryParamsComponent(params: ['search', 'showTrashed']);
+
+    expect($component->restoredQuery(['search' => 'ada', 'showTrashed' => true]))
+        ->toBe(['search' => 'ada', 'showTrashed' => 'true']);
+});
+
+test('restoredQuery flattens arrays into the key[i] form Livewire reads back as arrays', function () {
+    $component = createRemembersQueryParamsComponent(params: ['search']);
+
+    expect($component->restoredQuery(['filterIds' => [3, 7], 'filterMap' => ['a' => ['b' => true]]]))
+        ->toBe(['filterIds[0]' => 3, 'filterIds[1]' => 7, 'filterMap[a][b]' => 'true']);
+});
+
+test('restoredQuery is empty when nothing was restored', function () {
+    $component = createRemembersQueryParamsComponent(params: ['search']);
+
+    expect($component->restoredQuery([]))->toBe([]);
+});
+
+test('restoredQuery skips null values and uses the #[Url(as:)] alias', function () {
+    $component = new class
+    {
+        use RemembersQueryParams {
+            restoredQuery as public;
+        }
+
+        #[Url(as: 'q')]
+        public string $search = '';
+
+        public ?string $filter = null;
+    };
+
+    expect($component->restoredQuery(['search' => 'x', 'filter' => null]))->toBe(['q' => 'x']);
+});
+
+test('resolveCurrentUrlParams recognises a param by its #[Url(as:)] alias', function () {
+    request()->server->set('QUERY_STRING', 'q=hello');
+
+    $component = new class
+    {
+        use RemembersQueryParams {
+            resolveCurrentUrlParams as public;
+        }
+
+        #[Url(as: 'q')]
+        public string $search = '';
+    };
+
+    expect($component->resolveCurrentUrlParams(['search']))->toBe(['search']);
+
+    request()->server->set('QUERY_STRING', '');
+});
+
+test('a Livewire component dispatches session-restored values so the URL can show them', function () {
+    session(['test.redirect-restore' => ['showTrashed' => true, 'search' => '']]);
+
+    Livewire::test(RemembersQueryParamsRedirectComponent::class)
+        ->assertSet('showTrashed', true)
+        ->assertNoRedirect()
+        ->assertDispatched('synapse-restored-query', query: ['showTrashed' => 'true']);
+});
+
+test('a Livewire component dispatches nothing when restored values equal the defaults', function () {
+    session(['test.redirect-restore' => ['showTrashed' => false, 'search' => '']]);
+
+    Livewire::test(RemembersQueryParamsRedirectComponent::class)
+        ->assertNotDispatched('synapse-restored-query');
+});
+class RemembersQueryParamsRedirectComponent extends Component
+{
+    use RemembersQueryParams;
+
+    #[Url]
+    public string $search = '';
+
+    #[Url]
+    public bool $showTrashed = false;
+
+    protected function rememberedParams(): array
+    {
+        return ['search', 'showTrashed'];
+    }
+
+    protected function rememberKey(): string
+    {
+        return 'test.redirect-restore';
+    }
+
+    public function render(): string
+    {
+        return '<div></div>';
+    }
+}

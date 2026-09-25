@@ -2,47 +2,6 @@
     @if ($enabled)
         {{-- Alpine logic lives here, not in attributes: the app runs Alpine's CSP build,
              whose expression parser rejects arrow functions, ?. and ??. --}}
-        <script nonce="{{ csp_nonce() }}">
-            (() => {
-                const register = () => {
-                    Alpine.data('synsearchPalette', () => ({
-                        active: 0,
-                        init() {
-                            // `show` is the enclosing synapse modal's Alpine state.
-                            this.$watch('show', (open) => {
-                                if (open) {
-                                    this.$nextTick(() => this.$refs.input.focus());
-                                }
-                            });
-                        },
-                        count() {
-                            return this.$refs.list ? this.$refs.list.children.length : 0;
-                        },
-                        next() {
-                            this.active = Math.min(this.active + 1, Math.max(this.count() - 1, 0));
-                        },
-                        prev() {
-                            this.active = Math.max(this.active - 1, 0);
-                        },
-                        reset() {
-                            this.active = 0;
-                        },
-                        openActive() {
-                            const item = this.$refs.list ? this.$refs.list.children[this.active] : null;
-                            const link = item ? item.querySelector('a') : null;
-
-                            if (link) {
-                                link.click();
-                            }
-                        },
-                    }));
-                };
-                document.addEventListener('alpine:init', register);
-                if (window.Alpine) {
-                    register();
-                }
-            })();
-        </script>
 
         <button
             type="button"

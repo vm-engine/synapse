@@ -1,9 +1,11 @@
-@if ($enabled)
-    <div
-        class="synotif-bell"
-        wire:poll.15s="refresh"
-        x-data="{ open: false }"
-    >
+{{-- The root element must be unconditional: a template opening with @if puts Livewire's
+     block-marker comment in front of the first tag, so wire:id lands on the next tag
+     (the trigger button) and wire:poll / wire:click end up outside the component. --}}
+<div
+    @class(['synotif-bell' => $enabled])
+    @if ($enabled) wire:poll.15s="refresh" x-data="{ open: false }" x-on:open-modal-notifications.window="open = false" @endif
+>
+    @if ($enabled)
         <button
             type="button"
             class="synotif-bell-trigger"
@@ -72,9 +74,9 @@
                 <button
                     type="button"
                     class="synotif-view-all"
-                    x-on:click="open = false; $dispatch('open-modal-notifications')"
+                    x-on:click="$dispatch('open-modal-notifications')"
                 >{{ __('View all') }}</button>
             </div>
         </div>
-    </div>
-@endif
+    @endif
+</div>

@@ -663,6 +663,12 @@ describe('Semantic CSS classes', function () {
             ->toContain('syn-drawer-panel')
             ->not->toContain('translate-x-full text-gray-500');
     });
+
+    it('closes on Escape like the modal does', function () {
+        $html = Blade::render('<x-synapse-drawer title="Details">Body</x-synapse-drawer>');
+
+        expect($html)->toContain('@keydown.escape.window="drawerOpen = false"');
+    });
 });
 
 describe('Badge Component', function () {

@@ -125,3 +125,25 @@ it('dispatches a notify browser event only for notifications created after mount
     $component->call('refresh')
         ->assertDispatched('notify');
 });
+
+it('puts the Livewire root on the polling wrapper so the dropdown and poll belong to the component', function () {
+    // A template that opens with @if gets Livewire's block-marker comment on the
+    // same line as its first tag, so the root attributes landed on the inner
+    // <button> and left wire:poll / wire:click outside the component.
+    $html = Livewire::test('synotif::bell')->html();
+
+    preg_match('/<([a-z]+)\b[^>]*\bwire:id="/i', $html, $root);
+    preg_match('/<[a-z]+\b[^>]*\bwire:id="[^"]*"[^>]*>/i', $html, $rootTag);
+
+    expect($root[1] ?? null)->toBe('div')
+        ->and($rootTag[0] ?? '')->toContain('wire:poll.15s="refresh"');
+});
+
+it('still renders a single root element when notifications are disabled', function () {
+    config(['synapps.apps.notifications.enabled' => false]);
+
+    $html = Livewire::test('synotif::bell')->html();
+
+    expect($html)->toMatch('/<div\b[^>]*\bwire:id="/')
+        ->and($html)->not->toContain('synotif-bell-trigger');
+});

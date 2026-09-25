@@ -113,6 +113,7 @@ class SynAppsPatchResources extends Command
             'synapps/resources/js  — synapps-{base,app,frontend,guest}.js' => $this->createSynappsIntermediaryJs(),
             'synapps/resources/css/tailwind-ref.css' => $this->createTailwindRefCss(),
             'synapps/resources/css — lta.css → synapse-components.css migration' => $this->migrateLtaCssToComponentsCss(),
+            'synapps/resources/js — synapse-components.js' => $this->installComponentsJs(),
             'resources/css/base.css' => $this->createBaseCss(),
             'resources/css/frontend.css' => $this->createFrontendCss(),
             'resources/css/guest.css' => $this->createGuestCss(),
@@ -546,6 +547,43 @@ class SynAppsPatchResources extends Command
         }
 
         return $patched;
+    }
+
+    /**
+     * Install synapse-components.js (the components' Alpine.data registrations,
+     * formerly inline <script>s in each view) and import it from synapps.js.
+     *
+     * Idempotent — an existing synapse-components.js or import is left untouched.
+     */
+    protected function installComponentsJs(): bool
+    {
+        $jsDir = synapps_path('resources/js');
+        $componentsPath = $jsDir.'/synapse-components.js';
+        $synappsJsPath = $jsDir.'/synapps.js';
+        $patched = false;
+
+        if (! file_exists($componentsPath)) {
+            $stubPath = __DIR__.'/../../../stubs/synapps/resources/js/synapse-components.js';
+            file_put_contents($componentsPath, $this->readFile($stubPath));
+            $patched = true;
+        }
+
+        if (! file_exists($synappsJsPath)) {
+            return $patched;
+        }
+
+        $content = $this->readFile($synappsJsPath);
+
+        if (str_contains($content, 'synapse-components.js')) {
+            return $patched;
+        }
+
+        $import = 'import "./synapse-components.js";';
+        $anchored = preg_replace('/^(import\s+flatpickr\s+from\s+["\']flatpickr["\'];)$/m', "$1\n{$import}", $content, 1);
+
+        file_put_contents($synappsJsPath, $anchored !== null && $anchored !== $content ? $anchored : $import."\n".$content);
+
+        return true;
     }
 
     /**

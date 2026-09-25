@@ -56,6 +56,8 @@ afterEach(function () {
         resource_path('js/frontend.js'),
         resource_path('js/guest.js'),
         resource_path('js/app.js.bak'),
+        base_path('synapps/resources/js/synapse-components.js'),
+        base_path('synapps/resources/js/synapps.js'),
         base_path('synapps/resources/css/synapps-base.css'),
         base_path('synapps/resources/css/synapps-app.css'),
         base_path('synapps/resources/css/synapps-frontend.css'),
@@ -203,6 +205,39 @@ test('does not re-migrate a project that already migrated', function () {
     $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get($cssDir.'/synapse-components.css'))->toBe("/* already migrated */\n");
+});
+
+// ─── installComponentsJs ───────────────────────────────────────────────────────
+
+test('installs synapse-components.js and imports it from synapps.js', function () {
+    $jsDir = base_path('synapps/resources/js');
+    File::put($jsDir.'/synapps.js', "import \"flatpickr/dist/flatpickr.min.css\";\nimport flatpickr from \"flatpickr\";\n\nAlpine.plugin(mask);\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+
+    expect(File::get($jsDir.'/synapse-components.js'))->toContain("Alpine.data('synapseModal'")
+        ->and(File::get($jsDir.'/synapps.js'))->toContain("import flatpickr from \"flatpickr\";\nimport \"./synapse-components.js\";")
+        ->and(substr_count(File::get($jsDir.'/synapps.js'), 'synapse-components.js'))->toBe(1);
+});
+
+test('prepends the import when synapps.js has no flatpickr import to anchor on', function () {
+    $jsDir = base_path('synapps/resources/js');
+    File::put($jsDir.'/synapps.js', "Alpine.plugin(mask);\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+
+    expect(File::get($jsDir.'/synapps.js'))->toStartWith("import \"./synapse-components.js\";\n");
+});
+
+test('leaves an existing synapse-components.js and import alone', function () {
+    $jsDir = base_path('synapps/resources/js');
+    File::put($jsDir.'/synapse-components.js', "/* customised */\n");
+    File::put($jsDir.'/synapps.js', "import './synapse-components.js';\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+
+    expect(File::get($jsDir.'/synapse-components.js'))->toBe("/* customised */\n")
+        ->and(File::get($jsDir.'/synapps.js'))->toBe("import './synapse-components.js';\n");
 });
 
 // ─── createBaseJs / rewriteAppJsToFocused ─────────────────────────────────────

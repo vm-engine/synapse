@@ -10,6 +10,7 @@ import anchor from "@alpinejs/anchor";
 import morph from "@alpinejs/morph";
 import sort from "@alpinejs/sort";
 import flatpickr from "flatpickr";
+import "./synapse-components.js";
 
 Alpine.plugin(mask);
 Alpine.plugin(intersect);
