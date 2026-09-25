@@ -71,6 +71,9 @@ class SynapseViewServiceProvider extends ServiceProvider
         // Makes <livewire:synotif::bell /> and <livewire:synotif::list /> resolvable
         // from the MFC pairs under resources/views/components/notifications/.
         Livewire::addNamespace('synotif', __DIR__.'/../resources/views/components/notifications');
+
+        // Makes <livewire:synsearch::palette /> resolvable from resources/views/components/searchable/.
+        Livewire::addNamespace('synsearch', __DIR__.'/../resources/views/components/searchable');
     }
 
     /**

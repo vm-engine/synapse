@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - Unreleased
 
+### Added
+- **Global search (opt-in).** `searchables` table, `SynSearchable` facade / `synsearchable()` helper (`put`, `forget`, `forgetSource`, `search`), `synapps:searchable-setup` (imports backend nav + module.json `searchables`, per enabled language) and `synapps:searchable-forget`. Ctrl/⌘+K command palette `<livewire:synsearch::palette />` mounted in the header stub. Eloquent search by default; optional Laravel Scout engine via `synapps.apps.searchable.engine = scout`.
+
 ### Changed
 - **PHPStan level 7 with a minimal ignore list.** Dropped the blanket `ignoreErrors` patterns; only three path-scoped ignores remain (intentional `env()` in `ConfigGenerator\Builder`, optional synapps-auth `Role` in `Notify`, library traits unused in-package). New `phpstan-bootstrap.php` registers the `synapse::` view namespace in Larastan's bare Testbench app so `view()` view-string checks resolve.
 - **Excel import rows typed `array<array-key, mixed>`** (was `array<string, mixed>`) across `ColumnMapper::map()`, `ExcelImporter`, `ChunkIterator`, `ProcessExcelImport` and the `ProcessesImport` contract — rows really are 0-indexed when no column mapping is set. Docblock-only; no runtime change.
@@ -17,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ExcelImport::$status` docblock declared `string` although the column is cast to `ExcelTaskStatus`.
 
 ### Removed
+- Static TailAdmin "Search or type command…" box from the header stub (`layouts/partials/header.blade.php`); it had no behaviour and is replaced by the global search palette.
 - Write-only properties `SpoutReader::$filePath`, `StyledWriter::$sheetName`, `TemplateWriter::$sheetName`.
 
 ### Added

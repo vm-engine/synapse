@@ -56,6 +56,8 @@ use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
 use VmEngine\Synapse\Console\Commands\SynAppsRemoveModule;
+use VmEngine\Synapse\Console\Commands\SynAppsSearchableForget;
+use VmEngine\Synapse\Console\Commands\SynAppsSearchableSetup;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Console\Commands\SynAppsUpgradeAudit;
 use VmEngine\Synapse\Console\Commands\SynAppsVendorFonts;
@@ -73,6 +75,7 @@ use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
 use VmEngine\Synapse\Services\SynapseUtils;
 use VmEngine\Synapse\Services\SyNav;
+use VmEngine\Synapse\Services\SynSearchable;
 
 /**
  * @SuppressWarnings PHPMD.StaticAccess
@@ -103,6 +106,8 @@ class SynapseServiceProvider extends ServiceProvider
             $this->commands([
                 SynAppsSetup::class,
                 SynotifSetup::class,
+                SynAppsSearchableSetup::class,
+                SynAppsSearchableForget::class,
                 SynAppsDiscover::class,
                 SynAppsCopyResources::class,
                 SynAppsPatchResources::class,
@@ -209,6 +214,9 @@ class SynapseServiceProvider extends ServiceProvider
     {
         $this->app->singleton('synav', function ($app) {
             return new SyNav;
+        });
+        $this->app->singleton('synsearchable', function ($app) {
+            return new SynSearchable;
         });
         $this->app->singleton('dbconf', function ($app) {
             return new DbConfig;

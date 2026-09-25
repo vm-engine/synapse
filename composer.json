@@ -20,6 +20,9 @@
         "laravel/pint": "^1.26",
         "pestphp/pest-plugin-phpstan": "^5.2"
     },
+    "suggest": {
+        "laravel/scout": "Optional search engine for SynSearchable (set synapps.apps.searchable.engine = scout)"
+    },
     "autoload": {
         "psr-4": {
             "VmEngine\\Synapse\\": "src/"

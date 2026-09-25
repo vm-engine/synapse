@@ -273,6 +273,81 @@ class InvoicePaid extends Notification
 
 `enabled`/`log_channel` are set interactively by `synotif:setup` (or during `synapps:setup`/`synapps:reconfig`). `dropdown_limit`/`modal_per_page` are tuning knobs — edit `apps.json` directly and run `php artisan synapps:config` to change them.
 
+## Global Search
+
+Opt-in backend command palette (Ctrl/⌘+K) over pages and module content.
+
+### Enable
+
+```bash
+php artisan synapps:searchable-setup
+```
+
+Creates the `searchables` table and imports every routed backend nav item plus each module's `searchables` block, once per enabled language. Re-run after installing/updating a module or adding a language. Content rows are never touched. Until setup runs, the whole API is a silent no-op and the palette renders nothing.
+
+Existing apps: add `<livewire:synsearch::palette />` to `synapps/resources/views/components/layouts/partials/header.blade.php` (next to the notification bell) and copy the `.synsearch-*` rules from the stub `synapse-components.css`.
+
+### Extra pages via `module.json`
+
+```json
+"searchables": {
+    "create": {
+        "name": "__example::search.create",
+        "description": "__example::search.create_desc",
+        "route": "example.create",
+        "icon": "ph ph-plus",
+        "acl": "example.manage",
+        "keywords": "new add"
+    }
+}
+```
+
+Needs `name` and `route` (backend-relative, like nav) or `url`. Run `synapps:config` then `synapps:searchable-setup`.
+
+### Content from code
+
+```php
+use VmEngine\Synapse\Facades\SynSearchable;
+
+// on save — plain string = all locales; ['en' => ..., 'id' => ...] = per locale
+SynSearchable::put(
+    source: 'content:example.item',
+    key: (string) $item->id,
+    title: $item->name,
+    description: $item->summary,
+    route: 'example.edit',
+    routeParams: ['id' => $item->id],
+    icon: 'ph ph-box',
+    acl: 'example.manage',
+    keywords: $item->code,
+);
+
+// on delete
+SynSearchable::forget('content:example.item', (string) $item->id);
+
+// bulk (prefix match), e.g. module uninstall
+SynSearchable::forgetSource('content:example');
+
+// query directly (ACL + locale filtered)
+synsearchable()->search('acme', limit: 10);
+```
+
+Sources must start with `content:`; `nav` and `module:*` belong to setup.
+
+```bash
+php artisan synapps:searchable-forget content:example   # asks first; --force to skip
+```
+
+### Engine
+
+Default is Eloquent `LIKE`. To use Laravel Scout (Typesense, Meilisearch, …) install and configure Scout, then set in `synapps/config/apps.json`:
+
+```json
+"searchable": { "engine": "scout" }
+```
+
+If Scout isn't installed, or the engine throws, search falls back to Eloquent.
+
 ## Support
 
 For issues and questions, please contact the VM Engine development team or create an issue in the repository.

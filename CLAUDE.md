@@ -44,6 +44,8 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapse:patch-composer` | Merge composer.local.json | Local dev with path repos | Yes | No |
 | `synapse:restore-composer` | Restore original composer.json | After patching | Yes | No |
 | `synapse:excel-cleanup` | Mark stale Excel tasks as failed | Scheduled or manual | Yes | No |
+| `synapps:searchable-setup` | Enable global search; (re)import nav + module searchables | Once to enable, then after module/language changes | Yes | No |
+| `synapps:searchable-forget` | Delete `content:*` searchable rows by source prefix | Module uninstall / cleanup | Yes | No |
 | `synapps:upgrade-audit` | Detect (and optionally auto-fix) legacy Synapse patterns | Before/while upgrading vm-engine/synapse | Yes | No |
 
 ### synapps:upgrade-audit

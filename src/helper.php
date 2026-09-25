@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Str;
 use VmEngine\Synapse\Services\SyNav;
+use VmEngine\Synapse\Services\SynSearchable;
 use VmEngine\Synapse\Services\ThemeService;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
@@ -83,6 +84,16 @@ if (! function_exists('synav')) {
     function synav()
     {
         return app('synav');
+    }
+}
+
+if (! function_exists('synsearchable')) {
+    /**
+     * SynSearchable helper function
+     */
+    function synsearchable(): SynSearchable
+    {
+        return app('synsearchable');
     }
 }
 

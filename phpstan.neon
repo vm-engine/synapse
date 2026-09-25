@@ -34,3 +34,5 @@ parameters:
     excludePaths:
         # Livewire Finder class location varies across Livewire versions; SynapseFinder overrides livewire.finder at runtime
         - src/Finder/SynapseFinder.php
+        # laravel/scout is optional (suggest); this model is only loaded when it's installed.
+        - src/Models/ScoutSearchable.php

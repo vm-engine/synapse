@@ -1301,6 +1301,56 @@ span.flatpickr-weekday,
     @apply px-4 py-3;
 }
 
+/* Global search palette (synsearch) */
+.synsearch-trigger {
+    @apply text-on-surface dark:text-on-surface-dark border-outline dark:border-outline-dark inline-flex items-center gap-2 rounded-md border bg-transparent px-2 py-1;
+}
+.synsearch-kbd {
+    @apply text-on-surface/60 dark:text-on-surface-dark/60 hidden text-xs sm:inline;
+}
+.synsearch-panel {
+    @apply flex max-h-[70vh] flex-col;
+}
+.synsearch-input-wrap {
+    @apply border-outline dark:border-outline-dark flex items-center gap-2 border-b px-4 py-3;
+
+    /* Nested for specificity: theme-base.css's `input[type="text"]` (0,1,1)
+       beats a bare `.synsearch-input` (0,1,0) — same trap as .syn-search-box. */
+    & .synsearch-input {
+        @apply text-on-surface dark:text-on-surface-dark h-auto w-full flex-1 rounded-none border-0 bg-transparent p-0 shadow-none dark:bg-transparent focus:outline-none focus:ring-0;
+    }
+}
+.synsearch-input-icon {
+    @apply text-on-surface/60 dark:text-on-surface-dark/60;
+}
+.synsearch-loading {
+    @apply text-on-surface/60 dark:text-on-surface-dark/60 text-xs;
+}
+.synsearch-empty {
+    @apply text-on-surface/70 dark:text-on-surface-dark/70 px-4 py-6 text-center text-sm;
+}
+.synsearch-list {
+    @apply overflow-y-auto py-2;
+}
+.synsearch-item {
+    @apply text-on-surface dark:text-on-surface-dark flex items-start gap-3 px-4 py-2 no-underline;
+}
+.synsearch-item-active {
+    @apply bg-primary/10;
+}
+.synsearch-item-icon {
+    @apply mt-0.5 text-lg;
+}
+.synsearch-item-body {
+    @apply flex min-w-0 flex-1 flex-col;
+}
+.synsearch-item-title {
+    @apply truncate font-medium;
+}
+.synsearch-item-description {
+    @apply text-on-surface/70 dark:text-on-surface-dark/70 truncate text-sm;
+}
+
 /* Spin utility — pairs with ph-spinner-gap; Phosphor ships no built-in
    spin animation, unlike FontAwesome's fa-spin. */
 @keyframes syn-spin {
