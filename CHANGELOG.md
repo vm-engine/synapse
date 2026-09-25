@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - Unreleased
 
+### Changed
+- **PHPStan level 7 with a minimal ignore list.** Dropped the blanket `ignoreErrors` patterns; only three path-scoped ignores remain (intentional `env()` in `ConfigGenerator\Builder`, optional synapps-auth `Role` in `Notify`, library traits unused in-package). New `phpstan-bootstrap.php` registers the `synapse::` view namespace in Larastan's bare Testbench app so `view()` view-string checks resolve.
+- **Excel import rows typed `array<array-key, mixed>`** (was `array<string, mixed>`) across `ColumnMapper::map()`, `ExcelImporter`, `ChunkIterator`, `ProcessExcelImport` and the `ProcessesImport` contract — rows really are 0-indexed when no column mapping is set. Docblock-only; no runtime change.
+- `SynapseServiceProvider` references the app's `Database\Seeders\DatabaseSeeder` by string instead of importing a class the package doesn't ship.
+- Added `pestphp/pest-plugin-phpstan` dev dependency.
+
+### Fixed
+- `ExcelImport::$status` docblock declared `string` although the column is cast to `ExcelTaskStatus`.
+
+### Removed
+- Write-only properties `SpoutReader::$filePath`, `StyledWriter::$sheetName`, `TemplateWriter::$sheetName`.
+
 ### Added
 - Semantic CSS primitives from the synmod-pm pass (`synapse-components.css` + stub): `.syn-row-muted` (inline-add/sub rows in editable datatables), `.syn-field-caption` (tiny uppercase caption in dense cells), `.syn-media-card` + `-img`/`-placeholder`/`-body`/`-title`/`-actions` (image-header cards), `.syn-icon-dropdown` / `.syn-icon-dropdown-item` (teleported row-action menu; item selector outranks theme-base's `button[type="button"]` reset).
 - `<x-synapse-lightbox>` — full-screen image preview, opened via the window event `open-lightbox-{name}` with detail `{ url, alt? }` (closes on backdrop click, close button, Escape, or `close-lightbox-{name}`); styled by new `.syn-lightbox*` classes. Extracted from synmod-fm's hand-rolled preview overlay.

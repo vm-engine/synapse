@@ -18,8 +18,6 @@ class StyledWriter implements WriterInterface
 
     private int $currentRow = 1;
 
-    private ?string $sheetName = null;
-
     private int $startingRow = 1;
 
     private ?string $templatePath = null;
@@ -126,7 +124,6 @@ class StyledWriter implements WriterInterface
         }
 
         $this->outputPath = $outputPath;
-        $this->sheetName = $sheetName;
 
         if ($this->templatePath !== null) {
             if (! file_exists($this->templatePath)) {

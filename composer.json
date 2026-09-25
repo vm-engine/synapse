@@ -17,7 +17,8 @@
         "orchestra/testbench": "^11.0",
         "phpstan/phpstan": "^2.1",
         "larastan/larastan": "^3.8",
-        "laravel/pint": "^1.26"
+        "laravel/pint": "^1.26",
+        "pestphp/pest-plugin-phpstan": "^5.2"
     },
     "autoload": {
         "psr-4": {

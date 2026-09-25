@@ -11,7 +11,7 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
 
 /**
  * @property int $id
- * @property string $status
+ * @property ExcelTaskStatus $status
  * @property string $file_path
  * @property int|null $user_id
  * @property string|null $reference

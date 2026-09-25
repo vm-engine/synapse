@@ -43,7 +43,7 @@ class ColumnMapper
      *
      * @param  array<int, mixed>  $row  Raw row data (0-indexed)
      * @param  int  $rowIndex  The current row index in the file
-     * @return array<string, mixed>
+     * @return array<array-key, mixed> 0-indexed raw row when no mapping is set
      */
     public function map(array $row, int $rowIndex): array
     {

@@ -5,102 +5,31 @@ parameters:
     paths:
         - src
 
-    # Level 9 is the highest level
     level: 7
 
+    # Larastan's bare Testbench app never registers the `synapse::` view
+    # namespace; this bootstrap registers it so view-string checks resolve.
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+
     ignoreErrors:
-        # Intentional env() call for config generation in Builder
+        # Intentional env() call: resolves `env::` placeholders while generating config files
         -
-            message: "#Called 'env' outside of the config directory#"
+            identifier: larastan.noEnvCallsOutsideOfConfig
             path: src/Services/ConfigGenerator/Builder.php
 
-        # DatabaseSeeder is from the Laravel app, not package
+        # vm-engine/synapps-auth is an optional runtime dependency (guarded by
+        # NotificationSetup::authInstalled()); its Role model isn't installed here.
         -
-            message: "#Class Database\\\\Seeders\\\\DatabaseSeeder not found#"
-            path: src/SynapseServiceProvider.php
+            identifier: class.notFound
+            path: src/Notifications/Notify.php
 
-        # View component render methods - false positive
+        # Library traits used only by consuming packages
         -
-            message: "#Parameter .* of function view expects view-string#"
-            paths:
-                - src/Components/*.php
-
-        # Traits are library code meant to be used by consuming packages
-        -
-            message: "#Trait .* is used zero times and is not analysed#"
+            identifier: trait.unused
             paths:
                 - src/Traits/*.php
                 - src/Notifications/Concerns/*.php
-
-        # vm-engine/synapps-auth is an optional, uninstalled runtime dependency
-        # in this package's own dev environment (see NotificationSetup::authInstalled()
-        # guard at the call site) — its Role model can't be resolved here.
-        -
-            message: "#Call to static method whereIn\\(\\) on an unknown class VmEngine\\\\SynAuth\\\\Models\\\\Role#"
-            path: src/Notifications/Notify.php
-
-        # Eloquent casts enum comparison - PHPDoc infers string but runtime is enum
-        -
-            message: "#Strict comparison using ===.* will always evaluate to false#"
-            paths:
-                - src/Models/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-                - src/Services/Excel/Excel*.php
-        -
-            message: "#Strict comparison using !==.* will always evaluate to true#"
-            paths:
-                - src/Models/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-                - src/Services/Excel/Excel*.php
-        -
-            message: "#Result of && is always false#"
-            paths:
-                - src/Models/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-                - src/Services/Excel/Excel*.php
-        -
-            message: "#Unreachable statement - code above always terminates#"
-            paths:
-                - src/Models/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-                - src/Services/Excel/Excel*.php
-        -
-            message: "#Cannot access property .* on string#"
-            paths:
-                - src/Models/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-                - src/Services/Excel/Excel*.php
-
-        # Runtime validation guards - PHPDoc narrows type before check
-        -
-            message: "#Call to function is_subclass_of.* will always evaluate to true#"
-            paths:
-                - src/Services/Excel/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-        -
-            message: "#function.alreadyNarrowedType#"
-            paths:
-                - src/Services/Excel/Excel*.php
-                - src/Jobs/ProcessExcel*.php
-
-        # Property written for API but read externally
-        -
-            message: "#Property .* is never read, only written#"
-            paths:
-                - src/Services/Excel/Readers/*.php
-                - src/Services/Excel/Writers/*.php
-
-        # ColumnMapper return type - sequential array treated as list
-        -
-            message: "#should return array<string, mixed> but returns array<int, mixed>#"
-            path: src/Services/Excel/Support/ColumnMapper.php
-
-        # SynapseFinder addLocation call - parent class dynamically resolved at runtime
-        -
-            message: "#Call to an undefined method VmEngine\\\\Synapse\\\\Finder\\\\SynapseFinder::addLocation\\(\\)#"
-            path: src/SynapseServiceProvider.php
-
-    reportUnmatchedIgnoredErrors: false
 
     excludePaths:
         # Livewire Finder class location varies across Livewire versions; SynapseFinder overrides livewire.finder at runtime

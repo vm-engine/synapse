@@ -20,14 +20,11 @@ class SpoutReader implements ReaderInterface
      */
     private CsvReader|XlsxReader|null $reader = null;
 
-    private string $filePath = '';
-
     /**
      * Open the file for reading.
      */
     public function open(string $filePath): void
     {
-        $this->filePath = $filePath;
         $this->reader = $this->createReader($filePath);
         $this->reader->open($filePath);
     }

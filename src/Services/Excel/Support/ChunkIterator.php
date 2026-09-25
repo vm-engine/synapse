@@ -13,8 +13,8 @@ class ChunkIterator
     /**
      * Iterate over a generator in chunks and call the callback for each chunk.
      *
-     * @param  Generator<int, array<string, mixed>>  $rows
-     * @param  Closure(Collection<int, array<string, mixed>>, int): void  $callback
+     * @param  Generator<int, array<array-key, mixed>>  $rows
+     * @param  Closure(Collection<int, array<array-key, mixed>>, int): void  $callback
      * @param  int  $skipRows  Number of rows to skip from the beginning
      * @return int Total number of rows processed
      */

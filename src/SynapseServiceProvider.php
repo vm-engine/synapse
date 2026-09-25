@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse;
 
-use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Router;
@@ -308,7 +307,7 @@ class SynapseServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
-            $this->callAfterResolving(DatabaseSeeder::class, function ($seeder) {
+            $this->callAfterResolving('Database\Seeders\DatabaseSeeder', function ($seeder) {
                 $seedList = config('synapse.seed_path.general');
                 foreach ($seedList as $seederFile) {
                     if (! file_exists($seederFile)) {
