@@ -76,6 +76,7 @@
 
         <!-- Main Content -->
         <main class="flex-1">
+            @includeIf('synauth::components.impersonation-banner')
             {{ $slot }}
         </main>
 

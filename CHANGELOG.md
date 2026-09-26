@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RemembersQueryParams` now reflects session-restored values in the address bar (browser event + `history.replaceState`), honouring `#[Url(as:)]` aliases.
 - `.syn-diff-table` / `.syn-diff-pre` / `.syn-diff-empty` CSS primitives (Field / Before / After change tables).
 - `<x-synapse-drawer>` closes on Escape.
+- Impersonation banner: the header stub renders `<x-synauth::impersonation-banner />` and hides the profile link while a dev is impersonating (`@unlessimpersonating`); the frontend layout stubs (`layouts/layout`, `themes/default` and `themes/application` `frontend`) `@includeIf` the banner, so they still render without synapps-auth.
 - **Global search (opt-in).** `searchables` table, `SynSearchable` facade / `synsearchable()` helper (`put`, `forget`, `forgetSource`, `search`), `synapps:searchable-setup` (imports backend nav + module.json `searchables`, per enabled language) and `synapps:searchable-forget`. Ctrl/⌘+K command palette `<livewire:synsearch::palette />` mounted in the header stub. Eloquent search by default; optional Laravel Scout engine via `synapps.apps.searchable.engine = scout`.
 
 ### Changed
@@ -33,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Static TailAdmin "Search or type command…" box from the header stub (`layouts/partials/header.blade.php`); it had no behaviour and is replaced by the global search palette.
 - Write-only properties `SpoutReader::$filePath`, `StyledWriter::$sheetName`, `TemplateWriter::$sheetName`.
+- FM-only CSS classes `.syn-file-tile*`, `.syn-folder-chip*`, `.syn-drop-overlay*`, `.syn-segmented*`, `.syn-file-thumb-sm`, `.syn-file-icon-sm` from `synapse-components.css` — synmod-fm now ships its own `fm.css`. Generic primitives from that pass (`.syn-breadcrumb-*`, `.syn-section-label`, `.syn-empty-state*`, `.syn-selection-bar-*`, `.syn-row-selected`, `.syn-sort-header`) stay.
 
 ### Added
 - Semantic CSS primitives from the synmod-pm pass (`synapse-components.css` + stub): `.syn-row-muted` (inline-add/sub rows in editable datatables), `.syn-field-caption` (tiny uppercase caption in dense cells), `.syn-media-card` + `-img`/`-placeholder`/`-body`/`-title`/`-actions` (image-header cards), `.syn-icon-dropdown` / `.syn-icon-dropdown-item` (teleported row-action menu; item selector outranks theme-base's `button[type="button"]` reset).

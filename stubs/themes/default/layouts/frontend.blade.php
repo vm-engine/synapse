@@ -99,6 +99,7 @@
 
         {{-- Main Content --}}
         <main class="fe-main">
+            @includeIf('synauth::components.impersonation-banner')
             {{ $slot }}
         </main>
 
