@@ -94,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default theme frontend: mobile toggle stayed visible on desktop (theme-base's global `button[type=button]` rule out-specified it; now opts out via `btn-icon`) and the page background ignored dark mode (`.dark` sits on `<body>` itself).
 - Fallback `components/layouts/app.blade.php` loaded the Outfit font twice (hardcoded links plus `@themeHeaders`).
 - Application theme: module `notify` toasts were silently dropped (own `toast` component never listened), duplicated page title, mobile sidebar overlay used `window` in a template (fails the CSP-safe evaluator), Cmd/Ctrl+B swallowed the shortcut on core-layout pages, frontend layout called unguarded auth routes, assets double-loaded via `@vite()`, Font Awesome 6.5 CDN loaded on top of the bundled FA 7.
+- **`$wire` assignments threw under Livewire's CSP build** (`properties[name] is not a function`), so every `#[Modelable]` child (`x-modelable="$wire.value"`, e.g. the synmod-fm file picker) logged errors and lost parent→child value updates. Alpine's CSP evaluator reads `obj.constructor` before member assignments and Livewire's `$wire` proxy treats inherited `Object.prototype` keys as aliases (still in livewire/livewire v4.4.7); `synapse-components.js` now wraps each component's `$wire` on `component.init` to answer those keys itself.
 
 ### Removed
 - Static TailAdmin "Search or type command…" box from the header stub (`layouts/partials/header.blade.php`); it had no behaviour and is replaced by the global search palette.

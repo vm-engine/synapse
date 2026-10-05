@@ -15,6 +15,32 @@
  */
 import flatpickr from "flatpickr";
 
+// Livewire CSP build: assigning through $wire (e.g. the x-modelable="$wire.value"
+// binding Livewire adds to every #[Modelable] child) throws "properties[name] is
+// not a function". Alpine's CSP evaluator reads `obj.constructor` before any
+// member assignment, and Livewire's $wire proxy answers `property in aliases` -
+// true for inherited Object.prototype keys - then calls a non-existent property
+// getter (livewire/livewire js/$wire.js, still the case in v4.4.7). Answer those
+// inherited keys before they reach Livewire's proxy.
+Livewire.hook("component.init", ({ component }) => {
+    const wire = component.$wire;
+
+    component.$wire = component.el.$wire = new Proxy(wire, {
+        get(target, property) {
+            if (typeof property === "string" && property in Object.prototype) {
+                return Object.prototype[property];
+            }
+
+            return wire[property];
+        },
+        set(target, property, value) {
+            wire[property] = value;
+
+            return true;
+        },
+    });
+});
+
 // <x-synapse-adv-select>
 Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wireModel, labelField,
     valueField,
