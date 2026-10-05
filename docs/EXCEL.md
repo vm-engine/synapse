@@ -557,6 +557,48 @@ The `column_styles` and `header_style` are stored in the task's `options` JSON a
 
 ---
 
+## Livewire Export Button
+
+`<x-synapse-excel-export-button>` plus the `VmEngine\Synapse\Traits\WithExcelExport` trait cover the usual Livewire export UI.
+
+```php
+use Livewire\Attributes\Computed;
+use VmEngine\Synapse\Traits\WithExcelExport;
+
+class InvoiceList extends Component
+{
+    use WithExcelExport;
+
+    #[Computed]
+    public function exportTask(): ?ExcelExport
+    {
+        return $this->excelExportTask('invoice-list-'.auth()->id()); // app-specific reference
+    }
+
+    public function exportToExcel(): void { /* dispatch ExcelExporter background export with that reference */ }
+
+    public function downloadExport(): ?BinaryFileResponse
+    {
+        return $this->exportTask ? $this->downloadExcelExportFile($this->exportTask, 'invoices.xlsx') : null;
+    }
+
+    public function dismissExport(): void
+    {
+        if ($this->exportTask) {
+            $this->dismissExcelExportTask($this->exportTask);
+        }
+    }
+}
+```
+
+| Trait method | Description |
+|---|---|
+| `excelExportTask(string $reference): ?ExcelExport` | Latest task under the reference |
+| `downloadExcelExportFile(ExcelExport $task, string $filename, string $notFoundMessage = '')` | Download the finished file, or notify when missing/not ready |
+| `dismissExcelExportTask(ExcelExport $task): void` | Delete the output file and the task record |
+
+Blade usage and props: [COMPONENTS.md → Excel Export Button](COMPONENTS.md#excel-export-button). For a direct download without a background job use `mode="sync"`.
+
 ## Reference Tracking
 
 Both `ExcelExport` and `ExcelImport` models support a `reference` column — a module-defined string identifier for looking up tasks across page refreshes without storing the task ID in the session.

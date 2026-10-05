@@ -13,85 +13,116 @@
     >
     <meta
         name="description"
-        content="{{ config('synapps.apps.description') }}"
+        content="{{ $description ?? config('synapps.apps.description') }}"
     >
 
     <title>{{ $title ?? config('synapps.apps.title', config('app.name')) }}</title>
 
-    {{-- Theme CDN Headers --}}
+    {{-- Theme CDN Headers (fonts etc. — declared in theme.json) --}}
     @themeHeaders('frontend')
 
-    <link
-        href="https://fonts.googleapis.com"
-        rel="preconnect"
-    >
-    <link
-        href="https://fonts.gstatic.com"
-        rel="preconnect"
-        crossorigin
-    >
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
-        rel="stylesheet"
-    >
+    {{-- Module head tags: hreflang, Open Graph, canonical… --}}
+    @stack('head')
 
-    {{-- Theme CDN Styles --}}
+    {{-- Theme CDN Styles + Vite (base.css + frontend.css via ThemeService) --}}
     @themeStyles('frontend')
-
-    @vite(['resources/css/app.css'])
     @livewireStyles
     @stack('styles')
 </head>
 
 <body
-    x-data="{ 'loaded': true, 'darkMode': $persist(false).as('darkMode') }"
-    :class="{ 'dark bg-gray-900': darkMode === true }"
+    class="fe-body"
+    x-data="applicationThemeShell"
 >
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 shadow">
-            <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
-                <div class="text-xl font-bold">
-                    <a href="/">{{ config('synapps.apps.title', config('app.name')) }}</a>
-                </div>
-                <div class="flex items-center gap-4">
-                    @auth
-                        <a
-                            href="{{ route('backend.home.dashboard') }}"
-                            class="text-gray-700 dark:text-gray-300 hover:text-primary"
-                        >
-                            Dashboard
-                        </a>
-                    @else
-                        <a
-                            href="{{ route('auth.login') }}"
-                            class="text-gray-700 dark:text-gray-300 hover:text-primary"
-                        >
-                            Login
-                        </a>
-                    @endauth
-                </div>
-            </nav>
+    <div class="fe-layout">
+
+        {{-- Header --}}
+        <header
+            class="fe-header"
+            x-data="frontendHeader"
+            :class="headerClass"
+            @keydown.escape.window="close"
+        >
+            <div class="fe-header__inner">
+
+                {{-- Logo --}}
+                <a
+                    class="fe-logo"
+                    href="{{ url('/') }}"
+                >
+                    {{ config('synapps.apps.title', config('app.name')) }}
+                </a>
+
+                {{-- Navigation: modules/host theme push menus, language switcher… here --}}
+                <nav
+                    class="fe-nav"
+                    id="fe-nav"
+                    aria-label="{{ __('Main navigation') }}"
+                >
+                    @stack('nav')
+
+                    {{-- Auth Actions --}}
+                    <div class="fe-header__actions">
+                        @auth
+                            @if (Route::has('backend.home.dashboard'))
+                                <a
+                                    class="fe-action-link fe-action-link--primary"
+                                    href="{{ route('backend.home.dashboard') }}"
+                                >
+                                    <span class="fa-solid fa-gauge-high fa-sm"></span>
+                                    {{ __('Dashboard') }}
+                                </a>
+                            @endif
+                        @else
+                            @if (Route::has('auth.login'))
+                                <a
+                                    class="fe-action-link"
+                                    href="{{ route('auth.login') }}"
+                                >
+                                    {{ __('Sign in') }}
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
+                </nav>
+
+                {{-- Mobile toggle --}}
+                <button
+                    class="fe-mobile-toggle btn-icon"
+                    type="button"
+                    aria-controls="fe-nav"
+                    aria-label="{{ __('Toggle navigation') }}"
+                    :aria-expanded="ariaExpanded"
+                    @click="toggle"
+                >
+                    <span class="fa-solid fa-bars"></span>
+                </button>
+            </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="flex-1">
+        {{-- Main Content --}}
+        <main class="fe-main">
             @includeIf('synauth::components.impersonation-banner')
             {{ $slot }}
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-gray-100 dark:bg-gray-900 py-6">
-            <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-                &copy; {{ date('Y') }} {{ config('synapps.apps.title', config('app.name')) }}. All rights reserved.
+        {{-- Footer --}}
+        <footer class="fe-footer">
+            <div class="fe-footer__inner">
+                <div class="fe-footer__brand">
+                    <span class="fe-footer__logo">{{ config('synapps.apps.title', config('app.name')) }}</span>
+                    <p class="fe-footer__tagline">{{ config('synapps.apps.description') }}</p>
+                </div>
+                <p class="fe-footer__copy">
+                    &copy; {{ date('Y') }} {{ config('synapps.apps.title', config('app.name')) }}.
+                    {{ __('All rights reserved.') }}
+                </p>
             </div>
         </footer>
     </div>
 
-    {{-- Theme CDN Scripts --}}
+    {{-- Theme CDN Scripts + Vite (base.js + frontend.js via ThemeService) --}}
     @themeScripts('frontend')
-
-    @vite(['resources/js/app.js'])
     @livewireScripts
     @stack('scripts')
 </body>

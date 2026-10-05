@@ -14,6 +14,11 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
 | `synapps:make` | Create a component in a synapps/modules module | Building out a module | Yes | No |
 | `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
+| `synapps:remove-module` | Move a module to `.trash` (or delete) and rediscover | Retiring a module | No | No |
+| `synapps:copy-resources` | Re-copy layouts, CSS, JS, assets from stubs | Refreshing stub resources after an upgrade | Yes (asks before overwrite) | No |
+| `synapps:copy-themes` | Copy stub themes into `synapps/resources/themes` | Refreshing bundled themes | Yes | No |
+| `synapps:searchable-setup` | Enable global search (table + import) | Turning on the Ctrl/⌘+K palette | Yes | No |
+| `synapps:searchable-forget` | Delete searchable entries by source prefix | Cleaning stale search content | Yes | No |
 | `synapps:reconfig` | Interactively update `apps.json` | Changing app code/domains/dependencies after setup | Yes | No |
 | `synotif:setup` | Enable/configure in-app notifications | Turning on notifications after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes (per theme) | No |
@@ -426,6 +431,38 @@ synapps/resources/themes/{name}/
 
 - [Theme System Documentation](../docs/THEMES.md) - Complete theming guide
 - [Configuration](../docs/CONFIGURATION.md) - Theme configuration options
+
+---
+
+## synapps:remove-module
+
+```bash
+php artisan synapps:remove-module {moduleName} [--permanent]
+```
+
+Removes `synapps/modules/{moduleName}` after confirmation. By default the folder is **moved** to `.trash/{moduleName}-{timestamp}` (and `/.trash` is added to `.gitignore`) so it can be restored by hand; `--permanent` deletes it. Afterwards it rediscovers modules so `composer.json` autoload entries and the compiled configs no longer reference it.
+
+---
+
+## synapps:copy-resources / synapps:copy-themes
+
+```bash
+php artisan synapps:copy-resources [--css] [--js] [--layouts] [--assets] [--all] [--force]
+php artisan synapps:copy-themes [theme ...] [--force]
+```
+
+Re-copy the stub layouts (incl. nav components), CSS, JS and static assets, or the bundled themes, into `synapps/resources`. Without options everything is copied; existing files are only overwritten after confirmation or with `--force`. Use after upgrading synapse when you want the new stub versions (e.g. the impersonation-banner slot in the layout stubs).
+
+---
+
+## synapps:searchable-setup / synapps:searchable-forget
+
+```bash
+php artisan synapps:searchable-setup
+php artisan synapps:searchable-forget {prefix} [--force]   # prefix must start with "content:"
+```
+
+`searchable-setup` enables the global backend search: creates the `searchables` table and (re)imports backend nav entries and module searchables. `searchable-forget` deletes content entries whose source starts with the prefix. See README → *Global Search*.
 
 ---
 

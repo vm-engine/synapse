@@ -1,14 +1,12 @@
 /**
  * Application Synapse Theme — Base CSS (Shared Across All Layouts)
  *
- * Contains: Google Fonts, @theme configuration, base typography, custom scrollbar,
+ * Contains: @theme configuration, base typography, custom scrollbar,
  * glassmorphism utilities, animations, text utilities, form utilities,
  * advanced select component, buttons, and badges.
+ * Fonts (Open Sans + Poppins) are loaded via theme.json headers.all.
  * Loaded on EVERY page via resources/css/base.css.
  */
-
-/* Google Fonts - Modern Professional Pairing */
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap");
 
 /* Theme Configuration - Tailwind v4 */
 @theme {

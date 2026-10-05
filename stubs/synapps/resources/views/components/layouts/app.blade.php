@@ -18,22 +18,8 @@
 
     <title>{{ $title ?? config('synapps.apps.title', config('app.name')) }}</title>
 
-    {{-- Theme CDN Headers --}}
+    {{-- Theme CDN Headers (fonts etc. — declared in theme.json) --}}
     @themeHeaders('app')
-
-    <link
-        href="https://fonts.googleapis.com"
-        rel="preconnect"
-    >
-    <link
-        href="https://fonts.gstatic.com"
-        rel="preconnect"
-        crossorigin
-    >
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
-        rel="stylesheet"
-    >
 
     {{-- Theme CDN Styles + Vite (base.css + app.css via ThemeService) --}}
     @themeStyles('app')

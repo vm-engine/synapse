@@ -286,6 +286,20 @@ test('patchThemeImportLines updates synapps-base.css to active theme', function 
         ->and($content)->not->toContain('old-theme');
 });
 
+test('patchThemeImportLines re-points tailwind-ref.css at the active theme', function () {
+    $oldContent = "@import \"tailwindcss\";\n@import './synapse-components.css';\n@import '../themes/old-theme/css/theme-base.css';\n";
+    File::put(base_path('synapps/resources/css/tailwind-ref.css'), $oldContent);
+
+    config(['synapps.apps.themes.active' => 'new-theme']);
+
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+
+    $content = File::get(base_path('synapps/resources/css/tailwind-ref.css'));
+    expect($content)->toContain("@import '../themes/new-theme/css/theme-base.css';")
+        ->and($content)->toContain("@import './synapse-components.css';")
+        ->and($content)->not->toContain('old-theme');
+});
+
 test('patchThemeImportLines updates synapps-base.js to active theme', function () {
     $oldContent = "import './synapps.js';\nimport '../themes/old-theme/js/theme-base.js';\n";
     File::put(base_path('synapps/resources/js/synapps-base.js'), $oldContent);

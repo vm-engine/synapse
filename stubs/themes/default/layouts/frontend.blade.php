@@ -13,27 +13,16 @@
     >
     <meta
         name="description"
-        content="{{ config('synapps.apps.description') }}"
+        content="{{ $description ?? config('synapps.apps.description') }}"
     >
 
     <title>{{ $title ?? config('synapps.apps.title', config('app.name')) }}</title>
 
-    {{-- Theme CDN Headers --}}
+    {{-- Theme CDN Headers (fonts etc. — declared in theme.json) --}}
     @themeHeaders('frontend')
 
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap"
-        rel="stylesheet"
-    >
+    {{-- Module head tags: hreflang, Open Graph, canonical… --}}
+    @stack('head')
 
     {{-- Theme CDN Styles + Vite (base.css + frontend.css via ThemeService) --}}
     @themeStyles('frontend')
@@ -41,56 +30,71 @@
     @stack('styles')
 </head>
 
-<body class="fe-body">
+<body
+    class="fe-body"
+    x-data="{ 'darkMode': $persist(false).as('darkMode') }"
+    :class="{ 'dark': darkMode === true }"
+>
     <div class="fe-layout">
 
         {{-- Header --}}
         <header
             class="fe-header"
-            x-data="frontendHeaderScroll()"
-            :class="{ 'fe-header--scrolled': scrolled }"
+            x-data="frontendHeader"
+            :class="headerClass"
+            @keydown.escape.window="close"
         >
             <div class="fe-header__inner">
 
                 {{-- Logo --}}
                 <a
                     class="fe-logo"
-                    href="/"
+                    href="{{ url('/') }}"
                 >
                     {{ config('synapps.apps.title', config('app.name')) }}
                 </a>
 
-                {{-- Auth Actions --}}
-                <div class="fe-header__actions">
-                    @auth
-                        @if (Route::has('backend.home.dashboard'))
-                            <a
-                                class="fe-action-link fe-action-link--primary"
-                                href="{{ route('backend.home.dashboard') }}"
-                            >
-                                <span class="fa-solid fa-gauge-high fa-sm"></span>
-                                Dashboard
-                            </a>
-                        @endif
-                    @else
-                        @if (Route::has('auth.login'))
-                            <a
-                                class="fe-action-link"
-                                href="{{ route('auth.login') }}"
-                            >
-                                Sign in
-                            </a>
-                        @endif
-                    @endauth
-                </div>
+                {{-- Navigation: modules/host theme push menus, language switcher… here --}}
+                <nav
+                    class="fe-nav"
+                    id="fe-nav"
+                    aria-label="{{ __('Main navigation') }}"
+                >
+                    @stack('nav')
+
+                    {{-- Auth Actions --}}
+                    <div class="fe-header__actions">
+                        @auth
+                            @if (Route::has('backend.home.dashboard'))
+                                <a
+                                    class="fe-action-link fe-action-link--primary"
+                                    href="{{ route('backend.home.dashboard') }}"
+                                >
+                                    <span class="fa-solid fa-gauge-high fa-sm"></span>
+                                    {{ __('Dashboard') }}
+                                </a>
+                            @endif
+                        @else
+                            @if (Route::has('auth.login'))
+                                <a
+                                    class="fe-action-link"
+                                    href="{{ route('auth.login') }}"
+                                >
+                                    {{ __('Sign in') }}
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
+                </nav>
 
                 {{-- Mobile toggle --}}
                 <button
-                    class="fe-mobile-toggle"
+                    class="fe-mobile-toggle btn-icon"
                     type="button"
-                    x-data="{ open: false }"
-                    @click="open = !open"
-                    aria-label="Toggle navigation"
+                    aria-controls="fe-nav"
+                    aria-label="{{ __('Toggle navigation') }}"
+                    :aria-expanded="ariaExpanded"
+                    @click="toggle"
                 >
                     <span class="fa-solid fa-bars"></span>
                 </button>
@@ -112,7 +116,7 @@
                 </div>
                 <p class="fe-footer__copy">
                     &copy; {{ date('Y') }} {{ config('synapps.apps.title', config('app.name')) }}.
-                    All rights reserved.
+                    {{ __('All rights reserved.') }}
                 </p>
             </div>
         </footer>
@@ -122,25 +126,6 @@
     @themeScripts('frontend')
     @livewireScripts
     @stack('scripts')
-
-    <script nonce="{{ csp_nonce() }}">
-    (() => {
-        const register = () => {
-            Alpine.data('frontendHeaderScroll', () => ({
-                scrolled: false,
-                init() {
-                    window.addEventListener('scroll', () => {
-                        this.scrolled = window.scrollY > 20;
-                    });
-                }
-            }));
-        };
-    document.addEventListener('alpine:init', register);
-    if (window.Alpine) {
-        register();
-    }
-    })();
-    </script>
 </body>
 
 </html>

@@ -1,160 +1,70 @@
 /**
  * Application Synapse Theme — App Layout JavaScript (Backend/Admin)
  *
- * Contains: Global m4vm Alpine store (sidebar toggle, dark mode), keyboard
- * shortcuts (Cmd+K/B/D), sidebar menu component, and search component.
+ * Contains: applicationAppShell (dark mode + sidebar state, persisted),
+ * applicationSidebarSubmenu, and the Cmd/Ctrl+B sidebar shortcut.
+ * Global search (Cmd/Ctrl+K) is handled by <livewire:synsearch::palette />.
  * Loaded ONLY on backend/admin pages via resources/js/app.js.
  */
 
-document.addEventListener('alpine:init', () => {
-
-    // ============================================
-    // GLOBAL THEME STORE
-    // ============================================
-    Alpine.store('m4vm', {
-        sidebarOpen: Alpine.$persist(true).as('m4vm_sidebar_open'),
-        sidebarCollapsed: Alpine.$persist(false).as('m4vm_sidebar_collapsed'),
-        darkMode: Alpine.$persist(false).as('m4vm_dark_mode'),
+const registerAppShell = () => {
+    Alpine.data('applicationAppShell', () => ({
+        // Same key as the default theme so the choice survives theme switches
+        // and carries between admin, auth and public pages.
+        darkMode: Alpine.$persist(false).as('darkMode'),
+        sidebarOpen: Alpine.$persist(true).as('sidebarOpen'),
+        sidebarCollapsed: Alpine.$persist(false).as('sidebarCollapsed'),
 
         init() {
-            // Apply dark mode class on init
-            if (this.darkMode) {
-                document.documentElement.classList.add('dark');
-            }
+            this.applyDarkMode();
+        },
+
+        toggleDarkMode() {
+            this.darkMode = !this.darkMode;
+            this.applyDarkMode();
         },
 
         toggleSidebar() {
             this.sidebarOpen = !this.sidebarOpen;
         },
 
-        toggleCollapse() {
-            this.sidebarCollapsed = !this.sidebarCollapsed;
+        closeSidebar() {
+            this.sidebarOpen = false;
         },
 
-        toggleDarkMode() {
-            this.darkMode = !this.darkMode;
-            if (this.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-    });
-
-    // ============================================
-    // SIDEBAR MENU COMPONENT
-    // ============================================
-    Alpine.data('sidebarMenu', () => ({
-        activeMenu: null,
-        submenus: {},
-
-        init() {
-            // Get current route to set active menu
-            const path = window.location.pathname;
-            this.activeMenu = this.findActiveMenu(path);
+        // Getter so the template stays a bare name (the CSP-safe evaluator can't reach `window`).
+        get showMobileOverlay() {
+            return this.sidebarOpen && window.innerWidth < 1024;
         },
 
-        findActiveMenu(path) {
-            // Logic to determine active menu from path
-            return path.split('/')[1] || 'dashboard';
+        applyDarkMode() {
+            document.documentElement.classList.toggle('dark', this.darkMode);
         },
-
-        toggleSubmenu(menuId) {
-            if (!this.submenus[menuId]) {
-                this.submenus[menuId] = true;
-            } else {
-                this.submenus[menuId] = !this.submenus[menuId];
-            }
-        },
-
-        isSubmenuOpen(menuId) {
-            return this.submenus[menuId] === true;
-        },
-
-        isActive(menuId) {
-            return this.activeMenu === menuId;
-        }
     }));
 
-    // ============================================
-    // SEARCH COMPONENT WITH DEBOUNCE
-    // ============================================
-    Alpine.data('search', () => ({
-        query: '',
-        results: [],
-        loading: false,
-        timeout: null,
+    // Sidebar menu item with a submenu (layouts/components/sidebar-menu.blade.php).
+    Alpine.data('applicationSidebarSubmenu', (initialOpen) => ({
+        open: initialOpen,
 
-        search() {
-            clearTimeout(this.timeout);
-
-            if (this.query.length < 2) {
-                this.results = [];
-                return;
-            }
-
-            this.timeout = setTimeout(() => {
-                this.loading = true;
-                this.performSearch();
-            }, 300);
+        toggle(key) {
+            this.open = !this.open;
+            this.selected = this.selected === key ? '' : key;
         },
-
-        performSearch() {
-            // Implement your search logic here
-            // Example: fetch('/api/search?q=' + this.query)
-
-            setTimeout(() => {
-                this.results = [
-                    { title: 'Sample Result 1', url: '#' },
-                    { title: 'Sample Result 2', url: '#' }
-                ];
-                this.loading = false;
-            }, 500);
-        },
-
-        clear() {
-            this.query = '';
-            this.results = [];
-        }
     }));
-});
+};
 
-// ============================================
-// KEYBOARD SHORTCUTS (backend only)
-// ============================================
-document.addEventListener('keydown', (e) => {
-    // Cmd/Ctrl + K for search
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        const searchInput = document.querySelector('input[type="text"][placeholder*="Search"]');
-        if (searchInput) {
-            searchInput.focus();
-        }
+document.addEventListener('alpine:init', registerAppShell);
+
+if (window.Alpine) {
+    registerAppShell();
+}
+
+document.addEventListener('keydown', (event) => {
+    // Only on pages rendered by this theme's app layout (core fallback layouts have their own shell).
+    const shell = window.Alpine?.$data(document.body);
+
+    if ((event.metaKey || event.ctrlKey) && event.key === 'b' && typeof shell?.toggleSidebar === 'function') {
+        event.preventDefault();
+        shell.toggleSidebar();
     }
-
-    // Cmd/Ctrl + B for sidebar toggle
-    if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-        e.preventDefault();
-        Alpine.store('m4vm').toggleSidebar();
-    }
-
-    // Cmd/Ctrl + D for dark mode toggle
-    if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
-        e.preventDefault();
-        Alpine.store('m4vm').toggleDarkMode();
-    }
-
-    // Escape to close dropdowns and modals
-    if (e.key === 'Escape') {
-        // Trigger click.away for all open dropdowns
-        window.dispatchEvent(new Event('click'));
-    }
-});
-
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Application Theme (backend) loaded');
-
-    // Initialize dark mode from store
-    Alpine.store('m4vm')?.init();
 });

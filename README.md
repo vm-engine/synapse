@@ -173,6 +173,8 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-datepicker />
 <x-synapse-currency currency="$" />
 <x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q" />
+<x-synapse-adv-select wire-model="status" :options="$statusOptions" />   {{-- options: [["value" => .., "label" => ..]] --}}
+<x-synapse-toggler label="Active" wire:model.live="isActive" />
 
 <!-- File upload -->
 <x-synapse-drag-n-drop wireModel="avatar" />          {{-- single image, with preview --}}
@@ -184,9 +186,15 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-stat-tile icon="ph ph-invoice" color="blue" label="Total Invoices" value="2,613" />
 <x-synapse-badge color="success">Active</x-synapse-badge>
 
+<!-- List helpers -->
+<x-synapse-sort-icon field="name" :sort-field="$sortField" :sort-direction="$sortDirection" />
+<x-synapse-per-page-selector :paginator="$items" />   {{-- binds $perPage, 10/15/25/50 --}}
+<x-synapse-excel-export-button mode="sync" action="exportToExcel" label="Export" exporting-label="Exporting…" />
+
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
 <x-synapse-drawer title="Settings">...</x-synapse-drawer>
+<x-synapse-modal name="edit">...</x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
 <x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />
 ```

@@ -427,7 +427,8 @@ class SynAppsPatchResources extends Command
     }
 
     /**
-     * Patch the active-theme import lines in all 8 synapps-*.css and synapps-*.js files.
+     * Patch the active-theme import lines in all 8 synapps-*.css / synapps-*.js files
+     * and in tailwind-ref.css (the @reference target for @apply in layout CSS entries).
      * Updates the theme folder name to match the currently active theme.
      * Idempotent — only writes when the theme path has changed.
      */
@@ -441,6 +442,7 @@ class SynAppsPatchResources extends Command
             'synapps-app.css' => "../themes/{$activeTheme}/css/theme-app.css",
             'synapps-frontend.css' => "../themes/{$activeTheme}/css/theme-frontend.css",
             'synapps-guest.css' => "../themes/{$activeTheme}/css/theme-guest.css",
+            'tailwind-ref.css' => "../themes/{$activeTheme}/css/theme-base.css",
         ];
 
         $cssDir = synapps_path('resources/css');

@@ -17,20 +17,21 @@
             <img
                 class="h-8 shrink-0"
                 src="{{ theme_asset('images/logo-dark.svg') }}"
-                alt="Logo"
+                alt="{{ config('synapps.apps.title', config('app.name')) }}"
             >
             <span
                 class="truncate text-xl font-bold text-white"
                 x-show="!sidebarCollapsed"
                 x-transition
             >
-                Member4VM
+                {{ config('synapps.apps.title', config('app.name')) }}
             </span>
         </div>
 
         {{-- Collapse Toggle (Desktop Only) --}}
         <button
             class="hidden shrink-0 text-gray-400 transition-colors hover:text-white lg:block"
+            aria-label="{{ __('Collapse sidebar') }}"
             @click="sidebarCollapsed = !sidebarCollapsed"
             x-show="!sidebarCollapsed"
             x-transition
@@ -53,6 +54,7 @@
         {{-- Expand Icon (when collapsed) --}}
         <button
             class="hidden text-gray-400 transition-colors hover:text-white lg:block"
+            aria-label="{{ __('Expand sidebar') }}"
             @click="sidebarCollapsed = !sidebarCollapsed"
             x-show="sidebarCollapsed"
             x-transition
@@ -82,7 +84,7 @@
             @foreach (synav()->backend() as $key => $menu)
                 @canAccess($menu['acl'] ?? null)
                 <li
-                    @isset($menu['sub']) x-data="synapseSidebarSubmenu(selected.startsWith('{{ $key }}'))" @endisset>
+                    @isset($menu['sub']) x-data="applicationSidebarSubmenu(selected.startsWith('{{ $key }}'))" @endisset>
                     @isset($menu['sub'])
                         {{-- Menu item with submenu --}}
                         <button
@@ -264,20 +266,3 @@
     </div>
 </aside>
 
-<script nonce="{{ csp_nonce() }}">
-    (() => {
-        const register = () => {
-            Alpine.data('synapseSidebarSubmenu', (initialOpen) => ({
-                open: initialOpen,
-                toggle(key) {
-                    this.open = !this.open;
-                    this.selected = this.selected === key ? '' : key;
-                },
-            }));
-        };
-        document.addEventListener('alpine:init', register);
-        if (window.Alpine) {
-            register();
-        }
-    })();
-</script>

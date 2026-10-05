@@ -428,6 +428,31 @@ Also closes on backdrop click, the close button, or Escape.
 
 ---
 
+### Modal
+
+```blade
+<x-synapse-modal name="edit-user" max-width="xl">
+    <div class="syn-modal-header">…</div>
+    <div class="syn-modal-body">…</div>
+    <div class="syn-modal-footer">…</div>
+</x-synapse-modal>
+```
+
+| Prop | Default | Description |
+|---|---|---|
+| `name` | `modal` | Event suffix — open with `$dispatch('open-modal-{name}')`, close with `close-modal-{name}` (also closes on Escape) |
+| `max-width` | `xl` | Panel width |
+
+Event names are matched lowercase by the browser, so keep `name` lowercase.
+
+### Toggler
+
+```blade
+<x-synapse-toggler id="is-active" name="is_active" label="Active" wire:model.live="isActive" />
+```
+
+Props: `id`, `name`, `label`, `checked` (false), `active-color` (`green`), `inline` (false).
+
 ### Toastr Notifications
 
 Toast notifications for user feedback:
@@ -543,6 +568,44 @@ Flexible alert component with dismissible functionality:
 ```
 
 ---
+
+## List Helpers
+
+### Per-Page Selector
+
+```blade
+<x-synapse-per-page-selector :paginator="$items" />
+```
+
+Renders a 10/15/25/50 page-size `<select>` bound to the host's `$perPage` (`wire:model.live="perPage"`) next to `$paginator->links()`. The host component must have a public `$perPage` property.
+
+### Sort Icon
+
+```blade
+<th><x-synapse-sort-icon field="name" :sort-field="$sortField" :sort-direction="$sortDirection" /> Name</th>
+```
+
+A link that calls the host's `sortBy('{field}')` and shows `ph-arrows-down-up` / `ph-caret-up` / `ph-caret-down`.
+
+### Excel Export Button
+
+```blade
+{{-- Sync: the action returns a download response --}}
+<x-synapse-excel-export-button mode="sync" action="exportToExcel" label="Export" exporting-label="Exporting…" />
+
+{{-- Async: background export tracked by an ExcelExport task (see WithExcelExport) --}}
+<x-synapse-excel-export-button
+    mode="async"
+    :task="$this->exportTask"
+    action="exportToExcel"
+    download-action="downloadExport"
+    dismiss-action="dismissExport"
+    label="Export" processing-label="Processing…" download-label="Download"
+    failed-label="Export failed" dismiss-label="Dismiss"
+/>
+```
+
+In async mode the button shows three states — idle, processing (polls), completed (download + dismiss) or failed. See [EXCEL.md](EXCEL.md#livewire-export-button).
 
 ## Advanced Select
 

@@ -12,15 +12,12 @@
         content="{{ csrf_token() }}"
     >
 
-    <title>{{ config('app.name', 'Member4VM') }}</title>
+    <title>{{ $title ?? config('synapps.apps.title', config('app.name')) }}</title>
 
-    <!-- Theme Headers -->
+    {{-- Theme CDN Headers (fonts etc. — declared in theme.json) --}}
     @themeHeaders('guest')
 
-    <!-- Vite Assets (includes compiled theme CSS/JS) -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <!-- Theme Styles -->
+    {{-- Theme CDN Styles + Vite (base.css + guest.css via ThemeService) --}}
     @themeStyles('guest')
 
     @stack('styles')
@@ -28,7 +25,7 @@
 
 <body
     class="font-sans antialiased"
-    x-data="synapseGuestShell()"
+    x-data="applicationThemeShell"
     :class="{ 'dark': darkMode }"
 >
     <div class="flex min-h-screen">
@@ -43,96 +40,31 @@
             <div class="absolute -right-20 bottom-20 h-96 w-96 rounded-full bg-white/5 blur-3xl"></div>
 
             <div class="relative z-10 flex w-full flex-col items-center justify-center p-12 text-white">
-                <!-- Logo -->
+                {{-- Logo --}}
                 <div class="animate-fade-in mb-8">
                     <img
                         class="h-16"
                         src="{{ theme_asset('images/logo-dark.svg') }}"
-                        alt="Member4VM Logo"
+                        alt="{{ config('synapps.apps.title', config('app.name')) }}"
                     >
                 </div>
 
-                <!-- App Name -->
+                {{-- App Name --}}
                 <h1 class="animate-fade-in mb-4 text-center text-5xl font-bold">
-                    Member4VM
+                    {{ config('synapps.apps.title', config('app.name')) }}
                 </h1>
 
-                <!-- Description -->
-                <p class="text-primary-100 animate-fade-in mb-12 max-w-md text-center text-xl leading-relaxed">
-                    Powerful membership management platform for virtual machine services
-                </p>
+                {{-- Description --}}
+                @if (config('synapps.apps.description'))
+                    <p class="text-primary-100 animate-fade-in max-w-md text-center text-xl leading-relaxed">
+                        {{ config('synapps.apps.description') }}
+                    </p>
+                @endif
 
-                <!-- Features List -->
-                <ul class="animate-fade-in space-y-4 text-lg">
-                    <li class="flex items-center gap-3">
-                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-                            <svg
-                                class="text-success h-5 w-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                        </div>
-                        <span>Secure Authentication</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-                            <svg
-                                class="text-success h-5 w-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                        </div>
-                        <span>Real-time Monitoring</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-                            <svg
-                                class="text-success h-5 w-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                        </div>
-                        <span>Advanced Resource Management</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <div class="bg-success/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-                            <svg
-                                class="text-success h-5 w-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                        </div>
-                        <span>24/7 Support & Monitoring</span>
-                    </li>
-                </ul>
-
-                <!-- Footer Text -->
+                {{-- Footer Text --}}
                 <div class="text-primary-200 mt-auto pt-12 text-center text-sm">
-                    &copy; {{ date('Y') }} Member4VM. All rights reserved.
+                    &copy; {{ date('Y') }} {{ config('synapps.apps.title', config('app.name')) }}.
+                    {{ __('All rights reserved.') }}
                 </div>
             </div>
         </div>
@@ -146,7 +78,7 @@
                     <button
                         class="group relative rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                         type="button"
-                        aria-label="Toggle dark mode"
+                        aria-label="{{ __('Toggle dark mode') }}"
                         @click="toggleDarkMode()"
                     >
                         <!-- Sun Icon (Light Mode) -->
@@ -191,7 +123,7 @@
                         <span
                             class="pointer-events-none absolute -bottom-10 right-0 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700"
                         >
-                            Toggle theme
+                            {{ __('Toggle theme') }}
                         </span>
                     </button>
                 </div>
@@ -204,13 +136,13 @@
                         <img
                             class="h-12"
                             src="{{ theme_asset('images/logo.svg') }}"
-                            alt="Member4VM"
+                            alt="{{ config('synapps.apps.title', config('app.name')) }}"
                             x-show="!darkMode"
                         >
                         <img
                             class="h-12"
                             src="{{ theme_asset('images/logo-dark.svg') }}"
-                            alt="Member4VM"
+                            alt="{{ config('synapps.apps.title', config('app.name')) }}"
                             x-show="darkMode"
                         >
                     </div>
@@ -218,48 +150,14 @@
                     <!-- Content Slot -->
                     {{ $slot }}
                 </div>
-
-                <!-- Additional Links (Optional) -->
-                <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-                    <p>
-                        Need help?
-                        <a
-                            class="text-primary-600 dark:text-primary-400 hover:underline"
-                            href="#"
-                        >Contact Support</a>
-                    </p>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Theme Scripts -->
+    {{-- Theme CDN Scripts + Vite (base.js + guest.js via ThemeService) --}}
     @themeScripts('guest')
 
     @stack('scripts')
-
-    <script nonce="{{ csp_nonce() }}">
-        (() => {
-            const register = () => {
-                Alpine.data('synapseGuestShell', () => ({
-                    darkMode: Alpine.$persist(false).as('m4vm_dark_mode_guest'),
-                    init() {
-                        this.darkMode ? document.documentElement.classList.add('dark') : document
-                            .documentElement.classList.remove('dark');
-                    },
-                    toggleDarkMode() {
-                        this.darkMode = !this.darkMode;
-                        this.darkMode ? document.documentElement.classList.add('dark') : document
-                            .documentElement.classList.remove('dark');
-                    },
-                }));
-            };
-            document.addEventListener('alpine:init', register);
-            if (window.Alpine) {
-                register();
-            }
-        })();
-    </script>
 </body>
 
 </html>

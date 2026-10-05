@@ -36,6 +36,11 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:patch` | Patch JS/CSS/Vite/routes/seeder/tests | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
+| `synapps:copy-resources` | Re-copy stub layouts/CSS/JS/assets | Refreshing stub resources after an upgrade | Yes | No |
+| `synapps:copy-themes` | Copy stub themes | Refreshing bundled themes | Yes | No |
+| `synapps:make` | Create a module component (`object module name`, e.g. `livewire`, `--mfc/--sfc/--class`) | Building out a module | Yes | No |
+| `synapps:make-theme` | Create new theme from template | Custom themes | Yes | No |
+| `synapps:remove-module` | Move a module to `.trash` (or `--permanent`) and rediscover | Retiring a module | No | No |
 | `synapps:reconfig` | Interactively update core `apps.json` fields | Renaming app/changing domains after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
@@ -891,6 +896,14 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 - `<x-synapse-currency currency="$" />`
 - `<x-synapse-datepicker :flatpickr="{}" />`
 - `<x-synapse-search-box placeholder="" />` — left search icon, optional `trailing` slot, all other attributes (`wire:model`, ...) pass through to the `<input>`.
+- `<x-synapse-adv-select wire-model="" :options="[['value'=>..,'label'=>..]]" />` — replaces the removed `select`/`multi-select`/`select2`; supports `multiple`, remote `searchMethod`/`loadMethod`, `disabled`.
+- `<x-synapse-toggler label="" />`
+- `<x-synapse-password-generator />`, `<x-synapse-drag-n-drop />`, `<x-synapse-file-drop />`
+
+**List Helpers:**
+- `<x-synapse-per-page-selector :paginator="$items" />` — 10/15/25/50 bound to the host's `$perPage` + pagination links.
+- `<x-synapse-sort-icon field="" :sort-field="$sortField" :sort-direction="$sortDirection" />` — calls the host's `sortBy()`.
+- `<x-synapse-excel-export-button mode="sync|async" action="" ... />` — pair async mode with the `WithExcelExport` trait (docs/EXCEL.md).
 
 **Layout Components:**
 - `<x-synapse-panel title="">` — card-shell wrapper with a `toolbar` slot; `collapsible`/`collapsed` for a click-to-toggle body.
@@ -899,17 +912,23 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 **UI Components:**
 - `<x-synapse-confirm-dialog title="" message="" confirmText="" />`
 - `<x-synapse-drawer title="" />`
+- `<x-synapse-modal name="" max-width="xl">` — `open-modal-{name}` / `close-modal-{name}` window events, Escape closes; keep `name` lowercase.
+- `<x-synapse-lightbox name="" />` — `$dispatch('open-lightbox-{name}', { url })`.
 - `<x-synapse-toastr />`
 - `<x-synapse-alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`
 - `<x-synapse-badge color="gray|brand|success|warning|danger|info" size="sm|md" icon="">` — pill status badge.
 
+All component `Alpine.data()` registrations live in `stubs/synapps/resources/js/synapse-components.js` (copied to `synapps/resources/js/`, imported by `synapps.js`, installed into existing projects by `synapps:patch`) — never add inline `<script>` blocks to component views: they don't run when a component first appears through a Livewire morph, and inline object literals break the CSP-safe Alpine build.
+
 **Alert Component (Detailed):**
 
 Auto-assigns icons by type:
-- Success: `fa-solid fa-circle-check`
-- Warning: `fa-solid fa-triangle-exclamation`
-- Danger/Error: `fa-solid fa-circle-exclamation`
-- Info: `fa-solid fa-circle-info`
+- Success: `ph ph-check-circle`
+- Warning: `ph ph-warning`
+- Danger/Error: `ph ph-warning-circle`
+- Info: `ph ph-info`
+
+(Pass `icon="..."` to override — any icon font class works.)
 
 Features: Alpine.js animations, dark mode, slot content, ARIA attributes
 
@@ -960,7 +979,7 @@ Output placed in **current working directory** (where command runs).
 
 ## Testing
 
-**Framework:** PestPHP 3.x with Orchestra Testbench
+**Framework:** Pest 5.x (PHPUnit 13) with Orchestra Testbench 11
 
 **Structure:**
 ```
@@ -1074,16 +1093,16 @@ tests/
 ## Dependencies
 
 **Required:**
-- Laravel Framework 12.x|13.x
+- Laravel Framework ^13.0 (PHP ^8.5)
 - Livewire ^4.0
 - composer/semver ^3.0
 - openspout/openspout ^4.0
 - phpoffice/phpspreadsheet ^2.0
 
 **Dev:**
-- pestphp/pest ^3.0
-- pestphp/pest-plugin-laravel ^3.0
-- orchestra/testbench ^10.0
+- pestphp/pest ^5.0
+- pestphp/pest-plugin-laravel ^5.0
+- orchestra/testbench ^11.0
 - laradumps/laradumps ^4.0
 - phpstan/phpstan ^2.1
 - larastan/larastan ^3.8
