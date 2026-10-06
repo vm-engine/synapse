@@ -285,7 +285,7 @@ All features from beta are now stable. See [CHANGELOG.md](CHANGELOG.md) for full
 
 ### Upgrading to v3.0.0
 
-Changes below are sorted by impact — work through **Critical** first; each item blocks or silently breaks something if skipped. See [CHANGELOG.md](CHANGELOG.md#300---unreleased) for full technical detail on every item.
+Changes below are sorted by impact — work through **Critical** first; each item blocks or silently breaks something if skipped. See [CHANGELOG.md](CHANGELOG.md#300---2026-10-06) for full technical detail on every item.
 
 #### 🔴 Critical
 

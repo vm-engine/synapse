@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - Unreleased
+## [3.0.0] - 2026-10-06
+
+Includes everything through [2.5.2] (`SsrfGuard`, `SafeOutboundUrlRule`, `security.ssrf_allow_loopback`), merged from the 2.x line. Upgrading from 2.x: see [UPGRADE.md](UPGRADE.md).
 
 ### Added
 - **`synapse-components.js`** — all component `Alpine.data()` registrations (adv-select, confirm-dialog, datepicker, drag-n-drop, file-drop, lightbox, modal, password-generator, search palette, toastr, toggler) moved out of per-view inline `<script>`s into one file imported by `synapps.js`, like `synapse-components.css`. Inline scripts never ran when a component first appeared through a Livewire morph (e.g. status togglers after leaving a trash view). Blade values are passed through `x-data` arguments. `synapps:patch` installs the file and the import in existing projects.
@@ -101,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Static TailAdmin "Search or type command…" box from the header stub (`layouts/partials/header.blade.php`); it had no behaviour and is replaced by the global search palette.
 - Write-only properties `SpoutReader::$filePath`, `StyledWriter::$sheetName`, `TemplateWriter::$sheetName`.
 - FM-only CSS classes `.syn-file-tile*`, `.syn-folder-chip*`, `.syn-drop-overlay*`, `.syn-segmented*`, `.syn-file-thumb-sm`, `.syn-file-icon-sm` from `synapse-components.css` — synmod-fm now ships its own `fm.css`. Generic primitives from that pass (`.syn-breadcrumb-*`, `.syn-section-label`, `.syn-empty-state*`, `.syn-selection-bar-*`, `.syn-row-selected`, `.syn-sort-header`) stay.
-- **BREAKING: `select` / `multi-select` / `select2` Blade components removed** (`<x-synapse-select>`, `<x-synapse-multiselect>`, and the third-party Select2 wrapper) in favor of `<x-adv-select>`. `select2` had no usages anywhere in the codebase. `select`/`multi-select` are still used by 33 files across `synapps-auth`, `synapps-fallback`, `synmod-cms`, `synmod-example`, and `synmod-pm` — see `.claude/plans/2026-09-07-select-migration-note.md` for the full list and migration shape; those call sites must be migrated to `<x-adv-select>` before this version ships.
+- **BREAKING: `select` / `multi-select` / `select2` Blade components removed** (`<x-synapse-select>`, `<x-synapse-multiselect>`, and the third-party Select2 wrapper) in favor of `<x-adv-select>`. `select2` had no usages anywhere in the codebase. The bundled modules (`synapps-auth`, `synapps-fallback`, `synmod-cms`, `synmod-example`, `synmod-pm`) have been migrated; **Upgrade:** replace any remaining `<x-synapse-select>`/`<x-synapse-multiselect>` in your own modules with `<x-adv-select>` (see [docs/COMPONENTS.md](docs/COMPONENTS.md#advanced-select)).
 - **BREAKING: `system.json` config system removed entirely.** `synapps/config/system.json` and `system.dev.json` (source), `synapps/config/compiled/system.json` (compiled output), the `System` config builder, and `config('synapps.system.*')` are all gone. It was almost entirely dead weight — nothing in the ecosystem read most of its keys (`env`, `multilang`, `locale`, `fallback_locale`, `has_auth`, `has_acl`, `force_secure`, `userfile_url`, the computed `number_format` defaults) — but it had two narrow real consumers, both removed as part of this change:
   - `SynapseServiceProvider`'s `path.public` binding, driven by `synapps.system.public_path`. Projects relying on a non-default public path must configure it another way (this feature is not being replaced).
   - `synapps:setup`'s write of the generated encryption key into `system.json`'s `laravel_key` — redundant with Laravel's own `APP_KEY` in `.env`, which is unaffected by this change.
