@@ -918,6 +918,7 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 - Values interpolated into `wire:*` expressions go through `Components\Concerns\SanitizesWireArguments` (`wireMethod()`, `safeKey()`).
 
 **UI Components:**
+- `<x-synapse-copy-button text="" label="Copy" :icon-only="true" />` — clipboard copy with feedback + execCommand fallback.
 - `<x-synapse-confirm-dialog title="" message="" confirmText="" />`
 - `<x-synapse-drawer title="" />`
 - `<x-synapse-modal name="" max-width="xl">` — `open-modal-{name}` / `close-modal-{name}` window events, Escape closes; keep `name` lowercase.

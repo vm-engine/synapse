@@ -1894,3 +1894,14 @@ button.syn-calendar-event {
 .syn-calendar-agenda-empty {
     @apply text-sm text-gray-500 dark:text-gray-400;
 }
+
+/* Copy Button */
+.syn-copy-button.syn-copy-button[type='button'] {
+    @apply inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-md bg-transparent px-1.5 py-1 text-xs font-medium text-gray-500 shadow-none transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white;
+}
+.syn-copy-button.syn-copy-button-copied[type='button'] {
+    @apply text-green-600 dark:text-green-400;
+}
+.syn-copy-button.syn-copy-button-failed[type='button'] {
+    @apply text-red-600 dark:text-red-400;
+}

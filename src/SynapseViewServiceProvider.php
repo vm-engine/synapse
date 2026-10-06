@@ -14,6 +14,7 @@ use VmEngine\Synapse\Components\Calendar;
 use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\ColorPicker;
 use VmEngine\Synapse\Components\ConfirmDialog;
+use VmEngine\Synapse\Components\CopyButton;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\DragNDrop;
@@ -152,5 +153,6 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(KanbanColumn::class, 'synapse-kanban.column');
         $blade->component(KanbanCard::class, 'synapse-kanban.card');
         $blade->component(Calendar::class, 'synapse-calendar');
+        $blade->component(CopyButton::class, 'synapse-copy-button');
     }
 }

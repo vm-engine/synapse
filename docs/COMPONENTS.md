@@ -585,6 +585,21 @@ Flexible alert component with dismissible functionality:
 
 ---
 
+### Copy Button
+
+Copies `text` to the clipboard with "Copied" / "Copy failed" feedback (icon swap + `aria-live`). Falls back to a hidden textarea + `execCommand('copy')` where the Clipboard API is unavailable (non-HTTPS hosts).
+
+```blade
+<x-synapse-copy-button text="packages/synmod-example/src" label="Copy path" />
+<x-synapse-copy-button :text="$token" label="Copy token" :icon-only="false" />
+```
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `text` | string | — | Required |
+| `label` | string | `Copy` | Accessible name and visible label |
+| `iconOnly` | bool | `true` | Hide the visible label |
+
 ## Planning & Layout Components
 
 ### Steps

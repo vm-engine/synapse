@@ -198,6 +198,7 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-modal name="edit">...</x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
 <x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />
+<x-synapse-copy-button text="..." label="Copy path" />   {{-- clipboard + execCommand fallback, "Copied" feedback --}}
 
 <!-- Planning & layout -->
 <x-synapse-steps :steps="['Details', 'Media', 'Review']" :current="$step" go-method="goToStep" />

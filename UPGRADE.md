@@ -392,6 +392,10 @@ cp vendor/vm-engine/synapse/stubs/synapps/resources/css/synapse-components.css s
 npm run build
 ```
 
+### Upgrading to v3.2.0
+
+No breaking changes. New `<x-synapse-copy-button>` — re-copy the `synapse-components.js` / `.css` stubs and rebuild, exactly as for v3.1.0.
+
 ---
 
 ## Deprecation Warnings

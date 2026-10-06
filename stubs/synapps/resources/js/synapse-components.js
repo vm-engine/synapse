@@ -787,6 +787,64 @@ Alpine.data('synapseSplitPane', (storageKey, initialWidth) => ({
     },
 }));
 
+// <x-synapse-copy-button>
+Alpine.data('synapseCopyButton', (text, labels) => ({
+    copied: false,
+    failed: false,
+    timer: null,
+    async copy() {
+        const ok = await this.write(text);
+        this.copied = ok;
+        this.failed = !ok;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            this.copied = false;
+            this.failed = false;
+        }, 2000);
+    },
+    async write(value) {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(value);
+                return true;
+            }
+        } catch (e) {
+            // Permission denied or unsupported: try the legacy path below.
+        }
+
+        const area = document.createElement('textarea');
+        area.value = value;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+
+        let ok = false;
+        try {
+            ok = document.execCommand('copy');
+        } catch (e) {
+            ok = false;
+        }
+        document.body.removeChild(area);
+
+        return ok;
+    },
+    isIdle() {
+        return !this.copied && !this.failed;
+    },
+    buttonText() {
+        if (this.copied) return labels.copied;
+        if (this.failed) return labels.failed;
+        return labels.label;
+    },
+    announcement() {
+        if (this.copied) return labels.copied;
+        if (this.failed) return labels.failed;
+        return '';
+    },
+}));
+
 // RemembersQueryParams: when a list component restores filters from the session,
 // Livewire's #[Url] tracking never writes them to the address bar. Merge them in so
 // the URL matches what's on screen (and can be shared/bookmarked).

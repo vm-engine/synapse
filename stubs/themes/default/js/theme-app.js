@@ -204,7 +204,13 @@ document.addEventListener('keydown', (event) => {
 // Smooth scroll to anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        const target = document.querySelector(this.getAttribute('href'));
+        let target = null;
+        try {
+            target = document.querySelector(this.getAttribute('href'));
+        } catch (error) {
+            // "#" (e.g. sort-icon links handled by wire:click) or "#!" are not valid selectors.
+            return;
+        }
         if (target) {
             e.preventDefault();
             target.scrollIntoView({
