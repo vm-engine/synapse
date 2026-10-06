@@ -1559,11 +1559,11 @@ span.flatpickr-weekday,
     @apply text-theme-xs text-error-500 mt-1.5;
 }
 
-/* Fixed bottom save/cancel bar spanning the full form width — recurs
-   identically (same utilities, different declaration order) in
-   synmod-cms's page-form.blade.php and article-form.blade.php. */
+/* Save/cancel bar pinned to the bottom of a long form (used by synmod-cms's
+   <x-cms::form-layout>). Sticky, not fixed, so it stays inside the content
+   column instead of sliding under the admin sidebar. */
 .syn-form-action-bar {
-    @apply fixed bottom-0 left-0 right-0 z-9 flex items-center justify-between border-t border-gray-200 bg-white px-5 py-3 dark:border-gray-700 dark:bg-gray-900;
+    @apply sticky bottom-0 z-9 mt-6 flex items-center justify-between rounded-t-2xl border border-b-0 border-gray-200 bg-white px-5 py-3 dark:border-gray-800 dark:bg-gray-900;
 }
 
 /* Full-screen image preview (<x-synapse-lightbox>). */
