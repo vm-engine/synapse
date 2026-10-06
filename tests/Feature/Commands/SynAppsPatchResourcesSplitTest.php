@@ -77,9 +77,10 @@ afterEach(function () {
         }
     }
 
-    // Remove test-created synapps dirs
-    if (File::isDirectory(base_path('synapps'))) {
-        File::deleteDirectory(base_path('synapps'));
+    // Remove only the synapps dirs this file owns — deleting base_path('synapps')
+    // wholesale races other parallel workers' fixtures under synapps_path().
+    foreach (['resources/css', 'resources/js', 'resources/themes/default'] as $dir) {
+        File::deleteDirectory(base_path("synapps/{$dir}"));
     }
 });
 
