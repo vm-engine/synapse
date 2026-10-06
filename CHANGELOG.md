@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-10-06
+
+### Added
+- `<x-synapse-color-picker>` — native color input + hex field + preset swatches, entangled to `wire:model` (`#rrggbb`, validate with `hex_color`).
+- `<x-synapse-steps>` — server-driven wizard step indicator; completed steps call an optional `go-method`.
+- `<x-synapse-split-pane>` — aside/main layout with an optional resizable handle (width remembered per browser via `storage-key`) and a mobile aside toggle.
+- `<x-synapse-kanban>` / `.column` / `.card` — board layout on Livewire 4's native `wire:sort` groups (`sortMethod($id, $position, $destinationColumnId)`).
+- `<x-synapse-calendar>` — month grid + mobile agenda built server-side; `nav-method`, `event-method`, `day-method` callbacks, Monday/Sunday week start, "+N more" overflow.
+- `SanitizesWireArguments` component concern: method-name and key whitelists for values interpolated into `wire:*` expressions.
+- `synapse-components.js`: `synapseColorPicker`, `synapseSplitPane`. `synapse-components.css`: `.syn-color-*`, `.syn-step*`, `.syn-split-pane*`, `.syn-kanban*`, `.syn-calendar*`.
+
+### Documentation
+- README "Blade Components", `docs/COMPONENTS.md` (Color Picker + new "Planning & Layout Components" section), `UPGRADE.md` "Upgrading to v3.1.0" (re-copy the `synapse-components.js`/`.css` stubs), package `CLAUDE.md` component list.
+
 ## [3.0.0] - 2026-10-06
 
 Includes everything through [2.5.2] (`SsrfGuard`, `SafeOutboundUrlRule`, `security.ssrf_allow_loopback`), merged from the 2.x line. Upgrading from 2.x: see [UPGRADE.md](UPGRADE.md).
