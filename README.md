@@ -175,6 +175,7 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q" />
 <x-synapse-adv-select wire-model="status" :options="$statusOptions" />   {{-- options: [["value" => .., "label" => ..]] --}}
 <x-synapse-toggler label="Active" wire:model.live="isActive" />
+<x-synapse-color-picker wire:model="color" :swatches="['#ef4444', '#3b82f6']" />   {{-- #rrggbb, validate with hex_color --}}
 
 <!-- File upload -->
 <x-synapse-drag-n-drop wireModel="avatar" />          {{-- single image, with preview --}}
@@ -197,6 +198,16 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-modal name="edit">...</x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
 <x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />
+
+<!-- Planning & layout -->
+<x-synapse-steps :steps="['Details', 'Media', 'Review']" :current="$step" go-method="goToStep" />
+<x-synapse-split-pane aside-width="20rem" resizable storage-key="nodes"><x-slot:aside>...</x-slot:aside>...</x-synapse-split-pane>
+<x-synapse-kanban sort-method="moveItem">                {{-- moveItem($id, $position, $columnId), native wire:sort --}}
+    <x-synapse-kanban.column id="draft" label="Draft" color="gray">
+        <x-synapse-kanban.card :id="$item->id">...</x-synapse-kanban.card>
+    </x-synapse-kanban.column>
+</x-synapse-kanban>
+<x-synapse-calendar :month="$month" :events="$events" nav-method="setMonth" event-method="openEvent" day-method="createOn" />
 ```
 
 ### Icons

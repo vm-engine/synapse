@@ -160,6 +160,22 @@ Text input with a fixed left search icon and an optional trailing slot:
 
 ---
 
+### Color Picker
+
+Native color input + hex field + optional preset swatches, entangled to `wire:model`.
+
+```blade
+<x-synapse-color-picker wire:model="form.color" :swatches="['#ef4444', '#f59e0b', '#10b981', '#3b82f6']" />
+<x-synapse-color-picker wire:model="form.color" :swatches="$palette" :allow-custom="false" />  {{-- swatches only --}}
+```
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `swatches` | array | `[]` | `#rrggbb` presets; invalid entries are dropped |
+| `allowCustom` | bool | `true` | Native picker + hex field; forced on when there are no swatches |
+
+Value is `#rrggbb`. Validate with Laravel's `hex_color` rule.
+
 ## File Upload Components
 
 Synapse ships two complementary file-upload components. Pick by use case:
@@ -568,6 +584,88 @@ Flexible alert component with dismissible functionality:
 ```
 
 ---
+
+## Planning & Layout Components
+
+### Steps
+
+Server-driven step indicator; the host Livewire component owns `$step`.
+
+```blade
+<x-synapse-steps :steps="['Details', 'Media', 'Review']" :current="$step" go-method="goToStep" />
+```
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `steps` | array | `[]` | Labels in order |
+| `current` | int | `1` | 1-based, clamped to the valid range |
+| `goMethod` | string | `null` | Called as `goToStep(n)` — completed steps only |
+
+### Split Pane
+
+```blade
+<x-synapse-split-pane aside-width="20rem" resizable storage-key="example-nodes" toggle-label="Show tree">
+    <x-slot:aside>...tree...</x-slot:aside>
+    ...editor...
+</x-synapse-split-pane>
+```
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `asideWidth` | string | `20rem` | number + `px`/`rem`/`%` |
+| `resizable` | bool | `false` | Drag handle between panes |
+| `storageKey` | string | `null` | Remembers the dragged width in localStorage (resizable only) |
+| `toggleLabel` | string | `Toggle panel` | Mobile show/hide button |
+
+Below `lg` the panes stack and the aside hides behind the toggle.
+
+### Kanban
+
+Layout for Livewire 4's native `wire:sort` groups — no custom JS.
+
+```blade
+<x-synapse-kanban sort-method="moveItem">
+    @foreach ($this->columns as $column)
+        <x-synapse-kanban.column :id="$column['id']" :label="$column['label']" :color="$column['color']" :count="count($column['items'])" empty-text="Drop items here">
+            @foreach ($column['items'] as $item)
+                <x-synapse-kanban.card :id="$item->id" wire:key="card-{{ $item->id }}">{{ $item->name }}</x-synapse-kanban.card>
+            @endforeach
+        </x-synapse-kanban.column>
+    @endforeach
+</x-synapse-kanban>
+```
+
+```php
+public function moveItem(string $id, int $position, string $columnId): void
+{
+    // $columnId is always the destination column; persist status + position.
+}
+```
+
+| Component | Props |
+|---|---|
+| `x-synapse-kanban` | `sortMethod`, `group` (default `kanban`) |
+| `x-synapse-kanban.column` | `id`, `label`, `color` (`gray`/`brand`/`success`/`warning`/`danger`/`info`), `count`, `emptyText` |
+| `x-synapse-kanban.card` | `id` — drag by the handle; wrap inner buttons in `wire:sort:ignore` if needed |
+
+### Calendar
+
+Month grid (md+) and agenda list (mobile), built server-side.
+
+```blade
+<x-synapse-calendar :month="$month" :events="$this->events" nav-method="setMonth" event-method="openEvent" day-method="createOn" week-start="monday" />
+```
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `month` | string | current month | `Y-m`; malformed → current month |
+| `events` | array | `[]` | `[['id', 'title', 'date' => 'Y-m-d', 'color']]`; malformed entries are skipped |
+| `navMethod` | string | `null` | `setMonth('Y-m')` from prev / today / next |
+| `eventMethod` | string | `null` | `openEvent('id')` |
+| `dayMethod` | string | `null` | `createOn('Y-m-d')` from a day number or "+N more" |
+| `weekStart` | string | `monday` | or `sunday` |
+
+Each day shows up to 3 events plus "+N more".
 
 ## List Helpers
 

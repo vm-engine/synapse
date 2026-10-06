@@ -724,6 +724,69 @@ Alpine.data('synapseToggler', (initialActive) => ({
     active: initialActive,
 }));
 
+// <x-synapse-color-picker>
+Alpine.data('synapseColorPicker', (initialValue) => ({
+    value: initialValue,
+    isValidHex() {
+        return /^#[0-9a-fA-F]{6}$/.test(this.value || '');
+    },
+    nativeValue() {
+        return this.isValidHex() ? this.value.toLowerCase() : '#000000';
+    },
+    fromNative(event) {
+        this.value = event.target.value;
+    },
+    pick(color) {
+        this.value = color;
+    },
+    isSelected(color) {
+        return (this.value || '').toLowerCase() === color.toLowerCase();
+    },
+}));
+
+// <x-synapse-split-pane>
+Alpine.data('synapseSplitPane', (storageKey, initialWidth) => ({
+    width: initialWidth,
+    asideOpen: false,
+    init() {
+        if (!storageKey) return;
+        try {
+            const saved = window.localStorage.getItem('syn-split:' + storageKey);
+            if (saved) this.width = saved;
+        } catch (e) {
+            // Storage blocked (private mode, sandbox): keep the default width.
+        }
+    },
+    gridStyle() {
+        return '--syn-split-aside: ' + this.width;
+    },
+    toggleAside() {
+        this.asideOpen = !this.asideOpen;
+    },
+    startDrag() {
+        const move = (event) => {
+            const rect = this.$el.getBoundingClientRect();
+            const px = Math.min(Math.max(event.clientX - rect.left, 160), rect.width - 240);
+            this.width = px + 'px';
+        };
+        const stop = () => {
+            window.removeEventListener('pointermove', move);
+            window.removeEventListener('pointerup', stop);
+            this.persist();
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', stop);
+    },
+    persist() {
+        if (!storageKey) return;
+        try {
+            window.localStorage.setItem('syn-split:' + storageKey, this.width);
+        } catch (e) {
+            // Storage blocked: the width just isn't remembered.
+        }
+    },
+}));
+
 // RemembersQueryParams: when a list component restores filters from the session,
 // Livewire's #[Url] tracking never writes them to the address bar. Merge them in so
 // the URL matches what's on screen (and can be shared/bookmarked).

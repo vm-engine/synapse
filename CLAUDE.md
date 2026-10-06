@@ -909,6 +909,14 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 - `<x-synapse-panel title="">` — card-shell wrapper with a `toolbar` slot; `collapsible`/`collapsed` for a click-to-toggle body.
 - `<x-synapse-stat-tile icon="" color="" label="" value="" />` — single-metric card. `variant="tile"` (default, icon square + label/value) or `variant="card"` (title-row layout, `iconPosition`, `tinted`, `sublabel`, `href`/`clickable`). `label`/`value`/(`sublabel`) accept matching named slots for rich content.
 
+**Planning & Layout Components (3.1):**
+- `<x-synapse-color-picker wire:model="" :swatches="['#rrggbb']" />` — native picker + hex field + swatches; validate with `hex_color`.
+- `<x-synapse-steps :steps="[]" :current="1" go-method="" />` — server-driven wizard indicator, no JS.
+- `<x-synapse-split-pane aside-width="20rem" resizable storage-key="">` + `<x-slot:aside>` — stacks below `lg`.
+- `<x-synapse-kanban sort-method="">` → `.column id="" label="" color=""` → `.card id=""` — native `wire:sort` groups; column reads `sortMethod`/`group` via `@aware`.
+- `<x-synapse-calendar month="Y-m" :events="[]" nav-method="" event-method="" day-method="" />` — month grid built in PHP, mobile agenda.
+- Values interpolated into `wire:*` expressions go through `Components\Concerns\SanitizesWireArguments` (`wireMethod()`, `safeKey()`).
+
 **UI Components:**
 - `<x-synapse-confirm-dialog title="" message="" confirmText="" />`
 - `<x-synapse-drawer title="" />`

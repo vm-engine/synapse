@@ -380,6 +380,18 @@ The search input moved inside the dropdown (was previously nested in the bordere
 - [ ] `php artisan synapps:discover && php artisan synapps:config`
 - [ ] Run your test suite
 
+### Upgrading to v3.1.0
+
+No breaking changes. New components: `<x-synapse-color-picker>`, `<x-synapse-steps>`, `<x-synapse-split-pane>`, `<x-synapse-kanban>` (+ `.column`, `.card`) and `<x-synapse-calendar>` — see [docs/COMPONENTS.md](docs/COMPONENTS.md#planning--layout-components).
+
+They need the updated front-end files. `synapps:patch` only installs `synapse-components.js` / `.css` when they are missing, so copy the new stubs over your project copies (if you never edited them) and rebuild:
+
+```bash
+cp vendor/vm-engine/synapse/stubs/synapps/resources/js/synapse-components.js synapps/resources/js/
+cp vendor/vm-engine/synapse/stubs/synapps/resources/css/synapse-components.css synapps/resources/css/
+npm run build
+```
+
 ---
 
 ## Deprecation Warnings
