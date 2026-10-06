@@ -396,6 +396,12 @@ npm run build
 
 No breaking changes. New `<x-synapse-copy-button>` — re-copy the `synapse-components.js` / `.css` stubs and rebuild, exactly as for v3.1.0.
 
+The default theme's smooth-scroll fix (sort-icon links no longer throw) lives in `themes/default/js/theme-app.js`; if your project uses the unmodified default theme, re-copy it too:
+
+```bash
+cp vendor/vm-engine/synapse/stubs/themes/default/js/theme-app.js synapps/resources/themes/default/js/
+```
+
 ---
 
 ## Deprecation Warnings
