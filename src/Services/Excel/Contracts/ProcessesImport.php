@@ -11,7 +11,7 @@ interface ProcessesImport
     /**
      * Process a chunk of imported rows.
      *
-     * @param  Collection<int, array<string, mixed>>  $rows
+     * @param  Collection<int, array<array-key, mixed>>  $rows
      * @param  int  $chunkIndex  0-based chunk counter
      */
     public function process(Collection $rows, int $chunkIndex): void;

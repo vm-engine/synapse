@@ -1,25 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Components;
 
 use Illuminate\View\Component;
 
 class AdvSelect extends Component
 {
+    /**
+     * @param  array<int|string, mixed>|null  $preload
+     * @param  array<int|string, mixed>  $options
+     */
     public function __construct(
-        public $wireModel,
-        public $searchMethod = null,
-        public $loadMethod = null,
-        public $multiple = false,
-        public $placeholder = 'Select an option',
-        public $labelField = 'label',
-        public $valueField = 'value',
-        public $preload = null,
-        public $options = [],
-        public $minSearchLength = 2,
-        public $live = false,
-        public $allowCreate = false,
-        public $autoLoad = true,
+        public string $wireModel,
+        public ?string $searchMethod = null,
+        public ?string $loadMethod = null,
+        public bool $multiple = false,
+        public string $placeholder = 'Select an option',
+        public string $labelField = 'label',
+        public string $valueField = 'value',
+        public ?array $preload = null,
+        public array $options = [],
+        public int $minSearchLength = 2,
+        public bool $live = false,
+        public bool $allowCreate = false,
+        public bool $autoLoad = true,
+        public bool $disabled = false,
     ) {}
 
     public function render()

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services;
 
 use Closure;
@@ -15,10 +17,10 @@ class SynapseUtils
     /**
      * Generate Module List by given namespaces
      *
-     * @param  array  $namespaces,  format NAMESPACE => [path_to_module_group, FILTER PREFIX]
-     * @param  Closure  $func
+     * @param  array<string, mixed>  $namespaces  format NAMESPACE => [path_to_module_group, FILTER PREFIX]
+     * @return array<int, mixed>
      */
-    public static function listModuleNamespaces(array $namespaces, $func): array
+    public static function listModuleNamespaces(array $namespaces, Closure $func): array
     {
         return self::readModules($namespaces, function ($namespace, $namespaceValue, $moduleName, $modulePath, $func) {
             if ($namespace != 'SynModule') {
@@ -29,7 +31,11 @@ class SynapseUtils
         }, $func);
     }
 
-    public static function listModuleResources($namespaces, $path, $func = null)
+    /**
+     * @param  array<string, mixed>  $namespaces
+     * @return array<int, mixed>
+     */
+    public static function listModuleResources(array $namespaces, string $path, ?Closure $func = null): array
     {
         return self::readModules(
             $namespaces,
@@ -57,14 +63,18 @@ class SynapseUtils
 
         $composerJson = file_get_contents($path);
 
-        return strpos($composerJson, 'SynApps') !== false;
+        return $composerJson !== false && str_contains($composerJson, 'SynApps');
     }
 
+    /**
+     * @param  array<string, mixed>  $namespaces
+     * @return array<int, mixed>
+     */
     private static function readModules(
         array $namespaces,
         Closure $process,
         Closure $final
-    ) {
+    ): array {
         $return = [];
 
         // $namespace = namespace
@@ -77,7 +87,7 @@ class SynapseUtils
                     $namespaceValue[1] = [$namespaceValue[1]];
                 }
                 foreach ($namespaceValue[1] as $prefix) {
-                    $paths = glob($namespaceValue[0].DS.$prefix.'*'.DS);
+                    $paths = glob($namespaceValue[0].DS.$prefix.'*'.DS) ?: [];
 
                     $tmp = array_merge(
                         $tmp,
@@ -85,7 +95,7 @@ class SynapseUtils
                     );
                 }
             } else {
-                $tmp = glob($namespaceValue[0].DS.'*', GLOB_ONLYDIR);
+                $tmp = glob($namespaceValue[0].DS.'*', GLOB_ONLYDIR) ?: [];
             }
             foreach ($tmp as $modulePath) {
                 $moduleName = last(explode(DS, trim($modulePath, DS)));

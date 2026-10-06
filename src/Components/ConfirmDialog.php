@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Components;
 
 use Illuminate\View\Component;
@@ -12,7 +14,7 @@ class ConfirmDialog extends Component
         public ?string $confirmText = 'Confirm',
         public ?string $cancelText = 'Cancel',
         public ?string $confirmColor = 'danger',
-        public ?string $icon = 'fa-solid fa-circle-exclamation',
+        public ?string $icon = 'ph ph-warning-circle',
     ) {}
 
     public function render()

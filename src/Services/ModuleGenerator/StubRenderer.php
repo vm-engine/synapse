@@ -20,6 +20,8 @@ class StubRenderer
 
     /**
      * Render stub with variables
+     *
+     * @param  array<string, mixed>  $variables
      */
     public function render(string $stubName, array $variables): string
     {
@@ -49,6 +51,8 @@ class StubRenderer
 
     /**
      * Replace variables in stub content
+     *
+     * @param  array<string, mixed>  $variables
      */
     protected function replaceVariables(string $content, array $variables): string
     {
@@ -70,6 +74,8 @@ class StubRenderer
 
     /**
      * Get list of available stubs
+     *
+     * @return array<int, string>
      */
     public function getAvailableStubs(): array
     {

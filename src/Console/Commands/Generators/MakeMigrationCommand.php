@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeMigrationCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-migration
                             {module : The module name}
                             {name? : The name of the migration}
@@ -18,6 +20,9 @@ class MakeMigrationCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'migration';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

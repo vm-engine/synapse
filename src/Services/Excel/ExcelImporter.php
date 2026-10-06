@@ -111,7 +111,7 @@ class ExcelImporter
     /**
      * Import all rows synchronously and return as a collection.
      *
-     * @return Collection<int, array<string, mixed>>
+     * @return Collection<int, array<array-key, mixed>>
      */
     public function import(): Collection
     {
@@ -138,7 +138,7 @@ class ExcelImporter
     /**
      * Import in chunks for memory-efficient processing.
      *
-     * @param  Closure(Collection<int, array<string, mixed>>, int): void  $callback
+     * @param  Closure(Collection<int, array<array-key, mixed>>, int): void  $callback
      * @return int Total rows processed
      */
     public function chunk(int $chunkSize, Closure $callback): int
@@ -224,7 +224,7 @@ class ExcelImporter
     /**
      * Get a generator of mapped rows from the reader.
      *
-     * @return \Generator<int, array<string, mixed>>
+     * @return \Generator<int, array<array-key, mixed>>
      */
     private function getMappedRowsGenerator(ReaderInterface $reader): \Generator
     {

@@ -3,22 +3,8 @@
     wire:ignore
 >
     <input
-        type="date"
-        x-data="{
-            flatpickrInstance: null,
-            value: @entangle($attributes->wire('model'))
-        }"
-        x-init="flatpickrInstance = flatpickr($el, Object.assign({}, {{ $flatpickr }}, {
-            defaultDate: value || null,
-            onChange: function(selectedDates, dateStr, instance) {
-                value = dateStr;
-            }
-        }));
-        $watch('value', val => {
-            if (flatpickrInstance && val !== flatpickrInstance.input.value) {
-                flatpickrInstance.setDate(val || null, false);
-            }
-        });"
+        type="text"
+        x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'), {{ $flatpickr }})"
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
     <span class="input-group-item right pointer-events-none">
@@ -39,3 +25,4 @@
         </svg>
     </span>
 </div>
+

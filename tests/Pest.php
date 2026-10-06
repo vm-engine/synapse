@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Tests\TestCase;
 
 /*
@@ -12,3 +14,14 @@ use Tests\TestCase;
 */
 
 uses(TestCase::class)->in('Feature', 'Unit');
+
+/**
+ * Enable the opt-in searchable feature for a test by running its migration.
+ */
+function setUpSearchable(): void
+{
+    test()->artisan('migrate', [
+        '--path' => realpath(__DIR__.'/../database/migrations/searchable'),
+        '--realpath' => true,
+    ])->assertExitCode(0);
+}

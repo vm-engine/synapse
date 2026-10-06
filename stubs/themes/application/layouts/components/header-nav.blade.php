@@ -5,8 +5,8 @@
         {{-- Mobile Hamburger --}}
         <button
             class="text-gray-600 transition-colors hover:text-gray-900 lg:hidden dark:text-gray-300 dark:hover:text-white"
-            aria-label="Toggle sidebar"
-            @click="sidebarOpen = !sidebarOpen"
+            aria-label="{{ __('Toggle sidebar') }}"
+            @click="toggleSidebar"
         >
             <svg
                 class="h-6 w-6"
@@ -23,27 +23,8 @@
             </svg>
         </button>
 
-        {{-- Search Bar --}}
-        <div class="relative w-full max-w-md">
-            <input
-                class="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-transparent focus:ring-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
-                type="text"
-                placeholder="Search... (Cmd+K)"
-            >
-            <svg
-                class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-            </svg>
-        </div>
+        {{-- Global Search (Cmd/Ctrl+K) --}}
+        <livewire:synsearch::palette />
     </div>
 
     {{-- Right: Dark Mode Toggle, Notifications, User Menu --}}
@@ -51,126 +32,9 @@
         {{-- Dark Mode Toggle --}}
         @include('theme::components.dark-mode-toggle')
 
-        {{-- Notifications Dropdown --}}
-        <div
-            class="relative"
-            x-data="{ open: false }"
-        >
-            <button
-                class="relative rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                aria-label="Notifications"
-                @click="open = !open"
-            >
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                </svg>
-
-                {{-- Unread Badge --}}
-                <span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500"></span>
-            </button>
-
-            {{-- Notifications Dropdown --}}
-            <div
-                class="dropdown w-80"
-                style="display: none;"
-                x-show="open"
-                @click.away="open = false"
-                x-transition:enter="transition-all duration-200"
-                x-transition:enter-start="opacity-0 scale-95"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition-all duration-150"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-            >
-                {{-- Header --}}
-                <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
-                        <span class="text-primary-600 dark:text-primary-400 text-xs font-medium">3 new</span>
-                    </div>
-                </div>
-
-                {{-- Notification Items --}}
-                <div class="max-h-80 overflow-y-auto">
-                    {{-- Notification Item --}}
-                    <a
-                        class="block border-b border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
-                        href="#"
-                    >
-                        <div class="flex gap-3">
-                            <div class="shrink-0">
-                                <div
-                                    class="bg-primary-100 dark:bg-primary-900 flex h-10 w-10 items-center justify-center rounded-full">
-                                    <svg
-                                        class="text-primary-600 dark:text-primary-400 h-5 w-5"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Server deployed
-                                    successfully</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your VM-001 is now running</p>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">5 minutes ago</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    {{-- More notifications... --}}
-                    <a
-                        class="block border-b border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
-                        href="#"
-                    >
-                        <div class="flex gap-3">
-                            <div class="shrink-0">
-                                <div
-                                    class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                                    <svg
-                                        class="h-5 w-5 text-green-600 dark:text-green-400"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Payment received</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Invoice #1234 has been paid</p>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">2 hours ago</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                {{-- Footer --}}
-                <div class="border-t border-gray-200 px-4 py-3 dark:border-gray-700">
-                    <a
-                        class="text-primary-600 dark:text-primary-400 text-sm hover:underline"
-                        href="#"
-                    >View all notifications</a>
-                </div>
-            </div>
-        </div>
+        {{-- Notifications --}}
+        <livewire:synotif::bell />
+        <x-synapse::notification-panel />
 
         {{-- User Menu Dropdown --}}
         <div
@@ -250,7 +114,7 @@
                                     fill=""
                                 />
                             </svg>
-                            Your Profile
+                            {{ __('Your Profile') }}
                         </a>
                     </li>
                 </ul>
@@ -274,7 +138,7 @@
                         />
                     </svg>
 
-                    Sign out
+                    {{ __('Sign out') }}
                 </x-synauth::logout>
             </div>
         </div>

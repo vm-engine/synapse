@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -25,7 +27,7 @@ class SynAppsConfig extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         SynAppsConfigGenerator::generate();
         SynapseConfigGenerator::generate();

@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Foundation\Vite;
+use Illuminate\Support\Facades\File;
 use VmEngine\Synapse\Services\ThemeService;
 
 beforeEach(function () {
@@ -198,14 +201,14 @@ beforeEach(function () {
     config(['synapps.apps.themes.fallback' => $this->fallbackThemeName]);
 
     $this->fallbackThemePath = synapps_path("resources/themes/{$this->fallbackThemeName}/layouts");
-    Illuminate\Support\Facades\File::ensureDirectoryExists($this->fallbackThemePath);
+    File::ensureDirectoryExists($this->fallbackThemePath);
     foreach (['app', 'frontend', 'guest'] as $layout) {
-        Illuminate\Support\Facades\File::put("{$this->fallbackThemePath}/{$layout}.blade.php", '');
+        File::put("{$this->fallbackThemePath}/{$layout}.blade.php", '');
     }
 });
 
 afterEach(function () {
-    Illuminate\Support\Facades\File::deleteDirectory(synapps_path("resources/themes/{$this->fallbackThemeName}"));
+    File::deleteDirectory(synapps_path("resources/themes/{$this->fallbackThemeName}"));
 });
 
 test('resolveThemeLayout uses fallback theme when active theme layout file missing', function () {

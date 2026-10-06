@@ -26,11 +26,11 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @method static \Illuminate\Database\Eloquent\Builder where($column, $operator = null, $value = null, $boolean = 'and')
- * @method static \VmEngine\Synapse\Models\ExcelExport create(array $attributes)
- * @method static \VmEngine\Synapse\Models\ExcelExport|null find(int|string $id, array $columns = ['*'])
- * @method static \VmEngine\Synapse\Models\ExcelExport findOrFail(int|string $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Builder forReference(string $reference)
+ * @method static \Illuminate\Database\Eloquent\Builder<\VmEngine\Synapse\Models\ExcelExport> where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \VmEngine\Synapse\Models\ExcelExport create(array<string, mixed> $attributes)
+ * @method static \VmEngine\Synapse\Models\ExcelExport|null find(int|string $id, array<int, string> $columns = ['*'])
+ * @method static \VmEngine\Synapse\Models\ExcelExport findOrFail(int|string $id, array<int, string> $columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder<\VmEngine\Synapse\Models\ExcelExport> forReference(string $reference)
  */
 class ExcelExport extends Model
 {

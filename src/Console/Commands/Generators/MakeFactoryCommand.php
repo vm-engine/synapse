@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeFactoryCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-factory
                             {module : The module name}
                             {name? : The name of the factory}
@@ -17,6 +19,9 @@ class MakeFactoryCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'factory';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

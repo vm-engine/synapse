@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeCommandCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-command
                             {module : The module name}
                             {name? : The name of the command}
@@ -19,6 +21,9 @@ class MakeCommandCommand extends BaseGeneratorCommand
 
     protected string $componentName = '';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

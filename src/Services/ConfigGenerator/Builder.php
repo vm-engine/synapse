@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
 use Illuminate\Support\Str;
@@ -8,30 +10,34 @@ use VmEngine\Synapse\Services\ConfigGenerator\Builder\Auth;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Binding;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Modules;
 use VmEngine\Synapse\Services\ConfigGenerator\Builder\Navigation;
-use VmEngine\Synapse\Services\ConfigGenerator\Builder\System;
+use VmEngine\Synapse\Services\ConfigGenerator\Builder\Tenancy;
 
 class Builder
 {
-    protected $configBuilder = [
+    /** @var array<string, class-string<BuilderBase>> */
+    protected array $configBuilder = [
         'apps' => Apps::class,
-        'system' => System::class,
         'modules' => Modules::class,
         'binding' => Binding::class,
         'navigation' => Navigation::class,
         'auth' => Auth::class,
+        'tenancy' => Tenancy::class,
     ];
 
-    protected $builderInstances = [];
+    /** @var array<string, BuilderBase> */
+    protected array $builderInstances = [];
 
-    protected $initComplete = false;
+    protected bool $initComplete = false;
 
-    public $synappsPath;
+    public string $synappsPath;
 
-    public $mainConfig;
+    /** @var array<string, mixed> */
+    public array $mainConfig;
 
-    public $config = []; // config AppConfig
+    /** @var array<string, mixed> */
+    public array $config = []; // config AppConfig
 
-    public $configHash = '';
+    public string $configHash = '';
 
     public function __construct()
     {
@@ -39,7 +45,7 @@ class Builder
         $this->configHash = hash('sha256', now()->format('Y-m-d H:i:s.u'));
     }
 
-    private function init()
+    private function init(): void
     {
         if (! $this->initComplete) {
             $this->buildConfigs();
@@ -47,17 +53,13 @@ class Builder
         }
     }
 
-    private function buildConfigs()
+    private function buildConfigs(): void
     {
         $this->synappsPath = synapps_path();
-        $this->mainConfig = json_decode(
-            file_get_contents(__DIR__.'/../../../config.json'),
-            true
-        );
+        $this->mainConfig = read_json_file(__DIR__.'/../../../config.json');
 
         $this->config = [
             'apps' => [],
-            'system' => [],
             'binding' => [],
             'modules' => [],
             'modules_ori' => [], // config2 default dari module dan lib (tidak akan masuk ke config AppConfig)
@@ -68,7 +70,7 @@ class Builder
         ];
     }
 
-    private function initLoop()
+    private function initLoop(): void
     {
         foreach ($this->configBuilder as $key => $value) {
             $this->builderInstances[$key] = new $value($this);
@@ -76,14 +78,14 @@ class Builder
         }
     }
 
-    private function handlePreLoop()
+    private function handlePreLoop(): void
     {
         foreach ($this->builderInstances as $instance) {
             $instance->preLoop();
         }
     }
 
-    private function loopModules()
+    private function loopModules(): void
     {
         foreach ($this->builderInstances as $instance) {
             foreach ($this->config['modules'] as $moduleName => $moduleConfig) {
@@ -92,30 +94,30 @@ class Builder
         }
     }
 
-    private function handlePostLoop()
+    private function handlePostLoop(): void
     {
         foreach ($this->builderInstances as $instance) {
             $instance->postLoop();
         }
     }
 
-    private function finalize()
+    private function finalize(): void
     {
         foreach ($this->builderInstances as $instance) {
             $instance->finalize();
         }
     }
 
-    private function fetchEnvValues()
+    private function fetchEnvValues(): void
     {
         array_walk_recursive($this->config, function (&$value) {
-            if (Str::startsWith($value, 'env::')) {
+            if (is_string($value) && Str::startsWith($value, 'env::')) {
                 $value = env(Str::after($value, 'env::'));
             }
         });
     }
 
-    private function writeFinalFile()
+    private function writeFinalFile(): void
     {
         $finalPath = synapps_path('config/compiled/synapps.json');
         if (! file_exists(dirname($finalPath))) {
@@ -124,7 +126,8 @@ class Builder
         file_put_contents($finalPath, json_encode($this->config, JSON_PRETTY_PRINT));
     }
 
-    public function generate()
+    /** @return array<string, mixed> */
+    public function generate(): array
     {
         $this->initLoop();
         $this->handlePreLoop();

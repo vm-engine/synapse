@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
-use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Router;
@@ -49,11 +50,14 @@ use VmEngine\Synapse\Console\Commands\SynAppsCopyStubs;
 use VmEngine\Synapse\Console\Commands\SynAppsCopyThemes;
 use VmEngine\Synapse\Console\Commands\SynAppsDiscover;
 use VmEngine\Synapse\Console\Commands\SynAppsLinkErrors;
+use VmEngine\Synapse\Console\Commands\SynAppsMake;
 use VmEngine\Synapse\Console\Commands\SynAppsMakeTheme;
 use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
-use VmEngine\Synapse\Console\Commands\SynAppsPatchTests;
 use VmEngine\Synapse\Console\Commands\SynAppsPublishSettings;
 use VmEngine\Synapse\Console\Commands\SynAppsReconfig;
+use VmEngine\Synapse\Console\Commands\SynAppsRemoveModule;
+use VmEngine\Synapse\Console\Commands\SynAppsSearchableForget;
+use VmEngine\Synapse\Console\Commands\SynAppsSearchableSetup;
 use VmEngine\Synapse\Console\Commands\SynAppsSetup;
 use VmEngine\Synapse\Console\Commands\SynAppsUpgradeAudit;
 use VmEngine\Synapse\Console\Commands\SynAppsVendorFonts;
@@ -62,6 +66,7 @@ use VmEngine\Synapse\Console\Commands\SynapseDbLang;
 use VmEngine\Synapse\Console\Commands\SynapseExcelCleanup;
 use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
+use VmEngine\Synapse\Console\Commands\SynotifSetup;
 use VmEngine\Synapse\Finder\SynapseFinder;
 use VmEngine\Synapse\Http\Middlewares\LogApiRequest;
 use VmEngine\Synapse\Http\Middlewares\NoCacheHeaders;
@@ -70,6 +75,7 @@ use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
 use VmEngine\Synapse\Services\SynapseUtils;
 use VmEngine\Synapse\Services\SyNav;
+use VmEngine\Synapse\Services\SynSearchable;
 
 /**
  * @SuppressWarnings PHPMD.StaticAccess
@@ -99,13 +105,16 @@ class SynapseServiceProvider extends ServiceProvider
 
             $this->commands([
                 SynAppsSetup::class,
+                SynotifSetup::class,
+                SynAppsSearchableSetup::class,
+                SynAppsSearchableForget::class,
                 SynAppsDiscover::class,
                 SynAppsCopyResources::class,
                 SynAppsPatchResources::class,
-                SynAppsPatchTests::class,
                 SynAppsLinkErrors::class,
                 SynAppsConfig::class,
                 SynAppsReconfig::class,
+                SynAppsRemoveModule::class,
                 SynAppsPublishSettings::class,
                 SynAppsCopyStubs::class,
                 SynAppsCopyThemes::class,
@@ -117,6 +126,7 @@ class SynapseServiceProvider extends ServiceProvider
                 SynapseRestoreComposer::class,
                 SynapseExcelCleanup::class,
                 SynAppsUpgradeAudit::class,
+                SynAppsMake::class,
                 // Generator Commands
                 MakeModuleCommand::class,
                 MakeModelCommand::class,
@@ -205,6 +215,9 @@ class SynapseServiceProvider extends ServiceProvider
         $this->app->singleton('synav', function ($app) {
             return new SyNav;
         });
+        $this->app->singleton('synsearchable', function ($app) {
+            return new SynSearchable;
+        });
         $this->app->singleton('dbconf', function ($app) {
             return new DbConfig;
         });
@@ -217,13 +230,14 @@ class SynapseServiceProvider extends ServiceProvider
         if (SynapseUtils::isSynAppsAutoloaded() && $this->isSynAppsConfigured()) {
             $this->registerSynapseFinder();
             $this->bindAlias();
-            $this->bindPublicPath();
             $this->bindInterface();
             $this->bindClass();
             $this->registerSynAppsServiceProviders();
             $this->registerLangFiles();
             $this->registerConfigs();
             $this->overrideConfigs();
+            $this->overrideAppUrl();
+            $this->overrideLivewireCsp();
         }
     }
 
@@ -242,7 +256,7 @@ class SynapseServiceProvider extends ServiceProvider
         });
     }
 
-    private function bindAlias()
+    private function bindAlias(): void
     {
         if (config('synapps.binding.alias')) {
             $this->app->booting(function () {
@@ -255,16 +269,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function bindPublicPath()
-    {
-        if (config('synapps.system.public_path')) {
-            $this->app->bind('path.public', function () {
-                return realpath(base_path(config('synapps.system.public_path')));
-            });
-        }
-    }
-
-    private function bindInterface()
+    private function bindInterface(): void
     {
         foreach (config('synapse.binding.interface', []) as $contract => $service) {
             $this->app->bind(
@@ -274,7 +279,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function bindClass()
+    private function bindClass(): void
     {
         foreach (config('synapps.binding.class', []) as $class => $newClass) {
             $this->app->bind($class, function ($app, $args) use ($newClass) {
@@ -287,7 +292,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerSynAppsServiceProviders()
+    private function registerSynAppsServiceProviders(): void
     {
         $moduleConfigs = config('synapps.modules', []);
 
@@ -306,11 +311,11 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function bootDbOverride()
+    private function bootDbOverride(): void
     {
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
-            $this->callAfterResolving(DatabaseSeeder::class, function ($seeder) {
+            $this->callAfterResolving('Database\Seeders\DatabaseSeeder', function ($seeder) {
                 $seedList = config('synapse.seed_path.general');
                 foreach ($seedList as $seederFile) {
                     if (! file_exists($seederFile)) {
@@ -325,7 +330,7 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerLangFiles()
+    private function registerLangFiles(): void
     {
         $langPath = config('synapse.lang_path.general', []);
         $that = $this;
@@ -337,14 +342,14 @@ class SynapseServiceProvider extends ServiceProvider
         );
     }
 
-    private function registerConfigs()
+    private function registerConfigs(): void
     {
         $modules = config('synapps.modules', []);
         foreach ($modules as $module) {
             if (! $module['is_package']) {
                 $configPath = synapps_path('modules'.DS.$module['id'].DS.'config');
                 if (file_exists($configPath)) {
-                    $configs = glob($configPath.DS.'*.php');
+                    $configs = glob($configPath.DS.'*.php') ?: [];
                     foreach ($configs as $config) {
                         $configName = basename($config, '.php');
                         $this->mergeConfigFrom($config, $configName);
@@ -354,14 +359,14 @@ class SynapseServiceProvider extends ServiceProvider
         }
     }
 
-    private function overrideConfigs()
+    private function overrideConfigs(): void
     {
         $path = synapps_path('config'.DS.'override');
         if (! file_exists($path)) {
             return;
         }
 
-        $configs = glob($path.DS.'*.php');
+        $configs = glob($path.DS.'*.php') ?: [];
         foreach ($configs as $config) {
             $configName = basename($config, '.php');
             if (file_exists(base_path('config'.DS.$configName.'.php'))) {
@@ -383,7 +388,45 @@ class SynapseServiceProvider extends ServiceProvider
     }
 
     /**
+     * Override Laravel's default app.url with the domain configured in
+     * synapps.apps.urls.domain, picking dev/prod based on the current environment.
+     */
+    private function overrideAppUrl(): void
+    {
+        $isProduction = $this->app->environment('production');
+        $domain = config('synapps.apps.urls.domain.'.($isProduction ? 'prod' : 'dev'));
+        $originalAppUrl = config('app.url');
+
+        config([
+            'app.url' => empty($domain)
+                ? $originalAppUrl
+                : ($isProduction ? 'https://' : 'http://').$domain,
+        ]);
+    }
+
+    /**
+     * Force Livewire's CSP-safe mode on for every synapse-based project.
+     *
+     * Livewire 4's `csp_safe` config flag swaps Alpine's evaluator to its
+     * CSP-safe build (no `new Function()`/`eval()`), which is required for
+     * `SecureHeaders::buildContentSecurityPolicy()` to drop `'unsafe-eval'`.
+     * Set unconditionally here (not via `overrideConfigs()`'s
+     * synapps/config/override/*.php mechanism) because that mechanism only
+     * applies when the target config file is already published — this must
+     * be active even on a fresh synapse project that never ran
+     * `vendor:publish --tag=livewire-config`.
+     */
+    private function overrideLivewireCsp(): void
+    {
+        config(['livewire.csp_safe' => true]);
+    }
+
+    /**
      * Deep merge configuration arrays
+     *
+     * @param  array<string, mixed>  $base
+     * @param  array<string, mixed>  $override
+     * @return array<string, mixed>
      */
     private function deepMergeConfig(array $base, array $override): array
     {

@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Http\Middlewares;
 
 use Closure;
 use Illuminate\Foundation\Vite;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class SecureHeaders
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         // Bound before $next() so views rendered during the request can
         // read csp_nonce() and stamp it onto their inline <script> tags.
@@ -53,16 +56,16 @@ class SecureHeaders
      * All seven directives below (script-src, style-src, img-src, font-src,
      * connect-src, frame-src, media-src) are config-driven.
      *
-     * `unsafe-eval` and `style-src 'unsafe-inline'` are kept for now:
-     * Alpine.js's default build needs `unsafe-eval` to evaluate directive
-     * expressions, and removing it requires swapping to Alpine's dedicated
-     * CSP build (`@alpinejs/csp`), which is a separate, higher-risk change.
+     * `script-src` has no `unsafe-eval`: `SynapseServiceProvider::overrideLivewireCsp()`
+     * forces `livewire.csp_safe` on, which swaps Alpine to its CSP-safe
+     * evaluator (no `new Function()`/`eval()`), so it's no longer needed.
+     * `style-src 'unsafe-inline'` is kept for now (deferred hardening).
      */
     protected function buildContentSecurityPolicy(string $nonce): string
     {
         $extra = config('synapps.apps.csp', []);
 
-        $scriptSrc = array_merge(["'self'", "'unsafe-eval'", "'nonce-{$nonce}'"], $extra['script_src'] ?? []);
+        $scriptSrc = array_merge(["'self'", "'nonce-{$nonce}'"], $extra['script_src'] ?? []);
         $styleSrc = array_merge(["'self'", "'unsafe-inline'"], $extra['style_src'] ?? []);
         $imgSrc = array_merge(["'self'", 'data:'], $extra['img_src'] ?? []);
         $fontSrc = array_merge(["'self'", 'data:'], $extra['font_src'] ?? []);

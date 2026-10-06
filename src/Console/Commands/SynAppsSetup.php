@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use stdClass;
+use VmEngine\Synapse\Notifications\NotificationSetup;
 use VmEngine\Synapse\Services\SynapseUtils;
 
 use function Laravel\Prompts\confirm;
@@ -92,6 +95,25 @@ class SynAppsSetup extends Command
             $enabledLanguages = array_map('trim', explode(',', $languagesInput));
         }
 
+        $notificationsEnabled = false;
+        $notificationsLogChannel = null;
+
+        if (NotificationSetup::authInstalled()) {
+            $notificationsEnabled = confirm(
+                label: 'Enable in-app notifications?',
+                default: false,
+            );
+
+            if ($notificationsEnabled) {
+                $notificationsLogChannelInput = text(
+                    label: 'Log channel for skipped/disabled notifications (blank = silent)',
+                );
+                $notificationsLogChannel = $notificationsLogChannelInput === '' ? null : $notificationsLogChannelInput;
+            }
+        } else {
+            $this->components->info('Notifications skipped — install vm-engine/synapps-auth to enable.');
+        }
+
         $appsJson = [
             'app_code' => $appCode,
             'app_name' => $appName,
@@ -111,6 +133,10 @@ class SynAppsSetup extends Command
             'description' => $appDesc,
             'multi_language' => $multiLanguage,
             'enabled_languages' => $enabledLanguages,
+            'notifications' => [
+                'enabled' => $notificationsEnabled,
+                'log_channel' => $notificationsLogChannel,
+            ],
             'dependencies' => [
                 'npm' => [
                     'main' => [
@@ -125,6 +151,7 @@ class SynAppsSetup extends Command
                         '@alpinejs/morph' => '^3.15.0',
                         '@alpinejs/sort' => '^3.15.0',
                         '@fortawesome/fontawesome-free' => '^7.1.0',
+                        '@phosphor-icons/web' => '^2.1.2',
                         'flatpickr' => '^4.6.13',
                         'vite-plugin-static-copy' => '^3.1.4',
                     ],
@@ -192,10 +219,10 @@ class SynAppsSetup extends Command
         if (! file_exists(base_path('synapps'))) {
             mkdir(base_path('synapps'), 0755);
         }
-        if (! SynapseUtils::copyDirectory(
-            realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'synapps'),
-            base_path('synapps')
-        )) {
+
+        $stubsPath = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'synapps');
+
+        if ($stubsPath === false || ! SynapseUtils::copyDirectory($stubsPath, base_path('synapps'))) {
             $this->components->error('Failed to copy synapps folder');
 
             return 1;
@@ -204,17 +231,6 @@ class SynAppsSetup extends Command
         file_put_contents(
             base_path('synapps'.DS.'config'.DS.'apps.json'),
             json_encode($appsJson, JSON_PRETTY_PRINT)
-        );
-
-        $systemFile = synapps_path('config/system.json');
-        $jsonSystem = json_decode(
-            file_get_contents($systemFile),
-            true
-        );
-        $jsonSystem['laravel_key'] = $key;
-        file_put_contents(
-            $systemFile,
-            json_encode($jsonSystem, JSON_PRETTY_PRINT)
         );
 
         // Setup default theme
@@ -226,9 +242,13 @@ class SynAppsSetup extends Command
         ]);
         $this->call('synapps:config');
         $this->call('synapps:link-errors');
-        $this->call('synapps:patch-resources');
-        $this->call('synapps:patch-tests');
+        $this->call('synapps:patch');
         $this->call('synapps:discover');
+
+        if ($notificationsEnabled) {
+            NotificationSetup::ensureMigration($this);
+        }
+
         $this->call('migrate');
 
         $this->components->success('Setup complete.');
@@ -252,7 +272,7 @@ class SynAppsSetup extends Command
         $defaultThemeStub = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'themes'.DS.'default');
         $defaultThemeDest = $themesPath.'/default';
 
-        if (is_dir($defaultThemeStub) && ! is_dir($defaultThemeDest)) {
+        if ($defaultThemeStub !== false && is_dir($defaultThemeStub) && ! is_dir($defaultThemeDest)) {
             if (SynapseUtils::copyDirectory($defaultThemeStub, $defaultThemeDest)) {
                 $this->components->info('Default theme installed.');
             }

@@ -1,25 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services;
 
 use VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
 class SynAppsConfigGenerator
 {
-    public static function generate()
+    /** @return array<string, mixed> */
+    public static function generate(): array
     {
         return (new Builder)->generate();
     }
 
-    public static function config()
+    /** @return array<string, mixed> */
+    public static function config(): array
     {
         if (! file_exists(synapps_path('config/compiled/synapps.json'))) {
             return (new Builder)->generate();
         }
 
-        return json_decode(
-            file_get_contents(synapps_path('config/compiled/synapps.json')),
-            true
-        );
+        return read_json_file(synapps_path('config/compiled/synapps.json'));
     }
 }

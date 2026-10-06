@@ -17,8 +17,6 @@ class TemplateWriter implements WriterInterface
 
     private int $currentRow = 1;
 
-    private ?string $sheetName = null;
-
     public function __construct(
         private readonly string $templatePath,
         private readonly int $startingRow = 1,
@@ -40,7 +38,6 @@ class TemplateWriter implements WriterInterface
         }
 
         $this->outputPath = $outputPath;
-        $this->sheetName = $sheetName;
         $this->spreadsheet = IOFactory::load($this->templatePath);
         $this->currentRow = $this->startingRow;
 

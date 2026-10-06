@@ -11,7 +11,7 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
 
 /**
  * @property int $id
- * @property string $status
+ * @property ExcelTaskStatus $status
  * @property string $file_path
  * @property int|null $user_id
  * @property string|null $reference
@@ -27,11 +27,11 @@ use VmEngine\Synapse\Enums\ExcelTaskStatus;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @method static \Illuminate\Database\Eloquent\Builder where($column, $operator = null, $value = null, $boolean = 'and')
- * @method static \VmEngine\Synapse\Models\ExcelImport create(array $attributes)
- * @method static \VmEngine\Synapse\Models\ExcelImport|null find(int|string $id, array $columns = ['*'])
- * @method static \VmEngine\Synapse\Models\ExcelImport findOrFail(int|string $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Builder forReference(string $reference)
+ * @method static \Illuminate\Database\Eloquent\Builder<\VmEngine\Synapse\Models\ExcelImport> where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \VmEngine\Synapse\Models\ExcelImport create(array<string, mixed> $attributes)
+ * @method static \VmEngine\Synapse\Models\ExcelImport|null find(int|string $id, array<int, string> $columns = ['*'])
+ * @method static \VmEngine\Synapse\Models\ExcelImport findOrFail(int|string $id, array<int, string> $columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder<\VmEngine\Synapse\Models\ExcelImport> forReference(string $reference)
  */
 class ExcelImport extends Model
 {

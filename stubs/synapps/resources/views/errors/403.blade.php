@@ -30,11 +30,26 @@
 
 <body
     class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900"
-    x-data="{ 'darkMode': false }"
-    x-init="darkMode = JSON.parse(localStorage.getItem('darkMode'));
-    $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    x-data="synapseErrorShell()"
     :class="{ 'dark': darkMode === true }"
 >
+    <script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+            Alpine.data('synapseErrorShell', () => ({
+                darkMode: false,
+                init() {
+                    this.darkMode = JSON.parse(localStorage.getItem('darkMode'));
+                    this.$watch('darkMode', (value) => localStorage.setItem('darkMode', JSON.stringify(value)));
+                }
+            }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+    </script>
     <div class="mx-auto max-w-2xl px-4 text-center">
         <div class="mb-8">
             <div class="mb-4 flex justify-center">

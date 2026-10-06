@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // use VmEngine\Synapse\Services\SynapseConfigGenerator;
 // use VmEngine\Synapse\Services\SynAppsConfigGenerator;
 // use Illuminate\Support\Facades\File;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
 use Illuminate\Support\Str;
@@ -7,35 +9,35 @@ use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Modules extends BuilderBase
 {
-    protected $moduleString;
+    protected string $moduleString;
 
-    protected $tmpModulesDev;
+    /** @var array<string, mixed> */
+    protected array $tmpModulesDev;
 
-    protected $configAppOverride;
+    /** @var array<string, mixed> */
+    protected array $configAppOverride;
 
-    protected $configDevOverride;
+    /** @var array<string, mixed> */
+    protected array $configDevOverride;
 
-    public function init()
+    public function init(): void
     {
         $this->loadModulePackageConfig();
         $this->loadSynAppsModuleConfig();
         $this->mergeConfigs();
     }
 
-    private function loadModulePackageConfig()
+    private function loadModulePackageConfig(): void
     {
         $modules = array_merge(
-            glob(synapps_path('modules/*/module.json')),
-            glob(base_path('vendor/*/synmod-*/module.json')),
-            glob(base_path('vendor/*/synmodule-*/module.json')),
-            glob(base_path('vendor/*/synapps-*/module.json')),
+            glob(synapps_path('modules/*/module.json')) ?: [],
+            glob(base_path('vendor/*/synmod-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synmodule-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synapps-*/module.json')) ?: [],
         );
 
         foreach ($modules as $modulePath) {
-            $moduleConfig = json_decode(
-                file_get_contents($modulePath),
-                true
-            );
+            $moduleConfig = read_json_file($modulePath);
 
             if (! isset($moduleConfig['load_priority'])) {
                 $moduleConfig['load_priority'] = 99;
@@ -49,7 +51,7 @@ class Modules extends BuilderBase
             // Check if module is discovered
             if (Str::contains($modulePath, 'synapps'.DS.'modules')) {
                 $mainComposer = file_get_contents(base_path('composer.json'));
-                if (strpos($mainComposer, addcslashes('synapps'.DS.'modules'.DS.$moduleConfig['id'], '\\')) === false) {
+                if ($mainComposer === false || strpos($mainComposer, addcslashes('synapps'.DS.'modules'.DS.$moduleConfig['id'], '\\')) === false) {
                     continue;
                 }
             }
@@ -57,13 +59,15 @@ class Modules extends BuilderBase
             $this->synapps->config['modules'][$moduleConfig['id']] = $moduleConfig;
         }
 
-        $moduleSorted = collect($this->synapps->config['modules'])->sortBy('load_priority');
+        /** @var array<string, mixed> $modulesConfig */
+        $modulesConfig = $this->synapps->config['modules'];
+        $moduleSorted = collect($modulesConfig)->sortBy('load_priority');
         $this->synapps->config['modules']
             = $this->synapps->config['modules_ori']
             = $moduleSorted->toArray();
     }
 
-    private function loadSynAppsModuleConfig()
+    private function loadSynAppsModuleConfig(): void
     {
         if (! file_exists(synapps_path('config/modules.json'))) {
             file_put_contents(synapps_path('config/modules.json'), '{}');
@@ -73,18 +77,20 @@ class Modules extends BuilderBase
             file_put_contents(synapps_path('config/modules.dev.json'), '{}');
         }
 
-        $this->configAppOverride = $this->sanitizeConfigOverrides(json_decode(
-            file_get_contents(synapps_path('config/modules.json')),
-            true
-        ));
+        $this->configAppOverride = $this->sanitizeConfigOverrides(
+            read_json_file(synapps_path('config/modules.json'))
+        );
 
-        $this->configDevOverride = $this->sanitizeConfigOverrides(json_decode(
-            file_get_contents(synapps_path('config/modules.dev.json')),
-            true
-        ));
+        $this->configDevOverride = $this->sanitizeConfigOverrides(
+            read_json_file(synapps_path('config/modules.dev.json'))
+        );
     }
 
-    private function sanitizeConfigOverrides($configs)
+    /**
+     * @param  array<string, mixed>  $configs
+     * @return array<string, mixed>
+     */
+    private function sanitizeConfigOverrides(array $configs): array
     {
         $protectedKeys = $this->synapps->mainConfig['protected_module_keys'];
         foreach ($configs as $id => $config) {
@@ -97,7 +103,7 @@ class Modules extends BuilderBase
         return $configs;
     }
 
-    private function mergeConfigs()
+    private function mergeConfigs(): void
     {
         $this->synapps->config['modules'] = array_replace_recursive(
             $this->synapps->config['modules'],
@@ -106,7 +112,7 @@ class Modules extends BuilderBase
         );
     }
 
-    public function finalize()
+    public function finalize(): void
     {
         file_put_contents(
             synapps_path('config/compiled/modules.json'),

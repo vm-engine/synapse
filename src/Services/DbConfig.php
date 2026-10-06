@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services;
 
 use VmEngine\Synapse\Models\Config;
 
 class DbConfig
 {
+    /** @var array<string, array<string, mixed>> */
     private array $cache = [];
 
     public function get(string $group, string $key, mixed $default = null, bool $force = false): mixed

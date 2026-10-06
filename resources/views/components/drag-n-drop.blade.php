@@ -21,144 +21,8 @@
 @endphp
 
 <div
-    class="w-full"
-    x-data="{
-        fileName: '',
-        fileSize: '',
-        previewUrl: null,
-        isDragging: false,
-        error: null,
-        accept: @js($acceptTypes),
-        maxSize: @js($maxSize),
-        maxWidth: @js($maxWidth),
-        maxHeight: @js($maxHeight),
-    
-        handleFiles(files) {
-            if (files.length === 0) return;
-    
-            const file = files[0];
-            this.error = null;
-    
-            // Validate file type
-            if (this.accept && !this.accept.split(',').some(type => file.type === type.trim())) {
-                this.error = 'Invalid file type. Accepted types: ' + @js($acceptExtensions);
-                this.clearFileInput();
-                return;
-            }
-    
-            // Validate file size
-            const fileSizeKB = Math.round(file.size / 1024);
-            if (this.maxSize && fileSizeKB > this.maxSize) {
-                this.error = `File size exceeds maximum allowed size of ${this.maxSize}KB (${Math.round(this.maxSize / 1024)}MB)`;
-                this.clearFileInput();
-                return;
-            }
-    
-            // Set preview immediately - dimension validation will be done server-side
-            this.setFileInfo(file);
-        },
-    
-        setFileInfo(file) {
-            this.fileName = file.name;
-            this.fileSize = this.formatFileSize(file.size);
-    
-            // Show preview for images
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.previewUrl = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        },
-    
-        formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        },
-    
-        clearFileInput() {
-            if (this.$refs.fileInput) {
-                this.$refs.fileInput.value = '';
-            }
-    
-            @if($wireModel)
-            this.$wire.set('{{ $wireModel }}', null);
-            @endif
-        },
-    
-        removeFile() {
-            this.fileName = '';
-            this.fileSize = '';
-            this.previewUrl = null;
-            this.error = null;
-            this.clearFileInput();
-        },
-    
-        triggerFileInput() {
-            if (this.$refs.fileInput) {
-                this.$refs.fileInput.click();
-            }
-        },
-    
-        // Handle drag-and-drop for Livewire mode
-        handleDrop(event) {
-            const files = event.dataTransfer.files;
-    
-            if (files.length > 0 && this.$refs.fileInput) {
-                // Set the files to the input element so Livewire can pick them up
-                this.$refs.fileInput.files = files;
-    
-                // Manually trigger change event for Livewire to detect
-                const changeEvent = new Event('change', { bubbles: true });
-                this.$refs.fileInput.dispatchEvent(changeEvent);
-            }
-        },
-    
-        // Livewire upload event handlers
-        handleLivewireUploadStart() {
-            this.error = null;
-    
-            // Get file info from the input
-            if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
-                const file = this.$refs.fileInput.files[0];
-                this.fileName = file.name;
-                this.fileSize = this.formatFileSize(file.size);
-    
-                // Show preview for images
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.previewUrl = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-        },
-    
-        handleLivewireUploadFinish(event) {
-            // Upload completed successfully
-        },
-    
-        handleLivewireUploadError() {
-            this.error = 'Upload failed. Please try again.';
-            this.removeFile();
-        }
-    }"
-    x-init="// Watch for wire:model changes to clear preview
-    @if($wireModel)
-    $watch('$wire.{{ $wireModel }}', value => {
-        if (value === null || value === '') {
-            // Only clear the UI, don't touch the file input during upload
-            this.fileName = '';
-            this.fileSize = '';
-            this.previewUrl = null;
-        }
-    });
-    @endif"
+    class="syn-drag-drop"
+    x-data="synapseDragDrop({{ json_encode(['accept' => $acceptTypes, 'acceptExtensions' => $acceptExtensions, 'maxSize' => $maxSize, 'maxWidth' => $maxWidth, 'maxHeight' => $maxHeight, 'wireModel' => $wireModel ?: null]) }})"
     x-on:dragndrop-clear-input.window="removeFile()"
 >
     <!-- Hidden File Input -->
@@ -178,27 +42,27 @@
 
     <!-- Dropzone Area -->
     <div
-        class="relative cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors duration-200 hover:border-gray-400"
+        class="syn-drag-drop-zone"
         @click="triggerFileInput()"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
-        @drop.prevent="isDragging = false; @if ($wireModel) handleDrop($event) @else handleFiles($event.dataTransfer.files) @endif"
-        :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'"
+        @drop.prevent="onDrop($event)"
+        :class="isDragging ? 'syn-drag-drop-zone-active' : 'syn-drag-drop-zone-idle'"
     >
         <!-- Preview Area -->
         <div
-            class="mb-4"
+            class="syn-drag-drop-preview"
             x-show="previewUrl && {{ $preview ? 'true' : 'false' }}"
             x-cloak
         >
-            <div class="relative mx-auto inline-block">
+            <div class="syn-drag-drop-preview-wrap">
                 <img
-                    class="max-h-48 rounded-lg shadow-md"
+                    class="syn-drag-drop-preview-img"
                     alt="Preview"
                     :src="previewUrl"
                 >
                 <button
-                    class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600"
+                    class="syn-drag-drop-remove-btn"
                     type="button"
                     @click.stop="removeFile()"
                 >
@@ -218,21 +82,21 @@
                 </button>
             </div>
             <p
-                class="mt-2 text-sm text-gray-600"
+                class="syn-drag-drop-filename"
                 x-text="fileName"
             ></p>
             <p
-                class="text-xs text-gray-500"
+                class="syn-drag-drop-filesize"
                 x-text="fileSize"
             ></p>
         </div>
 
         <!-- Upload Icon and Text -->
         <div x-show="!previewUrl">
-            <div class="mb-6 flex justify-center">
-                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+            <div class="syn-drag-drop-empty-icon-wrap">
+                <div class="syn-drag-drop-empty-icon-circle">
                     <svg
-                        class="h-8 w-8 text-gray-400"
+                        class="syn-drag-drop-empty-icon"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -248,31 +112,31 @@
                 </div>
             </div>
 
-            <h4 class="mb-3 text-xl font-semibold text-gray-700">{{ $label }}</h4>
+            <h4 class="syn-drag-drop-label">{{ $label }}</h4>
 
-            <p class="mx-auto mb-5 block max-w-sm text-sm text-gray-500">
+            <p class="syn-drag-drop-desc">
                 {{ $description }}
             </p>
 
-            <span class="text-sm font-medium text-blue-600 underline hover:text-blue-700">
+            <span class="syn-drag-drop-browse">
                 {{ $browseText }}
             </span>
 
             <!-- File Info (when file selected but no preview) -->
             <div
-                class="mt-4"
+                class="syn-drag-drop-file-info"
                 x-show="fileName && !previewUrl"
             >
                 <p
-                    class="text-sm font-medium text-gray-700"
+                    class="syn-drag-drop-file-name"
                     x-text="fileName"
                 ></p>
                 <p
-                    class="text-xs text-gray-500"
+                    class="syn-drag-drop-file-size"
                     x-text="fileSize"
                 ></p>
                 <button
-                    class="mt-2 text-xs text-red-600 hover:text-red-700"
+                    class="syn-drag-drop-remove-link"
                     type="button"
                     @click.stop="removeFile()"
                 >
@@ -284,19 +148,14 @@
 
     <!-- Error Message -->
     <div
-        class="mt-2 text-sm text-red-600"
+        class="syn-drag-drop-error"
         x-show="error"
         x-cloak
         x-text="error"
     ></div>
 
     @if ($error)
-        <p class="mt-2 text-sm text-red-600">{{ $error }}</p>
+        <p class="syn-drag-drop-error">{{ $error }}</p>
     @endif
 </div>
 
-<style>
-    [x-cloak] {
-        display: none !important;
-    }
-</style>

@@ -2,27 +2,7 @@
 <div
     class="fixed inset-0 z-[9999] bg-gray-900/50 dark:bg-gray-900/80 flex justify-center items-center"
     style="display: none;"
-    x-data="{
-        loading: false,
-        init() {
-            // Listen to Livewire request lifecycle
-            document.addEventListener('livewire:navigating', () => {
-                this.loading = true;
-            });
-
-            document.addEventListener('livewire:navigated', () => {
-                this.loading = false;
-            });
-
-            // For wire:click and other actions - show/hide on request lifecycle
-            Livewire.interceptMessage(({ onSuccess, onError, onFailure }) => {
-                this.loading = true;
-                onSuccess(() => { this.loading = false; });
-                onError(() => { this.loading = false; });
-                onFailure(() => { this.loading = false; });
-            });
-        }
-    }"
+    x-data="globalLoader()"
     x-show="loading"
     x-cloak
 >
@@ -54,3 +34,43 @@
     </svg>
     <span class="sr-only">Loading...</span>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('globalLoader', () => ({
+            loading: false,
+            init() {
+                document.addEventListener('livewire:navigating', () => {
+                    this.loading = true;
+                });
+
+                document.addEventListener('livewire:navigated', () => {
+                    this.loading = false;
+                });
+
+                Livewire.interceptMessage(({
+                    onSuccess,
+                    onError,
+                    onFailure
+                }) => {
+                    this.loading = true;
+                    onSuccess(() => {
+                        this.loading = false;
+                    });
+                    onError(() => {
+                        this.loading = false;
+                    });
+                    onFailure(() => {
+                        this.loading = false;
+                    });
+                });
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

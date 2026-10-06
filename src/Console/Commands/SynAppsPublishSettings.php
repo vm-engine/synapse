@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -24,7 +26,7 @@ class SynAppsPublishSettings extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         if (! class_exists('\\VmEngine\\SynAuth\\SynAuthServiceProvider')) {
             $this->components->error('SynAuth is required for this module');
@@ -32,8 +34,16 @@ class SynAppsPublishSettings extends Command
             return 1;
         }
 
+        $stubsPath = realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'modules'.DS.'settings');
+
+        if ($stubsPath === false) {
+            $this->components->error('Settings stub directory not found.');
+
+            return 1;
+        }
+
         SynapseUtils::copyDirectory(
-            realpath(__DIR__.DS.'..'.DS.'..'.DS.'..'.DS.'stubs'.DS.'modules'.DS.'settings'),
+            $stubsPath,
             synapps_path('modules'.DS.'settings')
         );
         $this->components->info('Settings module has been published');

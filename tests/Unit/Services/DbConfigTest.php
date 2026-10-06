@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use VmEngine\Synapse\Models\Config;
 use VmEngine\Synapse\Services\DbConfig;
 

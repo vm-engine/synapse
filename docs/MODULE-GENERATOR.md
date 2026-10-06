@@ -4,7 +4,7 @@ Complete Laravel-style code generator for Synapse modular architecture.
 
 ## Features
 
-- ✅ **31 Artisan Commands** - Complete Laravel make command coverage + unified `synmod-make`
+- ✅ **34 Component Types** - Complete Laravel make command coverage, generated through the unified `synapps:make` command
 - ✅ **Dual Module Support** - Directory modules (`synapps/modules/`) and package modules (`vendor/*/synmod-*`)
 - ✅ **Unified Interface** - `synmod-make` command with interactive menu for all component types
 - ✅ **Smart Namespacing** - Auto-detects module type and generates correct namespaces
@@ -32,6 +32,33 @@ The module generator is included with Synapse. No additional installation requir
 # Verify commands are available
 php artisan list synapps:make
 ```
+
+---
+
+## Unified Command
+
+`synapps:make` is the primary entry point for `synapps/modules/` — it always
+targets a directory module and takes the component type and module name as
+required positional arguments, plus the component name (required for every
+type except `module`, since a module has no separate name to give):
+
+```bash
+php artisan synapps:make model blog Post
+
+# name is optional only for module
+php artisan synapps:make module blog
+```
+
+Common options (`--path`, `--mfc`, `--sfc`, `--class`, `--inline`, `--form`,
+`--test`, `--discover`) are forwarded to the underlying command where they
+apply (the livewire-only ones are ignored for other types). For a
+type-specific option not in that list (e.g. `synapps:make-observer`'s
+`--model=`, or `synapps:make-module`'s `--author=`), call the underlying
+`synapps:make-{type}` command directly — it still works, it's just no longer
+listed in `artisan list`.
+
+For package-development workflows (`vendor/*/synmod-*`), use `synmod-make`
+instead — same idea, different intended audience.
 
 ---
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\Upgrade\Rules;
 
 use VmEngine\Synapse\Services\Upgrade\AbstractUpgradeRule;

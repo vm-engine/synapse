@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Composer\Semver\Comparator;
@@ -21,27 +23,30 @@ class SynAppsDiscover extends Command
      */
     protected $description = 'Discover modules and dependencies, update composer.json/package.json autoload entries';
 
-    protected $packageJson = [];
+    /** @var array<string, mixed> */
+    protected array $packageJson = [];
 
-    protected $composerJson = [];
+    /** @var array<string, mixed> */
+    protected array $composerJson = [];
 
-    protected $namespaces = [];
+    /** @var array<string, string> */
+    protected array $namespaces = [];
 
-    protected $npmDeps = 0;
+    protected int $npmDeps = 0;
 
-    protected $composerDeps = 0;
+    protected int $composerDeps = 0;
 
-    protected $npmDevDeps = 0;
+    protected int $npmDevDeps = 0;
 
-    protected $composerDevDeps = 0;
+    protected int $composerDevDeps = 0;
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
-        $this->packageJson = json_decode(file_get_contents(base_path('package.json')), true);
-        $this->composerJson = json_decode(file_get_contents(base_path('composer.json')), true);
+        $this->packageJson = read_json_file(base_path('package.json'));
+        $this->composerJson = read_json_file(base_path('composer.json'));
 
         $this->discoverSynapseModules();
 
@@ -63,12 +68,12 @@ class SynAppsDiscover extends Command
         }
     }
 
-    private function discoverSynapseModules()
+    private function discoverSynapseModules(): void
     {
-        $moduleConfigPaths = glob(synapps_path('modules'.DS.'*'.DS.'module.json'));
+        $moduleConfigPaths = glob(synapps_path('modules'.DS.'*'.DS.'module.json')) ?: [];
 
         foreach ($moduleConfigPaths as $moduleConfigPath) {
-            $moduleConfig = json_decode(file_get_contents($moduleConfigPath), true);
+            $moduleConfig = read_json_file($moduleConfigPath);
             $modulePath = ltrim(str_replace(
                 base_path(),
                 '',
@@ -85,35 +90,35 @@ class SynAppsDiscover extends Command
         }
     }
 
-    private function discoverModuleDeps()
+    private function discoverModuleDeps(): void
     {
         $modulePackages = array_merge(
-            glob(base_path('vendor/*/synmod-*/module.json')),
-            glob(base_path('vendor/*/synmodule-*/module.json')),
-            glob(base_path('vendor/*/synapps-*/module.json')),
+            glob(base_path('vendor/*/synmod-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synmodule-*/module.json')) ?: [],
+            glob(base_path('vendor/*/synapps-*/module.json')) ?: [],
         );
         foreach ($modulePackages as $packageConfigPath) {
-            $moduleConfig = json_decode(file_get_contents($packageConfigPath), true);
+            $moduleConfig = read_json_file($packageConfigPath);
 
             $this->compareDependencies($moduleConfig['dependencies']);
         }
     }
 
-    private function discoverSynAppsDeps()
+    private function discoverSynAppsDeps(): void
     {
-        $appsConfig = json_decode(file_get_contents(synapps_path('config/apps.json')), true);
+        $appsConfig = read_json_file(synapps_path('config/apps.json'));
         $this->compareDependencies($appsConfig['dependencies']);
 
         if (! file_exists(synapps_path('config/apps.dev.json'))) {
             file_put_contents(synapps_path('config/apps.dev.json'), '{}');
         }
-        $appsDevConfig = json_decode(file_get_contents(synapps_path('config/apps.dev.json')), true);
+        $appsDevConfig = read_json_file(synapps_path('config/apps.dev.json'));
         if (isset($appsDevConfig['dependencies'])) {
             $this->compareDependencies($appsDevConfig['dependencies']);
         }
     }
 
-    private function informDiscoveries()
+    private function informDiscoveries(): void
     {
         $this->components->info('Added '.count($this->namespaces).' Namespaces');
         if ($this->npmDeps) {
@@ -130,7 +135,7 @@ class SynAppsDiscover extends Command
         }
     }
 
-    private function updateComposer()
+    private function updateComposer(): void
     {
         // Clean up deleted module namespaces
         $existingAutoload = $this->composerJson['autoload']['psr-4'] ?? [];
@@ -183,7 +188,7 @@ class SynAppsDiscover extends Command
         exec('composer dump-autoload');
     }
 
-    private function updateNpm()
+    private function updateNpm(): void
     {
         if (empty($this->packageJson['dependencies'])) {
             $this->packageJson['dependencies'] = new \stdClass;
@@ -203,6 +208,7 @@ class SynAppsDiscover extends Command
         }
     }
 
+    /** @param  array<string, mixed>  $moduleDependecies */
     private function compareDependencies(array $moduleDependecies): void
     {
         $this->compareDeps('packageJson', 'dependencies', $moduleDependecies['npm']['main'] ?? [], 'npmDeps');
@@ -211,6 +217,7 @@ class SynAppsDiscover extends Command
         $this->compareDeps('composerJson', 'require-dev', $moduleDependecies['composer']['dev'] ?? [], 'composerDevDeps');
     }
 
+    /** @param  array<string, mixed>  $toLoop */
     private function compareDeps(
         string $thisVar,
         string $thisVarKey,

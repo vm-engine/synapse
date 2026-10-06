@@ -95,8 +95,8 @@ DbConfig::set('app.site_name', 'My Site');
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 12.x
+- PHP 8.5+
+- Laravel 13.x
 - Livewire 4.x
 - Composer
 - Node.js & NPM
@@ -115,11 +115,12 @@ php artisan synapps:discover
 # Regenerate configs
 php artisan synapps:config
 
-# Generate module components
-php artisan synapps:make-module blog --author="Your Name"
-php artisan synapps:make-model blog Post -mfs
-php artisan synapps:make-controller blog PostController --resource
-php artisan synapps:make-livewire blog PostList
+# Generate module components (unified command)
+php artisan synapps:make module blog --author="Your Name"
+php artisan synapps:make model blog Post -mfs
+php artisan synapps:make controller blog PostController --resource
+php artisan synapps:make livewire blog PostList
+# ...or the individual synapps:make-{type} commands still work the same way
 
 # Manage database config
 php artisan synapse:db-config app.maintenance_mode true
@@ -171,17 +172,189 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-checkboxes name="permissions" :options="$opts" :model="$selected" />
 <x-synapse-datepicker />
 <x-synapse-currency currency="$" />
+<x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q" />
+<x-synapse-adv-select wire-model="status" :options="$statusOptions" />   {{-- options: [["value" => .., "label" => ..]] --}}
+<x-synapse-toggler label="Active" wire:model.live="isActive" />
 
 <!-- File upload -->
 <x-synapse-drag-n-drop wireModel="avatar" />          {{-- single image, with preview --}}
 <x-synapse-file-drop wire-model="docs" multiple       {{-- multi-file, any type --}}
     :max-count="3" :allowed-types="['pdf','jpg']" />
 
+<!-- Layout components -->
+<x-synapse-panel title="Clients">...</x-synapse-panel>
+<x-synapse-stat-tile icon="ph ph-invoice" color="blue" label="Total Invoices" value="2,613" />
+<x-synapse-badge color="success">Active</x-synapse-badge>
+
+<!-- List helpers -->
+<x-synapse-sort-icon field="name" :sort-field="$sortField" :sort-direction="$sortDirection" />
+<x-synapse-per-page-selector :paginator="$items" />   {{-- binds $perPage, 10/15/25/50 --}}
+<x-synapse-excel-export-button mode="sync" action="exportToExcel" label="Export" exporting-label="Exporting…" />
+
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
 <x-synapse-drawer title="Settings">...</x-synapse-drawer>
+<x-synapse-modal name="edit">...</x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
+<x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />
 ```
+
+### Icons
+
+Synapse-provided components (badge, panel, search-box, confirm-dialog, ...) accept a plain icon *class string*, so any icon font works — pick one and pass its class:
+
+```blade
+<x-synapse-badge color="success" icon="ph ph-check">Verified</x-synapse-badge>
+```
+
+**Phosphor Icons** (`@phosphor-icons/web`, loaded from `node_modules` — no CDN) is the recommended set: 9,000+ icons, and — unlike FontAwesome Free — every icon has a real glyph in every weight it ships. Classes look like `ph ph-<name>` (e.g. `ph ph-house`, `ph ph-trash`, `ph ph-check-circle`). Only the `regular` weight is imported by default (`@import "@phosphor-icons/web/regular";` in `synapps.css`) to keep the CSS bundle small; to add another weight (`bold`, `fill`, `duotone`, `light`, `thin`), add its import next to it and use the matching class prefix documented at [phosphoricons.com](https://phosphoricons.com).
+
+**FontAwesome Free** (`@fortawesome/fontawesome-free`) remains installed and available as an alternative — classes look like `fa-solid fa-<name>`. Watch out: FA Free ships one font file per style (solid/regular/brands), and **most icons only have a glyph in the solid font** — `fa-regular`/`fa-light`/`fa-duotone` render nothing for the vast majority of icons in the free tier (those weights are Pro-only per-icon). Stick to `fa-solid` unless you've confirmed the specific icon has a free non-solid glyph.
+
+## Notifications
+
+In-app notifications on top of Laravel's stock `notifications` table — no schema changes. Disabled by default; enable with `php artisan synotif:setup` (see [docs/COMMANDS.md](docs/COMMANDS.md#synotifsetup)).
+
+**Sending:**
+
+```php
+use VmEngine\Synapse\Notifications\Notify;
+
+Notify::make(new InvoicePaid($invoice))
+    ->toUsers($user)                        // User model, user id, or an iterable mix of either
+    ->toRoles('admin', except: [$userA])    // requires vm-engine/synapps-auth; string|array of slugs
+    ->withToastr()                          // pop a toast when the recipient's bell picks it up
+    ->queued()                              // resolve targets + send in a queued job, not inline
+    ->send();
+```
+
+`send()` silently no-ops when notifications are disabled (config flag off, or the `notifications` table doesn't exist), optionally logging the attempt to `synapps.apps.notifications.log_channel`. An unknown role slug or a user id that doesn't resolve is logged as a warning and skipped — it never throws. `toRoles()` throws only when `vm-engine/synapps-auth` itself isn't installed, since that's a structural misconfiguration, not a data state.
+
+**Data shape convention** — every notification class's `toArray()`/`toDatabase()` should return:
+
+```php
+public function toArray(object $notifiable): array
+{
+    return [
+        'title' => 'notifications.invoice_paid.title',   // translation key, not a rendered string
+        'message' => 'notifications.invoice_paid.message',
+        'params' => ['invoice' => $this->invoice->number], // shared by title + message
+        'icon' => 'fa-solid fa-file-invoice',
+        'url' => route('invoices.show', $this->invoice),
+        'toastr' => $this->toastr ?? false,               // set via HasToastrFlag + Notify::withToastr()
+    ];
+}
+```
+
+Title/message are rendered with `__($key, $params)` **at display time**, using the viewer's current locale — the same stored row renders correctly for every recipient regardless of language. To make `withToastr()` work, the notification class uses the provided trait:
+
+```php
+use VmEngine\Synapse\Notifications\Concerns\HasToastrFlag;
+
+class InvoicePaid extends Notification
+{
+    use HasToastrFlag; // exposes $this->toastr, set by Notify::withToastr()
+}
+```
+
+**UI:** embed once in your layout —
+
+```blade
+<livewire:synotif::bell />
+<x-synapse::notification-panel />
+```
+
+`synotif::bell` renders the badge + dropdown (latest N, polling every 15s for new toastr-flagged notifications). `notification-panel` wraps the paginated "view all" list in `<x-synapse::modal>`; it's a **separate** embed rather than nested inside the bell because Livewire can't nest a namespaced child component (`synotif::list`) inside another Livewire component's own template.
+
+**Config** (`synapps/config/apps.json` → `notifications` block, compiled to `config('synapps.apps.notifications.*')`):
+
+```json
+{
+    "notifications": {
+        "enabled": true,
+        "log_channel": null,
+        "dropdown_limit": 5,
+        "modal_per_page": 15
+    }
+}
+```
+
+`enabled`/`log_channel` are set interactively by `synotif:setup` (or during `synapps:setup`/`synapps:reconfig`). `dropdown_limit`/`modal_per_page` are tuning knobs — edit `apps.json` directly and run `php artisan synapps:config` to change them.
+
+## Global Search
+
+Opt-in backend command palette (Ctrl/⌘+K) over pages and module content.
+
+### Enable
+
+```bash
+php artisan synapps:searchable-setup
+```
+
+Creates the `searchables` table and imports every routed backend nav item plus each module's `searchables` block, once per enabled language. Re-run after installing/updating a module or adding a language. Content rows are never touched. Until setup runs, the whole API is a silent no-op and the palette renders nothing.
+
+Existing apps: add `<livewire:synsearch::palette />` to `synapps/resources/views/components/layouts/partials/header.blade.php` (next to the notification bell) and copy the `.synsearch-*` rules from the stub `synapse-components.css`.
+
+### Extra pages via `module.json`
+
+```json
+"searchables": {
+    "create": {
+        "name": "__example::search.create",
+        "description": "__example::search.create_desc",
+        "route": "example.create",
+        "icon": "ph ph-plus",
+        "acl": "example.manage",
+        "keywords": "new add"
+    }
+}
+```
+
+Needs `name` and `route` (backend-relative, like nav) or `url`. Run `synapps:config` then `synapps:searchable-setup`.
+
+### Content from code
+
+```php
+use VmEngine\Synapse\Facades\SynSearchable;
+
+// on save — plain string = all locales; ['en' => ..., 'id' => ...] = per locale
+SynSearchable::put(
+    source: 'content:example.item',
+    key: (string) $item->id,
+    title: $item->name,
+    description: $item->summary,
+    route: 'example.edit',
+    routeParams: ['id' => $item->id],
+    icon: 'ph ph-box',
+    acl: 'example.manage',
+    keywords: $item->code,
+);
+
+// on delete
+SynSearchable::forget('content:example.item', (string) $item->id);
+
+// bulk (prefix match), e.g. module uninstall
+SynSearchable::forgetSource('content:example');
+
+// query directly (ACL + locale filtered)
+synsearchable()->search('acme', limit: 10);
+```
+
+Sources must start with `content:`; `nav` and `module:*` belong to setup.
+
+```bash
+php artisan synapps:searchable-forget content:example   # asks first; --force to skip
+```
+
+### Engine
+
+Default is Eloquent `LIKE`. To use Laravel Scout (Typesense, Meilisearch, …) install and configure Scout, then set in `synapps/config/apps.json`:
+
+```json
+"searchable": { "engine": "scout" }
+```
+
+If Scout isn't installed, or the engine throws, search falls back to Eloquent.
 
 ## Support
 

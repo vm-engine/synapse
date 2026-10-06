@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator;
 
 class BuilderBase
@@ -11,13 +13,14 @@ class BuilderBase
         $this->synapps = $synapps;
     }
 
-    public function init() {}
+    public function init(): void {}
 
-    public function preLoop() {}
+    public function preLoop(): void {}
 
-    public function loop(string $packageNamespace, array $packageConfig) {}
+    /** @param  array<string, mixed>  $packageConfig */
+    public function loop(string $packageNamespace, array $packageConfig): void {}
 
-    public function postLoop() {}
+    public function postLoop(): void {}
 
-    public function finalize() {}
+    public function finalize(): void {}
 }

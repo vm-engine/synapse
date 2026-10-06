@@ -1,84 +1,71 @@
-# Member4VM Theme
+# Application Theme
 
-Modern, professional Laravel theme with glassmorphism effects and comprehensive dark mode support.
+Glassmorphism theme for Synapse web applications: dark, collapsible sidebar admin (`app`), split-screen auth (`guest`) and public website (`frontend`) layouts. Tailwind v4, Alpine.js, class-based dark mode.
 
-## Features
+## File Structure
 
-- **Glassmorphism Design** - Modern glass effects with backdrop blur
-- **Dark Mode** - Full dark mode support with smooth transitions
-- **Responsive** - Mobile-first design, works on all devices
-- **Accessible** - WCAG 2.1 AA compliant
-- **Performance** - Optimized animations and transitions
-- **OKLCH Colors** - Modern color science for consistent appearance
+```
+application/
+├── theme.json              # Metadata + CDN css/js/headers per layout
+├── assets/images/          # logo.svg, logo-dark.svg
+├── css/
+│   ├── theme-base.css      # @theme tokens (primary-*, status colors), typography, glass utilities
+│   ├── theme-app.css       # Sidebar, header, admin page styles
+│   ├── theme-guest.css
+│   └── theme-frontend.css  # Public site shell (fe-*)
+├── js/
+│   ├── theme-base.js       # applicationThemeShell (guest/frontend dark mode), dropdown, modal, tabs, collapsible, tooltip, formValidator
+│   ├── theme-app.js        # applicationAppShell, applicationSidebarSubmenu, Cmd/Ctrl+B
+│   ├── theme-guest.js
+│   └── theme-frontend.js   # frontendHeader (scroll shadow + mobile menu)
+└── layouts/
+    ├── app.blade.php
+    ├── guest.blade.php
+    ├── frontend.blade.php
+    └── components/         # sidebar-menu, header-nav, dark-mode-toggle, card, button, form-input
+```
 
-## Layouts
+Layouts load CSS/JS with `@themeStyles('<layout>')` / `@themeScripts('<layout>')`. Never add `@vite()` to a layout.
 
-### Guest Layout
-- Split-screen design (desktop)
-- Left: Branded banner with logo and features
-- Right: Authentication forms with glass card effect
-- Stacks vertically on mobile
+## Colors & Fonts
 
-### App Layout
-- Fixed darker sidebar (independently scrollable)
-- Collapsible sidebar
-- Header with search, notifications, dark mode toggle
-- Responsive with mobile overlay
+`css/theme-base.css` `@theme` defines `--color-primary-50…900` (OKLCH, hue 240) and `--color-success|warning|danger|info`. Change the hue to rebrand.
 
-## Color Palette
+Body text is Open Sans, headings Poppins, loaded from `theme.json` `headers.all`. To self-host them:
 
-**Primary (Professional Blue):**
-- 500: `oklch(0.55 0.20 240)` - Main brand color
+```bash
+php artisan synapps:vendor-fonts application
+npm run build && php artisan synapps:config
+```
 
-**Status Colors:**
-- Success: `oklch(0.65 0.18 145)` - Green
-- Warning: `oklch(0.75 0.15 85)` - Amber
-- Danger: `oklch(0.60 0.22 25)` - Red
+## Dark Mode
 
-## Typography
+Class-based: `applicationAppShell` (admin) and `applicationThemeShell` (auth + public) set `.dark` on `<html>` from the persisted `darkMode` value. The default theme uses the same key, so the choice carries across layouts and theme switches.
 
-**Modern Professional Pairing** (UI/UX Pro Max Recommendation)
+## Admin Header
 
-- **Headings:** Poppins (weights: 400, 500, 600, 700)
-- **Body:** Open Sans (weights: 300, 400, 500, 600, 700)
-- **Code:** JetBrains Mono
+Global search (`<livewire:synsearch::palette/>`, Cmd/Ctrl+K), notifications (`<livewire:synotif::bell/>` + `<x-synapse::notification-panel/>`), dark mode toggle and user menu. Toasts use `<x-synapse-toastr/>`, so `$this->dispatch('notify', …)` from any module shows up. Cmd/Ctrl+B toggles the sidebar.
 
-This pairing creates strong visual hierarchy while maintaining excellent readability.
+## Frontend Layout Contract
 
-## Components
+| Input | How |
+| --- | --- |
+| Page title | `$title` — Livewire `->title('…')` |
+| Meta description | `$description` — Livewire `->layoutData(['description' => '…'])`; defaults to `synapps.apps.description` |
+| Head tags (hreflang, Open Graph, canonical) | `@push('head')` |
+| Header navigation | `@push('nav')` — inline on desktop, in the mobile menu below `lg` |
+| Extra styles / scripts | `@push('styles')` / `@push('scripts')` |
 
-Reusable Blade components:
-- `card` - Glass cards with variants
-- `button` - Button with variants (primary, secondary, danger, ghost)
-- `form-input` - Form input with label, hint, error
-- `dark-mode-toggle` - Theme switcher
-- `sidebar-menu` - Sidebar navigation
-- `header-nav` - Header navigation
+UI strings are JSON translation keys (`Sign in`, `Dashboard`, `Sign out`, `Your Profile`, `Toggle sidebar`, `All rights reserved.`, …). Translate them in `lang/{locale}.json`.
 
-## Keyboard Shortcuts
+## Activate
 
-- `Cmd/Ctrl + K` - Focus search
-- `Cmd/Ctrl + B` - Toggle sidebar
-- `Cmd/Ctrl + D` - Toggle dark mode
+```bash
+php artisan synapps:copy-themes application
+# set "themes.active": "application" in synapps/config/apps.json
+php artisan synapps:config
+php artisan synapps:patch layouts
+npm run build
+```
 
-## Customization
-
-Edit `css/theme.css` to customize:
-- Colors (OKLCH values)
-- Spacing
-- Border radius
-- Animations
-
-## Browser Support
-
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-
-## Accessibility
-
-- Keyboard navigation
-- Screen reader friendly
-- Focus indicators
-- ARIA labels
-- Reduced motion support
+See `packages/synapse/docs/THEMES.md` for the full theming guide.

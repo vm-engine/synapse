@@ -12,8 +12,6 @@ This feature works in all JSON configuration files:
 
 - `synapps/config/apps.json`
 - `synapps/config/apps.dev.json`
-- `synapps/config/system.json`
-- `synapps/config/system.dev.json`
 - `synapps/config/modules.json`
 - `synapps/config/modules.dev.json`
 - `module.json` (in any module)
@@ -94,25 +92,6 @@ Results in compiled config:
         "stripe_secret": "env::STRIPE_SECRET",
         "paypal_client_id": "env::PAYPAL_CLIENT_ID",
         "paypal_secret": "env::PAYPAL_SECRET"
-    }
-}
-```
-
-#### system.json
-
-```json
-{
-    "database": {
-        "host": "env::DB_HOST",
-        "port": "env::DB_PORT",
-        "database": "env::DB_DATABASE",
-        "username": "env::DB_USERNAME",
-        "password": "env::DB_PASSWORD"
-    },
-    "mail": {
-        "host": "env::MAIL_HOST",
-        "port": "env::MAIL_PORT",
-        "from_address": "env::MAIL_FROM_ADDRESS"
     }
 }
 ```
@@ -219,9 +198,6 @@ $appName = config('synapps.apps.app_name');
 
 // From module.json config section
 $stripeKey = config('synapps.modules.payment.config.stripe_key');
-
-// From system.json
-$dbHost = config('synapps.system.database.host');
 ```
 
 ---
@@ -417,6 +393,8 @@ return [
 
 ## Configuration Files Reference
 
+> **`system.json` / `system.dev.json` were removed in v3.0.0** (dead weight — nothing in the ecosystem read most of its keys). See [UPGRADE.md](../UPGRADE.md#upgrading-to-v300) for the migration steps if you relied on `synapps.system.public_path` or a custom `binding` key.
+
 ### Source Configuration Files
 
 Located in `synapps/config/`:
@@ -425,8 +403,6 @@ Located in `synapps/config/`:
 |------|---------|------------------|
 | `apps.json` | Application-level configuration | ✅ Yes |
 | `apps.dev.json` | Development overrides for apps.json | ✅ Yes |
-| `system.json` | System-level configuration | ✅ Yes |
-| `system.dev.json` | Development overrides for system.json | ✅ Yes |
 | `modules.json` | Module overrides and settings | ✅ Yes |
 | `modules.dev.json` | Development overrides for modules.json | ✅ Yes |
 | `config.json` | Protection rules for configuration | ❌ No |
@@ -438,7 +414,6 @@ Generated in `synapps/config/compiled/`:
 | File | Purpose |
 |------|---------|
 | `apps.json` | Compiled application configuration |
-| `system.json` | Compiled system configuration |
 | `modules.json` | Compiled module configuration with discovery |
 | `binding.json` | Service container bindings |
 | `checksum` | Configuration hash for cache validation |

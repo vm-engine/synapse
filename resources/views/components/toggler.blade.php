@@ -8,16 +8,8 @@
 ])
 
 @php
-    $colorClasses = [
-        'green' => 'bg-green-500 dark:bg-green-500',
-        'blue' => 'bg-blue-500 dark:bg-blue-500',
-        'brand' => 'bg-brand-500 dark:bg-brand-500',
-        'red' => 'bg-red-500 dark:bg-red-500',
-        'yellow' => 'bg-yellow-500 dark:bg-yellow-500',
-        'purple' => 'bg-purple-500 dark:bg-purple-500',
-    ];
-
-    $activeColorClass = $colorClasses[$activeColor] ?? $colorClasses['green'];
+    $allowedColors = ['green', 'blue', 'brand', 'red', 'yellow', 'purple'];
+    $activeColorClass = 'syn-toggler-' . (in_array($activeColor, $allowedColors) ? $activeColor : 'green');
     $componentId = $id ?: ($name ?: 'toggler-' . uniqid());
     $checkedValue = $checked ? 'true' : 'false';
 @endphp
@@ -25,15 +17,10 @@
 @if ($inline)
     <div
         data-checked="{{ $checkedValue }}"
-        x-data="{ active: {{ $checkedValue }} }"
-        x-init="
-            active = $el.dataset.checked === 'true';
-            new MutationObserver(() => { active = $el.dataset.checked === 'true'; })
-                .observe($el, { attributes: true, attributeFilter: ['data-checked'] });
-        "
+        x-data="synapseTogglerInline({{ $checkedValue }})"
     >
         <label
-            class="flex cursor-pointer select-none items-center gap-2 text-sm font-medium"
+            class="syn-toggler-label-inline"
             for="{{ $componentId }}"
             {{ $attributes->only(['title', 'wire:click']) }}
         >
@@ -47,20 +34,20 @@
                     {{ $attributes->only(['@change', 'wire:model', 'wire:loading']) }}
                 />
                 <div
-                    class="block h-6 w-11 rounded-full transition-colors"
-                    :class="active ? '{{ $activeColorClass }}' : 'bg-gray-300 dark:bg-gray-600'"
+                    class="syn-toggler-track"
+                    :class="active ? '{{ $activeColorClass }}' : 'syn-toggler-off'"
                 ></div>
                 <div
-                    class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
+                    class="syn-toggler-thumb"
                     :class="active ? 'translate-x-full' : 'translate-x-0'"
                 ></div>
             </div>
         </label>
     </div>
 @else
-    <div x-data="{ active: @entangle($attributes->wire('model')->value()) }">
+    <div x-data="synapseToggler($wire.entangle('{{ $attributes->wire('model')->value() }}').live)">
         <label
-            class="flex cursor-pointer select-none items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-400"
+            class="syn-toggler-label"
             for="{{ $componentId }}"
         >
             <div class="relative">
@@ -72,11 +59,11 @@
                     x-model="active"
                 />
                 <div
-                    class="block h-6 w-11 rounded-full transition-colors"
-                    :class="active ? '{{ $activeColorClass }}' : 'bg-gray-300 dark:bg-gray-600'"
+                    class="syn-toggler-track"
+                    :class="active ? '{{ $activeColorClass }}' : 'syn-toggler-off'"
                 ></div>
                 <div
-                    class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
+                    class="syn-toggler-thumb"
                     :class="active ? 'translate-x-full' : 'translate-x-0'"
                 ></div>
             </div>
@@ -88,3 +75,4 @@
         </label>
     </div>
 @endif
+

@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeModelCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-model
                             {module : The module name}
                             {name? : The name of the model}
@@ -21,6 +23,9 @@ class MakeModelCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'model';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         $options = [
@@ -51,7 +56,7 @@ class MakeModelCommand extends BaseGeneratorCommand
 
     protected function createMigration(): void
     {
-        $name = $this->argument('name');
+        $name = $this->stringArgument('name');
         $tableName = $this->generator->namespaceResolver->generateTableName($name);
 
         $this->call('synapps:make-migration', [
@@ -66,7 +71,7 @@ class MakeModelCommand extends BaseGeneratorCommand
     {
         $this->call('synapps:make-factory', [
             'module' => $this->argument('module'),
-            'name' => $this->argument('name').'Factory',
+            'name' => $this->stringArgument('name').'Factory',
             '--model' => $this->argument('name'),
             '--no-interaction' => true,
         ]);
@@ -76,7 +81,7 @@ class MakeModelCommand extends BaseGeneratorCommand
     {
         $this->call('synapps:make-seeder', [
             'module' => $this->argument('module'),
-            'name' => $this->argument('name').'Seeder',
+            'name' => $this->stringArgument('name').'Seeder',
             '--no-interaction' => true,
         ]);
     }

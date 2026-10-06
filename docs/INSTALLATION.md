@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 12.x|13.x
+- PHP 8.5+
+- Laravel 13.x
 - Livewire ^4.0 (installed transitively as a dependency of this package)
 - Composer
 - Node.js & NPM
@@ -81,8 +81,7 @@ This command will:
    - `vendor:publish --tag=synapse-config --force` - Publish Synapse config files
    - `synapps:config` - Regenerate configuration files
    - `synapps:link-errors` - Create symlink for error views
-   - `synapps:patch-resources` - Patch JS/CSS imports and comment default seeder
-   - `synapps:patch-tests` - Configure testing infrastructure
+   - `synapps:patch` - Patch JS/CSS imports, comment default seeder, and configure testing infrastructure
    - `synapps:discover` - Discover modules and update dependencies
 
 **Option B: Existing SynApps Repository**
@@ -99,8 +98,7 @@ Then manually run the setup commands:
 php artisan vendor:publish --tag="synapse-config" --force
 php artisan synapps:config
 php artisan synapps:link-errors
-php artisan synapps:patch-resources
-php artisan synapps:patch-tests
+php artisan synapps:patch
 php artisan synapps:discover
 ```
 

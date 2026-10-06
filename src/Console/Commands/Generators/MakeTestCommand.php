@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeTestCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-test
                             {module : The module name}
                             {name? : The name of the test}
@@ -17,6 +19,9 @@ class MakeTestCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'test';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

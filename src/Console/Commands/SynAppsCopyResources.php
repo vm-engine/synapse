@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -38,7 +40,7 @@ class SynAppsCopyResources extends Command
         $copyJs = $copyAll || $this->option('js');
         $copyLayouts = $copyAll || $this->option('layouts');
         $copyAssets = $copyAll || $this->option('assets');
-        $force = $this->option('force');
+        $force = (bool) $this->option('force');
 
         // Check if synapps directory exists
         if (! file_exists(base_path('synapps'))) {

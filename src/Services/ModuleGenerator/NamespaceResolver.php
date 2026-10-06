@@ -163,6 +163,8 @@ class NamespaceResolver
 
     /**
      * Convert module name to proper case formats
+     *
+     * @return array<string, string>
      */
     public function generateIdCases(string $name): array
     {

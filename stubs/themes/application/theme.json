@@ -1,24 +1,25 @@
 {
     "id": "application",
-    "name": "Theme for Application",
-    "description": "Modern, professional theme with glassmorphism and dark mode support. Ideal for web applications. No Frontend Layout",
-    "version": "1.0.0",
-    "author": "Adods + Claude",
+    "name": "Application",
+    "description": "Glassmorphism theme for web applications: dark sidebar admin (app), split-screen auth (guest) and public website (frontend) layouts with dark mode",
+    "version": "2.0.0",
+    "author": "VM Engine",
     "layouts": [
         "app",
-        "guest"
+        "guest",
+        "frontend"
     ],
     "css": {
-        "all": [
-            "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        ],
+        "all": [],
         "app": [],
-        "guest": []
+        "guest": [],
+        "frontend": []
     },
     "js": {
         "all": [],
         "app": [],
-        "guest": []
+        "guest": [],
+        "frontend": []
     },
     "headers": {
         "all": [
@@ -27,7 +28,8 @@
             "<link href=\"https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap\" rel=\"stylesheet\">"
         ],
         "app": [],
-        "guest": []
+        "guest": [],
+        "frontend": []
     },
     "settings": {
         "sidebar_width": "18rem",

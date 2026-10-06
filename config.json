@@ -1,14 +1,4 @@
 {
-    "allowed_dev_keys": [
-        "mode",
-        "laravel_key",
-        "locale",
-        "fallback_locale",
-        "public_path",
-        "public_url",
-        "userfile_url",
-        "binding"
-    ],
     "protected_module_keys": [
         "id",
         "namespaces",

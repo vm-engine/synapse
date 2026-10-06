@@ -1,19 +1,7 @@
 <div
     class="card"
     id="todo-form"
-    x-data="{
-        scrollToForm() {
-            this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            setTimeout(() => {
-                this.$refs.titleInput.focus();
-            }, 500);
-        },
-        focusTitleInput() {
-            setTimeout(() => {
-                this.$refs.titleInput.focus();
-            }, 100);
-        }
-    }"
+    x-data="todoFormPage()"
     @scroll-to-form.window="scrollToForm()"
     @todo-created.window="focusTitleInput()"
 >
@@ -152,3 +140,30 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+        Alpine.data('todoFormPage', () => ({
+            scrollToForm() {
+                this.$el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                setTimeout(() => {
+                    this.$refs.titleInput.focus();
+                }, 500);
+            },
+            focusTitleInput() {
+                setTimeout(() => {
+                    this.$refs.titleInput.focus();
+                }, 100);
+            }
+        }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+</script>

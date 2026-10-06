@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
 use Illuminate\Translation\TranslationServiceProvider;

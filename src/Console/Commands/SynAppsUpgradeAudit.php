@@ -1,13 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
 use VmEngine\Synapse\Services\Upgrade\UpgradeAuditService;
 use VmEngine\Synapse\Services\Upgrade\UpgradeFinding;
+use VmEngine\Synapse\Traits\HasTypedInput;
 
 class SynAppsUpgradeAudit extends Command
 {
+    use HasTypedInput;
+
     /**
      * The name and signature of the console command.
      *
@@ -28,7 +33,9 @@ class SynAppsUpgradeAudit extends Command
 
     public function handle(UpgradeAuditService $service): int
     {
-        $onlyRuleIds = $this->option('only') ?: null;
+        // --only=* is an array-mode option, so this is always array<string>.
+        $only = $this->option('only');
+        $onlyRuleIds = is_array($only) && $only !== [] ? $only : null;
         $projectRoot = base_path();
 
         $report = $service->scan($projectRoot, $onlyRuleIds);
@@ -53,7 +60,7 @@ class SynAppsUpgradeAudit extends Command
             }
         }
 
-        $outputPath = $this->option('output');
+        $outputPath = $this->stringOption('output');
         if (! str_starts_with($outputPath, '/')) {
             $outputPath = $projectRoot.'/'.$outputPath;
         }

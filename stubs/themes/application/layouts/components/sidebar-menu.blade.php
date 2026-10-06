@@ -17,20 +17,21 @@
             <img
                 class="h-8 shrink-0"
                 src="{{ theme_asset('images/logo-dark.svg') }}"
-                alt="Logo"
+                alt="{{ config('synapps.apps.title', config('app.name')) }}"
             >
             <span
                 class="truncate text-xl font-bold text-white"
                 x-show="!sidebarCollapsed"
                 x-transition
             >
-                Member4VM
+                {{ config('synapps.apps.title', config('app.name')) }}
             </span>
         </div>
 
         {{-- Collapse Toggle (Desktop Only) --}}
         <button
             class="hidden shrink-0 text-gray-400 transition-colors hover:text-white lg:block"
+            aria-label="{{ __('Collapse sidebar') }}"
             @click="sidebarCollapsed = !sidebarCollapsed"
             x-show="!sidebarCollapsed"
             x-transition
@@ -53,6 +54,7 @@
         {{-- Expand Icon (when collapsed) --}}
         <button
             class="hidden text-gray-400 transition-colors hover:text-white lg:block"
+            aria-label="{{ __('Expand sidebar') }}"
             @click="sidebarCollapsed = !sidebarCollapsed"
             x-show="sidebarCollapsed"
             x-transition
@@ -82,12 +84,12 @@
             @foreach (synav()->backend() as $key => $menu)
                 @canAccess($menu['acl'] ?? null)
                 <li
-                    @isset($menu['sub']) x-data="{ open: selected.startsWith('{{ $key }}') }" @endisset>
+                    @isset($menu['sub']) x-data="applicationSidebarSubmenu(selected.startsWith('{{ $key }}'))" @endisset>
                     @isset($menu['sub'])
                         {{-- Menu item with submenu --}}
                         <button
                             class="menu-item {{ synav()->is($key) ? 'menu-item-active' : '' }} group relative w-full"
-                            @click="open = !open; selected = selected === '{{ $key }}' ? '' : '{{ $key }}'"
+                            @click="toggle('{{ $key }}')"
                             :class="{ 'justify-center': sidebarCollapsed }"
                         >
                             <div class="flex min-w-0 flex-1 items-center gap-3">
@@ -263,3 +265,4 @@
         </div>
     </div>
 </aside>
+

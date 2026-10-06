@@ -30,6 +30,7 @@ A fully featured, reactive select component that supports:
 | live              | bool        | false               | If true, updates Livewire immediately on change. |
 | allowCreate       | bool        | false               | If true, allows user to create new options by pressing Enter. |
 | autoLoad          | bool        | true                | If true, auto-loads selected values from wireModel on init. |
+| disabled          | bool        | false               | If true, the select is non-interactive and visually dimmed. |
 
 --------------------------------------------------------------------
 💡 Examples
@@ -117,236 +118,59 @@ public function loadUser(int|array $ids): array
 
 Component: VmEngine\Synapse\Components\AdvSelect
 View: synapse::components.adv-select
-Version: 1.0.0
+Version: 1.2.0 — added a `disabled` prop (native disabled on the search
+input and clear/remove buttons, `is-disabled` CSS class, and
+focusInput() is a no-op while disabled).
 --------------------------------------------------------------------
 --}}
 
 <div
-    class="adv-select-container relative w-full"
-    x-data="{
-        search: '',
-        results: [],
-        selected: @js($preload ?? []),
-        multiple: {{ $multiple ? 'true' : 'false' }},
-        open: false,
-        searchMethod: {{ $searchMethod ? "'{$searchMethod}'" : 'null' }},
-        loadMethod: {{ $loadMethod ? "'{$loadMethod}'" : 'null' }},
-        wireModel: '{{ $wireModel }}',
-        labelField: '{{ $labelField }}',
-        valueField: '{{ $valueField }}',
-        staticOptions: @js($options),
-        minSearchLength: {{ $minSearchLength }},
-        isLive: {{ $live ? 'true' : 'false' }},
-        allowCreate: {{ $allowCreate ? 'true' : 'false' }},
-        autoLoad: {{ $autoLoad ? 'true' : 'false' }},
-
-        async init() {
-            // Auto-load selected values from wireModel if enabled
-            if (this.autoLoad && this.selected.length === 0) {
-                await this.loadInitialValues();
-            }
-
-            // Set initial value to Livewire model
-            // Only sync if preload has values (avoid empty updates on first render)
-            if (this.selected && this.selected.length > 0) {
-                this.syncWithWire();
-            }
-
-            // Reopen dropdown after Livewire updates
-            Livewire.interceptMessage(({ onSuccess }) => {
-                onSuccess(() => {
-                    if (document.activeElement === this.$refs.search && this.search.length > 0) {
-                        this.open = true;
-                    }
-                });
-            });
-
-            // Listen for reset event
-            window.addEventListener('reset-tag-input', () => {
-                this.clearSelection();
-            });
-        },
-
-        async loadInitialValues() {
-            if (!this.$wire) return;
-
-            try {
-                // Get current value from Livewire model
-                const currentValue = this.$wire.get(this.wireModel);
-
-                if (currentValue === null || currentValue === undefined || (Array.isArray(currentValue) && currentValue.length === 0)) {
-                    return; // No value to load
-                }
-
-                const values = Array.isArray(currentValue) ? currentValue : [currentValue];
-
-                // Try to find values in static options first
-                const foundInStatic = [];
-                for (const val of values) {
-                    // Use loose equality to handle type mismatches (string vs number)
-                    const found = this.staticOptions.find(o => o[this.valueField] == val);
-                    if (found) {
-                        foundInStatic.push(found);
-                    }
-                }
-
-                // If all values found in static options, use them
-                if (foundInStatic.length === values.length) {
-                    this.selected = foundInStatic;
-                    return;
-                }
-
-                // If loadMethod is provided, call it to get full objects
-                if (this.loadMethod && this.$wire?.call) {
-                    const loaded = await this.$wire.call(this.loadMethod, this.multiple ? values : values[0]);
-
-                    if (loaded) {
-                        this.selected = Array.isArray(loaded) ? loaded : [loaded];
-                        return;
-                    }
-                }
-
-                // Fallback: create simple objects with value = label
-                this.selected = values.map(val => ({
-                    [this.valueField]: val,
-                    [this.labelField]: val
-                }));
-            } catch (e) {
-                console.error('Error loading initial values:', e);
-            }
-        },
-
-        focusInput() {
-            this.$refs.search.classList.remove('hidden');
-            this.$refs.search.focus();
-            this.open = true;
-        },
-
-        async fetch() {
-            const query = this.search.toLowerCase();
-
-            // ✅ 1. Start with static options (filter client-side)
-            let staticResults = this.staticOptions.filter(o =>
-                o[this.labelField].toLowerCase().includes(query)
-            );
-
-            // ✅ 2. If a Livewire search method is provided, merge remote results
-            if (this.searchMethod && query.length > this.minSearchLength && this.$wire?.call) {
-                try {
-                    const res = await this.$wire.call(this.searchMethod, this.search);
-                    const remoteResults = Array.isArray(res) ? res : [];
-                    // merge while avoiding duplicates by valueField
-                    const merged = [...staticResults];
-                    for (const r of remoteResults) {
-                        if (!merged.find(o => o[this.valueField] == r[this.valueField])) {
-                            merged.push(r);
-                        }
-                    }
-                    this.results = merged;
-                } catch (e) {
-                    console.error('search error', e);
-                    this.results = staticResults;
-                }
-            } else {
-                // no remote search — static only
-                this.results = staticResults;
-            }
-
-            this.open = this.results.length > 0 || (this.allowCreate && this.search.trim() !== '');
-        },
-
-        select(item) {
-            if (this.multiple) {
-                if (!this.selected.find(i => i[this.valueField] == item[this
-                        .valueField])) {
-                    this.selected.push(item);
-                }
-            } else {
-                this.selected = [item];
-                this.$refs.search.blur();
-            }
-            this.search = '';
-            this.results = [];
-            this.open = false;
-            this.syncWithWire();
-        },
-
-        createNew() {
-            if (!this.allowCreate || !this.search.trim()) return;
-
-            const newItem = {
-                [this.valueField]: this.search.trim(),
-                [this.labelField]: this.search.trim()
-            };
-
-            // Add to static options for future searches
-            this.staticOptions.push(newItem);
-
-            // Select the new item
-            this.select(newItem);
-        },
-
-        handleKeydown(e) {
-            if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results.length === 0) {
-                e.preventDefault();
-                this.createNew();
-            }
-        },
-
-        remove(index) {
-            this.selected.splice(index, 1);
-            this.syncWithWire();
-        },
-
-        clearSelection() {
-            this.selected = [];
-            this.syncWithWire();
-            this.focusInput();
-        },
-
-        syncWithWire() {
-            if (!this.$wire) return; // safety check
-
-            const ids = this.selected.map(i => i[this.valueField]);
-
-            // Prevent sending [] on init unless already synced once
-            if (!this._initialized) {
-                this._initialized = true;
-                if (ids.length === 0) return; // skip initial empty sync
-            }
-
-            this.$wire.set(this.wireModel, this.multiple ? ids : (ids.length > 0 ? ids[0] : null), this.live);
-        },
-    }"
+    class="adv-select-container"
+    {{-- Options/preload are inlined as raw JSON array/object literals (not
+         Blade's @js(), which wraps them in JSON.parse(...)) because Livewire's
+         CSP-safe Alpine evaluator (see SynapseServiceProvider::overrideLivewireCsp())
+         has no access to the `JSON` global — JSON.parse() inside an x-data
+         expression throws "Undefined variable: JSON" and silently falls back
+         to an empty data object, breaking every binding in this component. --}}
+    x-data="synapseAdvSelect({{ json_encode($preload ?? []) }}, {{ $multiple ? 'true' : 'false' }}, {{ $searchMethod ? "'{$searchMethod}'" : 'null' }}, {{ $loadMethod ? "'{$loadMethod}'" : 'null' }}, '{{ $wireModel }}', '{{ $labelField }}', '{{ $valueField }}', {{ json_encode($options) }}, {{ $minSearchLength }}, {{ $live ? 'true' : 'false' }}, {{ $allowCreate ? 'true' : 'false' }}, {{ $autoLoad ? 'true' : 'false' }}, {{ $disabled ? 'true' : 'false' }})"
     x-init="init()"
     wire:ignore
+    {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
+         stopPropagation() on click, which would otherwise prevent this
+         bubble-phase document listener from ever firing inside a modal.
+         Capture-phase runs before that stopPropagation() takes effect.
+         This lives on the container (not just the input box) because the
+         dropdown's search input is now a container descendant, not a box
+         descendant — clicking into it must not count as "away". --}}
+    @click.away.capture="open = false"
 >
-    {{-- Select box --}}
+    {{-- Select box (display-only: placeholder / selection / pills + clear + arrow) --}}
     <div
-        class="adv-select-input-box shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 focus:ring-3 focus:outline-hidden flex w-full flex-wrap gap-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
-        @click="focusInput"
-        {{-- .capture: some ancestors (e.g. <x-synapse-modal>'s content box) call
-             stopPropagation() on click, which would otherwise prevent this
-             bubble-phase document listener from ever firing inside a modal.
-             Capture-phase runs before that stopPropagation() takes effect. --}}
-        @click.away.capture="open = false"
+        class="adv-select-input-box"
+        :class="{ 'is-open': open, 'is-disabled': disabled }"
+        :aria-disabled="disabled"
+        @click="toggleOpen"
     >
+        {{-- Placeholder (nothing selected, either mode) --}}
+        <template x-if="selected.length === 0">
+            <span class="adv-select-placeholder">{{ $placeholder }}</span>
+        </template>
+
         {{-- Selected items (multiple mode) --}}
         <template x-if="multiple">
             <template
                 x-for="(item, index) in selected"
                 :key="item[valueField]"
             >
-                <span
-                    class="adv-select-item-multiple flex items-center space-x-1 rounded-md bg-blue-100 px-2 py-1 text-blue-700"
-                >
+                <span class="adv-select-item-multiple">
                     <span x-text="item[labelField]"></span>
                     <button
-                        class="ml-1 text-sm"
+                        class="adv-select-item-remove"
                         type="button"
+                        :disabled="disabled"
                         @click.stop="remove(index)"
                     >
-                        ✕
+                        <i class="ph ph-x"></i>
                     </button>
                 </span>
             </template>
@@ -355,48 +179,55 @@ Version: 1.0.0
         {{-- Single select display --}}
         <template x-if="!multiple && selected.length">
             <span
-                class="adv-select-item-single text-gray-800"
+                class="adv-select-item-single"
                 x-text="selected[0][labelField]"
             ></span>
         </template>
 
-        {{-- Input --}}
-        <input
-            class="adv-select-input flex-1 focus:outline-none"
-            type="text"
-            x-ref="search"
-            x-model="search"
-            x-on:focus="fetch()"
-            x-on:input.debounce.300ms="fetch()"
-            x-on:keydown="handleKeydown($event)"
-            placeholder="{{ $placeholder }}"
-            :class="{ 'hidden': !multiple && selected.length }"
-        />
-
         {{-- Clear button for single select --}}
         <template x-if="!multiple && selected.length">
             <button
-                class="adv-select-clear ml-auto text-sm text-gray-400 hover:text-gray-700"
+                class="adv-select-clear"
                 type="button"
+                :disabled="disabled"
                 @click.stop="clearSelection"
             >
-                ✕
+                <i class="ph ph-x"></i>
             </button>
         </template>
+
+        {{-- Dropdown arrow --}}
+        <i
+            class="ph ph-caret-down adv-select-arrow"
+            :class="{ 'is-open': open }"
+        ></i>
     </div>
 
     {{-- Dropdown --}}
     <div
-        class="adv-select-dropdown absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-md dark:border-gray-700 dark:bg-gray-900"
-        x-show="open && (results.length > 0 || (allowCreate && search.trim()))"
+        class="adv-select-dropdown"
+        x-show="open"
         x-transition
     >
+        {{-- Search input --}}
+        <input
+            class="adv-select-input"
+            type="text"
+            x-ref="search"
+            x-model="search"
+            :disabled="disabled"
+            x-on:focus="fetch()"
+            x-on:input.debounce.300ms="fetch()"
+            x-on:keydown="handleKeydown($event)"
+            placeholder="{{ $placeholder }}"
+        />
+
         <template
             x-for="item in results"
             :key="item[valueField]"
         >
             <div
-                class="adv-select-option cursor-pointer p-2 hover:bg-blue-100 dark:hover:bg-gray-800"
+                class="adv-select-option"
                 x-text="item[labelField]"
                 @click="select(item)"
             ></div>
@@ -405,14 +236,15 @@ Version: 1.0.0
         {{-- Create new option hint --}}
         <template x-if="allowCreate && search.trim() && results.length === 0">
             <div
-                class="adv-select-option-create cursor-pointer border-t border-gray-200 p-2 hover:bg-green-100 dark:border-gray-700 dark:hover:bg-green-900/20"
+                class="adv-select-option-create"
                 @click="createNew()"
             >
-                <span class="text-green-600 dark:text-green-400">
-                    <i class="fa-solid fa-plus mr-1"></i>
+                <span class="adv-select-create-hint">
+                    <i class="ph ph-plus mr-1"></i>
                     Create "<span x-text="search"></span>"
                 </span>
             </div>
         </template>
     </div>
 </div>
+

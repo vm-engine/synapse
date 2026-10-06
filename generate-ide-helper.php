@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+declare(strict_types=1);
+
 /**
  * Universal IDE Helper Generator for vm-engine/synapse
  *

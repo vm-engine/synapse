@@ -1,10 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Str;
 use VmEngine\Synapse\Services\SyNav;
+use VmEngine\Synapse\Services\SynSearchable;
 use VmEngine\Synapse\Services\ThemeService;
 
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
+
+if (! function_exists('read_json_file')) {
+    /**
+     * Read and decode a JSON file, throwing if it's missing or malformed.
+     *
+     * @return array<mixed>
+     */
+    function read_json_file(string $path): array
+    {
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            throw new RuntimeException("Unable to read JSON file: {$path}");
+        }
+
+        $decoded = json_decode($contents, true);
+
+        if (! is_array($decoded)) {
+            throw new RuntimeException("Invalid JSON in file: {$path}");
+        }
+
+        return $decoded;
+    }
+}
 
 if (! function_exists('synapps_path')) {
     /**
@@ -24,12 +51,10 @@ if (! function_exists('is_decimal')) {
      *  mengecek apakah sebuah nilai angka mengandung decimal atau tidak
      *
      * @param  mixed  $value  yang akan dicek (float/double)
-     * @return bool
      */
-    function is_decimal($value)
+    function is_decimal(mixed $value): bool
     {
-        // return ((float) $value !== floor($value));
-        return is_numeric($value) && floor($value) != $value;
+        return is_numeric($value) && floor((float) $value) != $value;
     }
 }
 
@@ -62,12 +87,22 @@ if (! function_exists('synav')) {
     }
 }
 
+if (! function_exists('synsearchable')) {
+    /**
+     * SynSearchable helper function
+     */
+    function synsearchable(): SynSearchable
+    {
+        return app('synsearchable');
+    }
+}
+
 if (! function_exists('dbconf')) {
     /**
      * Get Config from database
      *
-     * @param  string|array  $configString  String to get config, e.g.: 'group.key', Add ! prefix to skip config cache
-     *                                      Associative Array to set config ['group.key' => 'value']
+     * @param  string|array<string, mixed>  $configString  String to get config, e.g.: 'group.key', Add ! prefix to skip config cache
+     *                                                     Associative Array to set config ['group.key' => 'value']
      * @param  mixed  $default  Default value
      * @param  bool  $force  Force get from database directly
      */
@@ -122,10 +157,9 @@ if (! function_exists('page_title')) {
     /**
      * Add Title to Main App Title
      *
-     * @param  string|array  $title
-     * @param  string  $separator
+     * @param  string|array<int, string>  $title
      */
-    function page_title($title, $separator = '-'): string
+    function page_title(string|array $title, string $separator = '-'): string
     {
         if (is_array($title)) {
             $title = implode(' '.$separator.' ', $title);

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use VmEngine\Synapse\Facades\DbConfig;
 use VmEngine\Synapse\Facades\DbLang;
@@ -15,6 +18,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
+            LivewireServiceProvider::class,
             SynapseServiceProvider::class,
         ];
     }
@@ -42,6 +46,22 @@ abstract class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
+    }
+
+    /**
+     * Register the package's own Blade views under the "synapse" namespace.
+     *
+     * In a full application this is wired up by SynapseConfigGenerator via
+     * config('synapse.view_path.general'), which only exists once SynApps
+     * config has been generated. Isolated package tests never generate that
+     * config, so components calling view('synapse::components.*') in
+     * render() would otherwise fail to resolve the namespace.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app['view']->addNamespace('synapse', __DIR__.'/../resources/views');
     }
 
     /**

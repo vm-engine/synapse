@@ -9,12 +9,18 @@ Synapse provides several Artisan commands for managing your modular application.
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
 | `synapps:config` | Regenerate config files | After config changes | Yes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
-| `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
-| `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
+| `synapps:patch` | Patch JS/CSS/Vite/routes/seeder/tests | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
+| `synapps:make` | Create a component in a synapps/modules module | Building out a module | Yes | No |
 | `synapps:make-theme` | Create new theme from template | When creating custom themes | Yes | No |
+| `synapps:remove-module` | Move a module to `.trash` (or delete) and rediscover | Retiring a module | No | No |
+| `synapps:copy-resources` | Re-copy layouts, CSS, JS, assets from stubs | Refreshing stub resources after an upgrade | Yes (asks before overwrite) | No |
+| `synapps:copy-themes` | Copy stub themes into `synapps/resources/themes` | Refreshing bundled themes | Yes | No |
+| `synapps:searchable-setup` | Enable global search (table + import) | Turning on the Ctrl/⌘+K palette | Yes | No |
+| `synapps:searchable-forget` | Delete searchable entries by source prefix | Cleaning stale search content | Yes | No |
 | `synapps:reconfig` | Interactively update `apps.json` | Changing app code/domains/dependencies after setup | Yes | No |
+| `synotif:setup` | Enable/configure in-app notifications | Turning on notifications after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes (per theme) | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
 | `synapse:db-config` | Manage database configuration | When updating configs | Yes | No |
@@ -43,8 +49,7 @@ php artisan synapps:setup
    - `vendor:publish --tag=synapse-config --force` - Publishes Synapse configuration files
    - `synapps:config` - Regenerates SynApps & Synapse configuration files
    - `synapps:link-errors` - Links custom error views
-   - `synapps:patch-resources` - Patches JS/CSS imports
-   - `synapps:patch-tests` - Configures testing infrastructure
+   - `synapps:patch` - Patches JS/CSS imports and configures testing infrastructure
    - `synapps:discover` - Discovers modules and updates dependencies
 
 ### Configuration files published
@@ -70,8 +75,8 @@ php artisan synapps:config
 
 1. Runs **SynAppsConfigGenerator** to generate `config/synapps.php`
 2. Runs **SynapseConfigGenerator** to generate `config/synapse.php`
-3. Reads source configs from `synapps/config/{apps,system,modules}.json` and `.dev.json` overrides
-4. Executes all config builders (Apps, System, Modules, Binding) through their lifecycle phases
+3. Reads source configs from `synapps/config/{apps,modules}.json` and `.dev.json` overrides
+4. Executes all config builders (Apps, Modules, Binding) through their lifecycle phases
 5. Generates compiled configs in `synapps/config/compiled/`
 
 ### When to run
@@ -114,43 +119,49 @@ php artisan synapps:discover
 
 ---
 
-## synapps:patch-resources
+## synapps:patch
 
 Integrates Synapse resources into your Laravel application, wires up the per-layout CSS/JS split (since v2.4.0), and cleans up default Laravel files.
 
 ```bash
-php artisan synapps:patch-resources
+php artisan synapps:patch
 ```
 
-With no options, **all patch operations run**, including the per-layout split — this brings a project all the way from a fresh Laravel install to the current 8-entry-point structure in one call.
+With no arguments, **all patch operations run**, including the per-layout split — this brings a project all the way from a fresh Laravel install to the current 8-entry-point structure in one call.
 
-### Options
+### Arguments
 
-Pass one or more flags to run only that subset of patches (useful for re-running a single patch after manually reverting a file):
+Pass one or more object names to run only that subset of patches (useful for re-running a single patch after manually reverting a file):
 
-| Option | Restricts to |
+```bash
+php artisan synapps:patch layouts
+php artisan synapps:patch theme vite
+```
+
+| Object | Restricts to |
 |---|---|
-| `--theme` | Legacy monolith theme import into `app.css`/`app.js` (only applies if a theme still has a single `theme.css`/`theme.js`, pre-2.4.0 style) |
-| `--comment-default` | Commenting out the default Laravel welcome route and `User::factory()` seeder call |
-| `--css-sources` | Tailwind `@source` directives in `resources/css/app.css` |
-| `--npm-watch` | `package.json` `"watch": "vite build --watch"` script |
-| `--js-back` | `window.withBack()` global JS helper in `resources/js/app.js` |
-| `--vite` | `vite.config.js` static-asset-copy plugin + dev-server watch config |
-| `--split-layouts` | Per-layout CSS/JS split only (see below) |
+| `theme` | Legacy monolith theme import into `app.css`/`app.js` (only applies if a theme still has a single `theme.css`/`theme.js`, pre-2.4.0 style) |
+| `seeder` | Commenting out the default Laravel welcome route and `User::factory()` seeder call |
+| `css` | Tailwind `@source` directives in `resources/css/app.css` |
+| `npm` | `package.json` `"watch": "vite build --watch"` script |
+| `js` | `window.withBack()` global JS helper in `resources/js/app.js` |
+| `vite` | `vite.config.js` static-asset-copy plugin + dev-server watch config |
+| `layouts` | Per-layout CSS/JS split only (see below) |
+| `tests` | Testing infrastructure only (see below) |
 
-### What it does (no options — full run)
+### What it does (no arguments — full run)
 
 1. **Base synapps imports** — adds `import '../../synapps/resources/js/synapps.js';` to `resources/js/app.js` and `@import '../../synapps/resources/css/synapps.css';` to `resources/css/app.css`
 2. **Tailwind `@source` directives** — adds `@source` entries covering `synapps/`, active theme, and `synmod-*`/`synapps-*` vendor package Blade/JS files
-3. **Legacy theme import** (`--theme`) — only if the active theme still has a single `theme.css`/`theme.js` (pre-split); no-ops for themes already using the 4+4 split structure
+3. **Legacy theme import** (`theme`) — only if the active theme still has a single `theme.css`/`theme.js` (pre-split); no-ops for themes already using the 4+4 split structure
 4. **`vite.config.js`** — converts to function-based config (for `--watch` detection), adds the `vite-plugin-static-copy` plugin (wrapped so it's skipped during `--watch` for faster HMR) to copy assets from `synapps/resources/assets/`, per-theme `assets/`, and `vendor/*/synmod-*` / `vendor/vm-engine/synapps-*` packages, and ensures `server.watch` has the right `ignored` paths + polling config for cross-platform file watching
 5. **`routes/web.php`** — comments out the default Laravel welcome route, but only if no other routes are defined in the file
 6. **`database/seeders/DatabaseSeeder.php`** — comments out the default `User::factory()` call (handles multi-line calls too)
 7. **`package.json`** — adds a `"watch": "vite build --watch"` script
 8. **`resources/js/app.js`** — appends the global `window.withBack()` helper plus a `mousedown` interceptor that recomputes the `?back=` URL at click time (fixes stale URLs after Livewire pagination)
-9. **Per-layout CSS/JS split** (`--split-layouts`) — see below
+9. **Per-layout CSS/JS split** (`layouts`) — see below
 
-### Per-layout CSS/JS split (`--split-layouts`)
+### Per-layout CSS/JS split (`layouts`)
 
 Brings the project from the single `app.css`/`app.js` monolith to the 8-entry-point structure introduced in v2.4.0:
 
@@ -160,7 +171,7 @@ Brings the project from the single `app.css`/`app.js` monolith to the 8-entry-po
 4. Patches the active-theme import line in all 8 `synapps-*.css`/`.js` files whenever the active theme changes (e.g. after `synapps:reconfig` or editing `apps.json` directly) — idempotent, only writes when the theme path actually differs
 5. Expands `vite.config.js`'s `input` array to all 8 entry points (`resources/{css,js}/{base,app,frontend,guest}.*`)
 
-> **Breaking in v2.4.0:** themes without the 4+4 split (`theme-{base,app,frontend,guest}.{css,js}`) will fail `npm run build` once `--split-layouts` has run, since `synapps-base.css` imports `theme-base.css`. See the [Theme System docs](../docs/THEMES.md) for the split-theme layout.
+> **Breaking in v2.4.0:** themes without the 4+4 split (`theme-{base,app,frontend,guest}.{css,js}`) will fail `npm run build` once `layouts` has run, since `synapps-base.css` imports `theme-base.css`. See the [Theme System docs](../docs/THEMES.md) for the split-theme layout.
 
 ### Backup files
 
@@ -182,33 +193,15 @@ Patched: resources/js/app.js — rewrite to focused import
 Patched: vite.config.js — expand input array
 ```
 
-### Safe to run multiple times
-
-Every operation is idempotent — only patches if the change is not already present, so re-running (with or without options) is always safe.
-
-### When to run
-
-- After fresh installation
-- If Synapse assets are not loading
-- After switching the active theme, to repropagate the theme import lines (`--split-layouts`, or just re-run with no options)
-- **Automatically called by `synapps:setup`**
-
-### See Also
-
-- [Theme System Documentation](../docs/THEMES.md) - Per-layout theme file structure
-- [synapps:reconfig](#synapps-reconfig) - Changing the active theme without resetting it
-
----
-
-## synapps:patch-tests
+### Testing infrastructure (`tests`)
 
 Configures comprehensive testing infrastructure for Synapse modules.
 
 ```bash
-php artisan synapps:patch-tests
+php artisan synapps:patch tests
 ```
 
-### What it does - patches 4 files
+#### What it does - patches 4 files
 
 1. **`tests/Pest.php`** - Adds module test discovery paths:
    ```php
@@ -231,7 +224,7 @@ php artisan synapps:patch-tests
 
 4. **`phpunit.xml`** - Adds 3 test suites (Browser, Modules, Packages) with proper exclusions
 
-### Run test suites
+#### Run test suites
 
 ```bash
 php artisan test                        # All tests
@@ -240,15 +233,22 @@ php artisan test --testsuite=Modules    # Module tests only
 php artisan test --testsuite=Packages   # Package tests only
 ```
 
-### Backup files
+### Safe to run multiple times
 
-Before modifying `tests/Pest.php` and `.env.testing`, the command creates `.bak` backups. The backup is only created once — subsequent runs will not overwrite it.
+Every operation is idempotent — only patches if the change is not already present, so re-running (with or without arguments) is always safe.
 
 ### When to run
 
 - After fresh installation
+- If Synapse assets are not loading
+- After switching the active theme, to repropagate the theme import lines (`layouts`, or just re-run with no arguments)
 - After adding new modules with tests
 - **Automatically called by `synapps:setup`**
+
+### See Also
+
+- [Theme System Documentation](../docs/THEMES.md) - Per-layout theme file structure
+- [synapps:reconfig](#synapps-reconfig) - Changing the active theme without resetting it
 
 ---
 
@@ -434,6 +434,38 @@ synapps/resources/themes/{name}/
 
 ---
 
+## synapps:remove-module
+
+```bash
+php artisan synapps:remove-module {moduleName} [--permanent]
+```
+
+Removes `synapps/modules/{moduleName}` after confirmation. By default the folder is **moved** to `.trash/{moduleName}-{timestamp}` (and `/.trash` is added to `.gitignore`) so it can be restored by hand; `--permanent` deletes it. Afterwards it rediscovers modules so `composer.json` autoload entries and the compiled configs no longer reference it.
+
+---
+
+## synapps:copy-resources / synapps:copy-themes
+
+```bash
+php artisan synapps:copy-resources [--css] [--js] [--layouts] [--assets] [--all] [--force]
+php artisan synapps:copy-themes [theme ...] [--force]
+```
+
+Re-copy the stub layouts (incl. nav components), CSS, JS and static assets, or the bundled themes, into `synapps/resources`. Without options everything is copied; existing files are only overwritten after confirmation or with `--force`. Use after upgrading synapse when you want the new stub versions (e.g. the impersonation-banner slot in the layout stubs).
+
+---
+
+## synapps:searchable-setup / synapps:searchable-forget
+
+```bash
+php artisan synapps:searchable-setup
+php artisan synapps:searchable-forget {prefix} [--force]   # prefix must start with "content:"
+```
+
+`searchable-setup` enables the global backend search: creates the `searchables` table and (re)imports backend nav entries and module searchables. `searchable-forget` deletes content entries whose source starts with the prefix. See README → *Global Search*.
+
+---
+
 ## synapps:reconfig
 
 Interactive configuration updater for an already-set-up project. Re-prompts for the core `apps.json` fields (app code, name, author, domains, prefixes, title, description, multi-language) and rewrites `synapps/config/apps.json`.
@@ -445,6 +477,7 @@ php artisan synapps:reconfig
 ### What it does
 
 1. Prompts for each core field, defaulting to the current value already in `config('synapps.apps.*')` so blank/unchanged answers don't erase existing data
+   - Also prompts to enable/configure in-app notifications (same two questions as `synotif:setup` below) — only if `vm-engine/synapps-auth` is installed, otherwise this step is skipped
 2. **Preserves, rather than resets, these blocks** — read from the current config and carried forward as-is unless you edit `apps.json` directly:
    - `themes` (active/fallback theme, per-layout CSS/JS/headers)
    - `dependencies` (npm/composer packages, including any added manually)
@@ -464,6 +497,28 @@ php artisan synapps:config
 ```
 
 > **Note:** Prior to v2.4.7, `themes`, `dependencies`, and `git_repo` were reset to hardcoded defaults on every run. Upgrade if you rely on `synapps:reconfig` and have customized any of these.
+
+---
+
+## synotif:setup
+
+Enable/configure the in-app notification system (see [README.md#notifications](../README.md#notifications) for usage). Requires `vm-engine/synapps-auth` — aborts with an explanatory error if it isn't installed, since role-based targeting depends on it.
+
+```bash
+php artisan synotif:setup
+```
+
+### What it does
+
+1. Prompts: enable notifications (default from current config), and a log channel for skipped/disabled notifications (blank = silent)
+2. If enabling and the `notifications` table doesn't exist yet: publishes the `notifications:table` migration (skipped if a matching migration file already exists) and runs `migrate`
+3. Writes an `notifications` block (`enabled`, `log_channel`) into `synapps/config/apps.json`, preserving everything else
+4. Runs `synapps:config` to recompile
+
+### When to run
+
+- Turning notifications on (or off, or changing the log channel) after initial `synapps:setup`
+- `synapps:setup` and `synapps:reconfig` ask the same two questions inline, so this command is mainly for toggling the feature standalone after the fact
 
 ---
 

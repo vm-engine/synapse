@@ -24,37 +24,31 @@
                 {{-- Sort By --}}
                 <div>
                     <label
-                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                        for="sortBy"
-                    >{{ __('todos::todos.filters.sort_by') }}</label>
-                    <x-synapse-select
-                        id="sortBy"
-                        name="sortBy"
-                        wire:model.live="sortBy"
+                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('todos::todos.filters.sort_by') }}</label>
+                    <x-adv-select
+                        wire-model="sortBy"
+                        :live="true"
                         :options="[
-                            'created_desc' => __('todos::todos.sort.newest_first'),
-                            'created_asc' => __('todos::todos.sort.oldest_first'),
-                            'due_date' => __('todos::todos.sort.due_date'),
+                            ['value' => 'created_desc', 'label' => __('todos::todos.sort.newest_first')],
+                            ['value' => 'created_asc', 'label' => __('todos::todos.sort.oldest_first')],
+                            ['value' => 'due_date', 'label' => __('todos::todos.sort.due_date')],
                         ]"
-                    ></x-synapse-select>
+                    ></x-adv-select>
                 </div>
 
                 {{-- Filter Status --}}
                 <div>
                     <label
-                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                        for="filterCompleted"
-                    >{{ __('todos::todos.filters.status') }}</label>
-                    <x-synapse-select
-                        id="filterCompleted"
-                        name="filterCompleted"
-                        wire:model.live="filterCompleted"
+                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('todos::todos.filters.status') }}</label>
+                    <x-adv-select
+                        wire-model="filterCompleted"
+                        :live="true"
                         :options="[
-                            'all' => __('todos::todos.status.all'),
-                            'pending' => __('todos::todos.status.pending'),
-                            'completed' => __('todos::todos.status.completed'),
+                            ['value' => 'all', 'label' => __('todos::todos.status.all')],
+                            ['value' => 'pending', 'label' => __('todos::todos.status.pending')],
+                            ['value' => 'completed', 'label' => __('todos::todos.status.completed')],
                         ]"
-                    ></x-synapse-select>
+                    ></x-adv-select>
                 </div>
 
                 {{-- Filter Overdue --}}
@@ -211,24 +205,7 @@
         @if ($this->hasMore)
             <div
                 class="flex justify-center py-8"
-                x-data="{
-                    observer: null,
-                    init() {
-                        this.observer = new IntersectionObserver((entries) => {
-                            if (entries[0].isIntersecting) {
-                                @this.call('loadMore')
-                            }
-                        }, {
-                            rootMargin: '100px'
-                        })
-                        this.observer.observe(this.$el)
-                    },
-                    destroy() {
-                        if (this.observer) {
-                            this.observer.disconnect()
-                        }
-                    }
-                }"
+                x-data="todoListLoadMore()"
             >
                 <div
                     class="flex items-center gap-2 text-gray-500 dark:text-gray-400"
@@ -242,3 +219,32 @@
         @endif
     </div>
 </div>
+
+<script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+            Alpine.data('todoListLoadMore', () => ({
+                observer: null,
+                init() {
+                    this.observer = new IntersectionObserver((entries) => {
+                        if (entries[0].isIntersecting) {
+                            @this.call('loadMore')
+                        }
+                    }, {
+                        rootMargin: '100px'
+                    })
+                    this.observer.observe(this.$el)
+                },
+                destroy() {
+                    if (this.observer) {
+                        this.observer.disconnect()
+                    }
+                }
+            }));
+        };
+        document.addEventListener('alpine:init', register);
+        if (window.Alpine) {
+            register();
+        }
+    })();
+</script>

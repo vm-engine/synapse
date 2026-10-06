@@ -813,25 +813,25 @@ class PostForm extends Component
 
 #### 2. Generate back-URL links from list pages
 
-Use the global `withBack()` JavaScript helper (injected by `synapps:patch-resources`) to append the current URL as the `back` parameter:
+Use the `$withBack()` Alpine magic (backed by the global `window.withBack()` helper, both injected by `synapps:patch`) to append the current URL as the `back` parameter:
 
 ```blade
 <!-- Blade view (list page) -->
-<a :href="withBack('{{ route('blog.posts.create') }}')"
+<a :href="$withBack('{{ route('blog.posts.create') }}')"
    wire:navigate>
     Create Post
 </a>
 
 <!-- Or for edit links in a loop -->
 @foreach($posts as $post)
-    <a :href="withBack('{{ route('blog.posts.edit', $post) }}')"
+    <a :href="$withBack('{{ route('blog.posts.edit', $post) }}')"
        wire:navigate>
         Edit
     </a>
 @endforeach
 ```
 
-The `withBack()` helper appends `?back=<current-url>` (or `&back=` if the URL already has query params).
+The `withBack()` helper appends `?back=<current-url>` (or `&back=` if the URL already has query params). Use `$withBack()` (the Alpine magic) inside `x-`/`:`/`@`-bound expressions — Alpine's CSP-safe evaluator doesn't resolve arbitrary `window.*` globals like bare `withBack()`.
 
 ### How It Works
 

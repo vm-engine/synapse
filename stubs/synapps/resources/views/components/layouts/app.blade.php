@@ -18,22 +18,8 @@
 
     <title>{{ $title ?? config('synapps.apps.title', config('app.name')) }}</title>
 
-    {{-- Theme CDN Headers --}}
+    {{-- Theme CDN Headers (fonts etc. — declared in theme.json) --}}
     @themeHeaders('app')
-
-    <link
-        href="https://fonts.googleapis.com"
-        rel="preconnect"
-    >
-    <link
-        href="https://fonts.gstatic.com"
-        rel="preconnect"
-        crossorigin
-    >
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
-        rel="stylesheet"
-    >
 
     {{-- Theme CDN Styles + Vite (base.css + app.css via ThemeService) --}}
     @themeStyles('app')
@@ -43,11 +29,31 @@
 
 <body
     id="page-top"
-    x-data="{ page: '{{ synav()->getActiveMenu() }}', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
-    x-init="darkMode = JSON.parse(localStorage.getItem('darkMode'));
-    $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    x-data="synapseAppShell('{{ synav()->getActiveMenu() }}')"
     :class="{ 'dark bg-gray-900': darkMode === true }"
 >
+    <script nonce="{{ csp_nonce() }}">
+    (() => {
+        const register = () => {
+            Alpine.data('synapseAppShell', (page) => ({
+                page,
+                loaded: true,
+                darkMode: false,
+                stickyMenu: false,
+                sidebarToggle: false,
+                scrollTop: false,
+                init() {
+                    this.darkMode = JSON.parse(localStorage.getItem('darkMode'));
+                    this.$watch('darkMode', (value) => localStorage.setItem('darkMode', JSON.stringify(value)));
+                }
+            }));
+        };
+    document.addEventListener('alpine:init', register);
+    if (window.Alpine) {
+        register();
+    }
+    })();
+    </script>
     <div class="page-wrapper">
         @include('synapps::components.layouts.partials.sidebar')
         <div class="main-container">

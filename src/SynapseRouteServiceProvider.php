@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
@@ -16,14 +18,14 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
         parent::register();
     }
 
-    public function map()
+    public function map(): void
     {
         if (SynapseUtils::isSynAppsAutoloaded()) {
             $this->registerRoutes();
         }
     }
 
-    protected function registerRoutes()
+    protected function registerRoutes(): void
     {
         $modulePaths = config('synapse.module_path.general', []);
 
@@ -72,7 +74,7 @@ class SynapseRouteServiceProvider extends RouteServiceProvider
                     ->group($routesPath.'api.override.php');
             }
 
-            $apiVersions = glob($routesPath.'api.v[0-9]*.php');
+            $apiVersions = glob($routesPath.'api.v[0-9]*.php') ?: [];
             foreach ($apiVersions as $versionPath) {
                 $version = explode('.', pathinfo($versionPath, PATHINFO_FILENAME))[1]; // extract version from filename
                 Route::middleware('api')

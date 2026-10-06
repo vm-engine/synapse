@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeResourceCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-resource
                             {module : The module name}
                             {name? : The name of the resource}
@@ -17,6 +19,9 @@ class MakeResourceCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'resource';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

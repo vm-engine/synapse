@@ -40,37 +40,7 @@ Radio button group for single selection:
 
 ---
 
-### Select Dropdown
-
-Standard dropdown select:
-
-```blade
-<x-synapse-select
-    :options="['option1' => 'Option 1', 'option2' => 'Option 2']" />
-```
-
-**Props:**
-- `options` (array, required) - Select options
-
----
-
-### Multi-Select
-
-Multiple selection dropdown:
-
-```blade
-<x-synapse-multiselect
-    name="tags"
-    :options="$availableTags"
-    :model="$selectedTags" />
-```
-
-**Props:**
-- `name` (string, required) - Input name
-- `options` (array, required) - Available options
-- `model` (array, default: []) - Selected values
-
----
+> **`<x-synapse-select>` and `<x-synapse-multiselect>` were removed in v3.0.0.** Use [Advanced Select](#advanced-select) (`<x-adv-select>`) instead — it covers both single and multiple selection, plus searchable/remote data. See [UPGRADE.md](../UPGRADE.md#upgrading-to-v300) for the migration shape.
 
 ### Password Input
 
@@ -158,6 +128,35 @@ Date picker using Flatpickr:
 
 **Props:**
 - `flatpickr` (string, default: '{}') - JSON configuration for Flatpickr
+
+---
+
+### Search Box
+
+Text input with a fixed left search icon and an optional trailing slot:
+
+```blade
+<x-synapse-search-box
+    :placeholder="__('pm::client.search_placeholder')"
+    wire:model.live.debounce="q"
+/>
+
+{{-- With a trailing element, e.g. a filter-drawer toggle --}}
+<x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q">
+    <x-slot:trailing>
+        <button type="button" class="btn" @click="drawerOpen = true">
+            <span class="ph ph-funnel"></span>
+        </button>
+    </x-slot:trailing>
+</x-synapse-search-box>
+```
+
+**Props:**
+- `placeholder` (string, optional) - Input placeholder (no hardcoded default — pass a translated string)
+- All other attributes (`wire:model`, `id`, `name`, ...) pass through to the `<input>`
+
+**Slots:**
+- `trailing` (optional) - Element appended after the input
 
 ---
 
@@ -269,6 +268,101 @@ The label supports inline HTML — `<em>` is styled by the component as a brand-
 
 ## UI Components
 
+### Badge
+
+Pill-shaped status/label badge with color variants and an optional icon:
+
+```blade
+<x-synapse-badge color="success">Active</x-synapse-badge>
+<x-synapse-badge color="danger" size="sm">Overdue</x-synapse-badge>
+<x-synapse-badge color="success" icon="ph ph-check">Verified</x-synapse-badge>
+```
+
+**Props:**
+- `color` (string, default: 'gray') - `'gray'`, `'brand'`, `'success'`, `'warning'`, `'danger'`, `'info'`
+- `size` (string, default: 'md') - `'sm'`, `'md'`
+- `icon` (string, optional) - Icon class — Phosphor (recommended) e.g. `'ph ph-check'`, or FontAwesome e.g. `'fa-solid fa-check'` (see [Icons](../README.md#icons))
+
+---
+
+### Panel
+
+Card-shell wrapper for list/form pages — a header (title + optional toolbar) and a body slot. Replaces the hand-rolled `rounded-2xl border ... dark:bg-white/3` card markup:
+
+```blade
+<x-synapse-panel :title="__('pm::client.list_title')">
+    <x-slot:toolbar>
+        <a class="btn primary" href="{{ backend_route('pm.client.create') }}">Add</a>
+    </x-slot:toolbar>
+
+    <table>...</table>
+</x-synapse-panel>
+
+{{-- Collapsible --}}
+<x-synapse-panel title="Filters" collapsible collapsed>
+    <table>...</table>
+</x-synapse-panel>
+```
+
+**Props:**
+- `title` (string, optional) - Panel header title
+- `collapsible` (bool, default: false) - Make the body collapsible via the header
+- `collapsed` (bool, default: false) - Start collapsed (only applies when `collapsible`)
+
+**Slots:**
+- Default - Panel body (table, form, etc.), unstyled
+- `toolbar` (optional) - Header-right actions (add button, search, filter toggle), always visible even when collapsed
+
+---
+
+### Stat Tile
+
+Single-metric card. Two variants:
+
+```blade
+{{-- variant="tile" (default): icon square + label/value --}}
+<x-synapse-stat-tile icon="ph ph-invoice" color="blue" label="Total Invoices" value="2.613" />
+
+{{-- :bordered="false" — flat gray-50 "quick stats" look, no icon --}}
+<x-synapse-stat-tile label="Progress" value="42%" :bordered="false">
+    <div class="mt-2 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+        <div class="h-2.5 rounded-full bg-blue-600" style="width: 42%"></div>
+    </div>
+</x-synapse-stat-tile>
+
+{{-- variant="card": title-row layout, optional whole-card color tint --}}
+<x-synapse-stat-tile
+    variant="card" icon="ph ph-hourglass-medium" color="red" tinted
+    label="Stuck Transactions" value="4,277" sublabel="> 30 min old"
+/>
+
+{{-- clickable card with a trend sublabel --}}
+<x-synapse-stat-tile
+    variant="card" clickable href="{{ route('...') }}"
+    label="Transactions Today" value="0" sublabel="+0% vs yesterday (0)" sublabelColor="green"
+/>
+```
+
+**Props:**
+- `icon` (string, optional) - Icon class — Phosphor (recommended) e.g. `'ph ph-invoice'`, or FontAwesome e.g. `'fa-solid fa-file-invoice'` (see [Icons](../README.md#icons))
+- `color` (string, default: 'gray') - `'gray'`, `'blue'`, `'indigo'`, `'purple'`, `'red'`, `'orange'`, `'green'`
+- `label` / `value` (string, optional) - Caption / already-formatted value (caller formats numbers/currency); each can be overridden with a matching `<x-slot:label>` / `<x-slot:value>` for rich content
+- `valueColor` (string, optional) - `variant="tile"` only - value text color override, same palette as `color`
+- `bordered` (bool, default: true) - `variant="tile"` only - white card + border + rounded-xl vs gray-50 flat + rounded-lg (`false`)
+- `variant` (string, default: 'tile') - `'tile'` or `'card'`
+- `iconPosition` (string, default: 'left') - `variant="card"` only - `'left'` (icon square beside stacked title/value/sublabel), `'title'` (bare/circle icon inline in the title row), or `'background'` (large, low-opacity, cropped icon in the bottom-right corner)
+- `iconBackground` (bool, default: true) - both variants - colored square/circle behind the icon (`true`) vs a bare colored icon glyph (`false`)
+- `tinted` (bool, default: false) - `variant="card"` only - wash the whole card in `color` (bg/border/title/value/icon) vs a plain white card with a muted icon
+- `sublabel` / `sublabelColor` (string, optional) - `variant="card"` only - small caption line under the value; `sublabel` can be overridden with `<x-slot:sublabel>`
+- `href` (string, optional) - `variant="card"` only - wraps the tile in an `<a>`, implies clickable
+- `clickable` (bool, default: false) - `variant="card"` only - hover-shadow/cursor-pointer affordance without requiring `href` (e.g. a `wire:click` card)
+
+**Slots:**
+- Default - Extra content below the value (a badge, a progress bar)
+- `label` / `value` / `sublabel` - Override the matching prop with rich content
+
+---
+
 ### Confirm Dialog
 
 Modal confirmation for destructive actions:
@@ -280,7 +374,7 @@ Modal confirmation for destructive actions:
     confirmText="Delete"
     cancelText="Cancel"
     confirmColor="danger"
-    icon="fa-solid fa-trash" />
+    icon="ph ph-trash" />
 ```
 
 **Props:**
@@ -289,7 +383,7 @@ Modal confirmation for destructive actions:
 - `confirmText` (string, default: 'Confirm')
 - `cancelText` (string, default: 'Cancel')
 - `confirmColor` (string, default: 'danger')
-- `icon` (string, default: 'fa-solid fa-circle-exclamation')
+- `icon` (string, default: 'ph ph-warning-circle')
 
 ---
 
@@ -310,6 +404,54 @@ Slide-out side panel:
 - `title` (string, required) - Drawer header title
 
 ---
+
+### Lightbox
+
+Full-screen image preview on a dark backdrop. Place it once, then open it from anywhere with a window event:
+
+```blade
+<x-synapse-lightbox name="preview" />
+
+<button type="button" @click="$dispatch('open-lightbox-preview', { url: '/storage/photo.jpg', alt: 'Photo' })">
+    Preview
+</button>
+```
+
+**Props:**
+- `name` (string, default: 'lightbox') - Scopes the open/close events
+
+**Events (window):**
+- `open-lightbox-{name}` - Opens with detail `{ url, alt? }`
+- `close-lightbox-{name}` - Closes
+
+Also closes on backdrop click, the close button, or Escape.
+
+---
+
+### Modal
+
+```blade
+<x-synapse-modal name="edit-user" max-width="xl">
+    <div class="syn-modal-header">…</div>
+    <div class="syn-modal-body">…</div>
+    <div class="syn-modal-footer">…</div>
+</x-synapse-modal>
+```
+
+| Prop | Default | Description |
+|---|---|---|
+| `name` | `modal` | Event suffix — open with `$dispatch('open-modal-{name}')`, close with `close-modal-{name}` (also closes on Escape) |
+| `max-width` | `xl` | Panel width |
+
+Event names are matched lowercase by the browser, so keep `name` lowercase.
+
+### Toggler
+
+```blade
+<x-synapse-toggler id="is-active" name="is_active" label="Active" wire:model.live="isActive" />
+```
+
+Props: `id`, `name`, `label`, `checked` (false), `active-color` (`green`), `inline` (false).
 
 ### Toastr Notifications
 
@@ -367,7 +509,7 @@ Flexible alert component with dismissible functionality:
 <!-- Custom icon -->
 <x-synapse-alert
     type="success"
-    icon="fa-solid fa-check-double"
+    icon="ph ph-checks"
     message="Verified successfully!" />
 ```
 
@@ -376,7 +518,7 @@ Flexible alert component with dismissible functionality:
 - `title` (string, optional) - Alert title
 - `message` (string, optional) - Alert message (can also use slot for HTML)
 - `dismissible` (boolean, default: true) - Whether alert can be closed
-- `icon` (string, auto-assigned) - FontAwesome icon class (auto-assigned based on type)
+- `icon` (string, auto-assigned) - Icon class, Phosphor by default (auto-assigned based on type) — pass a FontAwesome class instead to override (see [Icons](../README.md#icons))
 - `border` (boolean, default: false) - Show left border accent
 - `solid` (boolean, default: false) - Use solid background instead of light variant
 
@@ -389,10 +531,10 @@ Flexible alert component with dismissible functionality:
 - Accessible with ARIA attributes
 
 **Default Icons:**
-- Success: `fa-solid fa-circle-check`
-- Warning: `fa-solid fa-triangle-exclamation`
-- Danger/Error: `fa-solid fa-circle-exclamation`
-- Info: `fa-solid fa-circle-info`
+- Success: `ph ph-check-circle`
+- Warning: `ph ph-warning`
+- Danger/Error: `ph ph-warning-circle`
+- Info: `ph ph-info`
 
 **Common Use Cases:**
 
@@ -427,9 +569,49 @@ Flexible alert component with dismissible functionality:
 
 ---
 
+## List Helpers
+
+### Per-Page Selector
+
+```blade
+<x-synapse-per-page-selector :paginator="$items" />
+```
+
+Renders a 10/15/25/50 page-size `<select>` bound to the host's `$perPage` (`wire:model.live="perPage"`) next to `$paginator->links()`. The host component must have a public `$perPage` property.
+
+### Sort Icon
+
+```blade
+<th><x-synapse-sort-icon field="name" :sort-field="$sortField" :sort-direction="$sortDirection" /> Name</th>
+```
+
+A link that calls the host's `sortBy('{field}')` and shows `ph-arrows-down-up` / `ph-caret-up` / `ph-caret-down`.
+
+### Excel Export Button
+
+```blade
+{{-- Sync: the action returns a download response --}}
+<x-synapse-excel-export-button mode="sync" action="exportToExcel" label="Export" exporting-label="Exporting…" />
+
+{{-- Async: background export tracked by an ExcelExport task (see WithExcelExport) --}}
+<x-synapse-excel-export-button
+    mode="async"
+    :task="$this->exportTask"
+    action="exportToExcel"
+    download-action="downloadExport"
+    dismiss-action="dismissExport"
+    label="Export" processing-label="Processing…" download-label="Download"
+    failed-label="Export failed" dismiss-label="Dismiss"
+/>
+```
+
+In async mode the button shows three states — idle, processing (polls), completed (download + dismiss) or failed. See [EXCEL.md](EXCEL.md#livewire-export-button).
+
 ## Advanced Select
 
-A fully featured, reusable **Livewire + Alpine.js select component**.
+A fully featured, reusable **Livewire + Alpine.js select component**. The replacement for the removed `select`/`multi-select` components (see the note above).
+
+> **v3.0.0:** the search input now lives inside the dropdown instead of nested in the bordered main box (fixes a double-border look under themes that border both), gained a rotating dropdown-arrow indicator, and the clear/pill-remove buttons now use Phosphor icons instead of a bare `✕` glyph.
 
 Supports:
 

@@ -6,6 +6,8 @@ namespace VmEngine\Synapse\Console\Commands\Generators;
 
 class MakeControllerCommand extends BaseGeneratorCommand
 {
+    protected $hidden = true;
+
     protected $signature = 'synapps:make-controller
                             {module : The module name}
                             {name? : The name of the controller}
@@ -20,6 +22,9 @@ class MakeControllerCommand extends BaseGeneratorCommand
 
     protected string $componentType = 'controller';
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getComponentOptions(): array
     {
         return [

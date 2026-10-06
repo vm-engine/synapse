@@ -33,10 +33,14 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:setup` | Initial setup wizard | Once on fresh install | No (overwrites) | N/A |
 | `synapps:config` | Regenerate config files | After config changes | Yes | ✅ Yes |
 | `synapps:discover` | Module discovery & deps | After module changes | Yes | ✅ Yes |
-| `synapps:patch-resources` | Patch JS/CSS/Vite/routes/seeder | After install, if assets missing | Yes | ✅ Yes |
-| `synapps:patch-tests` | Configure test discovery | After install, new modules | Yes | ✅ Yes |
+| `synapps:patch` | Patch JS/CSS/Vite/routes/seeder/tests | After install, if assets missing | Yes | ✅ Yes |
 | `synapps:link-errors` | Link error views | After custom error pages | Yes | ✅ Yes |
 | `synapps:copy-stubs` | Copy stub modules into synapps/modules | When you need example module code | Yes | No |
+| `synapps:copy-resources` | Re-copy stub layouts/CSS/JS/assets | Refreshing stub resources after an upgrade | Yes | No |
+| `synapps:copy-themes` | Copy stub themes | Refreshing bundled themes | Yes | No |
+| `synapps:make` | Create a module component (`object module name`, e.g. `livewire`, `--mfc/--sfc/--class`) | Building out a module | Yes | No |
+| `synapps:make-theme` | Create new theme from template | Custom themes | Yes | No |
+| `synapps:remove-module` | Move a module to `.trash` (or `--permanent`) and rediscover | Retiring a module | No | No |
 | `synapps:reconfig` | Interactively update core `apps.json` fields | Renaming app/changing domains after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |
@@ -45,6 +49,8 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapse:patch-composer` | Merge composer.local.json | Local dev with path repos | Yes | No |
 | `synapse:restore-composer` | Restore original composer.json | After patching | Yes | No |
 | `synapse:excel-cleanup` | Mark stale Excel tasks as failed | Scheduled or manual | Yes | No |
+| `synapps:searchable-setup` | Enable global search; (re)import nav + module searchables | Once to enable, then after module/language changes | Yes | No |
+| `synapps:searchable-forget` | Delete `content:*` searchable rows by source prefix | Module uninstall / cleanup | Yes | No |
 | `synapps:upgrade-audit` | Detect (and optionally auto-fix) legacy Synapse patterns | Before/while upgrading vm-engine/synapse | Yes | No |
 
 ### synapps:upgrade-audit
@@ -72,8 +78,7 @@ Interactive wizard that:
    - `vendor:publish --tag=synapse-config --force` - Publish config files (`config/synapse.php`, `config/synapps.php`)
    - `synapps:config` - Regenerate SynApps & Synapse configuration files
    - `synapps:link-errors` - Create symlink for error views
-   - `synapps:patch-resources` - Patch JS/CSS imports
-   - `synapps:patch-tests` - Configure testing infrastructure
+   - `synapps:patch` - Patch JS/CSS imports and configure testing infrastructure
    - `synapps:discover` - Discover modules and update dependencies
 
 **No follow-up required** - All configuration is automatically generated
@@ -90,8 +95,8 @@ php artisan synapps:config
 ```
 
 **What it does:**
-- Reads source configs from `synapps/config/{apps,system,modules}.json` and `.dev.json` overrides
-- Executes all config builders (Apps, System, Modules, Binding) through their lifecycle phases
+- Reads source configs from `synapps/config/{apps,modules}.json` and `.dev.json` overrides
+- Executes all config builders (Apps, Modules, Binding) through their lifecycle phases
 - Generates compiled configs in `synapps/config/compiled/`
 - Writes final configs to `config/synapps.php` and `config/synapse.php`
 
@@ -116,7 +121,7 @@ Critical command that:
 
 **Run after:** Creating modules, modifying `module.json`, changing dependencies
 
-### synapps:patch-resources
+### synapps:patch
 Patches Laravel resource files, wires per-layout CSS/JS split, and cleans up default Laravel files:
 
 **Creates per-layout entry files (if missing):**
@@ -146,10 +151,7 @@ Patches Laravel resource files, wires per-layout CSS/JS split, and cleans up def
 
 **Required npm packages:** `vite-plugin-static-copy` and `glob` (automatically included in `synapps:setup` dependencies)
 
-Safe to run multiple times — all operations are idempotent.
-
-### synapps:patch-tests
-Comprehensive test configuration that patches **4 files**:
+**Also configures testing infrastructure** (the `tests` object), patching **4 files**:
 
 **1. tests/Pest.php** - Adds module test paths to `->in()`:
 ```php
@@ -290,7 +292,6 @@ composer update
 - `::config()` - **Optimized method** - reads from cached `synapps.json`, generates if missing
 - `::generate()` - **Legacy method** - always regenerates configuration
 - **Apps Builder**: App-level config (`apps.json` + `apps.dev.json`)
-- **System Builder**: System config with protected keys (`system.json` + `system.dev.json`)
 - **Modules Builder**: Module discovery and merging (`modules.json` + `modules.dev.json`)
 - **Binding Builder**: Service container bindings
 
@@ -326,12 +327,12 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 **Configuration Files:**
 
 *Source:*
-- `synapps/config/{apps,system,modules}.json` - Base configs
-- `synapps/config/{apps,system,modules}.dev.json` - Dev overrides
+- `synapps/config/{apps,modules}.json` - Base configs
+- `synapps/config/{apps,modules}.dev.json` - Dev overrides
 - `config.json` - Protection rules
 
 *Compiled:*
-- `synapps/config/compiled/{apps,system,modules,binding}.json`
+- `synapps/config/compiled/{apps,modules,binding}.json`
 - `synapps/config/compiled/checksum` - Config hash
 
 ### Module Discovery Flow
@@ -847,7 +848,7 @@ class PostForm extends Component
 **Methods:**
 - `redirectBack(string $defaultRoute, array $parameters = [])` - Redirect to back URL or named route
 
-**JavaScript helper:** `withBack(url)` — global JS function (injected by `synapps:patch-resources`) that appends `?back=<current-url>` to a URL for use in Blade links.
+**JavaScript helper:** `withBack(url)` — global JS function (injected by `synapps:patch`) that appends `?back=<current-url>` to a URL for use in Blade links.
 
 See [docs/TRAITS.md#withreturnurl](docs/TRAITS.md#withreturnurl) for complete documentation.
 
@@ -886,41 +887,61 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 
 ## Blade Components
 
+> Registered tag is `synapse-{name}` (single hyphen, e.g. `<x-synapse-alert>`), not the `x-synapse::{name}` namespace notation — components are registered individually via `$blade->component(...)` in `SynapseViewServiceProvider`, not via a Blade component namespace.
+
 **Form Components:**
-- `<x-synapse::checkboxes name="" :options="[]" :model="[]" />`
-- `<x-synapse::radio-buttons name="" :options="[]" :model="" />`
-- `<x-synapse::select :options="[]" />`
-- `<x-synapse::multi-select name="" :options="[]" :model="[]" />`
-- `<x-synapse::password />`
-- `<x-synapse::currency currency="$" />`
-- `<x-synapse::datepicker :flatpickr="{}" />`
+- `<x-synapse-checkboxes name="" :options="[]" :model="[]" />`
+- `<x-synapse-radio-buttons name="" :options="[]" :model="" />`
+- `<x-synapse-password />`
+- `<x-synapse-currency currency="$" />`
+- `<x-synapse-datepicker :flatpickr="{}" />`
+- `<x-synapse-search-box placeholder="" />` — left search icon, optional `trailing` slot, all other attributes (`wire:model`, ...) pass through to the `<input>`.
+- `<x-synapse-adv-select wire-model="" :options="[['value'=>..,'label'=>..]]" />` — replaces the removed `select`/`multi-select`/`select2`; supports `multiple`, remote `searchMethod`/`loadMethod`, `disabled`.
+- `<x-synapse-toggler label="" />`
+- `<x-synapse-password-generator />`, `<x-synapse-drag-n-drop />`, `<x-synapse-file-drop />`
+
+**List Helpers:**
+- `<x-synapse-per-page-selector :paginator="$items" />` — 10/15/25/50 bound to the host's `$perPage` + pagination links.
+- `<x-synapse-sort-icon field="" :sort-field="$sortField" :sort-direction="$sortDirection" />` — calls the host's `sortBy()`.
+- `<x-synapse-excel-export-button mode="sync|async" action="" ... />` — pair async mode with the `WithExcelExport` trait (docs/EXCEL.md).
+
+**Layout Components:**
+- `<x-synapse-panel title="">` — card-shell wrapper with a `toolbar` slot; `collapsible`/`collapsed` for a click-to-toggle body.
+- `<x-synapse-stat-tile icon="" color="" label="" value="" />` — single-metric card. `variant="tile"` (default, icon square + label/value) or `variant="card"` (title-row layout, `iconPosition`, `tinted`, `sublabel`, `href`/`clickable`). `label`/`value`/(`sublabel`) accept matching named slots for rich content.
 
 **UI Components:**
-- `<x-synapse::confirm-dialog title="" message="" confirmText="" />`
-- `<x-synapse::drawer title="" />`
-- `<x-synapse::toastr />`
-- `<x-synapse::alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`
+- `<x-synapse-confirm-dialog title="" message="" confirmText="" />`
+- `<x-synapse-drawer title="" />`
+- `<x-synapse-modal name="" max-width="xl">` — `open-modal-{name}` / `close-modal-{name}` window events, Escape closes; keep `name` lowercase.
+- `<x-synapse-lightbox name="" />` — `$dispatch('open-lightbox-{name}', { url })`.
+- `<x-synapse-toastr />`
+- `<x-synapse-alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`
+- `<x-synapse-badge color="gray|brand|success|warning|danger|info" size="sm|md" icon="">` — pill status badge.
+
+All component `Alpine.data()` registrations live in `stubs/synapps/resources/js/synapse-components.js` (copied to `synapps/resources/js/`, imported by `synapps.js`, installed into existing projects by `synapps:patch`) — never add inline `<script>` blocks to component views: they don't run when a component first appears through a Livewire morph, and inline object literals break the CSP-safe Alpine build.
 
 **Alert Component (Detailed):**
 
 Auto-assigns icons by type:
-- Success: `fa-solid fa-circle-check`
-- Warning: `fa-solid fa-triangle-exclamation`
-- Danger/Error: `fa-solid fa-circle-exclamation`
-- Info: `fa-solid fa-circle-info`
+- Success: `ph ph-check-circle`
+- Warning: `ph ph-warning`
+- Danger/Error: `ph ph-warning-circle`
+- Info: `ph ph-info`
+
+(Pass `icon="..."` to override — any icon font class works.)
 
 Features: Alpine.js animations, dark mode, slot content, ARIA attributes
 
 ```blade
-<x-synapse::alert type="success" message="Saved!" />
+<x-synapse-alert type="success" message="Saved!" />
 
-<x-synapse::alert type="danger" title="Errors" :dismissible="false">
+<x-synapse-alert type="danger" title="Errors" :dismissible="false">
     <ul class="list-disc list-inside">
         @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
         @endforeach
     </ul>
-</x-synapse::alert>
+</x-synapse-alert>
 ```
 
 ---
@@ -958,7 +979,7 @@ Output placed in **current working directory** (where command runs).
 
 ## Testing
 
-**Framework:** PestPHP 3.x with Orchestra Testbench
+**Framework:** Pest 5.x (PHPUnit 13) with Orchestra Testbench 11
 
 **Structure:**
 ```
@@ -1072,16 +1093,16 @@ tests/
 ## Dependencies
 
 **Required:**
-- Laravel Framework 12.x|13.x
+- Laravel Framework ^13.0 (PHP ^8.5)
 - Livewire ^4.0
 - composer/semver ^3.0
 - openspout/openspout ^4.0
 - phpoffice/phpspreadsheet ^2.0
 
 **Dev:**
-- pestphp/pest ^3.0
-- pestphp/pest-plugin-laravel ^3.0
-- orchestra/testbench ^10.0
+- pestphp/pest ^5.0
+- pestphp/pest-plugin-laravel ^5.0
+- orchestra/testbench ^11.0
 - laradumps/laradumps ^4.0
 - phpstan/phpstan ^2.1
 - larastan/larastan ^3.8

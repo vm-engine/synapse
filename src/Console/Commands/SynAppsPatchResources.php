@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -11,75 +13,82 @@ class SynAppsPatchResources extends Command
      *
      * @var string
      */
-    protected $signature = 'synapps:patch-resources
-        {--theme : Only patch theme assets (CSS/JS)}
-        {--comment-default : Only patch web routes and database seeder}
-        {--css-sources : Only patch CSS @source directives}
-        {--npm-watch : Only patch package.json for npm run watch script}
-        {--js-back : Only patch app.js withBack global helper}
-        {--vite : Only patch vite.config.js}
-        {--split-layouts : Only patch per-layout CSS/JS split (synapps-*.css/js, base/frontend/guest entry files, vite inputs)}';
+    protected $signature = 'synapps:patch
+        {object?* : Resource(s) to patch — theme, seeder, css, npm, js, vite, layouts, tests. Omit to patch everything.}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Integrate Synapse resources into app.js, app.css, vite.config.js (with watch ignore), and clean default Laravel files';
+    protected $description = 'Integrate Synapse resources into app.js, app.css, vite.config.js (with watch ignore), configure testing infrastructure, and clean default Laravel files';
+
+    /**
+     * Module/package test paths added to tests/Pest.php's ->in() chain.
+     *
+     * @var array<int, string>
+     */
+    private array $testPathsToAdd = [
+        'Unit', // Add Unit directory for unit tests
+        '../vendor/vm-engine/synapse/tests/Feature', // Synapse Feature tests
+        '../synapps/modules/*/tests/Feature',
+        '../vendor/*/synmod-*/tests/Feature',
+        '../vendor/*/synmodule-*/tests/Feature',
+        '../vendor/*/synapps-*/tests/Feature',
+        '../vendor/vm-engine/synapse/tests/Unit', // Synapse Unit tests
+        '../synapps/modules/*/tests/Unit',
+        '../vendor/*/synmod-*/tests/Unit',
+        '../vendor/*/synmodule-*/tests/Unit',
+        '../vendor/*/synapps-*/tests/Unit',
+    ];
 
     /**
      * Execute the console command.
      */
     public function handle(): void
     {
-        $runAll = ! (
-            $this->option('theme') ||
-            $this->option('comment-default') ||
-            $this->option('css-sources') ||
-            $this->option('npm-watch') ||
-            $this->option('js-back') ||
-            $this->option('vite') ||
-            $this->option('split-layouts')
-        );
+        /** @var array<int, string> $objects */
+        $objects = $this->argument('object');
+        $runAll = $objects === [];
+        $wants = fn (string $name): bool => $runAll || in_array($name, $objects, true);
 
-        // Always patch synapps JS/CSS imports (unless a targeted option is given)
-        if ($runAll) {
-            $patches = [
-                'app.js — synapps import' => $this->patchAppJsImport(),
-                'app.css — synapps import' => $this->patchAppCssImport(),
-            ];
-        } else {
-            $patches = [];
-        }
+        // Always patch synapps JS/CSS imports (unless a targeted object is given)
+        $patches = $runAll ? [
+            'app.js — synapps import' => $this->patchAppJsImport(),
+            'app.css — synapps import' => $this->patchAppCssImport(),
+        ] : [];
 
-        if ($runAll || $this->option('css-sources')) {
+        if ($wants('css')) {
             $patches['app.css — @source directives'] = $this->patchCssSource();
         }
 
-        if ($runAll || $this->option('theme')) {
+        if ($wants('theme')) {
             $patches['app.css / app.js — theme assets'] = $this->patchThemeAssets();
         }
 
-        if ($runAll || $this->option('vite')) {
+        if ($wants('vite')) {
             $patches['vite.config.js'] = $this->patchViteConfig();
         }
 
-        if ($runAll || $this->option('comment-default')) {
+        if ($wants('seeder')) {
             $patches['routes/web.php'] = $this->patchWebRoutes();
             $patches['database/seeders/DatabaseSeeder.php'] = $this->patchDatabaseSeeder();
         }
 
-        if ($runAll || $this->option('npm-watch')) {
+        if ($wants('npm')) {
             $patches['package.json — watch script'] = $this->patchPackageJson();
         }
 
-        if ($runAll || $this->option('js-back')) {
+        if ($wants('js')) {
             $patches['app.js — global helpers'] = $this->patchAppJsGlobals();
         }
 
-        if ($runAll || $this->option('split-layouts')) {
-            $splitPatches = $this->patchSplitLayouts();
-            $patches = array_merge($patches, $splitPatches);
+        if ($wants('layouts')) {
+            $patches = array_merge($patches, $this->patchSplitLayouts());
+        }
+
+        if ($wants('tests')) {
+            $patches = array_merge($patches, $this->patchTests());
         }
 
         foreach ($patches as $label => $patched) {
@@ -103,6 +112,8 @@ class SynAppsPatchResources extends Command
             'synapps/resources/css — synapps-{base,app,frontend,guest}.css' => $this->createSynappsIntermediaryCss(),
             'synapps/resources/js  — synapps-{base,app,frontend,guest}.js' => $this->createSynappsIntermediaryJs(),
             'synapps/resources/css/tailwind-ref.css' => $this->createTailwindRefCss(),
+            'synapps/resources/css — lta.css → synapse-components.css migration' => $this->migrateLtaCssToComponentsCss(),
+            'synapps/resources/js — synapse-components.js' => $this->installComponentsJs(),
             'resources/css/base.css' => $this->createBaseCss(),
             'resources/css/frontend.css' => $this->createFrontendCss(),
             'resources/css/guest.css' => $this->createGuestCss(),
@@ -169,13 +180,13 @@ class SynAppsPatchResources extends Command
             ' * Minimal Tailwind v4 reference file — used by layout-specific CSS entry points',
             " * (resources/css/app.css, etc.) that need @apply but aren't the main CSS entry point.",
             ' *',
-            ' * Contains: @import "tailwindcss" + all custom @theme tokens (lta + theme-base).',
+            ' * Contains: @import "tailwindcss" + all custom @theme tokens (synapse-components + theme-base).',
             ' * NO @source directives — avoids re-scanning all blade/js files.',
             ' *',
             ' * Usage: @reference "../../synapps/resources/css/tailwind-ref.css";',
             ' */',
             '@import "tailwindcss";',
-            "@import './lta.css';",
+            "@import './synapse-components.css';",
             "@import '../themes/{$activeTheme}/css/theme-base.css';",
         ]);
 
@@ -235,7 +246,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($appCssPath);
+        $content = $this->readFile($appCssPath);
 
         // Replace direct synapps.css import → synapps-base.css
         $content = str_replace(
@@ -290,7 +301,9 @@ class SynAppsPatchResources extends Command
 
     /**
      * Rewrite resources/css/app.css from the monolith form to a focused single-import file.
-     * Detection: if `@import "tailwindcss"` is present, the file is still in monolith form.
+     * Detection: rewrite whenever the direct synapps.css import (monolith marker) is present —
+     * mirrors rewriteAppJsToFocused()'s detection, since patchAppCssImport() can re-add that
+     * direct import on a later run even after the file was already split.
      */
     protected function rewriteAppCssToFocused(): bool
     {
@@ -300,11 +313,11 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($cssPath);
+        $content = $this->readFile($cssPath);
 
-        // Already in focused form — skip
-        if (strpos($content, '@import "tailwindcss"') === false
-            && strpos($content, "@import 'tailwindcss'") === false) {
+        // Check for the direct synapps.css import (monolith marker)
+        if (strpos($content, "synapps/resources/css/synapps.css'") === false
+            && strpos($content, 'synapps/resources/css/synapps.css"') === false) {
             return false;
         }
 
@@ -334,7 +347,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($appJsPath);
+        $content = $this->readFile($appJsPath);
 
         // Replace direct synapps.js import → synapps-base.js
         $content = str_replace(
@@ -399,7 +412,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($jsPath);
+        $content = $this->readFile($jsPath);
 
         // Check for the direct synapps.js import (monolith marker)
         if (strpos($content, "synapps/resources/js/synapps.js'") === false
@@ -414,7 +427,8 @@ class SynAppsPatchResources extends Command
     }
 
     /**
-     * Patch the active-theme import lines in all 8 synapps-*.css and synapps-*.js files.
+     * Patch the active-theme import lines in all 8 synapps-*.css / synapps-*.js files
+     * and in tailwind-ref.css (the @reference target for @apply in layout CSS entries).
      * Updates the theme folder name to match the currently active theme.
      * Idempotent — only writes when the theme path has changed.
      */
@@ -428,6 +442,7 @@ class SynAppsPatchResources extends Command
             'synapps-app.css' => "../themes/{$activeTheme}/css/theme-app.css",
             'synapps-frontend.css' => "../themes/{$activeTheme}/css/theme-frontend.css",
             'synapps-guest.css' => "../themes/{$activeTheme}/css/theme-guest.css",
+            'tailwind-ref.css' => "../themes/{$activeTheme}/css/theme-base.css",
         ];
 
         $cssDir = synapps_path('resources/css');
@@ -438,7 +453,7 @@ class SynAppsPatchResources extends Command
                 continue;
             }
 
-            $content = file_get_contents($filePath);
+            $content = $this->readFile($filePath);
             $updated = preg_replace(
                 "/@import\s+['\"]\.\.\/themes\/[^'\"]+\/css\/theme-[a-z][a-z0-9-]*\.css['\"]\s*;/",
                 "@import '{$themePath}';",
@@ -466,7 +481,7 @@ class SynAppsPatchResources extends Command
                 continue;
             }
 
-            $content = file_get_contents($filePath);
+            $content = $this->readFile($filePath);
             $updated = preg_replace(
                 "/import\s+['\"]\.\.\/themes\/[^'\"]+\/js\/theme-[a-z][a-z0-9-]*\.js['\"]\s*;/",
                 "import '{$themePath}';",
@@ -483,6 +498,97 @@ class SynAppsPatchResources extends Command
     }
 
     /**
+     * Migrate an already-set-up project off the retired lta.css:
+     * 1. Copy synapse-components.css into the project if missing.
+     * 2. Rewrite synapps.css / tailwind-ref.css imports from ./lta.css to
+     *    ./synapse-components.css.
+     * 3. Delete the now-unused synapps/resources/css/lta.css.
+     *
+     * Idempotent — returns false once the project has already migrated.
+     */
+    protected function migrateLtaCssToComponentsCss(): bool
+    {
+        $cssDir = synapps_path('resources/css');
+        $ltaPath = $cssDir.'/lta.css';
+        $componentsPath = $cssDir.'/synapse-components.css';
+        $patched = false;
+
+        if (! file_exists($ltaPath) && file_exists($componentsPath)) {
+            return false;
+        }
+
+        if (! file_exists($componentsPath)) {
+            $stubPath = __DIR__.'/../../../stubs/synapps/resources/css/synapse-components.css';
+            file_put_contents($componentsPath, $this->readFile($stubPath));
+            $patched = true;
+        }
+
+        foreach (['synapps.css', 'tailwind-ref.css'] as $filename) {
+            $filePath = $cssDir.'/'.$filename;
+
+            if (! file_exists($filePath)) {
+                continue;
+            }
+
+            $content = $this->readFile($filePath);
+            $updated = preg_replace(
+                "/@import\s+['\"]\.\/lta\.css['\"]\s*;/",
+                "@import './synapse-components.css';",
+                $content
+            );
+
+            if ($updated !== $content) {
+                file_put_contents($filePath, $updated);
+                $patched = true;
+            }
+        }
+
+        if (file_exists($ltaPath)) {
+            unlink($ltaPath);
+            $patched = true;
+        }
+
+        return $patched;
+    }
+
+    /**
+     * Install synapse-components.js (the components' Alpine.data registrations,
+     * formerly inline <script>s in each view) and import it from synapps.js.
+     *
+     * Idempotent — an existing synapse-components.js or import is left untouched.
+     */
+    protected function installComponentsJs(): bool
+    {
+        $jsDir = synapps_path('resources/js');
+        $componentsPath = $jsDir.'/synapse-components.js';
+        $synappsJsPath = $jsDir.'/synapps.js';
+        $patched = false;
+
+        if (! file_exists($componentsPath)) {
+            $stubPath = __DIR__.'/../../../stubs/synapps/resources/js/synapse-components.js';
+            file_put_contents($componentsPath, $this->readFile($stubPath));
+            $patched = true;
+        }
+
+        if (! file_exists($synappsJsPath)) {
+            return $patched;
+        }
+
+        $content = $this->readFile($synappsJsPath);
+
+        if (str_contains($content, 'synapse-components.js')) {
+            return $patched;
+        }
+
+        $import = 'import "./synapse-components.js";';
+        $anchored = preg_replace('/^(import\s+flatpickr\s+from\s+["\']flatpickr["\'];)$/m', "$1\n{$import}", $content, 1);
+
+        file_put_contents($synappsJsPath, $anchored !== null && $anchored !== $content ? $anchored : $import."\n".$content);
+
+        return true;
+    }
+
+    /**
      * Expand the Vite input array in vite.config.js to include the 6 new layout entry points.
      * Idempotent — skips if resources/css/base.css is already listed.
      */
@@ -494,7 +600,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($viteConfigPath);
+        $content = $this->readFile($viteConfigPath);
 
         // Already expanded — idempotency check
         if (strpos($content, 'resources/css/base.css') !== false) {
@@ -541,7 +647,7 @@ class SynAppsPatchResources extends Command
         $jsLine = "import '../../synapps/resources/js/synapps.js';";
 
         $jsPatched = false;
-        $jsLines = file(resource_path('js/app.js'));
+        $jsLines = file(resource_path('js/app.js')) ?: [];
         $lastImportJs = 0;
         foreach ($jsLines as $row => $line) {
             if (strpos($line, $jsLine) !== false) {
@@ -573,7 +679,7 @@ class SynAppsPatchResources extends Command
         $cssLine = "@import '../../synapps/resources/css/synapps.css';";
 
         $cssPatched = false;
-        $cssLines = file(resource_path('css/app.css'));
+        $cssLines = file(resource_path('css/app.css')) ?: [];
         $lastImportCss = 0;
         foreach ($cssLines as $row => $line) {
             if (strpos($line, $cssLine) !== false) {
@@ -608,7 +714,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($cssPath);
+        $content = $this->readFile($cssPath);
 
         // Define @source directives to add
         $sourceDirectives = [
@@ -682,7 +788,7 @@ class SynAppsPatchResources extends Command
             $cssPath = resource_path('css/app.css');
             $cssLine = "@import '../../synapps/resources/themes/{$activeTheme}/css/theme.css';";
 
-            $content = file_get_contents($cssPath);
+            $content = $this->readFile($cssPath);
 
             // Remove old theme imports
             $content = preg_replace(
@@ -714,7 +820,7 @@ class SynAppsPatchResources extends Command
             $jsPath = resource_path('js/app.js');
             $jsLine = "import '../../synapps/resources/themes/{$activeTheme}/js/theme.js';";
 
-            $content = file_get_contents($jsPath);
+            $content = $this->readFile($jsPath);
 
             // Remove old theme imports
             $content = preg_replace(
@@ -755,7 +861,7 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
-        $content = file_get_contents($viteConfigPath);
+        $content = $this->readFile($viteConfigPath);
 
         $patched = false;
 
@@ -1017,12 +1123,14 @@ SERVER;
             return false;
         }
 
-        $content = file_get_contents($webRoutesPath);
-        $lines = file($webRoutesPath, FILE_IGNORE_NEW_LINES);
+        $content = $this->readFile($webRoutesPath);
+        $lines = file($webRoutesPath, FILE_IGNORE_NEW_LINES) ?: [];
 
-        // Check if default route exists and is not already commented
+        // Check if default route exists and is not already commented.
+        // Matches both the closure-based skeleton (`Route::get('/', function () {...})`)
+        // and the `Route::view('/', 'welcome')` form used by newer Laravel skeletons.
         $hasDefaultRoute = false;
-        $defaultRoutePattern = "/Route::get\s*\(\s*['\"]\/['\"]\s*,\s*function\s*\(\s*\)/";
+        $defaultRoutePattern = "/Route::(get\s*\(\s*['\"]\/['\"]\s*,\s*function\s*\(\s*\)|view\s*\(\s*['\"]\/['\"]\s*,)/";
 
         foreach ($lines as $line) {
             if (preg_match($defaultRoutePattern, $line) && ! $this->isCommented($line)) {
@@ -1066,6 +1174,8 @@ SERVER;
 
     /**
      * Check if there are other route definitions beyond the default welcome route.
+     *
+     * @param  array<int, string>  $lines
      */
     protected function hasOtherRouteDefinitions(array $lines, string $defaultRoutePattern): bool
     {
@@ -1109,6 +1219,8 @@ SERVER;
 
     /**
      * Comment out the default Laravel route (handles multi-line).
+     *
+     * @param  array<int, string>  $lines
      */
     protected function commentOutDefaultRoute(array &$lines, string $defaultRoutePattern): bool
     {
@@ -1160,8 +1272,8 @@ SERVER;
             return false;
         }
 
-        $content = file_get_contents($seederPath);
-        $lines = file($seederPath, FILE_IGNORE_NEW_LINES);
+        $content = $this->readFile($seederPath);
+        $lines = file($seederPath, FILE_IGNORE_NEW_LINES) ?: [];
 
         $patched = false;
 
@@ -1230,6 +1342,23 @@ SERVER;
     }
 
     /**
+     * Read a file's contents, throwing if the read fails.
+     * Callers already check file_exists() before calling this — a false
+     * result here means a genuine I/O failure (permissions, race), not a
+     * missing file.
+     */
+    protected function readFile(string $path): string
+    {
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            throw new \RuntimeException("Unable to read file: {$path}");
+        }
+
+        return $contents;
+    }
+
+    /**
      * Create a backup of a file before patching.
      * Only creates the backup once — skips if a .bak already exists.
      */
@@ -1260,7 +1389,7 @@ SERVER;
 
         $marker = '// Synapse global helpers';
 
-        $content = file_get_contents($jsPath);
+        $content = $this->readFile($jsPath);
 
         if (str_contains($content, $marker)) {
             return false;
@@ -1273,6 +1402,14 @@ window.withBack = (url) => {
     const separator = url.includes('?') ? '&' : '?';
     return url + separator + 'back=' + encodeURIComponent(window.location.href);
 };
+
+// Expose withBack as an Alpine magic ($withBack) so CSP-safe Alpine
+// expressions can call it — Alpine's CSP evaluator only resolves its own
+// reactive scope + registered magics, not arbitrary window globals.
+// Registered inside alpine:init so it works regardless of script load order.
+document.addEventListener('alpine:init', () => {
+    Alpine.magic('withBack', () => window.withBack);
+});
 
 // Re-compute the back URL at click time.
 // Livewire updates the browser URL AFTER DOM morph, so Alpine's :href
@@ -1312,11 +1449,7 @@ JS;
             return false;
         }
 
-        $packageJson = json_decode(file_get_contents($packageJsonPath), true);
-
-        if (! is_array($packageJson)) {
-            return false;
-        }
+        $packageJson = read_json_file($packageJsonPath);
 
         // Ensure scripts section exists
         if (! isset($packageJson['scripts'])) {
@@ -1340,6 +1473,421 @@ JS;
             $packageJsonPath,
             json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n"
         );
+
+        return true;
+    }
+
+    // ─── Test infrastructure (tests/Pest.php, .env.testing, phpunit.xml) ──────
+
+    /**
+     * Configure testing infrastructure: module paths in tests/Pest.php,
+     * .env.testing, composer.json's test script, and phpunit.xml.
+     *
+     * @return array<string, bool>
+     */
+    protected function patchTests(): array
+    {
+        return [
+            'tests/Pest.php — module paths' => $this->patchPestFile(),
+            '.env.testing' => $this->ensureEnvTesting(),
+            'composer.json — test script' => $this->ensureComposerTestScript(),
+            'phpunit.xml' => $this->patchPhpunitXml(),
+        ];
+    }
+
+    protected function patchPestFile(): bool
+    {
+        $pestPath = base_path('tests/Pest.php');
+
+        if (! file_exists($pestPath)) {
+            $this->components->error('tests/Pest.php not found.');
+            $this->components->info('Please ensure Pest is installed and tests/Pest.php exists.');
+
+            return false;
+        }
+
+        $content = $this->readFile($pestPath);
+
+        if ($this->isPestAlreadyPatched($content)) {
+            return false;
+        }
+
+        $patchedContent = $this->patchPestContent($content);
+
+        if ($patchedContent === null) {
+            $this->components->error('Failed to patch tests/Pest.php.');
+            $this->components->warn('Could not find the pest()->extend()->in() chain.');
+            $this->components->info('Please manually add module test paths to tests/Pest.php');
+
+            return false;
+        }
+
+        $this->createBackup($pestPath);
+        file_put_contents($pestPath, $patchedContent);
+
+        return true;
+    }
+
+    protected function ensureEnvTesting(): bool
+    {
+        $envTestingPath = base_path('.env.testing');
+
+        /** @var array<string, string> $requiredKeys */
+        $requiredKeys = [
+            'APP_ENV' => 'testing',
+            'APP_LOCALE' => 'en',
+            'APP_FALLBACK_LOCALE' => 'en',
+            'DB_CONNECTION' => 'sqlite',
+            'DB_DATABASE' => ':memory:',
+            'CACHE_STORE' => 'array',
+            'QUEUE_CONNECTION' => 'sync',
+            'SESSION_DRIVER' => 'array',
+            'MAIL_MAILER' => 'array',
+            'BCRYPT_ROUNDS' => '4',
+        ];
+
+        $defaultContent = <<<'ENV'
+APP_ENV=testing
+APP_KEY=
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+
+DB_CONNECTION=sqlite
+DB_DATABASE=:memory:
+
+CACHE_STORE=array
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=array
+MAIL_MAILER=array
+
+BCRYPT_ROUNDS=4
+
+ENV;
+
+        if (! file_exists($envTestingPath)) {
+            file_put_contents($envTestingPath, $defaultContent);
+
+            return true;
+        }
+
+        $existingContent = $this->readFile($envTestingPath);
+
+        /** @var array<string, string> $missingLines */
+        $missingLines = [];
+
+        foreach ($requiredKeys as $key => $value) {
+            if (! preg_match('/^'.preg_quote($key, '/').'=/m', $existingContent)) {
+                $missingLines[$key] = "{$key}={$value}";
+            }
+        }
+
+        if (empty($missingLines)) {
+            return false;
+        }
+
+        $this->createBackup($envTestingPath);
+        $appendContent = "\n".implode("\n", $missingLines)."\n";
+        file_put_contents($envTestingPath, rtrim($existingContent)."\n".$appendContent);
+
+        return true;
+    }
+
+    protected function ensureComposerTestScript(): bool
+    {
+        $composerPath = base_path('composer.json');
+
+        if (! file_exists($composerPath)) {
+            $this->components->error('composer.json not found.');
+
+            return false;
+        }
+
+        $composerContent = $this->readFile($composerPath);
+        $composer = json_decode($composerContent, true);
+
+        if (! isset($composer['scripts']['test'])) {
+            return false;
+        }
+
+        $testScript = $composer['scripts']['test'];
+
+        $hasConfigClear = false;
+        $hasConfigCache = false;
+        $hasTestEnvFlag = false;
+
+        foreach ($testScript as $command) {
+            if (str_contains($command, 'config:clear')) {
+                $hasConfigClear = true;
+            }
+            if (str_contains($command, 'config:cache')) {
+                $hasConfigCache = true;
+            }
+            if (str_contains($command, 'test --env=testing') || str_contains($command, 'test --env testing')) {
+                $hasTestEnvFlag = true;
+            }
+        }
+
+        if ($hasConfigClear && $hasConfigCache && $hasTestEnvFlag) {
+            return false;
+        }
+
+        $composer['scripts']['test'] = [
+            '@php artisan config:clear --ansi',
+            '@php artisan config:cache --ansi',
+            '@php artisan test --env=testing',
+        ];
+
+        $newComposerContent = json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $this->createBackup($composerPath);
+        file_put_contents($composerPath, $newComposerContent);
+
+        return true;
+    }
+
+    protected function isPestAlreadyPatched(string $content): bool
+    {
+        foreach ($this->testPathsToAdd as $path) {
+            if (! str_contains($content, $path)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function patchPestContent(string $content): ?string
+    {
+        // Pattern 1: pest()->extend()->use()->in(...) chain
+        $pattern1 = '/(pest\(\)->extend\([^)]+\)\s*->use\([^)]+\)\s*->in\(\s*)(.*?)(\s*\);)/s';
+
+        // Pattern 2: pest()->extend()->in(...) chain (without ->use())
+        $pattern2 = '/(pest\(\)->extend\([^)]+\)\s*(?:\/\/[^\n]*\n\s*)?->in\(\s*)(.*?)(\s*\);)/s';
+
+        $pattern = null;
+        $matches = [];
+
+        if (preg_match($pattern1, $content, $matches)) {
+            $pattern = $pattern1;
+        } elseif (preg_match($pattern2, $content, $matches)) {
+            $pattern = $pattern2;
+        } else {
+            return null;
+        }
+
+        $beforeIn = $matches[1];
+        $existingPaths = $matches[2];
+        $afterIn = $matches[3];
+
+        $existingPathsArray = $this->parseExistingPestPaths($existingPaths);
+        $allPaths = array_unique(array_merge($existingPathsArray, $this->testPathsToAdd));
+        $newPathsString = $this->buildPestPathsString($allPaths);
+        $newContent = $beforeIn.$newPathsString.$afterIn;
+
+        return preg_replace($pattern, $newContent, $content);
+    }
+
+    /** @return array<int, string> */
+    protected function parseExistingPestPaths(string $pathsString): array
+    {
+        preg_match_all("/'([^']+)'/", $pathsString, $matches);
+
+        return $matches[1];
+    }
+
+    /** @param  array<int, string>  $paths */
+    protected function buildPestPathsString(array $paths): string
+    {
+        $indent = "\n        ";
+        $lines = [];
+
+        foreach ($paths as $path) {
+            $lines[] = "'{$path}'";
+        }
+
+        return $indent.implode(','.$indent, $lines);
+    }
+
+    protected function patchPhpunitXml(): bool
+    {
+        $phpunitPath = base_path('phpunit.xml');
+
+        if (! file_exists($phpunitPath)) {
+            return false;
+        }
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+
+        if (! @$dom->load($phpunitPath)) {
+            $this->components->error('Failed to parse phpunit.xml.');
+
+            return false;
+        }
+
+        $modified = false;
+
+        if ($this->ensureTestSuites($dom)) {
+            $modified = true;
+        }
+
+        if ($this->ensurePhpEnvVars($dom)) {
+            $modified = true;
+        }
+
+        if ($modified) {
+            $this->createBackup($phpunitPath);
+            $dom->save($phpunitPath);
+        }
+
+        return $modified;
+    }
+
+    protected function ensureTestSuites(\DOMDocument $dom): bool
+    {
+        $modified = false;
+        $xpath = new \DOMXPath($dom);
+
+        $testsuitesNode = ($xpath->query('/phpunit/testsuites') ?: null)?->item(0);
+
+        if (! $testsuitesNode instanceof \DOMElement) {
+            $testsuites = $dom->createElement('testsuites');
+            $dom->documentElement->appendChild($testsuites);
+            $modified = true;
+        } else {
+            $testsuites = $testsuitesNode;
+        }
+
+        $requiredSuites = [
+            'Modules' => [
+                'synapps/modules/*/tests',
+            ],
+            'Packages' => [
+                'vendor/*/synmod-*/tests',
+                'vendor/*/synmodule-*/tests',
+                'vendor/*/synapps-*/tests',
+            ],
+        ];
+
+        if (! $this->testsuiteExists($xpath, 'Modules')) {
+            $this->addTestSuite($dom, $testsuites, 'Modules', $requiredSuites['Modules']);
+            $modified = true;
+        }
+
+        if (! $this->testsuiteExists($xpath, 'Packages')) {
+            $this->addTestSuite($dom, $testsuites, 'Packages', $requiredSuites['Packages']);
+            $modified = true;
+        }
+
+        return $modified;
+    }
+
+    protected function testsuiteExists(\DOMXPath $xpath, string $name): bool
+    {
+        $result = $xpath->query("/phpunit/testsuites/testsuite[@name='{$name}']");
+
+        return $result !== false && $result->length > 0;
+    }
+
+    /**
+     * @param  array<int, string>  $directories
+     * @param  array<int, string>  $excludes
+     */
+    protected function addTestSuite(\DOMDocument $dom, \DOMElement $testsuites, string $name, array $directories, array $excludes = []): void
+    {
+        $testsuite = $dom->createElement('testsuite');
+        $testsuite->setAttribute('name', $name);
+
+        foreach ($directories as $dir) {
+            $testsuite->appendChild($dom->createElement('directory', $dir));
+        }
+
+        foreach ($excludes as $exclude) {
+            $testsuite->appendChild($dom->createElement('exclude', $exclude));
+        }
+
+        $testsuites->appendChild($testsuite);
+    }
+
+    protected function ensurePhpEnvVars(\DOMDocument $dom): bool
+    {
+        $modified = false;
+        $xpath = new \DOMXPath($dom);
+
+        $phpNode = ($xpath->query('/phpunit/php') ?: null)?->item(0);
+
+        if (! $phpNode instanceof \DOMElement) {
+            $php = $dom->createElement('php');
+            $dom->documentElement->appendChild($php);
+            $modified = true;
+        } else {
+            $php = $phpNode;
+        }
+
+        // [name => [value, force]]
+        $requiredEnvVars = [
+            'APP_ENV' => ['testing', false],
+            'APP_LOCALE' => ['en', true],
+            'APP_FALLBACK_LOCALE' => ['en', true],
+            'DB_CONNECTION' => ['sqlite', false],
+            'DB_DATABASE' => [':memory:', false],
+            'CACHE_STORE' => ['array', false],
+            'SESSION_DRIVER' => ['array', false],
+            'QUEUE_CONNECTION' => ['sync', false],
+            'MAIL_MAILER' => ['array', false],
+            'BCRYPT_ROUNDS' => ['4', false],
+        ];
+
+        foreach ($requiredEnvVars as $name => [$value, $force]) {
+            if ($this->ensureEnvVar($dom, $xpath, $php, $name, $value, $force)) {
+                $modified = true;
+            }
+        }
+
+        return $modified;
+    }
+
+    protected function ensureEnvVar(\DOMDocument $dom, \DOMXPath $xpath, \DOMElement $php, string $name, string $value, bool $force = false): bool
+    {
+        $envVars = $xpath->query("/phpunit/php/env[@name='{$name}']");
+
+        if ($envVars !== false && $envVars->length > 0) {
+            $envVar = $envVars->item(0);
+
+            if (! $envVar instanceof \DOMElement) {
+                return false;
+            }
+
+            $changed = false;
+
+            if ($envVar->getAttribute('value') !== $value) {
+                $envVar->setAttribute('value', $value);
+                $changed = true;
+            }
+
+            $currentForce = $envVar->getAttribute('force');
+
+            if ($force && $currentForce !== 'true') {
+                $envVar->setAttribute('force', 'true');
+                $changed = true;
+            } elseif (! $force && $currentForce === 'true') {
+                $envVar->removeAttribute('force');
+                $changed = true;
+            }
+
+            return $changed;
+        }
+
+        $env = $dom->createElement('env');
+        $env->setAttribute('name', $name);
+        $env->setAttribute('value', $value);
+
+        if ($force) {
+            $env->setAttribute('force', 'true');
+        }
+
+        $php->appendChild($env);
 
         return true;
     }

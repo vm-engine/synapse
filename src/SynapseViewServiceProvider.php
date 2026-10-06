@@ -1,26 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use VmEngine\Synapse\Components\AdvSelect;
 use VmEngine\Synapse\Components\Alert;
+use VmEngine\Synapse\Components\Badge;
 use VmEngine\Synapse\Components\Checkboxes;
 use VmEngine\Synapse\Components\ConfirmDialog;
 use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\ExcelExportButton;
 use VmEngine\Synapse\Components\FileDrop;
+use VmEngine\Synapse\Components\Lightbox;
 use VmEngine\Synapse\Components\Modal;
-use VmEngine\Synapse\Components\MultiSelect;
+use VmEngine\Synapse\Components\Panel;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
 use VmEngine\Synapse\Components\PerPageSelector;
 use VmEngine\Synapse\Components\RadioButtons;
-use VmEngine\Synapse\Components\Select;
+use VmEngine\Synapse\Components\SearchBox;
 use VmEngine\Synapse\Components\SortIcon;
+use VmEngine\Synapse\Components\StatTile;
 use VmEngine\Synapse\Components\Toastr;
 use VmEngine\Synapse\Components\Toggler;
 use VmEngine\Synapse\Services\SynapseUtils;
@@ -44,7 +51,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $this->registerSynapseComponents();
     }
 
-    public function boot()
+    public function boot(): void
     {
         $blade = app('blade.compiler');
 
@@ -60,12 +67,19 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->directive('themeHeaders', function ($layoutType) {
             return "<?php echo app('synapse.theme')->renderHeaders({$layoutType}); ?>";
         });
+
+        // Makes <livewire:synotif::bell /> and <livewire:synotif::list /> resolvable
+        // from the MFC pairs under resources/views/components/notifications/.
+        Livewire::addNamespace('synotif', __DIR__.'/../resources/views/components/notifications');
+
+        // Makes <livewire:synsearch::palette /> resolvable from resources/views/components/searchable/.
+        Livewire::addNamespace('synsearch', __DIR__.'/../resources/views/components/searchable');
     }
 
     /**
      * Register theme view paths with fallback mechanism
      */
-    protected function registerThemeViews()
+    protected function registerThemeViews(): void
     {
         $activeTheme = config('synapps.apps.themes.active', 'default');
         $fallbackTheme = config('synapps.apps.themes.fallback', 'default');
@@ -87,7 +101,7 @@ class SynapseViewServiceProvider extends ServiceProvider
     /**
      * Set default Livewire layout to app.blade.php
      */
-    protected function setDynamicLayout()
+    protected function setDynamicLayout(): void
     {
         // Always use 'app' layout as default
         $layoutView = theme_service()->resolveThemeLayout('app');
@@ -95,17 +109,18 @@ class SynapseViewServiceProvider extends ServiceProvider
         config(['livewire.component_layout' => $layoutView]);
     }
 
-    private function registerSynapseComponents()
+    private function registerSynapseComponents(): void
     {
         // Use app('blade.compiler') directly instead of the Blade facade to avoid
         // stale facade instance issue where the Facade root and the container-resolved
         // BladeCompiler diverge (especially during testing with Livewire v4).
         $blade = app('blade.compiler');
         $blade->component(Alert::class, 'synapse-alert');
+        $blade->component(Badge::class, 'synapse-badge');
+        $blade->component(Panel::class, 'synapse-panel');
         $blade->component(Drawer::class, 'synapse-drawer');
         $blade->component(Modal::class, 'synapse-modal');
-        $blade->component(Select::class, 'synapse-select');
-        $blade->component(MultiSelect::class, 'synapse-multiselect');
+        $blade->component(Lightbox::class, 'synapse-lightbox');
         $blade->component(AdvSelect::class, 'synapse-adv-select');
         $blade->component(Password::class, 'synapse-password');
         $blade->component(PasswordGenerator::class, 'synapse-password-generator');
@@ -120,5 +135,8 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(FileDrop::class, 'synapse-file-drop');
         $blade->component(SortIcon::class, 'synapse-sort-icon');
         $blade->component(PerPageSelector::class, 'synapse-per-page-selector');
+        $blade->component(ExcelExportButton::class, 'synapse-excel-export-button');
+        $blade->component(SearchBox::class, 'synapse-search-box');
+        $blade->component(StatTile::class, 'synapse-stat-tile');
     }
 }

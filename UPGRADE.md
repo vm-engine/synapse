@@ -154,7 +154,7 @@ All features from beta are now stable. See [CHANGELOG.md](CHANGELOG.md) for full
 #### Recommendations
 
 - ✅ Review and update `.gitignore` to exclude compiled configs
-- ✅ Set up testing with `synapps:patch-tests`
+- ✅ Set up testing with `synapps:patch tests`
 - ✅ Configure error views with `synapps:link-errors`
 
 ---
@@ -283,6 +283,105 @@ All features from beta are now stable. See [CHANGELOG.md](CHANGELOG.md) for full
 
 ---
 
+### Upgrading to v3.0.0
+
+Changes below are sorted by impact — work through **Critical** first; each item blocks or silently breaks something if skipped. See [CHANGELOG.md](CHANGELOG.md#300---unreleased) for full technical detail on every item.
+
+#### 🔴 Critical
+
+**1. `<x-synapse-select>` / `<x-synapse-multiselect>` / Select2 removed.**
+Replaced entirely by `<x-adv-select>` (single and multiple selection, static or remote search). If any of your own views still render the old tags, they will throw an "unknown component" error at render time — this isn't a deprecation, the classes and views are deleted.
+
+- Find every usage: `grep -rn "x-synapse-select\|x-synapse-multiselect" resources/ synapps/`
+- Migrate each to `<x-adv-select>` — see [docs/COMPONENTS.md#advanced-select](docs/COMPONENTS.md#advanced-select) for the full prop reference. A single select becomes:
+  ```blade
+  {{-- Before --}}
+  <x-synapse-select :options="['a' => 'A', 'b' => 'B']" wire:model="type" />
+
+  {{-- After --}}
+  <x-adv-select wire-model="type" :options="[
+      ['value' => 'a', 'label' => 'A'],
+      ['value' => 'b', 'label' => 'B'],
+  ]" />
+  ```
+  A multi-select adds `:multiple="true"`.
+- Do this migration **before** updating `composer.json` to `^3.0` — the old components are gone the moment you upgrade, so migrate on the current version first, verify, then bump.
+
+**2. `system.json` config system removed entirely.**
+`synapps/config/system.json`, `system.dev.json`, the compiled `synapps/config/compiled/system.json`, the `System` config builder, and `config('synapps.system.*')` are all gone.
+
+- Delete the three files: `synapps/config/system.json`, `synapps/config/system.dev.json`, `synapps/config/compiled/system.json`.
+- Run `php artisan synapps:config` to regenerate.
+- If you relied on `synapps.system.public_path` to override the app's public directory, that override is gone — reconfigure it another way (e.g. your own service provider binding `path.public`).
+- If you had a custom `binding` key in `system.json` for `mergeBinding()`-style container overrides, that mechanism is also removed — move the binding into your own service provider.
+
+**3. Requires PHP ^8.5 and Laravel ^13.0** (dropped `12.x` support).
+```json
+{
+    "require": {
+        "php": "^8.5",
+        "laravel/framework": "^13.0",
+        "vm-engine/synapse": "^3.0"
+    }
+}
+```
+Upgrade PHP and Laravel first, confirm your app boots and its own test suite passes, **then** upgrade this package.
+
+#### 🟠 High
+
+**4. Alpine.js is now CSP-safe by default.**
+`SynapseServiceProvider` auto-forces `config('livewire.csp_safe') = true` on boot, and `SecureHeaders`'s `script-src` no longer includes `unsafe-eval`. This is good for security, but Alpine's CSP-safe parser rejects inline `x-data="{ ... }"` object literals with methods/arrow-functions, multi-statement directive expressions (e.g. `x-init="a(); b(); c()"`), and `@entangle()`.
+
+- Audit your own Blade views (not just this package's, which are already migrated) for inline `x-data` objects with methods, multi-statement attribute expressions, or `@entangle()`.
+- Migrate offending components to Alpine's `Alpine.data('name', () => ({ ... }))` registry pattern, called via `x-data="name"`.
+- If you need the old (less strict) behavior temporarily while migrating incrementally, override `livewire.csp_safe` back to `false` in your own `config/livewire.php` — but treat this as a stopgap, not a destination; re-enabling `unsafe-eval` weakens your CSP.
+- To find candidates: `grep -rn 'x-data="{' resources/ synapps/` and check for `=>`/`function`/`;` inside the match.
+
+**5. `synapps:patch-resources` and `synapps:patch-tests` replaced by `synapps:patch {object?*}`.**
+Option flags became positional object arguments; the two commands merged into one.
+
+| Before | After |
+|---|---|
+| `synapps:patch-resources --theme` | `synapps:patch theme` |
+| `synapps:patch-resources --css-sources` | `synapps:patch css` |
+| `synapps:patch-resources --npm-watch` | `synapps:patch npm` |
+| `synapps:patch-resources --js-back` | `synapps:patch js` |
+| `synapps:patch-resources --vite` | `synapps:patch vite` |
+| `synapps:patch-resources --split-layouts` | `synapps:patch layouts` |
+| `synapps:patch-resources --comment-default` | `synapps:patch seeder` |
+| `synapps:patch-tests` | `synapps:patch tests` |
+| `synapps:patch-resources` (no flags, full run) | `synapps:patch` (no argument, full run) |
+
+Update any deployment scripts, CI pipelines, or Composer scripts that invoke the old command names/flags directly.
+
+#### 🟡 Medium
+
+**6. `synapps:make-*` individual commands are hidden from `artisan list` (still fully functional).**
+`synapps:make {object} {module} {name?}` is now the documented primary entry point (e.g. `synapps:make model blog Post -mfs`), replacing 34 individually-listed commands as the "front door." The old direct commands (`synapps:make-model blog Post -mfs`, etc.) still work exactly as before — nothing to change unless you want to switch to the shorter unified form. See [docs/MODULE-GENERATOR.md](docs/MODULE-GENERATOR.md).
+
+**7. `<x-adv-select>` markup reworked.**
+The search input moved inside the dropdown (was previously nested in the bordered main box), gained a rotating dropdown-arrow indicator, and its clear/pill-remove buttons switched from a bare `✕` glyph to Phosphor icons. No prop/API changes — but if you have custom CSS targeting `adv-select`'s internal DOM structure (not just the documented props), re-check it against the new markup.
+
+#### 🟢 Low (no action required)
+
+- **New components:** `<x-synapse-badge>`, `<x-synapse-panel>` (with `collapsible`), `<x-synapse-search-box>`, `<x-synapse-stat-tile>` — purely additive. See [docs/COMPONENTS.md](docs/COMPONENTS.md).
+- **New in-app notification system** (`Notify` facade, `synotif:setup` command, `<livewire:synotif::bell />`) — disabled by default, opt-in via `php artisan synotif:setup`. See [docs/COMMANDS.md#synotifsetup](docs/COMMANDS.md#synotifsetup).
+- **Bug fixes** with no required action unless you were relying on the buggy behavior: welcome-route detection on Laravel 13's skeleton, a stray `synapps.css` re-import in the CSS split-layout rewrite, `is_decimal()`'s `TypeError` under strict types, `synapps:make-observer`'s missing model import, and tenancy central migrations now included in `migration_path` automatically when tenancy is enabled.
+- **Package-internal only, no consumer impact:** PHPStan raised from level 6 to 7, `declare(strict_types=1)` added across the package's own source.
+
+#### Quick Checklist
+
+- [ ] Migrate all `<x-synapse-select>`/`<x-synapse-multiselect>` usages to `<x-adv-select>` **on the current version**, before bumping composer.json
+- [ ] Delete `synapps/config/system.json`, `system.dev.json`, `compiled/system.json`; run `php artisan synapps:config`
+- [ ] Upgrade PHP to 8.5+ and Laravel to 13.x
+- [ ] Audit custom Blade views for CSP-unsafe inline `x-data`/`@entangle()` usage
+- [ ] Update any scripts calling `synapps:patch-resources --flag` / `synapps:patch-tests` to the new `synapps:patch {object}` form
+- [ ] `composer require vm-engine/synapse:^3.0`
+- [ ] `php artisan synapps:discover && php artisan synapps:config`
+- [ ] Run your test suite
+
+---
+
 ## Deprecation Warnings
 
 Synapse uses Laravel's logging system to warn about deprecated features:
@@ -370,7 +469,8 @@ When creating modules, specify compatible Synapse versions in `module.json`:
 | Synapse Version | Laravel | Livewire | PHP |
 |-----------------|---------|----------|-----|
 | v1.0.x – v1.7.x | ^12.0  | ^3.0     | >=8.2 |
-| v2.0.x – v2.2.x | ^12.0  | ^4.0     | >=8.2 |
+| v2.0.x – v2.4.x | ^12.0  | ^4.0     | >=8.2 |
+| v3.0.x+         | ^13.0  | ^4.0     | ^8.5  |
 
 ---
 

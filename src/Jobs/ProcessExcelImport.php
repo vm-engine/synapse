@@ -129,7 +129,7 @@ class ProcessExcelImport implements ShouldQueue
     }
 
     /**
-     * @return \Generator<int, array<string, mixed>>
+     * @return \Generator<int, array<array-key, mixed>>
      */
     private function getMappedRowsGenerator(SpoutReader $reader, int $startingRow, ColumnMapper $mapper): \Generator
     {

@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use VmEngine\Synapse\Traits\HasTypedInput;
 
 class SynAppsMakeTheme extends Command
 {
+    use HasTypedInput;
+
     /**
      * The name and signature of the console command.
      *
@@ -25,8 +30,8 @@ class SynAppsMakeTheme extends Command
 
     public function handle(): int
     {
-        $name = Str::slug($this->argument('name'));
-        $copyFrom = $this->option('copy-from');
+        $name = Str::slug($this->stringArgument('name'));
+        $copyFrom = $this->stringOption('copy-from');
 
         $themePath = synapps_path("resources/themes/{$name}");
         $sourcePath = synapps_path("resources/themes/{$copyFrom}");
@@ -72,7 +77,7 @@ class SynAppsMakeTheme extends Command
         $this->line('  5. Update synapps/config/apps.json to set active theme:');
         $this->line('     { "themes": { "active": "'.$name.'" } }');
         $this->line('  6. Run: php artisan synapps:config');
-        $this->line('  7. Run: php artisan synapps:patch-resources --split-layouts');
+        $this->line('  7. Run: php artisan synapps:patch layouts');
         $this->line('  8. Run: npm run build');
 
         return 0;
@@ -116,11 +121,7 @@ class SynAppsMakeTheme extends Command
             return;
         }
 
-        $config = json_decode(file_get_contents($jsonPath), true);
-
-        if (! is_array($config)) {
-            return;
-        }
+        $config = read_json_file($jsonPath);
 
         $config['id'] = $name;
         $config['name'] = Str::title(str_replace('-', ' ', $name)).' Theme';

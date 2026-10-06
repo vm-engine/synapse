@@ -1,9 +1,9 @@
 /**
  * Application Synapse Theme — Base JavaScript (Shared Across All Layouts)
  *
- * Contains: Reusable Alpine.js components and utility functions loaded
- * on EVERY page: dropdown, toast, modal, tabs, collapsible, tooltip,
- * formValidator, and the m4vm utility namespace.
+ * Contains: applicationThemeShell (dark mode for guest + frontend layouts) and
+ * reusable Alpine.js components loaded on EVERY page: dropdown, modal, tabs,
+ * collapsible, tooltip, formValidator. Toasts use <x-synapse-toastr />.
  */
 
 document.addEventListener('alpine:init', () => {
@@ -31,31 +31,6 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
             });
-        }
-    }));
-
-    // ============================================
-    // TOAST NOTIFICATION COMPONENT
-    // ============================================
-    Alpine.data('toast', () => ({
-        show: false,
-        message: '',
-        type: 'info', // success, warning, danger, info
-        duration: 3000,
-
-        trigger(message, type = 'info', duration = 3000) {
-            this.message = message;
-            this.type = type;
-            this.duration = duration;
-            this.show = true;
-
-            setTimeout(() => {
-                this.hide();
-            }, duration);
-        },
-
-        hide() {
-            this.show = false;
         }
     }));
 
@@ -186,176 +161,31 @@ document.addEventListener('alpine:init', () => {
 });
 
 // ============================================
-// UTILITY FUNCTIONS (Global Namespace)
+// THEME SHELL (guest + frontend layouts)
+// Persisted dark mode, same 'darkMode' key as applicationAppShell and the
+// default theme. Sets .dark on <html> so dark: variants also match <body>.
 // ============================================
-window.m4vm = {
-    /**
-     * Copy text to clipboard
-     */
-    copyToClipboard(text) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
-                console.log('Copied to clipboard');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-            });
-        } else {
-            // Fallback for older browsers
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-        }
-    },
+const registerThemeShell = () => {
+    Alpine.data('applicationThemeShell', () => ({
+        darkMode: Alpine.$persist(false).as('darkMode'),
 
-    /**
-     * Debounce function
-     */
-    debounce(func, wait = 300) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
+        init() {
+            this.applyDarkMode();
+        },
 
-    /**
-     * Format date relative to now
-     */
-    formatDate(date, format = 'relative') {
-        const d = new Date(date);
-        const now = new Date();
-        const diff = now - d;
+        toggleDarkMode() {
+            this.darkMode = !this.darkMode;
+            this.applyDarkMode();
+        },
 
-        if (format === 'relative') {
-            if (diff < 60000) return 'Just now';
-            if (diff < 3600000) {
-                const minutes = Math.floor(diff / 60000);
-                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-            }
-            if (diff < 86400000) {
-                const hours = Math.floor(diff / 3600000);
-                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-            }
-            if (diff < 604800000) {
-                const days = Math.floor(diff / 86400000);
-                return `${days} day${days > 1 ? 's' : ''} ago`;
-            }
-            return d.toLocaleDateString();
-        }
-
-        if (format === 'short') return d.toLocaleDateString();
-        if (format === 'long') {
-            return d.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-        if (format === 'time') {
-            return d.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-        return d.toLocaleString();
-    },
-
-    /**
-     * Format number with thousand separators
-     */
-    formatNumber(number, decimals = 0) {
-        return new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: decimals,
-            maximumFractionDigits: decimals
-        }).format(number);
-    },
-
-    /**
-     * Format currency
-     */
-    formatCurrency(amount, currency = 'USD') {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: currency
-        }).format(amount);
-    },
-
-    /**
-     * Truncate text with ellipsis
-     */
-    truncate(text, length = 100, suffix = '...') {
-        if (text.length <= length) return text;
-        return text.substring(0, length).trim() + suffix;
-    },
-
-    /**
-     * Slugify string
-     */
-    slugify(text) {
-        return text
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w\-]+/g, '')
-            .replace(/\-\-+/g, '-')
-            .replace(/^-+/, '')
-            .replace(/-+$/, '');
-    },
-
-    /**
-     * Check if element is in viewport
-     */
-    isInViewport(element) {
-        const rect = element.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
-    },
-
-    /**
-     * Smooth scroll to element
-     */
-    scrollTo(elementOrSelector, offset = 0) {
-        const element = typeof elementOrSelector === 'string'
-            ? document.querySelector(elementOrSelector)
-            : elementOrSelector;
-
-        if (!element) return;
-
-        const top = element.getBoundingClientRect().top + window.pageYOffset - offset;
-        window.scrollTo({ top: top, behavior: 'smooth' });
-    },
-
-    /**
-     * Get random color
-     */
-    randomColor() {
-        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-    },
-
-    /**
-     * Download data as file
-     */
-    downloadFile(data, filename, type = 'text/plain') {
-        const blob = new Blob([data], { type: type });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
+        applyDarkMode() {
+            document.documentElement.classList.toggle('dark', this.darkMode);
+        },
+    }));
 };
+
+document.addEventListener('alpine:init', registerThemeShell);
+
+if (window.Alpine) {
+    registerThemeShell();
+}

@@ -1,20 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Binding extends BuilderBase
 {
-    protected $providers = [];
+    /** @var array<int, mixed> */
+    protected array $providers = [];
 
-    public function init()
+    public function init(): void
     {
         $synapseConfig = include config_path('synapse.php');
         $this->synapps->config['binding'] = $synapseConfig['bindings'];
     }
 
-    public function loop($namespace, $config)
+    /** @param  array<string, mixed>  $config */
+    public function loop(string $namespace, array $config): void
     {
         if (isset($config['binding']) && isset($config['binding']['interface'])) {
             foreach ($config['binding']['interface'] as $contract => $service) {
@@ -29,13 +33,8 @@ class Binding extends BuilderBase
         }
     }
 
-    public function postLoop()
+    public function postLoop(): void
     {
-        $this->mergeBinding('interface');
-        $this->mergeBinding('class');
-        $this->mergeBinding('alias');
-        $this->mergeBinding('route');
-
         if (! empty($this->providers)) {
             $baseSystem = $this->synapps->config['system']['providers'] ?? [];
             $this->synapps->config['system']['providers'] = array_merge(
@@ -45,18 +44,7 @@ class Binding extends BuilderBase
         }
     }
 
-    private function mergeBinding($key)
-    {
-        $systemConfig = $this->synapps->config['system']['binding'][$key] ?? null;
-        if ($systemConfig) {
-            foreach ($systemConfig as $contract => $service) {
-                $this->synapps->config['binding'][$key][$contract] = $service;
-            }
-        }
-
-    }
-
-    public function finalize()
+    public function finalize(): void
     {
         file_put_contents(
             synapps_path('config/compiled/binding.json'),

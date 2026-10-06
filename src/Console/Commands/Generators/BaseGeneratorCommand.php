@@ -8,12 +8,15 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 use VmEngine\Synapse\Services\ModuleGenerator\ModuleGeneratorService;
+use VmEngine\Synapse\Traits\HasTypedInput;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
 
 abstract class BaseGeneratorCommand extends Command
 {
+    use HasTypedInput;
+
     protected ModuleGeneratorService $generator;
 
     protected function configure(): void
@@ -86,7 +89,7 @@ abstract class BaseGeneratorCommand extends Command
     protected function getModuleName(): string
     {
         if ($this->hasArgument('module') && $this->argument('module')) {
-            return $this->argument('module');
+            return $this->stringArgument('module');
         }
 
         if ($this->option('no-interaction')) {
@@ -106,7 +109,7 @@ abstract class BaseGeneratorCommand extends Command
     protected function getComponentName(): string
     {
         if ($this->hasArgument('name') && $this->argument('name')) {
-            return $this->argument('name');
+            return $this->stringArgument('name');
         }
 
         if ($this->option('no-interaction')) {
@@ -123,6 +126,9 @@ abstract class BaseGeneratorCommand extends Command
     /**
      * Get component-specific options
      * Override in subclasses to add custom options
+     */
+    /**
+     * @return array<string, mixed>
      */
     protected function getComponentOptions(): array
     {
@@ -145,7 +151,7 @@ abstract class BaseGeneratorCommand extends Command
     {
         // If custom path provided via option
         if ($this->hasOption('path') && $this->option('path')) {
-            return $this->option('path');
+            return $this->stringOption('path');
         }
 
         // Default to synapps/modules/{module} for directory modules

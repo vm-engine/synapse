@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VmEngine\Synapse\Services;
 
 use Illuminate\Foundation\Vite;
@@ -128,6 +130,8 @@ class ThemeService
     /**
      * Render Vite asset tags for the given entry points, silently skipping
      * any entries that are not present in the Vite manifest.
+     *
+     * @param  array<int, string>  $entries
      */
     private function safeViteRender(array $entries): string
     {
@@ -171,6 +175,8 @@ class ThemeService
 
     /**
      * Get CDN resources (css/js/headers) for a specific layout type
+     *
+     * @return array<int, mixed>
      */
     protected function getResources(string $type, string $layoutType): array
     {

@@ -10,6 +10,7 @@ import anchor from "@alpinejs/anchor";
 import morph from "@alpinejs/morph";
 import sort from "@alpinejs/sort";
 import flatpickr from "flatpickr";
+import "./synapse-components.js";
 
 Alpine.plugin(mask);
 Alpine.plugin(intersect);
@@ -37,7 +38,59 @@ Alpine.plugin(sort);
         }
     }
 
+    // Clones each .datatable column's <th> text onto its <td>s as
+    // data-label, so the CSS-only mobile card view (theme-app.css)
+    // can show "Label / Value" per cell without any Blade changes.
+    // <th class="datatable-col-checkbox|datatable-col-actions"> instead
+    // marks that column for special card placement (see synapse-components.css).
+    function initDatatableLabels(root) {
+        if (!root || typeof root.querySelectorAll !== "function") return;
+
+        root.querySelectorAll("table.datatable").forEach((table) => {
+            const headerCells = Array.from(
+                table.querySelectorAll(":scope > thead > tr:first-child > th")
+            );
+            if (!headerCells.length) return;
+
+            const labels = headerCells.map((th) => {
+                if (
+                    th.classList.contains("datatable-col-checkbox") ||
+                    th.classList.contains("datatable-col-actions")
+                ) {
+                    return null;
+                }
+                const text = (
+                    th.querySelector("p")?.textContent ?? th.textContent
+                ).trim();
+                return text || null;
+            });
+
+            table
+                .querySelectorAll(":scope > tbody > tr")
+                .forEach((row) => {
+                    Array.from(row.children).forEach((td, index) => {
+                        const th = headerCells[index];
+                        if (!th) return;
+
+                        if (th.classList.contains("datatable-col-checkbox")) {
+                            td.classList.add("datatable-col-checkbox");
+                            return;
+                        }
+                        if (th.classList.contains("datatable-col-actions")) {
+                            td.classList.add("datatable-col-actions");
+                            return;
+                        }
+                        if (labels[index]) {
+                            td.setAttribute("data-label", labels[index]);
+                        }
+                    });
+                });
+        });
+    }
+
     // On first load, nothing special — Alpine runs normally.
+    initDatatableLabels(document);
+
     // When Livewire navigates or morphs DOM, initialize Alpine on new root nodes.
     document.addEventListener("livewire:navigated", function (e) {
         // Livewire swaps a page root; try to find the root container and init
@@ -45,6 +98,7 @@ Alpine.plugin(sort);
         var root =
             e && e.detail && e.detail.root ? e.detail.root : document.body;
         initAlpineOn(root);
+        initDatatableLabels(root);
     });
 
     // Also handle Livewire partial updates (morphs)
@@ -54,6 +108,7 @@ Alpine.plugin(sort);
         try {
             if (component && component.el) {
                 initAlpineOn(component.el);
+                initDatatableLabels(component.el);
             }
         } catch (err) {
             // ignore

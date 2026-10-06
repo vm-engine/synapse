@@ -604,7 +604,7 @@ $view = theme_service()->resolveThemeLayout('app');
 
 ### Vite Entry Points
 
-The project uses **8 Vite entry points** — one `base` bundle shared by all pages plus a layout-specific bundle per page. `synapps:patch-resources` creates and wires all of these automatically.
+The project uses **8 Vite entry points** — one `base` bundle shared by all pages plus a layout-specific bundle per page. `synapps:patch` creates and wires all of these automatically.
 
 ```
 resources/css/base.css       ← Tailwind + Synapse core + theme-base.css (every page)
@@ -641,7 +641,7 @@ resources/js/guest.js        ← theme-guest.js (auth pages only)
 
 ### Synapse Intermediary CSS/JS Files
 
-`synapps/resources/css/` and `synapps/resources/js/` contain split intermediary files that import the active theme's split files. These are generated and patched by `synapps:patch-resources`:
+`synapps/resources/css/` and `synapps/resources/js/` contain split intermediary files that import the active theme's split files. These are generated and patched by `synapps:patch`:
 
 ```
 synapps/resources/css/synapps-base.css     ← imports synapps.css + active theme-base.css
@@ -655,11 +655,11 @@ synapps/resources/js/synapps-frontend.js   ← imports active theme-frontend.js
 synapps/resources/js/synapps-guest.js      ← imports active theme-guest.js
 ```
 
-When you run `synapps:patch-resources`, the theme import lines are updated to point at the currently active theme.
+When you run `synapps:patch`, the theme import lines are updated to point at the currently active theme.
 
 ### Vite Configuration
 
-`vite.config.js` is patched by `synapps:patch-resources` to include all 8 entry points plus static asset copying:
+`vite.config.js` is patched by `synapps:patch` to include all 8 entry points plus static asset copying:
 
 ```javascript
 import laravel from "laravel-vite-plugin";
@@ -938,7 +938,7 @@ Alpine.data("themeToggle", () => ({
 
 ### Assets not copying
 
-1. Run patch command: `php artisan synapps:patch-resources`
+1. Run patch command: `php artisan synapps:patch`
 2. Rebuild assets: `npm run build`
 3. Check Vite configuration in `vite.config.js`
 
