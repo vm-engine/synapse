@@ -188,13 +188,13 @@ Creates symlink/junction from `resources/views/errors` → `synapps/resources/vi
 - No admin required on Windows (uses junctions)
 
 ### synapps:reconfig
-Interactive updater for core `apps.json` fields (app code, name, author, domains, prefixes, title, description, multi-language), each defaulting to the current config value.
+Interactive updater for core `apps.json` fields (app code, name, author, domains, prefixes, title, description, multi-language, notifications, IP whitelist/blacklist), each defaulting to the current config value.
 
 ```bash
 php artisan synapps:reconfig
 ```
 
-**Preserves (not reset) on every run:** `themes`, `dependencies`, `csp`, `logging`, `security` — read from current config and carried forward unless `apps.json` is edited directly.
+**Preserves (not reset) on every run:** `themes`, `dependencies`, `csp`, `logging`, `security` — read from current config and carried forward unless `apps.json` is edited directly. Exception: `security.ip_whitelist` / `security.ip_blacklist` come from the prompts (enforced by the global `IpFilter` middleware; both empty = allow all).
 
 > Prior to v2.4.7 these four blocks were hardcoded and wiped on every run — upgrade if you use `synapps:reconfig` with customized themes/dependencies/CSP/logging.
 

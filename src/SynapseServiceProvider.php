@@ -68,6 +68,7 @@ use VmEngine\Synapse\Console\Commands\SynapsePatchComposer;
 use VmEngine\Synapse\Console\Commands\SynapseRestoreComposer;
 use VmEngine\Synapse\Console\Commands\SynotifSetup;
 use VmEngine\Synapse\Finder\SynapseFinder;
+use VmEngine\Synapse\Http\Middlewares\IpFilter;
 use VmEngine\Synapse\Http\Middlewares\LogApiRequest;
 use VmEngine\Synapse\Http\Middlewares\NoCacheHeaders;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
@@ -191,6 +192,7 @@ class SynapseServiceProvider extends ServiceProvider
         // Register SecureHeaders middleware globally (Laravel 12 compatible)
         $this->app->booted(function () {
             $kernel = $this->app->make(Kernel::class);
+            $kernel->prependMiddleware(IpFilter::class);
             $kernel->pushMiddleware(SecureHeaders::class);
         });
 

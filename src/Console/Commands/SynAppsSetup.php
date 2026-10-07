@@ -7,6 +7,7 @@ namespace VmEngine\Synapse\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use stdClass;
+use VmEngine\Synapse\Http\Middlewares\IpFilter;
 use VmEngine\Synapse\Notifications\NotificationSetup;
 use VmEngine\Synapse\Services\SynapseUtils;
 
@@ -114,6 +115,17 @@ class SynAppsSetup extends Command
             $this->components->info('Notifications skipped — install vm-engine/synapps-auth to enable.');
         }
 
+        $ipWhitelist = IpFilter::parseList(text(
+            label: 'Whitelisted IPs',
+            hint: 'Comma-separated IPs or CIDR ranges. Blank = allow all',
+            validate: fn (string $value) => $this->invalidIpMessage($value),
+        ));
+        $ipBlacklist = IpFilter::parseList(text(
+            label: 'Blacklisted IPs',
+            hint: 'Comma-separated IPs or CIDR ranges. Blank = block none',
+            validate: fn (string $value) => $this->invalidIpMessage($value),
+        ));
+
         $appsJson = [
             'app_code' => $appCode,
             'app_name' => $appName,
@@ -196,6 +208,8 @@ class SynAppsSetup extends Command
             ],
             'security' => [
                 'ssrf_allow_loopback' => false,
+                'ip_whitelist' => $ipWhitelist,
+                'ip_blacklist' => $ipBlacklist,
             ],
             'logging' => [
                 'sensitive_keys' => [
@@ -277,5 +291,15 @@ class SynAppsSetup extends Command
                 $this->components->info('Default theme installed.');
             }
         }
+    }
+
+    /**
+     * Prompt validation: error message naming invalid IP/CIDR entries, or null when all are valid.
+     */
+    protected function invalidIpMessage(string $value): ?string
+    {
+        $invalid = array_filter(IpFilter::parseList($value), fn (string $entry) => ! IpFilter::isValidEntry($entry));
+
+        return $invalid === [] ? null : 'Invalid IP/CIDR: '.implode(', ', $invalid);
     }
 }
