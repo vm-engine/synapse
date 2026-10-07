@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.1] - Unreleased
+## [3.3.0] - Unreleased
+
+### Added
+- `ReceivesImportTask` (Excel import contract): a `ProcessesImport` processor that also implements it gets its `ExcelImport` task via `setImportTask()` before the first chunk — for row numbers, acting as `user_id`, or a per-import report in `options`. Existing processors are unaffected.
 
 ### Fixed
+- `<x-synapse-modal>` focuses its first `[autofocus]` field when it opens (HTML `autofocus` only fires on page load, and CSP Alpine attributes can't hold a `$nextTick(() => …)` callback). **Existing projects:** re-copy `synapse-components.js` (`php artisan synapps:copy-resources`) and rebuild.
 - `<x-synapse-datepicker>` now honours `wire:model.live` (entangles live, so filters update immediately) and renders without an empty `$wire.entangle('')` when no `wire:model` is given.
 - `<x-synapse-split-pane>`: the mobile panel toggle stayed visible on desktop (the theme's `button[type="button"]` display out-ranked `lg:hidden`), taking a grid column and squeezing the aside to the handle width. The hiding rule now out-ranks it. **Existing projects:** re-copy `synapse-components.css` (`php artisan synapps:copy-resources`) and rebuild.
 

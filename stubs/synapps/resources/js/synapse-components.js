@@ -506,6 +506,9 @@ Alpine.data('synapseModal', (name) => ({
     show: false,
     open() {
         this.show = true;
+        // Focus the first [autofocus] field once visible: HTML autofocus only
+        // fires on page load, and CSP attributes can't hold a $nextTick callback.
+        this.$nextTick(() => this.$el.querySelector('[autofocus]')?.focus());
     },
     close() {
         if (!this.show) return;

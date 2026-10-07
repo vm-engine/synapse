@@ -15,6 +15,7 @@ use VmEngine\Synapse\Events\ExcelImportCompleted;
 use VmEngine\Synapse\Events\ExcelImportFailed;
 use VmEngine\Synapse\Models\ExcelImport;
 use VmEngine\Synapse\Services\Excel\Contracts\ProcessesImport;
+use VmEngine\Synapse\Services\Excel\Contracts\ReceivesImportTask;
 use VmEngine\Synapse\Services\Excel\Readers\SpoutReader;
 use VmEngine\Synapse\Services\Excel\Support\ChunkIterator;
 use VmEngine\Synapse\Services\Excel\Support\ColumnMapper;
@@ -55,6 +56,10 @@ class ProcessExcelImport implements ShouldQueue
 
         $columnMapper = ColumnMapper::fromSerializable($mapping);
         $processor = $this->resolveProcessor($task->processor_class);
+
+        if ($processor instanceof ReceivesImportTask) {
+            $processor->setImportTask($task);
+        }
 
         $reader = new SpoutReader;
         $skipRows = 0;
