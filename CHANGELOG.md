@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1] - Unreleased
+
+### Fixed
+- `<x-synapse-datepicker>` now honours `wire:model.live` (entangles live, so filters update immediately) and renders without an empty `$wire.entangle('')` when no `wire:model` is given.
+
 ## [3.2.0] - 2026-10-06
 
 ### Added

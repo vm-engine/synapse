@@ -4,7 +4,11 @@
 >
     <input
         type="text"
-        x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'), {{ $flatpickr }})"
+        @if ($attributes->wire('model')->value())
+            x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'){{ $attributes->wire('model')->hasModifier('live') ? '.live' : '' }}, {{ $flatpickr }})"
+        @else
+            x-data="synapseDatepicker(null, {{ $flatpickr }})"
+        @endif
         {{ $attributes->merge(['class' => 'form-input']) }}
     >
     <span class="input-group-item right pointer-events-none">
