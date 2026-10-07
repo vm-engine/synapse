@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.3.0] - Unreleased
+## [3.3.0] - 2026-10-07
 
 ### Added
+- IP whitelist/blacklist: global `IpFilter` middleware reads `security.ip_whitelist` / `security.ip_blacklist` (IPs or CIDR, v4/v6) from `synapps/config/apps.json`. Both empty = allow all; a blacklisted IP gets 403; when the whitelist is set, only listed IPs pass; blacklist wins. `synapps:setup` / `synapps:reconfig` prompt for both. Behind a proxy/load balancer, configure TrustProxies so `$request->ip()` is the real client.
 - `ReceivesImportTask` (Excel import contract): a `ProcessesImport` processor that also implements it gets its `ExcelImport` task via `setImportTask()` before the first chunk — for row numbers, acting as `user_id`, or a per-import report in `options`. Existing processors are unaffected.
 
 ### Fixed
