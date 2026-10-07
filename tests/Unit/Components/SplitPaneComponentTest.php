@@ -50,4 +50,13 @@ describe('SplitPane Component', function () {
             ->not->toContain('syn-split-pane-handle')
             ->not->toContain('syn-split-pane-resizable');
     });
+
+    it('hides the mobile toggle on desktop despite the theme button display', function () {
+        // theme-base.css loads after the component CSS and gives every
+        // button[type="button"]:not(.btn-icon) a display (specificity 0,2,1), so
+        // a single-class lg:hidden loses and the toggle takes a grid column.
+        $css = (string) file_get_contents(__DIR__.'/../../../stubs/synapps/resources/css/synapse-components.css');
+
+        expect($css)->toMatch('/\.syn-split-pane > \.syn-split-pane-toggle\[type="button"\]\s*\{\s*@apply lg:hidden;/');
+    });
 });

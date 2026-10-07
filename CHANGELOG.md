@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `<x-synapse-datepicker>` now honours `wire:model.live` (entangles live, so filters update immediately) and renders without an empty `$wire.entangle('')` when no `wire:model` is given.
+- `<x-synapse-split-pane>`: the mobile panel toggle stayed visible on desktop (the theme's `button[type="button"]` display out-ranked `lg:hidden`), taking a grid column and squeezing the aside to the handle width. The hiding rule now out-ranks it. **Existing projects:** re-copy `synapse-components.css` (`php artisan synapps:copy-resources`) and rebuild.
 
 ## [3.2.0] - 2026-10-06
 

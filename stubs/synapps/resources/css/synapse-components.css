@@ -1777,7 +1777,11 @@ button.syn-step-trigger {
     grid-template-columns: var(--syn-split-aside, 20rem) 0.5rem minmax(0, 1fr);
 }
 .syn-split-pane-toggle {
-    @apply self-start lg:hidden;
+    @apply self-start;
+}
+/* (0,3,0) so it beats the theme's `button[type="button"]:not(.btn-icon)` display (0,2,1), which loads later. */
+.syn-split-pane > .syn-split-pane-toggle[type="button"] {
+    @apply lg:hidden;
 }
 .syn-split-pane-aside {
     @apply hidden min-w-0 lg:block;
