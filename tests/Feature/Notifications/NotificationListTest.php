@@ -113,3 +113,12 @@ it('still renders a single root element when notifications are disabled', functi
 
     expect(Livewire::test('synotif::list')->html())->toMatch('/<div\b[^>]*\bwire:id="/');
 });
+
+it('renders without querying when notifications are disabled and the table does not exist', function () {
+    config(['synapps.apps.notifications.enabled' => false]);
+    Schema::dropIfExists('notifications');
+
+    Livewire::test('synotif::list')
+        ->assertOk()
+        ->assertViewHas('items', null);
+});

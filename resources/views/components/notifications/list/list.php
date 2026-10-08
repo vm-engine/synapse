@@ -19,10 +19,6 @@ new class extends Component
 
     public function getItemsProperty()
     {
-        if (! $this->enabled) {
-            return auth()->user()->notifications()->whereRaw('1 = 0')->paginate(1);
-        }
-
         $items = auth()->user()->notifications()
             ->latest()
             ->paginate(config('synapps.apps.notifications.modal_per_page', 15));
@@ -44,6 +40,6 @@ new class extends Component
 
     public function render()
     {
-        return view('synapse::components.notifications.list.list', ['items' => $this->items]);
+        return view('synapse::components.notifications.list.list', ['items' => $this->enabled ? $this->items : null]);
     }
 };
