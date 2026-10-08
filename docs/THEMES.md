@@ -71,7 +71,7 @@ Each page loads exactly **two** CSS bundles and **two** JS bundles:
 | Bundle | Loaded on | Contains |
 |--------|-----------|----------|
 | `base.css` + `base.js` | **Every page** | Tailwind utilities, Synapse core, `theme-base.*` |
-| `app.css` + `app.js` | Backend (`/admin/*`) | `theme-app.*` — sidebar, header, datatable |
+| `app.css` + `app.js` | Backend (`{backend_prefix}/*`, default `/apps/*`) | `theme-app.*` — sidebar, header, datatable |
 | `frontend.css` + `frontend.js` | Public pages | `theme-frontend.*` — CMS nav, editorial typography |
 | `guest.css` + `guest.js` | Auth pages | `theme-guest.*` — auth form container, OTP grid |
 

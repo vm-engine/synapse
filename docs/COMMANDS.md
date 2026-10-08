@@ -595,7 +595,7 @@ php artisan synapps:publish-settings
 
 1. Run `php artisan synapps:discover` to register the new module
 2. Run `php artisan migrate` if the module includes migrations
-3. Access the settings interface (usually at `/admin/settings` if using backend routes)
+3. Access the settings interface under the backend prefix (e.g. `/apps/settings` with the default `/apps` `backend_prefix`)
 
 ---
 

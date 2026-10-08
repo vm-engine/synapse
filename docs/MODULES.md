@@ -291,17 +291,18 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 ### 2. web.backend.php - Backend Routes
 
 ```php
-// URL: /admin/users (with system backend_prefix)
-// Route name: backend.users.index
+// URL: {backend_prefix}/{module url_prefix}/users, e.g. /apps/blog/users
+// Route name: backend.{module id}.users.index
 // Automatically requires authentication
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
 ```
 
 **Characteristics:**
 
--   URL prefixed with system `backend_prefix` (usually `/admin`)
--   Route name prefixed with `backend.`
--   Automatic authentication middleware
+-   Registered by **synapps-auth** (requires it to be installed)
+-   URL prefixed with `synapps.auth.routes.backend_prefix` (default `/apps`, set via `synauth:install` / `synauth:config`), then the module's `url_prefix`
+-   Route name prefixed with `{backend_name_prefix}.{module id}.` (default `backend.`)
+-   Automatic `auth` / `2fa-refresh` / `backend-access` middleware
 -   Ideal for admin panels
 
 ### 3. web.override.php - Override Routes

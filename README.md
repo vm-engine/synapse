@@ -32,7 +32,7 @@ A sophisticated modular architecture system for Laravel applications that enable
         }
     ],
     "require": {
-        "vm-engine/synapse": "^2.4"
+        "vm-engine/synapse": "^3.3"
     }
 }
 

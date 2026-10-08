@@ -363,7 +363,7 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 
 **3. SynapseRouteServiceProvider**: Route registration
 - `routes/web.php` - Standard (URL + name prefixed)
-- `routes/web.backend.php` - Backend (auto-auth, `/admin/*`, `backend.` prefix)
+- `routes/web.backend.php` - Backend — registered by **synapps-auth** (not this provider) when installed: URL `{backend_prefix}/{module url_prefix}/*`, name `{backend_name_prefix}.{module id}.*`, `web`+`auth`+`2fa-refresh`+`backend-access` middleware. Both prefixes come from `config('synapps.auth.routes.*')` (defaults `/apps` and `backend`), set via `synauth:install` / `synauth:config` — never hardcode them; use `backend_route()` / `route('backend.…')`.
 - `routes/web.override.php` - Override (no URL prefix, name prefixed)
 - `routes/api.php` - API routes (`/api/{prefix}/`, name `api.{id}.`)
 - `routes/api.override.php` - API override routes (`/api/`, name `api.{id}.`, no module prefix)
