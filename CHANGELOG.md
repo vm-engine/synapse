@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2026-10-08
+
+### Fixed
+- `<livewire:synotif::list />` (embedded in every app layout via `<x-synapse::notification-panel />`) crashed with `no such table: notifications` when in-app notifications were disabled during `synapps:setup`: its disabled branch still ran a `paginate()` count against the never-created table. It no longer queries anything while disabled.
+
+### Documentation
+- Install snippets (`README.md`, `docs/INSTALLATION.md`) required `vm-engine/synapse` `^2.4`; now `^3.3`.
+- `CLAUDE.md` / `docs/MODULES.md` / `docs/THEMES.md` / `docs/COMMANDS.md` described backend routes as a hardcoded `/admin/*`. `routes/web.backend.php` is registered by synapps-auth under `{backend_prefix}/{module url_prefix}` (default `/apps`, set via `synauth:install` / `synauth:config`), named `{backend_name_prefix}.{module id}.*`.
+
 ## [3.3.0] - 2026-10-07
 
 ### Added
