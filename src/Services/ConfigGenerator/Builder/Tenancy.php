@@ -15,20 +15,25 @@ class Tenancy extends BuilderBase
         }
 
         $this->loadTenancyConfig();
-
-        $this->loadModuleTenancyConfig();
     }
 
-    public function finalize(): void
+    /**
+     * Merge the replicable models a module declares under `tenancy` in its
+     * own module.json into the installation-wide list.
+     *
+     * @param  array<string, mixed>  $packageConfig
+     */
+    public function loop(string $packageNamespace, array $packageConfig): void
     {
-        if (! $this->hasTenancy()) {
+        // Only set once init() has loaded synapps/config/tenancy.json.
+        if (! isset($this->synapps->config['tenancy'])) {
             return;
         }
-        file_put_contents(
-            synapps_path('config/compiled/tenancy.json'),
-            json_encode($this->synapps->config['tenancy'], JSON_PRETTY_PRINT)
+
+        $this->synapps->config['tenancy']['replicable_models'] = array_merge(
+            $this->synapps->config['tenancy']['replicable_models'] ?? [],
+            $packageConfig['tenancy']['replicable_models'] ?? []
         );
-        unset($this->synapps->config['tenancy']);
     }
 
     private function loadTenancyConfig(): void
@@ -67,29 +72,8 @@ class Tenancy extends BuilderBase
         if (isset($this->synapps->config['auth'])) {
             array_unshift(
                 $this->synapps->config['tenancy']['excluded_prefixes'],
-                $this->synapps->config['auth']['routes']['backend_prefix'] ?? 'backend'
+                trim($this->synapps->config['auth']['routes']['backend_prefix'] ?? 'backend', '/')
             );
-        }
-    }
-
-    private function loadModuleTenancyConfig(): void
-    {
-        $modules = array_merge(
-            glob(synapps_path('modules/*/tenancy.json')) ?: [],
-            glob(base_path('vendor/*/synmod-*/tenancy.json')) ?: [],
-            glob(base_path('vendor/*/synmodule-*/tenancy.json')) ?: [],
-            glob(base_path('vendor/*/synapps-*/tenancy.json')) ?: [],
-        );
-
-        foreach ($modules as $modulePath) {
-            $moduleTenancyConfig = read_json_file($modulePath);
-
-            if (isset($moduleTenancyConfig['replicable_models'])) {
-                $this->synapps->config['tenancy']['replicable_models'] = array_merge(
-                    $this->synapps->config['tenancy']['replicable_models'] ?? [],
-                    $moduleTenancyConfig['replicable_models']
-                );
-            }
         }
     }
 

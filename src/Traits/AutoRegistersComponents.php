@@ -6,7 +6,6 @@ namespace VmEngine\Synapse\Traits;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
-use Livewire\Livewire;
 use ReflectionClass;
 
 /**
@@ -106,13 +105,20 @@ trait AutoRegistersComponents
         $componentsPath = $moduleRoot.'/resources/views/components';
         $classViewPath = $moduleRoot.'/resources/views/livewire';
 
-        Livewire::addNamespace(
-            $prefix,
-            is_dir($componentsPath) ? $componentsPath : null,
-            $livewireNamespace,
-            is_dir($livewirePath) ? $livewirePath : null,
-            is_dir($classViewPath) ? $classViewPath : null,
-        );
+        // Not Livewire::addNamespace() directly: SynapseServiceProvider rebinds
+        // 'livewire.finder' in its own register(), so a namespace added to the
+        // finder that exists right now is lost for any provider registered
+        // before it (package modules such as synapps-* load first). This runs
+        // against the current finder, if any, and again for a replacement.
+        $this->callAfterResolving('livewire.finder', function ($finder) use ($prefix, $componentsPath, $livewireNamespace, $livewirePath, $classViewPath) {
+            $finder->addNamespace(
+                $prefix,
+                viewPath: is_dir($componentsPath) ? $componentsPath : null,
+                classNamespace: $livewireNamespace,
+                classPath: is_dir($livewirePath) ? $livewirePath : null,
+                classViewPath: is_dir($classViewPath) ? $classViewPath : null,
+            );
+        });
     }
 
     /**

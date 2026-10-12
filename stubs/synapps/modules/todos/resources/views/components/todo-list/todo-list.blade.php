@@ -25,7 +25,7 @@
                 <div>
                     <label
                         class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('todos::todos.filters.sort_by') }}</label>
-                    <x-adv-select
+                    <x-synapse-adv-select
                         wire-model="sortBy"
                         :live="true"
                         :options="[
@@ -33,14 +33,14 @@
                             ['value' => 'created_asc', 'label' => __('todos::todos.sort.oldest_first')],
                             ['value' => 'due_date', 'label' => __('todos::todos.sort.due_date')],
                         ]"
-                    ></x-adv-select>
+                    ></x-synapse-adv-select>
                 </div>
 
                 {{-- Filter Status --}}
                 <div>
                     <label
                         class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('todos::todos.filters.status') }}</label>
-                    <x-adv-select
+                    <x-synapse-adv-select
                         wire-model="filterCompleted"
                         :live="true"
                         :options="[
@@ -48,7 +48,7 @@
                             ['value' => 'pending', 'label' => __('todos::todos.status.pending')],
                             ['value' => 'completed', 'label' => __('todos::todos.status.completed')],
                         ]"
-                    ></x-adv-select>
+                    ></x-synapse-adv-select>
                 </div>
 
                 {{-- Filter Overdue --}}

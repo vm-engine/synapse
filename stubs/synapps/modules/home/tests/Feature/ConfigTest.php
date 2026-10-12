@@ -30,7 +30,6 @@ describe('SynapseConfig', function () {
     it('check if config files compiled properly', function () {
         expect(file_exists(synapps_path('config/compiled/apps.json')))->toBeTrue();
         expect(file_exists(synapps_path('config/compiled/binding.json')))->toBeTrue();
-        expect(file_exists(synapps_path('config/compiled/checksum')))->toBeTrue();
 
         $compiledApps = json_decode(
             file_get_contents(synapps_path('config/compiled/apps.json')),

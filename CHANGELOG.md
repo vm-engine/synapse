@@ -12,7 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `VmEngine\Synapse\Services\ConfigDiff` — recursive diff/merge helpers for the `*.json` + `*.dev.json` config pairs.
 
 ### Changed
+- Tenancy config: a module's replicable models are now read from `tenancy.replicable_models` in its own `module.json` and merged into `synapps.tenancy.replicable_models`. The separate per-module `tenancy.json` file is no longer read.
 - Dev config overlays (`apps.dev.json`, `auth.dev.json`) now replace lists instead of merging them by index, so a dev override can shorten or empty a base list (e.g. `security.ip_whitelist`). Previously a dev list shorter than the base list kept the base list's trailing entries.
+
+### Fixed
+- `AutoRegistersComponents`: Livewire components of a package module whose provider registers before `SynapseServiceProvider` were never found (`Unable to find component`), because Synapse replaces the Livewire finder during its own registration. The namespace is now applied to whichever finder ends up bound.
+- Tenancy config never reached the app: the builder removed the `tenancy` section from the compiled `synapps.json`, so `config('synapps.tenancy.*')` was always `null` even after `tenancy:setup`. It is now kept (and the unused `compiled/tenancy.json` is no longer written).
+- The backend prefix added to `synapps.tenancy.excluded_prefixes` kept its leading slash (`/apps`) and so never matched a path segment.
+- Module stubs: the todos list view used the unregistered `<x-adv-select>` (now `<x-synapse-adv-select>`), and the home module's config test asserted a `compiled/checksum` file that is no longer generated.
 
 ## [3.3.1] - 2026-10-08
 
