@@ -26,6 +26,7 @@ use VmEngine\Synapse\Components\KanbanCard;
 use VmEngine\Synapse\Components\KanbanColumn;
 use VmEngine\Synapse\Components\Lightbox;
 use VmEngine\Synapse\Components\Modal;
+use VmEngine\Synapse\Components\NavBadge;
 use VmEngine\Synapse\Components\Panel;
 use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
@@ -125,6 +126,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade = app('blade.compiler');
         $blade->component(Alert::class, 'synapse-alert');
         $blade->component(Badge::class, 'synapse-badge');
+        $blade->component(NavBadge::class, 'synapse-nav-badge');
         $blade->component(Panel::class, 'synapse-panel');
         $blade->component(Drawer::class, 'synapse-drawer');
         $blade->component(Modal::class, 'synapse-modal');

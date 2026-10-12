@@ -293,6 +293,55 @@ class InvoicePaid extends Notification
 
 `enabled`/`log_channel` are set interactively by `synotif:setup` (or during `synapps:setup`/`synapps:reconfig`). `dropdown_limit`/`modal_per_page` are tuning knobs — edit `apps.json` directly and run `php artisan synapps:config` to change them.
 
+## Menu badges
+
+A backend menu item can show a count (pending items, unread, to review). Name a badge class on the item in the module's `module.json`, then run `php artisan synapps:config`:
+
+```json
+"pending": { "id": "pending", "name": "__mod::menu.be.pending", "route": "mod.pending.index", "acl": "mod.pending",
+             "badge": "Vendor\\Module\\Nav\\PendingBadge" }
+```
+
+```php
+use VmEngine\Synapse\Nav\NavBadge;
+
+final class PendingBadge extends NavBadge
+{
+    public function count(): ?int
+    {
+        return Task::query()->where('status', 'pending')->count();
+    }
+
+    public static function refreshOn(): array
+    {
+        return [Task::class];   // recount when a Task is saved or deleted
+    }
+}
+```
+
+| Method | Default | Meaning |
+|---|---|---|
+| `count()` | required | The number. `null` or `0` shows nothing; above 99 shows `99+`. |
+| `refreshOn()` | `[]` | What makes the cached count stale: Eloquent model classes (any save or delete) and/or event classes (when fired). |
+| `ttl()` | `3600` | Seconds the count may stay cached when nothing refreshes it first. `0` = never cache, `null` = keep until refreshed. |
+| `scope()` | `''` | Cache variant for counts that differ per viewer, e.g. `(string) auth()->id()`. |
+
+Refresh by hand where events do not reach — bulk `update()`/`delete()` queries fire no model events:
+
+```php
+synav()->refreshBadge(PendingBadge::class);            // for everyone
+synav()->refreshBadge(MyTasksBadge::class, $userId);   // one scope only
+synav()->refreshBadges();                              // every badge
+```
+
+- A parent item shows the sum of the children the current user may see.
+- The class is resolved from the container. Keep `count()` to a single fast query.
+- A badge class that is missing or throws is skipped and logged; it never breaks the menu.
+- Counts use the project's cache store. With the `array` store they are recounted on every request.
+- Backend menu only.
+
+**Existing projects:** the badge is rendered by `<x-synapse-nav-badge :item="$item" />` in the host's `menu-item` and `submenu-item` nav views. Run `php artisan synapps:patch layouts` to add that line (safe to re-run; a customised view is reported and left alone).
+
 ## Global Search
 
 Opt-in backend command palette (Ctrl/⌘+K) over pages and module content.

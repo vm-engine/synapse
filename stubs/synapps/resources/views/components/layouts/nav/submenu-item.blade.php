@@ -18,6 +18,7 @@
             <span class="{{ $item['icon'] }}"></span>
         @endif
         {{ synav()->translate($item['name']) }}
+        <x-synapse-nav-badge :item="$item" />
 
         @isset($item['sub'])
             <x-synapps::layouts.nav.arrow :itemKey="$itemKey" />

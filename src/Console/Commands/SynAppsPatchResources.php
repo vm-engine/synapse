@@ -124,7 +124,49 @@ class SynAppsPatchResources extends Command
             'resources/js/app.js — rewrite to focused import' => $this->rewriteAppJsToFocused(),
             'synapps-*.css / synapps-*.js — theme import lines' => $this->patchThemeImportLines(),
             'vite.config.js — expand input array' => $this->expandViteInputs(),
+            'synapps/resources/views — nav badge line' => $this->patchNavBadgeViews(),
         ];
+    }
+
+    /**
+     * Add <x-synapse-nav-badge> to the host's menu-item / submenu-item views, right after the
+     * item name (idempotent). A view customised beyond recognition is reported, not touched.
+     */
+    protected function patchNavBadgeViews(): bool
+    {
+        $tag = '<x-synapse-nav-badge :item="$item" />';
+        $name = '\{\{\s*synav\(\)->translate\(\$item\[\'name\'\]\)\s*\}\}';
+        $patched = false;
+
+        foreach (['menu-item.blade.php', 'submenu-item.blade.php'] as $file) {
+            $path = synapps_path('resources/views/components/layouts/nav/'.$file);
+            if (! file_exists($path)) {
+                continue;
+            }
+
+            $view = (string) file_get_contents($path);
+            if (str_contains($view, '<x-synapse-nav-badge')) {
+                continue;
+            }
+
+            // The name on its own line, optionally closed by the </span> that wraps it (menu-item).
+            $pattern = '/^([ \t]*)'.$name.'[ \t]*\n(?:([ \t]*)<\/span>[ \t]*\n)?/m';
+            if (preg_match($pattern, $view, $match, PREG_OFFSET_CAPTURE) !== 1) {
+                $this->components->warn("Not patched: {$file} is customised — add {$tag} after the item name by hand.");
+
+                continue;
+            }
+
+            $wrapped = isset($match[2]) && $match[2][1] !== -1;
+            $indent = $wrapped ? $match[2][0] : $match[1][0];
+            $insert = ($wrapped ? "\n" : '').$indent.$tag."\n";
+            $offset = $match[0][1] + strlen($match[0][0]);
+
+            file_put_contents($path, substr($view, 0, $offset).$insert.substr($view, $offset));
+            $patched = true;
+        }
+
+        return $patched;
     }
 
     /**

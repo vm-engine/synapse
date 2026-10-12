@@ -72,6 +72,7 @@ use VmEngine\Synapse\Http\Middlewares\IpFilter;
 use VmEngine\Synapse\Http\Middlewares\LogApiRequest;
 use VmEngine\Synapse\Http\Middlewares\NoCacheHeaders;
 use VmEngine\Synapse\Http\Middlewares\SecureHeaders;
+use VmEngine\Synapse\Nav\NavBadgeRepository;
 use VmEngine\Synapse\Services\DbConfig;
 use VmEngine\Synapse\Services\DbLang;
 use VmEngine\Synapse\Services\SynapseUtils;
@@ -90,6 +91,10 @@ class SynapseServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Menu badges: listen for what each declared badge says makes its count stale. After boot,
+        // so every module's menu config is in place.
+        $this->app->booted(fn () => $this->app->make(NavBadgeRepository::class)->registerListeners());
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../stubs/config/synapse.php' => config_path('synapse.php'),
@@ -217,6 +222,8 @@ class SynapseServiceProvider extends ServiceProvider
         $this->app->singleton('synav', function ($app) {
             return new SyNav;
         });
+        // Scoped, not singleton: its per-request memo must not outlive a request on long-running servers.
+        $this->app->scoped(NavBadgeRepository::class);
         $this->app->singleton('synsearchable', function ($app) {
             return new SynSearchable;
         });

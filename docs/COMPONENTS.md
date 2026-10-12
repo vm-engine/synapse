@@ -301,6 +301,18 @@ Pill-shaped status/label badge with color variants and an optional icon:
 
 ---
 
+### Nav Badge
+
+The count beside a backend menu item. It is already called from the nav views (`menu-item`, `submenu-item`); a module only names a badge class on its menu item — see [README → Menu badges](../README.md#menu-badges).
+
+```blade
+<x-synapse-nav-badge :item="$item" />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `item` | array | The menu item from `config('synapps.nav.backend')`. Renders nothing when it (and its visible children) has nothing to count. |
+
 ### Panel
 
 Card-shell wrapper for list/form pages — a header (title + optional toolbar) and a body slot. Replaces the hand-rolled `rounded-2xl border ... dark:bg-white/3` card markup:

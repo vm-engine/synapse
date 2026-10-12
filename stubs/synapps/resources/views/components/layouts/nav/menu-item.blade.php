@@ -25,6 +25,8 @@
             {{ synav()->translate($item['name']) }}
         </span>
 
+        <x-synapse-nav-badge :item="$item" />
+
         @isset($item['sub'])
             <x-synapps::layouts.nav.arrow :itemKey="$itemKey" />
         @endisset

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `synapps:reconfig --dev` writes only the answers changed during the run to `synapps/config/apps.dev.json` (merged into what is already there) and leaves `apps.json` untouched.
 - `VmEngine\Synapse\Services\ConfigDiff` — recursive diff/merge helpers for the `*.json` + `*.dev.json` config pairs.
+- Menu badges: a backend menu item can name a badge class in `module.json` (`"badge"`). Extend `VmEngine\Synapse\Nav\NavBadge` (`count()`, `refreshOn()`, `ttl()`, `scope()`); counts are cached and refreshed by the declared models/events or with `synav()->refreshBadge()` / `refreshBadges()`. Parents sum their visible children. Rendered by `<x-synapse-nav-badge>`; `synapps:patch layouts` adds it to an existing host's nav views. See README → Menu badges.
 
 ### Changed
 - Tenancy config: a module's replicable models are now read from `tenancy.replicable_models` in its own `module.json` and merged into `synapps.tenancy.replicable_models`. The separate per-module `tenancy.json` file is no longer read.
