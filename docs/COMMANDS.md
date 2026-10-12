@@ -472,7 +472,12 @@ Interactive configuration updater for an already-set-up project. Re-prompts for 
 
 ```bash
 php artisan synapps:reconfig
+
+# Per-developer override: write only the answers you changed to apps.dev.json
+php artisan synapps:reconfig --dev
 ```
+
+With `--dev`, `apps.json` is left untouched: only the values that differ from the current effective config are merged into `synapps/config/apps.dev.json` (existing entries there are kept).
 
 ### What it does
 

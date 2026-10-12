@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
+use VmEngine\Synapse\Services\ConfigDiff;
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Apps extends BuilderBase
@@ -25,7 +26,7 @@ class Apps extends BuilderBase
         }
 
         $tmpEnvClient = read_json_file($synappsPath.'/config/apps.dev.json');
-        $this->synapps->config['apps'] = array_replace_recursive(
+        $this->synapps->config['apps'] = ConfigDiff::merge(
             $this->synapps->config['apps'],
             $tmpEnvClient
         );

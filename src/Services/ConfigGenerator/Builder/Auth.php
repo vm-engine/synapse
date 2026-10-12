@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace VmEngine\Synapse\Services\ConfigGenerator\Builder;
 
+use VmEngine\Synapse\Services\ConfigDiff;
 use VmEngine\Synapse\Services\ConfigGenerator\BuilderBase;
 
 class Auth extends BuilderBase
@@ -23,7 +24,7 @@ class Auth extends BuilderBase
         }
 
         $tmpEnvAuth = read_json_file(synapps_path('config/auth.dev.json'));
-        $this->synapps->config['auth'] = array_replace_recursive(
+        $this->synapps->config['auth'] = ConfigDiff::merge(
             $this->synapps->config['auth'],
             $tmpEnvAuth
         );

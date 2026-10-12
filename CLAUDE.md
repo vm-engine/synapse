@@ -192,6 +192,7 @@ Interactive updater for core `apps.json` fields (app code, name, author, domains
 
 ```bash
 php artisan synapps:reconfig
+php artisan synapps:reconfig --dev   # write only the changed answers to apps.dev.json, apps.json untouched
 ```
 
 **Preserves (not reset) on every run:** `themes`, `dependencies`, `csp`, `logging`, `security` — read from current config and carried forward unless `apps.json` is edited directly. Exception: `security.ip_whitelist` / `security.ip_blacklist` come from the prompts (enforced by the global `IpFilter` middleware; both empty = allow all).

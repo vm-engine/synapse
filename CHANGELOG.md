@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `synapps:reconfig --dev` writes only the answers changed during the run to `synapps/config/apps.dev.json` (merged into what is already there) and leaves `apps.json` untouched.
+- `VmEngine\Synapse\Services\ConfigDiff` — recursive diff/merge helpers for the `*.json` + `*.dev.json` config pairs.
+
+### Changed
+- Dev config overlays (`apps.dev.json`, `auth.dev.json`) now replace lists instead of merging them by index, so a dev override can shorten or empty a base list (e.g. `security.ip_whitelist`). Previously a dev list shorter than the base list kept the base list's trailing entries.
+
 ## [3.3.1] - 2026-10-08
 
 ### Fixed

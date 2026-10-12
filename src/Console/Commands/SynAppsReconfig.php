@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use stdClass;
 use VmEngine\Synapse\Http\Middlewares\IpFilter;
 use VmEngine\Synapse\Notifications\NotificationSetup;
+use VmEngine\Synapse\Services\ConfigDiff;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
@@ -20,7 +22,7 @@ class SynAppsReconfig extends Command
      *
      * @var string
      */
-    protected $signature = 'synapps:reconfig';
+    protected $signature = 'synapps:reconfig {--dev : Write only the changed values to apps.dev.json instead of apps.json}';
 
     /**
      * The console command description.
@@ -237,10 +239,23 @@ class SynAppsReconfig extends Command
             ]),
         ];
 
-        file_put_contents(
-            base_path('synapps'.DS.'config'.DS.'apps.json'),
-            json_encode($appsJson, JSON_PRETTY_PRINT)
-        );
+        if ($this->option('dev')) {
+            // base_version is reset on every base write; that reset is not a dev override.
+            $changed = ConfigDiff::writeDev(
+                synapps_path('config/apps.dev.json'),
+                Arr::except($appsJson, 'base_version'),
+                config('synapps.apps', [])
+            );
+
+            $this->components->info($changed === []
+                ? 'No changes — apps.dev.json left untouched.'
+                : 'Changed values written to apps.dev.json.');
+        } else {
+            file_put_contents(
+                base_path('synapps'.DS.'config'.DS.'apps.json'),
+                json_encode($appsJson, JSON_PRETTY_PRINT)
+            );
+        }
 
         if ($notificationsEnabled) {
             NotificationSetup::ensureMigration($this);
