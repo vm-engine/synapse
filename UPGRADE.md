@@ -404,6 +404,14 @@ cp vendor/vm-engine/synapse/stubs/themes/default/js/theme-app.js synapps/resourc
 
 ---
 
+### Upgrading to the next release (unreleased): optional rich-text editor
+
+The rich-text editor now lives in Synapse as `<x-synapse-rte>` and is **off by default**.
+
+**Required action if any of your modules shows a rich-text editor** (the CMS with the Jodit driver, the example module, or your own code using `<x-synapse-rte>`): run `php artisan synapps:reconfig` and answer yes to "Enable the rich-text editor?". Until you do, those fields show "The rich-text editor is disabled" above a plain textarea.
+
+Nothing changes for a host that has no rich-text fields.
+
 ## Deprecation Warnings
 
 Synapse uses Laravel's logging system to warn about deprecated features:

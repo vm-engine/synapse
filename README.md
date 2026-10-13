@@ -293,6 +293,10 @@ class InvoicePaid extends Notification
 
 `enabled`/`log_channel` are set interactively by `synotif:setup` (or during `synapps:setup`/`synapps:reconfig`). `dropdown_limit`/`modal_per_page` are tuning knobs — edit `apps.json` directly and run `php artisan synapps:config` to change them.
 
+## Rich-text editor (optional)
+
+`<x-synapse-rte field="body" :value="$body" />` is a Jodit editor bound to a Livewire property, with `VmEngine\Synapse\Rte\RichText::clean()` to sanitise what it submits. It is off by default: answer yes to "Enable the rich-text editor?" in `synapps:setup` or `synapps:reconfig`, which adds `jodit` and `mews/purifier` to the project. While it is off the tag shows a notice above a plain textarea, so forms keep working. Modules can add toolbar buttons with `window.synapseRte.extend()`. See [docs/COMPONENTS.md](docs/COMPONENTS.md#rich-text-editor-optional).
+
 ## Menu badges
 
 A backend menu item can show a count (pending items, unread, to review). Name a badge class on the item in the module's `module.json`, then run `php artisan synapps:config`:

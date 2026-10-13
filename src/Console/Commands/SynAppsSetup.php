@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use stdClass;
 use VmEngine\Synapse\Http\Middlewares\IpFilter;
 use VmEngine\Synapse\Notifications\NotificationSetup;
+use VmEngine\Synapse\Rte\RteSetup;
 use VmEngine\Synapse\Services\SynapseUtils;
 
 use function Laravel\Prompts\confirm;
@@ -115,6 +116,12 @@ class SynAppsSetup extends Command
             $this->components->info('Notifications skipped — install vm-engine/synapps-auth to enable.');
         }
 
+        $rteEnabled = confirm(
+            label: 'Enable the rich-text editor?',
+            default: false,
+            hint: 'Adds jodit (npm) and mews/purifier (composer). Needed by <x-synapse-rte>.',
+        );
+
         $ipWhitelist = IpFilter::parseList(text(
             label: 'Whitelisted IPs',
             hint: 'Comma-separated IPs or CIDR ranges. Blank = allow all',
@@ -149,7 +156,8 @@ class SynAppsSetup extends Command
                 'enabled' => $notificationsEnabled,
                 'log_channel' => $notificationsLogChannel,
             ],
-            'dependencies' => [
+            'rte' => ['enabled' => $rteEnabled],
+            'dependencies' => RteSetup::applyDependencies([
                 'npm' => [
                     'main' => [
                         'jquery' => '^3.7',
@@ -176,7 +184,7 @@ class SynAppsSetup extends Command
                     'main' => new stdClass,
                     'dev' => new stdClass,
                 ],
-            ],
+            ], $rteEnabled),
             'themes' => [
                 'active' => 'default',
                 'fallback' => 'default',
@@ -257,6 +265,7 @@ class SynAppsSetup extends Command
         $this->call('synapps:config');
         $this->call('synapps:link-errors');
         $this->call('synapps:patch');
+        RteSetup::syncAssets($rteEnabled);
         $this->call('synapps:discover');
 
         if ($notificationsEnabled) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use Livewire\LivewireServiceProvider;
+use Mews\Purifier\PurifierServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use VmEngine\Synapse\Facades\DbConfig;
 use VmEngine\Synapse\Facades\DbLang;
@@ -20,6 +21,8 @@ abstract class TestCase extends Orchestra
         return [
             LivewireServiceProvider::class,
             SynapseServiceProvider::class,
+            // The optional rich-text editor's sanitiser (VmEngine\Synapse\Rte\RichText).
+            PurifierServiceProvider::class,
         ];
     }
 

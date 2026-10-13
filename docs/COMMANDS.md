@@ -52,6 +52,8 @@ php artisan synapps:setup
    - `synapps:patch` - Patches JS/CSS imports and configures testing infrastructure
    - `synapps:discover` - Discovers modules and updates dependencies
 
+One of the prompts is **"Enable the rich-text editor?"** (default no). Yes sets `rte.enabled` in `apps.json`, adds `jodit` (npm) and `mews/purifier` (composer) to its `dependencies` block so `synapps:discover` installs them, and imports `synapps/resources/js/synapse-rte.js` into `resources/js/app.js`. See [COMPONENTS.md → Rich-Text Editor](COMPONENTS.md#rich-text-editor-optional).
+
 ### Configuration files published
 
 - `config/synapse.php` - Core Synapse configuration
@@ -483,6 +485,7 @@ With `--dev`, `apps.json` is left untouched: only the values that differ from th
 
 1. Prompts for each core field, defaulting to the current value already in `config('synapps.apps.*')` so blank/unchanged answers don't erase existing data
    - Also prompts to enable/configure in-app notifications (same two questions as `synotif:setup` below) — only if `vm-engine/synapps-auth` is installed, otherwise this step is skipped
+   - Also asks **"Enable the rich-text editor?"**, defaulting to the current setting. Yes adds `jodit` and `mews/purifier` to the `dependencies` block and the `synapse-rte.js` import to `resources/js/app.js`; switching it from off to on also runs `synapps:discover` to install them and rebuild assets. No removes the two packages from the `dependencies` block and the import from `app.js` (packages already installed in the host stay installed)
 2. **Preserves, rather than resets, these blocks** — read from the current config and carried forward as-is unless you edit `apps.json` directly:
    - `themes` (active/fallback theme, per-layout CSS/JS/headers)
    - `dependencies` (npm/composer packages, including any added manually)

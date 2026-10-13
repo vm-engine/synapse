@@ -18,9 +18,11 @@
         "phpstan/phpstan": "^2.1",
         "larastan/larastan": "^3.8",
         "laravel/pint": "^1.26",
-        "pestphp/pest-plugin-phpstan": "^5.2"
+        "pestphp/pest-plugin-phpstan": "^5.2",
+        "mews/purifier": "^3.4"
     },
     "suggest": {
+        "mews/purifier": "HTML sanitiser for the optional rich-text editor (added to the host when rte.enabled is on)",
         "laravel/scout": "Optional search engine for SynSearchable (set synapps.apps.searchable.engine = scout)"
     },
     "autoload": {

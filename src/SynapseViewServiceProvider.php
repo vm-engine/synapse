@@ -32,6 +32,7 @@ use VmEngine\Synapse\Components\Password;
 use VmEngine\Synapse\Components\PasswordGenerator;
 use VmEngine\Synapse\Components\PerPageSelector;
 use VmEngine\Synapse\Components\RadioButtons;
+use VmEngine\Synapse\Components\Rte;
 use VmEngine\Synapse\Components\SearchBox;
 use VmEngine\Synapse\Components\SortIcon;
 use VmEngine\Synapse\Components\SplitPane;
@@ -143,6 +144,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(Toastr::class, 'synapse-toastr');
         $blade->component(DragNDrop::class, 'synapse-drag-n-drop');
         $blade->component(FileDrop::class, 'synapse-file-drop');
+        $blade->component(Rte::class, 'synapse-rte');
         $blade->component(SortIcon::class, 'synapse-sort-icon');
         $blade->component(PerPageSelector::class, 'synapse-per-page-selector');
         $blade->component(ExcelExportButton::class, 'synapse-excel-export-button');

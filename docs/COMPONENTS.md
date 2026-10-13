@@ -176,6 +176,62 @@ Native color input + hex field + optional preset swatches, entangled to `wire:mo
 
 Value is `#rrggbb`. Validate with Laravel's `hex_color` rule.
 
+## Rich-Text Editor (optional)
+
+`<x-synapse-rte>` is a [Jodit](https://xdsoft.net/jodit/) editor bound to a Livewire property. It is an optional feature, off by default, because it needs two extra packages: `jodit` (npm) and `mews/purifier` (composer).
+
+**Enable it** by answering yes to "Enable the rich-text editor?" in `php artisan synapps:setup` or `php artisan synapps:reconfig`. That sets `rte.enabled` in `synapps/config/apps.json`, adds the two packages to its `dependencies` block (installed by `synapps:discover`), and imports `synapps/resources/js/synapse-rte.js` into `resources/js/app.js`.
+
+```blade
+<x-synapse-rte field="body" :value="$body" />
+
+{{-- A Livewire form object, a taller editor and a shorter toolbar --}}
+<x-synapse-rte field="form.content" :value="$form->content" :height="500" :buttons="['bold', 'italic', '|', 'ul', 'ol', '|', 'link']" />
+```
+
+**Props:**
+- `field` (string, required) — the Livewire property to bind, e.g. `body` or `form.body`. Changes are deferred, like `wire:model`: they go to the server with the next request.
+- `value` (string|null) — the initial HTML.
+- `height` (int, default: `360`) — editor height in pixels.
+- `buttons` (array|null) — Jodit toolbar button names. Default: undo, redo, paragraph, bold, italic, underline, strikethrough, left, center, right, ul, ol, link. A `source` button is always added at the end.
+- `extension` (string|null) and `extension-config` (array) — name and config of a toolbar extension (see below).
+
+**When the editor is disabled**, the tag shows the message "The rich-text editor is disabled. Enable it with `php artisan synapps:reconfig`." above a normal `<textarea>` bound to the same property with `wire:model`, so the form still works.
+
+**Always clean the submitted HTML on the server:**
+
+```php
+use VmEngine\Synapse\Rte\RichText;
+
+$this->body = RichText::clean($this->body); // null when nothing visible is left
+```
+
+`RichText::clean()` keeps basic formatting, headings, lists, links and images, and drops scripts, event handlers, inline styles and non-http(s)/mailto URLs. On a host without `mews/purifier` (the editor was never enabled) it cannot keep any HTML safely, so it stores the input as escaped plain text with line breaks kept. A module that needs a wider allowlist keeps its own purifier profile.
+
+**Toolbar extensions.** A module adds its own buttons without Synapse knowing about them. Register the extension in the module's script, then name it on the tag:
+
+```js
+document.addEventListener('alpine:init', () => {
+    if (!window.synapseRte) return; // the editor is disabled on this host
+
+    // setup(rte, config) runs before the editor is built; rte.editor is set afterwards.
+    window.synapseRte.extend('my-buttons', (rte, config) => ({
+        buttons: [
+            { name: 'stamp', icon: 'ok', tooltip: config.label, exec: () => rte.editor.s.insertHTML(config.text) },
+        ],
+        destroy() { /* remove any listeners added above */ },
+    }));
+});
+```
+
+```blade
+<x-synapse-rte field="body" :value="$body" extension="my-buttons" :extension-config="['label' => 'Stamp', 'text' => 'Approved']" />
+```
+
+The editor's Alpine code lives in `synapse-rte.js`, not in `synapse-components.js`, because it imports Jodit and would break the asset build on a host that does not have it installed. It is loaded in the backend bundle (`resources/js/app.js`) only.
+
+---
+
 ## File Upload Components
 
 Synapse ships two complementary file-upload components. Pick by use case:

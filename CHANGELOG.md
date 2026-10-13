@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Optional rich-text editor: `<x-synapse-rte>` (Jodit) and `VmEngine\Synapse\Rte\RichText::clean()`. Off by default; `synapps:setup` / `synapps:reconfig` ask, add `jodit` and `mews/purifier` to the `apps.json` dependencies and import `synapps/resources/js/synapse-rte.js` into `resources/js/app.js`. While off, the tag shows an error above a plain textarea bound to the same property, and the sanitiser falls back to escaped plain text when `mews/purifier` is not installed. Modules add toolbar buttons with `window.synapseRte.extend()`. See docs/COMPONENTS.md → Rich-Text Editor.
 - `synapps:reconfig --dev` writes only the answers changed during the run to `synapps/config/apps.dev.json` (merged into what is already there) and leaves `apps.json` untouched.
 - `VmEngine\Synapse\Services\ConfigDiff` — recursive diff/merge helpers for the `*.json` + `*.dev.json` config pairs.
 - Menu badges: a backend menu item can name a badge class in `module.json` (`"badge"`). Extend `VmEngine\Synapse\Nav\NavBadge` (`count()`, `refreshOn()`, `ttl()`, `scope()`); counts are cached and refreshed by the declared models/events or with `synav()->refreshBadge()` / `refreshBadges()`. Parents sum their visible children. Rendered by `<x-synapse-nav-badge>`; `synapps:patch layouts` adds it to an existing host's nav views. See README → Menu badges.

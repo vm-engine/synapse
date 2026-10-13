@@ -14,7 +14,7 @@ describe('config preservation on reconfig', function () {
     it('preserves existing dependencies config via config() default in SynAppsReconfig source', function () {
         $source = file_get_contents((new ReflectionClass(SynAppsReconfig::class))->getFileName());
 
-        expect($source)->toContain("'dependencies' => config('synapps.apps.dependencies',");
+        expect($source)->toContain("'dependencies' => RteSetup::applyDependencies(config('synapps.apps.dependencies',");
     });
 
     it('preserves existing security config via config() default in SynAppsReconfig source', function () {

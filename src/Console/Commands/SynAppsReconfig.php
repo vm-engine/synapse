@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use stdClass;
 use VmEngine\Synapse\Http\Middlewares\IpFilter;
 use VmEngine\Synapse\Notifications\NotificationSetup;
+use VmEngine\Synapse\Rte\RteSetup;
 use VmEngine\Synapse\Services\ConfigDiff;
 
 use function Laravel\Prompts\confirm;
@@ -121,6 +122,13 @@ class SynAppsReconfig extends Command
             $this->components->info('Notifications skipped — install vm-engine/synapps-auth to enable.');
         }
 
+        $rteWasEnabled = RteSetup::enabled();
+        $rteEnabled = confirm(
+            label: 'Enable the rich-text editor?',
+            default: (bool) config('synapps.apps.rte.enabled', false),
+            hint: 'Adds jodit (npm) and mews/purifier (composer). Needed by <x-synapse-rte>.',
+        );
+
         $ipWhitelist = IpFilter::parseList(text(
             label: 'Whitelisted IPs',
             hint: 'Comma-separated IPs or CIDR ranges. Blank = allow all',
@@ -157,7 +165,8 @@ class SynAppsReconfig extends Command
                 'enabled' => $notificationsEnabled,
                 'log_channel' => $notificationsLogChannel,
             ],
-            'dependencies' => config('synapps.apps.dependencies', [
+            'rte' => ['enabled' => $rteEnabled],
+            'dependencies' => RteSetup::applyDependencies(config('synapps.apps.dependencies', [
                 'npm' => [
                     'main' => [
                         'jquery' => '^3.7',
@@ -184,7 +193,7 @@ class SynAppsReconfig extends Command
                     'main' => new stdClass,
                     'dev' => new stdClass,
                 ],
-            ]),
+            ]), $rteEnabled),
             'themes' => config('synapps.apps.themes', [
                 'active' => 'default',
                 'fallback' => 'default',
@@ -264,6 +273,13 @@ class SynAppsReconfig extends Command
         $this->components->success('Configuration updated.');
 
         $this->call('synapps:config');
+
+        RteSetup::syncAssets($rteEnabled);
+
+        if ($rteEnabled && ! $rteWasEnabled) {
+            // Installs the editor's packages into package.json / composer.json and rebuilds assets.
+            $this->call('synapps:discover');
+        }
 
         return 0;
     }
