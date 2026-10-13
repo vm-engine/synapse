@@ -4,12 +4,33 @@ declare(strict_types=1);
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Livewire\Livewire;
 use SynApps\Modules\TestModule\TestModuleServiceProvider;
 use VmEngine\ExampleModule\TestServiceProvider;
 use VmEngine\MyPackage\MyPackageServiceProvider;
 use VmEngine\Synapse\Traits\AutoRegistersComponents;
 use VmEngine\TestModule\TestModuleProvider;
+
+/**
+ * The trait registers on whatever is bound as 'livewire.finder' (not through the Livewire
+ * facade, see registerLivewireNamespace()). Binds a recorder there and returns it.
+ */
+function fakeLivewireFinder(): object
+{
+    $finder = new class
+    {
+        /** @var list<array<int|string, mixed>> */
+        public array $calls = [];
+
+        public function addNamespace(mixed ...$arguments): void
+        {
+            $this->calls[] = $arguments;
+        }
+    };
+
+    app()->instance('livewire.finder', $finder);
+
+    return $finder;
+}
 
 test('gets component prefix from namespace automatically', function () {
     $code = <<<'PHP'
@@ -83,8 +104,8 @@ PHP;
 });
 
 test('registers components safely when directories do not exist', function () {
-    // Livewire::addNamespace will be called but with null paths for missing directories
-    Livewire::shouldReceive('addNamespace')->once();
+    // The namespace is still added, with null paths for the missing directories
+    $finder = fakeLivewireFinder();
 
     $provider = new class(app()) extends ServiceProvider
     {
@@ -97,7 +118,10 @@ test('registers components safely when directories do not exist', function () {
     };
 
     // Should not throw errors when Livewire and View/Components directories don't exist
-    expect(fn () => $provider->register())->not->toThrow(Exception::class);
+    expect(fn () => $provider->register())->not->toThrow(Exception::class)
+        ->and($finder->calls)->toHaveCount(1)
+        ->and($finder->calls[0]['viewPath'])->toBeNull()
+        ->and($finder->calls[0]['classPath'])->toBeNull();
 });
 
 test('trait has required methods', function () {
@@ -229,17 +253,8 @@ test('converts nested component paths correctly to kebab-case', function () {
     }
 });
 
-test('registerLivewireNamespace calls Livewire::addNamespace with correct params', function () {
-    // Mock Livewire facade to capture the addNamespace call
-    $calledWith = null;
-
-    Livewire::shouldReceive('addNamespace')
-        ->once()
-        ->withArgs(function () use (&$calledWith) {
-            $calledWith = func_get_args();
-
-            return true;
-        });
+test('registerLivewireNamespace adds the namespace to the Livewire finder with correct params', function () {
+    $finder = fakeLivewireFinder();
 
     $provider = new class(app()) extends ServiceProvider
     {
@@ -254,19 +269,13 @@ test('registerLivewireNamespace calls Livewire::addNamespace with correct params
     $provider->doRegister();
 
     // First argument should be the kebab-case prefix derived from the anonymous class context
-    expect($calledWith)->not->toBeNull()
-        ->and($calledWith[0])->toBeString();
+    expect($finder->calls)->toHaveCount(1)
+        ->and($finder->calls[0][0])->toBeString()
+        ->and($finder->calls[0])->toHaveKeys(['viewPath', 'classNamespace', 'classPath', 'classViewPath']);
 });
 
 test('registerComponents calls registerLivewireNamespace when livewire flag is enabled', function () {
-    $namespaceCalled = false;
-    $bladeCalled = false;
-
-    Livewire::shouldReceive('addNamespace')
-        ->once()
-        ->andReturnUsing(function () use (&$namespaceCalled) {
-            $namespaceCalled = true;
-        });
+    $finder = fakeLivewireFinder();
 
     $provider = new class(app()) extends ServiceProvider
     {
@@ -280,11 +289,11 @@ test('registerComponents calls registerLivewireNamespace when livewire flag is e
 
     $provider->doRegister();
 
-    expect($namespaceCalled)->toBeTrue();
+    expect($finder->calls)->toHaveCount(1);
 });
 
 test('registerComponents skips livewire when flag is disabled', function () {
-    Livewire::shouldReceive('addNamespace')->never();
+    $finder = fakeLivewireFinder();
 
     $provider = new class(app()) extends ServiceProvider
     {
@@ -298,4 +307,6 @@ test('registerComponents skips livewire when flag is disabled', function () {
     };
 
     $provider->doRegister();
+
+    expect($finder->calls)->toBe([]);
 });

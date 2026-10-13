@@ -6,6 +6,13 @@ use Illuminate\Support\Facades\File;
 
 /** synapps:patch layouts adds the nav-badge line to a host's copies of the nav item views. */
 beforeEach(function () {
+    // A private base path: SynAppsPatchResourcesSplitTest creates and deletes the same
+    // directories, and test files run side by side under --parallel.
+    $this->originalBasePath = base_path();
+    $this->sandbox = sys_get_temp_dir().'/synapse-nav-badge-'.bin2hex(random_bytes(6));
+    File::ensureDirectoryExists($this->sandbox);
+    app()->setBasePath($this->sandbox);
+
     // The other layouts steps write here too (see SynAppsPatchResourcesSplitTest).
     foreach ([resource_path('css'), resource_path('js'), base_path('synapps/resources/css'), base_path('synapps/resources/js'),
         base_path('synapps/resources/themes/default/css'), base_path('synapps/resources/themes/default/js')] as $dir) {
@@ -33,6 +40,9 @@ afterEach(function () {
         base_path('synapps/resources/js/synapps-frontend.js'), base_path('synapps/resources/js/synapps-guest.js'),
         base_path('vite.config.js'), base_path('vite.config.js.bak'),
     ]);
+
+    app()->setBasePath($this->originalBasePath);
+    File::deleteDirectory($this->sandbox);
 });
 
 it('inserts the badge line into both views and reproduces the stubs exactly', function () {

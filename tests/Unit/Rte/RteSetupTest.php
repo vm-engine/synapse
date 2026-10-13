@@ -5,13 +5,19 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\File;
 use VmEngine\Synapse\Rte\RteSetup;
 
+// A private base path per test: other suites write resources/js/app.js too, and test files
+// run side by side under --parallel.
 beforeEach(function () {
-    File::ensureDirectoryExists(resource_path('js'));
-    File::ensureDirectoryExists(base_path('synapps/resources/js'));
+    $this->originalBasePath = base_path();
+    $this->sandbox = sys_get_temp_dir().'/synapse-rte-'.bin2hex(random_bytes(6));
+    File::ensureDirectoryExists($this->sandbox.'/resources/js');
+    File::ensureDirectoryExists($this->sandbox.'/synapps/resources/js');
+    app()->setBasePath($this->sandbox);
 });
 
 afterEach(function () {
-    File::delete([resource_path('js/app.js'), base_path('synapps/resources/js/synapse-rte.js')]);
+    app()->setBasePath($this->originalBasePath);
+    File::deleteDirectory($this->sandbox);
 });
 
 it('is off unless the config flag is on', function () {
