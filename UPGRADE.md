@@ -404,7 +404,7 @@ cp vendor/vm-engine/synapse/stubs/themes/default/js/theme-app.js synapps/resourc
 
 ---
 
-### Upgrading to the next release (unreleased): optional rich-text editor
+### Upgrading to v3.4.0: optional rich-text editor
 
 The rich-text editor now lives in Synapse as `<x-synapse-rte>` and is **off by default**.
 

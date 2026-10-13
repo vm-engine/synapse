@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.4.0] - 2026-10-13
 
 ### Added
 - Optional rich-text editor: `<x-synapse-rte>` (Jodit) and `VmEngine\Synapse\Rte\RichText::clean()`. Off by default; `synapps:setup` / `synapps:reconfig` ask, add `jodit` and `mews/purifier` to the `apps.json` dependencies and import `synapps/resources/js/synapse-rte.js` into `resources/js/app.js`. While off, the tag shows an error above a plain textarea bound to the same property, and the sanitiser falls back to escaped plain text when `mews/purifier` is not installed. Modules add toolbar buttons with `window.synapseRte.extend()`. See docs/COMPONENTS.md → Rich-Text Editor.
