@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.1] - 2026-10-13
+
+### Added
+- Settings module stub: Indonesian (`id`) translations for `acl`, `menu` and `page`, so a freshly set-up host has them. Existing hosts can copy `stubs/modules/settings/lang/id` into `synapps/modules/settings/lang/`.
+- `SettingsStubLangParityTest` — fails when an English key of the settings stub has no Indonesian line or the `:placeholders` differ.
+
 ### Fixed
 - `composer.json` branch alias: `dev-master` is now `3.4.x-dev` (was `3.0.x-dev`), so a dev checkout satisfies the `^3.3` / `^3.4` constraints of dependent packages.
 
