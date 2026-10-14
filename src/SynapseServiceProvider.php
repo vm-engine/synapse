@@ -6,6 +6,7 @@ namespace VmEngine\Synapse;
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Bootstrap\SetRequestForConsole;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -219,6 +220,10 @@ class SynapseServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Indonesian for framework strings Synapse pages and mail print (notification mail
+        // subcopy and footer, layout footers); a project's own lang/id.json still wins.
+        $this->loadJsonTranslationsFrom(__DIR__.'/../lang');
+
         $this->app->singleton('synav', function ($app) {
             return new SyNav;
         });
@@ -411,6 +416,13 @@ class SynapseServiceProvider extends ServiceProvider
                 ? $originalAppUrl
                 : ($isProduction ? 'https://' : 'http://').$domain,
         ]);
+
+        // A console process (queue worker, scheduler, artisan) built its request from the .env
+        // APP_URL before providers registered, so route()/url() — e.g. links in queued mail —
+        // would ignore the override. Rebuild that request from the overridden app.url.
+        if ($this->app->runningInConsole()) {
+            (new SetRequestForConsole)->bootstrap($this->app);
+        }
     }
 
     /**

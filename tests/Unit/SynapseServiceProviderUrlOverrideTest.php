@@ -40,4 +40,22 @@ describe('app.url override', function () {
 
         expect(config('app.url'))->toBe('http://original-app-url');
     });
+
+    it('points console URL generation (queued mail, scheduler) at the overridden app.url', function () {
+        config(['synapps.apps.urls.domain' => ['dev' => 'synapsev3.test', 'prod' => '']]);
+
+        invokeOverrideAppUrl();
+
+        expect(url('/'))->toBe('http://synapsev3.test')
+            ->and(url('/crm/tickets/5'))->toBe('http://synapsev3.test/crm/tickets/5');
+    });
+
+    it('leaves console URL generation alone when no domain is configured', function () {
+        config(['synapps.apps.urls.domain' => ['dev' => '', 'prod' => '']]);
+        config(['app.url' => 'http://original-app-url']);
+
+        invokeOverrideAppUrl();
+
+        expect(url('/'))->toBe('http://original-app-url');
+    });
 });

@@ -199,3 +199,15 @@ test('application app layout uses the shared toastr and real header widgets', fu
         ->and($header)->toContain('<x-synapse::notification-panel')
         ->and($header)->not->toContain('placeholder="Search');
 });
+
+test('default theme keeps a grouped input fully bordered', function () {
+    // Every .input-group-item (icon, prefix, button) is an absolute overlay inside the input,
+    // so squaring the input's right side left icon/prefix inputs without a right edge.
+    $css = File::get(themeStubPath('default', 'css/theme-base.css'));
+    $rule = str($css)->after('.input-group > select {')->before('}')->toString();
+
+    expect($rule)->toContain('flex: 1 1 0%')
+        ->not->toContain('border-right-width')
+        ->not->toContain('border-top-right-radius')
+        ->not->toContain('border-bottom-right-radius');
+});

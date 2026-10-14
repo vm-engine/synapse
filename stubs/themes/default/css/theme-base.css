@@ -328,7 +328,9 @@ input[type="radio"] {
     @apply flex items-stretch;
 }
 
-/* Input inside a group: override w-full so flex can control the width */
+/* Input inside a group: override w-full so flex can control the width.
+   Keep its full border and radius: every .input-group-item (icon, prefix, button)
+   is an absolute overlay inside the input (see synapse-components.css). */
 .input-group > .form-input,
 .input-group > input[type="text"],
 .input-group > input[type="email"],
@@ -341,9 +343,6 @@ input[type="radio"] {
     width: auto !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border-right-width: 0 !important;
 }
 
 /* Generic item */
