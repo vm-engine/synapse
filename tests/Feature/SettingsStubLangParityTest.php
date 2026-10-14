@@ -4,14 +4,30 @@ declare(strict_types=1);
 
 use Illuminate\Support\Arr;
 
-dataset('settings stub lang files', fn (): array => array_map(basename(...), glob(__DIR__.'/../../stubs/modules/settings/lang/en/*.php') ?: []));
+/** Stub modules that ship Indonesian translations, relative to the package root. */
+const STUB_LANG_DIRS = [
+    'settings' => 'stubs/modules/settings/lang',
+    'home' => 'stubs/synapps/modules/home/lang',
+];
 
-it('has an Indonesian line for every English key with the same placeholders', function (string $file) {
-    $idPath = __DIR__.'/../../stubs/modules/settings/lang/id/'.$file;
+dataset('stub lang files', function (): array {
+    $cases = [];
+
+    foreach (STUB_LANG_DIRS as $module => $dir) {
+        foreach (glob(__DIR__.'/../../'.$dir.'/en/*.php') ?: [] as $path) {
+            $cases["{$module} ".basename($path)] = [$dir, basename($path)];
+        }
+    }
+
+    return $cases;
+});
+
+it('has an Indonesian line for every English key with the same placeholders', function (string $dir, string $file) {
+    $idPath = __DIR__.'/../../'.$dir.'/id/'.$file;
 
     expect($idPath)->toBeFile();
 
-    $en = Arr::dot(require __DIR__.'/../../stubs/modules/settings/lang/en/'.$file);
+    $en = Arr::dot(require __DIR__.'/../../'.$dir.'/en/'.$file);
     $id = Arr::dot(require $idPath);
 
     expect(array_keys($id))->toEqualCanonicalizing(array_keys($en));
@@ -26,4 +42,4 @@ it('has an Indonesian line for every English key with the same placeholders', fu
     foreach ($en as $key => $line) {
         expect($placeholders($id[$key]))->toBe($placeholders($line), "{$file}: {$key}");
     }
-})->with('settings stub lang files');
+})->with('stub lang files');

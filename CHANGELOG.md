@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Home module stub: Indonesian (`id`) translations for `menu` and `acl` ("Dasbor"), so the dashboard menu item and breadcrumb are no longer shown as the raw `home::menu.be.index` key. Existing hosts can copy `stubs/synapps/modules/home/lang/id` into `synapps/modules/home/lang/`.
+- The stub language parity test now also covers the home module.
 - `lang/id.json`: Indonesian for the framework strings printed in notification mail (the "trouble clicking the button" subcopy, "All rights reserved.", default greeting and salutation), so an Indonesian email no longer ends with English lines. A host's own `lang/id.json` still wins.
 
 ### Changed
