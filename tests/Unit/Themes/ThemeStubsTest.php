@@ -211,3 +211,12 @@ test('default theme keeps a grouped input fully bordered', function () {
         ->not->toContain('border-top-right-radius')
         ->not->toContain('border-bottom-right-radius');
 });
+
+test('default theme gives a plain .btn a border and fill, leaving variants and overlays alone', function () {
+    $css = File::get(themeStubPath('default', 'css/theme-base.css'));
+    $selector = '.btn:where(:not(.primary, .secondary, .success, .danger, .warning, .info, .input-group-item))';
+    $rule = str($css)->after($selector.' {')->before('}')->toString();
+
+    expect($css)->toContain($selector)
+        ->and($rule)->toContain('border border-gray-300 bg-gray-50');
+});

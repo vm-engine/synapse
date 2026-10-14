@@ -189,6 +189,14 @@ button[type="button"]:not(.btn-icon) {
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
+/* Neutral button (no colour variant): border plus a faint fill so it stands out on panels.
+   :where() keeps the specificity at .btn, so variant and overlay rules still win. */
+.btn:where(:not(.primary, .secondary, .success, .danger, .warning, .info, .input-group-item)) {
+    @apply border border-gray-300 bg-gray-50 text-gray-700;
+    @apply hover:bg-gray-100 focus:ring-gray-300;
+    @apply dark:border-gray-700 dark:bg-white/[0.04] dark:text-gray-300 dark:hover:bg-white/[0.08];
+}
+
 /* Primary button */
 .btn.primary {
     @apply bg-brand-600 text-white;

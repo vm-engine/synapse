@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `lang/id.json`: Indonesian for the framework strings printed in notification mail (the "trouble clicking the button" subcopy, "All rights reserved.", default greeting and salutation), so an Indonesian email no longer ends with English lines. A host's own `lang/id.json` still wins.
 
+### Changed
+- Default theme: a plain `.btn` (no colour variant) now has a gray border and a faint fill (dark mode included), so secondary actions such as Cancel no longer blend into the panel. Coloured variants, bare `<button>`s and `.input-group-item` overlay buttons are unchanged. Existing hosts can re-copy the theme (`synapps:copy-themes`) or copy the `.btn:where(:not(...))` rule into their `theme-base.css`.
+
 ### Fixed
 - Links in queued mail (and anything else built by a queue worker, the scheduler or artisan) used the `.env` `APP_URL` instead of the `apps.json` domain: the console request was created before `overrideAppUrl()` ran. It is now rebuilt from the overridden `app.url`.
 - Default theme: `theme-base.css` no longer strips the right border and radius from inputs inside `.input-group`. Every `.input-group-item` is an absolute overlay, so icon, prefix, datepicker and button inputs were left without a right edge. Existing hosts can re-copy the theme (`synapps:copy-themes`) or delete the three `border-*-right*` declarations from their copy.
