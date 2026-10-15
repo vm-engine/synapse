@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-10-15
+
+### Added
+- `SynAppsSetup::DEFAULT_CSP`: a new `apps.json` now allows the external hosts the bundled stubs load — Google Fonts (`style_src` `https://fonts.googleapis.com`, `font_src` `https://fonts.gstatic.com`, used by the stub themes) and the toastr notification sound (`media_src` `https://res.cloudinary.com`). Before, the stub themes' Outfit font was blocked by the default CSP.
+
+### Changed
+- `synapps:setup` writes all seven CSP directives (`frame_src` and `media_src` were missing); `synapps:reconfig` falls back to the same defaults when the project has no `csp` block.
+
 ## [3.4.6] - 2026-10-15
 
 ### Fixed
