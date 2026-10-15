@@ -91,7 +91,7 @@ class SynAppsReconfig extends Command
             default: config('synapps.apps.multi_language', false)
         );
 
-        $enabledLanguages = ['en'];
+        $enabledLanguages = [(string) config('app.locale') ?: 'en'];
         if ($multiLanguage) {
             $languagesInput = text(
                 label: 'Enabled Languages',

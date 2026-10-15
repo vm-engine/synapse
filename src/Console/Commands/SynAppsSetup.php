@@ -86,12 +86,12 @@ class SynAppsSetup extends Command
             default: false,
         );
 
-        $enabledLanguages = ['en'];
+        $enabledLanguages = [(string) config('app.locale') ?: 'en'];
         if ($multiLanguage) {
             $languagesInput = text(
                 label: 'Enabled Languages',
                 placeholder: 'en,id,es',
-                default: 'en',
+                default: implode(',', $enabledLanguages),
                 hint: 'Comma-separated language codes (e.g., en,id,es)',
             );
             $enabledLanguages = array_map('trim', explode(',', $languagesInput));
