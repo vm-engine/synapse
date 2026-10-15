@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.4] - 2026-10-15
+
+### Fixed
+- `synapps:make-theme` crashed with a `TypeError` (an `SplFileInfo` passed to `copy()` under `strict_types`); it now copies the source theme's files.
+- `synapps:vendor-fonts` vendored only the first Google Fonts link but removed every Google Fonts entry from `theme.json`, so the other fonts were lost. It now downloads every `fonts.googleapis.com/css`/`css2` link across all layouts into one `fonts.css`.
+
 ## [3.4.3] - 2026-10-15
 
 ### Changed
