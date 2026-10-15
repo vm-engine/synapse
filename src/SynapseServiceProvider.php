@@ -412,9 +412,11 @@ class SynapseServiceProvider extends ServiceProvider
         $originalAppUrl = config('app.url');
 
         config([
-            'app.url' => empty($domain)
-                ? $originalAppUrl
-                : ($isProduction ? 'https://' : 'http://').$domain,
+            'app.url' => match (true) {
+                empty($domain) => $originalAppUrl,
+                (bool) preg_match('#^https?://#i', (string) $domain) => $domain,
+                default => ($isProduction ? 'https://' : 'http://').$domain,
+            },
         ]);
 
         // A console process (queue worker, scheduler, artisan) built its request from the .env

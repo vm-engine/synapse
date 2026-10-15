@@ -439,10 +439,10 @@ synapps/resources/themes/{name}/
 ## synapps:remove-module
 
 ```bash
-php artisan synapps:remove-module {moduleName} [--permanent]
+php artisan synapps:remove-module {moduleName} [--permanent] [--force]
 ```
 
-Removes `synapps/modules/{moduleName}` after confirmation. By default the folder is **moved** to `.trash/{moduleName}-{timestamp}` (and `/.trash` is added to `.gitignore`) so it can be restored by hand; `--permanent` deletes it. Afterwards it rediscovers modules so `composer.json` autoload entries and the compiled configs no longer reference it.
+Removes `synapps/modules/{moduleName}` after confirmation (skipped with `--force` or `--no-interaction`). By default the folder is **moved** to `.trash/{moduleName}-{timestamp}` (and `/.trash` is added to `.gitignore`) so it can be restored by hand; `--permanent` deletes it. Afterwards it rediscovers modules so `composer.json` autoload entries and the compiled configs no longer reference it.
 
 ---
 

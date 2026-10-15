@@ -40,7 +40,7 @@ Package guidance for **vm-engine/synapse** - Laravel modular architecture system
 | `synapps:copy-themes` | Copy stub themes | Refreshing bundled themes | Yes | No |
 | `synapps:make` | Create a module component (`object module name`, e.g. `livewire`, `--mfc/--sfc/--class`) | Building out a module | Yes | No |
 | `synapps:make-theme` | Create new theme from template | Custom themes | Yes | No |
-| `synapps:remove-module` | Move a module to `.trash` (or `--permanent`) and rediscover | Retiring a module | No | No |
+| `synapps:remove-module` | Move a module to `.trash` (or `--permanent`; `--force`/`-n` skips the prompt) and rediscover | Retiring a module | No | No |
 | `synapps:reconfig` | Interactively update core `apps.json` fields | Renaming app/changing domains after setup | Yes | No |
 | `synapps:vendor-fonts` | Self-host a theme's Google Fonts | Removing third-party font CDN calls | Yes | No |
 | `synapps:publish-settings` | Publish Settings module | When you need settings module | Yes | No |

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Encryption\Encrypter;
 
 class SynAppsPatchResources extends Command
 {
@@ -25,6 +26,7 @@ class SynAppsPatchResources extends Command
 
     /**
      * Module/package test paths added to tests/Pest.php's ->in() chain.
+     * Vendor package globs (synmod-*, synmodule-*, synapps-*) are filtered by existingTestPaths().
      *
      * @var array<int, string>
      */
@@ -1588,9 +1590,11 @@ JS;
             'BCRYPT_ROUNDS' => '4',
         ];
 
-        $defaultContent = <<<'ENV'
+        $appKey = 'base64:'.base64_encode(Encrypter::generateKey((string) config('app.cipher', 'AES-256-CBC')));
+
+        $defaultContent = <<<ENV
 APP_ENV=testing
-APP_KEY=
+APP_KEY={$appKey}
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
 
@@ -1613,9 +1617,16 @@ ENV;
         }
 
         $existingContent = $this->readFile($envTestingPath);
+        $keyFilled = false;
+
+        if (preg_match('/^APP_KEY=[ \t]*$/m', $existingContent)) {
+            $existingContent = (string) preg_replace('/^APP_KEY=[ \t]*$/m', "APP_KEY={$appKey}", $existingContent, 1);
+            $keyFilled = true;
+        }
 
         /** @var array<string, string> $missingLines */
         $missingLines = [];
+        $requiredKeys['APP_KEY'] = $appKey;
 
         foreach ($requiredKeys as $key => $value) {
             if (! preg_match('/^'.preg_quote($key, '/').'=/m', $existingContent)) {
@@ -1623,12 +1634,12 @@ ENV;
             }
         }
 
-        if (empty($missingLines)) {
+        if (empty($missingLines) && ! $keyFilled) {
             return false;
         }
 
         $this->createBackup($envTestingPath);
-        $appendContent = "\n".implode("\n", $missingLines)."\n";
+        $appendContent = empty($missingLines) ? '' : "\n".implode("\n", $missingLines)."\n";
         file_put_contents($envTestingPath, rtrim($existingContent)."\n".$appendContent);
 
         return true;
@@ -1687,9 +1698,29 @@ ENV;
         return true;
     }
 
+    /**
+     * Pest test paths to add, dropping vendor package globs (synmod-*, synmodule-*, synapps-*)
+     * that match no installed package folder.
+     *
+     * @return array<int, string>
+     */
+    protected function existingTestPaths(): array
+    {
+        return array_values(array_filter(
+            $this->testPathsToAdd,
+            fn (string $path): bool => ! preg_match('#^\.\./vendor/\*/syn#', $path)
+                || $this->globHasMatches(base_path('tests/'.$path)),
+        ));
+    }
+
+    protected function globHasMatches(string $pattern): bool
+    {
+        return (glob($pattern, GLOB_ONLYDIR) ?: []) !== [];
+    }
+
     protected function isPestAlreadyPatched(string $content): bool
     {
-        foreach ($this->testPathsToAdd as $path) {
+        foreach ($this->existingTestPaths() as $path) {
             if (! str_contains($content, $path)) {
                 return false;
             }
@@ -1722,7 +1753,7 @@ ENV;
         $afterIn = $matches[3];
 
         $existingPathsArray = $this->parseExistingPestPaths($existingPaths);
-        $allPaths = array_unique(array_merge($existingPathsArray, $this->testPathsToAdd));
+        $allPaths = array_unique(array_merge($existingPathsArray, $this->existingTestPaths()));
         $newPathsString = $this->buildPestPathsString($allPaths);
         $newContent = $beforeIn.$newPathsString.$afterIn;
 
@@ -1805,11 +1836,10 @@ ENV;
             'Modules' => [
                 'synapps/modules/*/tests',
             ],
-            'Packages' => [
-                'vendor/*/synmod-*/tests',
-                'vendor/*/synmodule-*/tests',
-                'vendor/*/synapps-*/tests',
-            ],
+            'Packages' => array_values(array_filter(
+                ['vendor/*/synmod-*/tests', 'vendor/*/synmodule-*/tests', 'vendor/*/synapps-*/tests'],
+                fn (string $dir): bool => $this->globHasMatches(base_path($dir)),
+            )),
         ];
 
         if (! $this->testsuiteExists($xpath, 'Modules')) {
@@ -1817,7 +1847,7 @@ ENV;
             $modified = true;
         }
 
-        if (! $this->testsuiteExists($xpath, 'Packages')) {
+        if ($requiredSuites['Packages'] !== [] && ! $this->testsuiteExists($xpath, 'Packages')) {
             $this->addTestSuite($dom, $testsuites, 'Packages', $requiredSuites['Packages']);
             $modified = true;
         }

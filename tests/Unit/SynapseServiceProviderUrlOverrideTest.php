@@ -32,6 +32,21 @@ describe('app.url override', function () {
         app()->detectEnvironment(fn () => 'testing');
     });
 
+    it('keeps the scheme when the configured domain already includes one', function () {
+        config(['synapps.apps.urls.domain' => ['dev' => 'http://synapsev3.test', 'prod' => 'https://synapsev3.com']]);
+
+        invokeOverrideAppUrl();
+
+        expect(config('app.url'))->toBe('http://synapsev3.test');
+
+        app()->detectEnvironment(fn () => 'production');
+        invokeOverrideAppUrl();
+
+        expect(config('app.url'))->toBe('https://synapsev3.com');
+
+        app()->detectEnvironment(fn () => 'testing');
+    });
+
     it('falls back to the original app.url when the domain is not configured', function () {
         config(['synapps.apps.urls.domain' => ['dev' => '', 'prod' => '']]);
         config(['app.url' => 'http://original-app-url']);

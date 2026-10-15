@@ -19,7 +19,8 @@ class SynAppsRemoveModule extends Command
      */
     protected $signature = 'synapps:remove-module
         {moduleName : The folder name of the module under synapps/modules}
-        {--permanent : Permanently delete the module instead of moving it to .trash}';
+        {--permanent : Permanently delete the module instead of moving it to .trash}
+        {--force : Remove without asking for confirmation (also implied by --no-interaction)}';
 
     /**
      * The console command description.
@@ -38,6 +39,12 @@ class SynAppsRemoveModule extends Command
             return self::INVALID;
         }
 
+        if ($moduleName === '' || $moduleName === '.' || $moduleName === '..' || preg_match('#[/\\\\]#', $moduleName)) {
+            $this->components->error('Module name must be a single folder name under synapps/modules.');
+
+            return self::INVALID;
+        }
+
         $modulePath = synapps_path('modules'.DS.$moduleName);
 
         if (! $files->isDirectory($modulePath) || ! $files->exists($modulePath.DS.'module.json')) {
@@ -48,7 +55,7 @@ class SynAppsRemoveModule extends Command
 
         $permanent = (bool) $this->option('permanent');
 
-        $confirmed = confirm(
+        $confirmed = $this->option('force') || ! $this->input->isInteractive() || confirm(
             label: $permanent
                 ? "Permanently delete module \"{$moduleName}\"? This cannot be undone."
                 : "Move module \"{$moduleName}\" to .trash? It can be restored manually afterwards.",

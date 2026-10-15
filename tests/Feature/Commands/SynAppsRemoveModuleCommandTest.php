@@ -94,3 +94,27 @@ test('synapps:remove-module does not duplicate an existing /.trash entry in .git
     $count = substr_count(file_get_contents(base_path('.gitignore')), '/.trash');
     expect($count)->toBe(1);
 });
+
+test('synapps:remove-module --force removes the module without asking', function () {
+    $this->artisan('synapps:remove-module', ['moduleName' => 'demo-removable', '--force' => true])
+        ->expectsOutputToContain('fake discover ran')
+        ->assertSuccessful();
+
+    expect($this->modulePath)->not->toBeDirectory()
+        ->and(glob(base_path('.trash/demo-removable-*')))->toHaveCount(1);
+});
+
+test('synapps:remove-module --no-interaction removes the module without asking', function () {
+    $this->artisan('synapps:remove-module', ['moduleName' => 'demo-removable', '--permanent' => true, '--no-interaction' => true])
+        ->assertSuccessful();
+
+    expect($this->modulePath)->not->toBeDirectory()
+        ->and(base_path('.trash'))->not->toBeDirectory();
+});
+
+test('synapps:remove-module rejects a module name that escapes synapps/modules', function () {
+    $this->artisan('synapps:remove-module', ['moduleName' => '../modules/demo-removable', '--force' => true])
+        ->assertExitCode(Command::INVALID);
+
+    expect($this->modulePath)->toBeDirectory();
+});
