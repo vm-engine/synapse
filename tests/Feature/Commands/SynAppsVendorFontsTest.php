@@ -117,3 +117,34 @@ it('does not duplicate the fonts.css entry when re-run after the header is re-ad
         ->count();
     expect($fontsCssCount)->toBe(1);
 });
+
+it('vendors every Google Fonts link, not just the first one', function () {
+    $themeJson = json_decode(File::get("{$this->themePath}/theme.json"), true);
+    $themeJson['headers']['frontend'][] = "<link href='https://fonts.googleapis.com/css2?family=Lora&display=swap' rel='stylesheet'>";
+    $themeJson['headers']['all'][] = "<link href='https://fonts.googleapis.com/css2?family=Fira+Code&display=swap' rel='stylesheet'>";
+    File::put("{$this->themePath}/theme.json", json_encode($themeJson));
+
+    Http::fake([
+        'fonts.googleapis.com/css2?family=Inter*' => Http::response("@font-face{font-family:'Inter';src:url(https://fonts.gstatic.com/s/inter/v1/a.woff2) format('woff2');}"),
+        'fonts.googleapis.com/css2?family=Lora*' => Http::response("@font-face{font-family:'Lora';src:url(https://fonts.gstatic.com/s/lora/v1/b.woff2) format('woff2');}"),
+        'fonts.googleapis.com/css2?family=Fira*' => Http::response("@font-face{font-family:'Fira Code';src:url(https://fonts.gstatic.com/s/firacode/v1/c.woff2) format('woff2');}"),
+        'fonts.gstatic.com/*' => Http::response('FAKE_WOFF2_BYTES'),
+    ]);
+
+    $this->artisan('synapps:vendor-fonts', ['theme' => $this->themeName])
+        ->assertExitCode(0);
+
+    $fontsDir = "{$this->themePath}/assets/fonts";
+    $woff2Files = collect(File::files($fontsDir))->filter(fn ($f) => $f->getExtension() === 'woff2');
+    expect($woff2Files)->toHaveCount(3)
+        ->and(File::get("{$fontsDir}/fonts.css"))
+        ->toContain("'Inter'")->toContain("'Lora'")->toContain("'Fira Code'")
+        ->not->toContain('fonts.gstatic.com');
+
+    $themeJson = json_decode(File::get("{$this->themePath}/theme.json"), true);
+    $localCss = "/assets/themes/{$this->themeName}/fonts/fonts.css";
+    expect($themeJson['headers']['frontend'])->toBeEmpty()
+        ->and($themeJson['headers']['all'])->toBeEmpty()
+        ->and($themeJson['css']['frontend'])->toContain($localCss)
+        ->and($themeJson['css']['all'])->toContain($localCss);
+});

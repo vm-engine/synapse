@@ -105,7 +105,7 @@ class SynAppsMakeTheme extends Command
                     mkdir($target, 0755, true);
                 }
             } else {
-                copy($item, $target);
+                copy($item->getPathname(), $target);
             }
         }
     }

@@ -41,25 +41,31 @@ class SynAppsVendorFonts extends Command
 
         $themeJson = json_decode(File::get($themeJsonPath), true);
 
-        [$fontsUrl, $affectedLayouts] = $this->findGoogleFontsLink($themeJson);
+        [$fontsUrls, $affectedLayouts] = $this->findGoogleFontsLinks($themeJson);
 
-        if (! $fontsUrl) {
+        if ($fontsUrls === []) {
             $this->components->error("No Google Fonts link found in '{$theme}'s theme.json headers.");
 
             return 1;
         }
 
-        $this->components->info("Fetching Google Fonts CSS from: {$fontsUrl}");
+        // Every link is vendored: the theme.json cleanup below removes all Google Fonts entries.
+        $cssParts = [];
+        foreach ($fontsUrls as $fontsUrl) {
+            $this->components->info("Fetching Google Fonts CSS from: {$fontsUrl}");
 
-        $cssResponse = Http::withHeaders(['User-Agent' => self::MODERN_USER_AGENT])->get($fontsUrl);
+            $cssResponse = Http::withHeaders(['User-Agent' => self::MODERN_USER_AGENT])->get($fontsUrl);
 
-        if (! $cssResponse->successful()) {
-            $this->components->error("Failed to fetch Google Fonts CSS (HTTP {$cssResponse->status()}).");
+            if (! $cssResponse->successful()) {
+                $this->components->error("Failed to fetch Google Fonts CSS from {$fontsUrl} (HTTP {$cssResponse->status()}).");
 
-            return 1;
+                return 1;
+            }
+
+            $cssParts[] = $cssResponse->body();
         }
 
-        $css = $cssResponse->body();
+        $css = implode("\n", $cssParts);
 
         preg_match_all('/url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.woff2)\)/', $css, $matches);
         $fontUrls = array_unique($matches[1]);
@@ -122,14 +128,14 @@ class SynAppsVendorFonts extends Command
     }
 
     /**
-     * Scan every headers.* layout array for a fonts.googleapis.com/css2 link.
+     * Collect every fonts.googleapis.com stylesheet link (css or css2) across all headers.* layout arrays.
      *
      * @param  array<string, mixed>  $themeJson
-     * @return array{0: ?string, 1: array<int, string>} [fontsUrl, affectedLayoutKeys]
+     * @return array{0: array<int, string>, 1: array<int, string>} [fontsUrls, affectedLayoutKeys]
      */
-    protected function findGoogleFontsLink(array $themeJson): array
+    protected function findGoogleFontsLinks(array $themeJson): array
     {
-        $fontsUrl = null;
+        $fontsUrls = [];
         $affectedLayouts = [];
 
         foreach ($themeJson['headers'] ?? [] as $layout => $entries) {
@@ -138,18 +144,16 @@ class SynAppsVendorFonts extends Command
             }
 
             foreach ($entries as $entry) {
-                if (is_string($entry) && str_contains($entry, 'fonts.googleapis.com/css2')) {
-                    if (! $fontsUrl) {
-                        preg_match('/href=[\'"]([^\'"]+)[\'"]/', $entry, $m);
-                        $fontsUrl = $m[1] ?? null;
-                    }
+                if (is_string($entry)
+                    && str_contains($entry, 'fonts.googleapis.com/css')
+                    && preg_match('/href=[\'"]([^\'"]+)[\'"]/', $entry, $m)) {
+                    $fontsUrls[] = html_entity_decode($m[1]);
                     $affectedLayouts[] = $layout;
-                    break;
                 }
             }
         }
 
-        return [$fontsUrl, array_unique($affectedLayouts)];
+        return [array_values(array_unique($fontsUrls)), array_values(array_unique($affectedLayouts))];
     }
 
     /**
