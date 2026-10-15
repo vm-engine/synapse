@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.3] - 2026-10-15
+
+### Changed
+- `synapps:setup` / `synapps:reconfig`: with multi-language off, `enabled_languages` is now the app locale (`config('app.locale')`, i.e. `APP_LOCALE`) instead of a hardcoded `en`; an empty locale still falls back to `en`. With multi-language on, `synapps:setup` pre-fills the language list with the app locale too.
+
 ## [3.4.2] - 2026-10-15
 
 ### Added
