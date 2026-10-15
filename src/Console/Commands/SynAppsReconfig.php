@@ -216,13 +216,7 @@ class SynAppsReconfig extends Command
                     'frontend' => [],
                 ],
             ]),
-            'csp' => config('synapps.apps.csp', [
-                'script_src' => [],
-                'style_src' => [],
-                'font_src' => [],
-                'img_src' => [],
-                'connect_src' => [],
-            ]),
+            'csp' => config('synapps.apps.csp', SynAppsSetup::DEFAULT_CSP),
             'security' => array_merge(config('synapps.apps.security', [
                 'ssrf_allow_loopback' => false,
             ]), [

@@ -18,6 +18,24 @@ use function Laravel\Prompts\text;
 class SynAppsSetup extends Command
 {
     /**
+     * Default `csp` block for a new apps.json: the external hosts the bundled
+     * stubs load in the browser (Google Fonts from the stub themes, the
+     * toastr notification sound from synapse-components.js). Consumed by
+     * SecureHeaders; packages add their own hosts from their install commands.
+     *
+     * @var array<string, list<string>>
+     */
+    public const DEFAULT_CSP = [
+        'script_src' => [],
+        'style_src' => ['https://fonts.googleapis.com'],
+        'font_src' => ['https://fonts.gstatic.com'],
+        'img_src' => [],
+        'connect_src' => [],
+        'frame_src' => [],
+        'media_src' => ['https://res.cloudinary.com'],
+    ];
+
+    /**
      * The name and signature of the console command.
      *
      * @var string
@@ -207,13 +225,7 @@ class SynAppsSetup extends Command
                     'frontend' => [],
                 ],
             ],
-            'csp' => [
-                'script_src' => [],
-                'style_src' => [],
-                'font_src' => [],
-                'img_src' => [],
-                'connect_src' => [],
-            ],
+            'csp' => self::DEFAULT_CSP,
             'security' => [
                 'ssrf_allow_loopback' => false,
                 'ip_whitelist' => $ipWhitelist,

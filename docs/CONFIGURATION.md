@@ -453,6 +453,8 @@ Extends the `Content-Security-Policy` allowlist enforced by the `SecureHeaders` 
 
 `frame_src` (embedded iframes, e.g. reCAPTCHA) and `media_src` (audio/video, e.g. a notification sound) default to `'self'` like the other directives when left empty.
 
+A new `apps.json` starts from `SynAppsSetup::DEFAULT_CSP`, which already allows the hosts the bundled stubs load: Google Fonts (`style_src` / `font_src`, from the stub themes) and the toastr notification sound (`media_src`). Every external host the browser loads must be listed here; packages that load their own (e.g. synapps-auth's reCAPTCHA) add them from their install/config commands.
+
 Read via `config('synapps.apps.csp.*')`. Inline `<script>` tags must carry the per-request nonce instead of relying on `'unsafe-inline'`:
 
 ```blade
