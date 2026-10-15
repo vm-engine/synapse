@@ -194,9 +194,15 @@ class SynapseConfigGenerator
             $config['namespaces']['general'],
             'database'.DS.'seeders',
             function ($namespace, $resourcePath, $moduleName, $modulePath, $namespaceValue) {
-                return $resourcePath.DS.'seeders.php';
+                $moduleJson = $modulePath.DS.'module.json';
+                $priority = file_exists($moduleJson) ? (read_json_file($moduleJson)['load_priority'] ?? 99) : 99;
+
+                return [(int) $priority, $resourcePath.DS.'seeders.php'];
             }
         );
+        // Seed in module load order (e.g. synapps-auth's roles first); usort is stable, so ties keep scan order.
+        usort($seedPaths, fn (array $a, array $b): int => $a[0] <=> $b[0]);
+        $seedPaths = array_column($seedPaths, 1);
 
         $migrationPaths[] = realpath(__DIR__.DS.'..'.DS.'..'.DS.'database'.DS.'migrations');
 

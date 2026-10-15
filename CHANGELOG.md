@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.6] - 2026-10-15
+
+### Fixed
+- Module seeders (`synapse.seed_path.general`) now run in module `load_priority` order (default 99) instead of filesystem scan order, so e.g. `synapps-auth` (priority 0) seeds before the modules that depend on it.
+
 ## [3.4.5] - 2026-10-15
 
 ### Fixed
