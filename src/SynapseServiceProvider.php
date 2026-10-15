@@ -330,6 +330,8 @@ class SynapseServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(config('synapse.migration_path.general', []));
             $this->callAfterResolving('Database\Seeders\DatabaseSeeder', function ($seeder) {
+                // Fires before SeedCommand sets the container; without it, module seeders get no run() injection.
+                $seeder->setContainer($this->app);
                 $seedList = config('synapse.seed_path.general');
                 foreach ($seedList as $seederFile) {
                     if (! file_exists($seederFile)) {

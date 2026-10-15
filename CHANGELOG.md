@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.5] - 2026-10-15
+
+### Fixed
+- Module seeders run through the `DatabaseSeeder` hook (`synapse.seed_path.general`) failed with `Too few arguments to function ...::run()` when `run()` type-hinted dependencies: the hook fired before `db:seed` set the container, so seeders were built without injection. The hook now sets the container first.
+
 ## [3.4.4] - 2026-10-15
 
 ### Fixed
