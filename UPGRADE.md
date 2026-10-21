@@ -412,6 +412,41 @@ The rich-text editor now lives in Synapse as `<x-synapse-rte>` and is **off by d
 
 Nothing changes for a host that has no rich-text fields.
 
+---
+
+### Upgrading to v3.6.1: theme scripts in `<head>`
+
+**Symptom fixed:** after a `wire:navigate` between layouts (login on the guest layout → frontend page or dashboard, app → frontend, …) the first page logged `Undefined variable: frontendHeader` / `headerClass` / `ariaExpanded` (or other components from the layout's entry), and the header's scroll shadow / mobile menu stayed broken until a full reload.
+
+**Cause:** layouts rendered `@themeScripts('<layout>')` at the end of `<body>`. Livewire waits for new `<head>` scripts before starting Alpine on a navigated page, but only re-runs body scripts without awaiting them, so the layout entry (`<layout>.js` — theme JS and any module JS imported into it) registered its Alpine components after Alpine had already initialised the page.
+
+**Required action if you copied a theme** (`synapps/resources/themes/*/layouts/*.blade.php`): move `@themeScripts('<layout>')` from the end of `<body>` into `<head>`, right after `@themeStyles('<layout>')`, in **every** layout. Leave `@livewireScripts` and `@stack('scripts')` where they are. Reference: the bundled stubs (`vendor/vm-engine/synapse/stubs/themes/*/layouts`), or the syariapp fix (commit `bb91028`, `synapps/resources/themes/default/layouts/*.blade.php`).
+
+```diff
+     @themeStyles('app')
++    @themeScripts('app')
+     @livewireStyles
+ </head>
+ ...
+-    @themeScripts('app')
+     @livewireScripts
+ </body>
+```
+
+`php artisan synapps:upgrade-audit` reports any `@themeScripts` still after `</head>` (rule F, manual review). The same applies to a custom layout that loads its js entry with `@vite([... 'resources/js/app.js'])` at the end of `<body>`.
+
+**Also:**
+
+- CDN scripts listed under `js` in `theme.json` now render with `defer`, so moving `@themeScripts` into `<head>` keeps them running after the page is parsed.
+- **`synapse-rte.js`**: projects with the rich-text editor have a copy at `synapps/resources/js/synapse-rte.js` that registers `synapseRte` only on `alpine:init`, which does not fire after a navigate. Re-copy it and rebuild:
+
+  ```bash
+  cp vendor/vm-engine/synapse/stubs/synapps/resources/js/synapse-rte.js synapps/resources/js/
+  npm run build
+  ```
+
+- Your own Alpine registrations (theme or module JS) should use the same pattern: `if (window.Alpine) { register(); } else { document.addEventListener('alpine:init', register); }`.
+
 ## Deprecation Warnings
 
 Synapse uses Laravel's logging system to warn about deprecated features:

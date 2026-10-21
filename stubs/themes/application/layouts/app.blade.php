@@ -19,6 +19,12 @@
 
     {{-- Theme CDN Styles + Vite (base.css + app.css via ThemeService) --}}
     @themeStyles('app')
+    {{-- Theme CDN Scripts + Vite (base.js + app.js via ThemeService). Keep them in <head>:
+         on wire:navigate Livewire waits only for new <head> scripts before starting Alpine on the
+         new page (body scripts are re-run, not awaited), so a layout entry in <body> registers its
+         Alpine components too late. Vite emits deferred module scripts, so a full page load still
+         runs them after livewire.js. --}}
+    @themeScripts('app')
 
     @stack('styles')
 </head>
@@ -84,8 +90,6 @@
     {{-- Toast notifications (listens to `notify` events) --}}
     <x-synapse-toastr></x-synapse-toastr>
 
-    {{-- Theme CDN Scripts + Vite (base.js + app.js via ThemeService) --}}
-    @themeScripts('app')
 
     @stack('scripts')
 </body>

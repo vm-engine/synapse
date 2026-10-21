@@ -24,7 +24,7 @@ default/
     └── frontend.blade.php
 ```
 
-The CSS/JS files compile through the `resources/{css,js}/{base,app,guest,frontend}` Vite entries; layouts load them with `@themeStyles('<layout>')` / `@themeScripts('<layout>')`. Never add `@vite()` to a layout.
+The CSS/JS files compile through the `resources/{css,js}/{base,app,guest,frontend}` Vite entries; layouts load them with `@themeStyles('<layout>')` / `@themeScripts('<layout>')`, both in `<head>` (on `wire:navigate` Livewire only waits for `<head>` scripts before starting Alpine). Never add `@vite()` to a layout.
 
 ## Colors & Dark Mode
 

@@ -66,8 +66,10 @@ test('renderScripts returns CDN script tags from config', function () {
 
     $output = $this->service->renderScripts('frontend');
 
-    expect($output)->toContain('<script src="https://cdn.example.com/global.js"></script>')
-        ->and($output)->toContain('<script src="https://cdn.example.com/frontend.js"></script>');
+    // defer: the layouts render @themeScripts in <head>, so CDN scripts run after the page is
+    // parsed (like the Vite module entries) instead of blocking it.
+    expect($output)->toContain('<script src="https://cdn.example.com/global.js" defer></script>')
+        ->and($output)->toContain('<script src="https://cdn.example.com/frontend.js" defer></script>');
 });
 
 test('renderScripts renders integrity and crossorigin attributes for object entries', function () {
@@ -88,7 +90,8 @@ test('renderScripts renders integrity and crossorigin attributes for object entr
 
     expect($output)->toContain('src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"')
         ->and($output)->toContain('integrity="sha384-LoktLSu+KN7O05Gi2Epno0XhcstpeXAu40T7IP2JC5OZ2qKi/oE9znxViQS3yYn5"')
-        ->and($output)->toContain('crossorigin="anonymous"');
+        ->and($output)->toContain('crossorigin="anonymous"')
+        ->and($output)->toEndWith(' defer></script>');
 });
 
 test('renderStyles renders integrity and crossorigin attributes for object entries', function () {
@@ -122,7 +125,7 @@ test('renderScripts still supports plain string entries without integrity', func
 
     $output = $this->service->renderScripts('app');
 
-    expect($output)->toBe('<script src="https://cdn.example.com/plain.js"></script>');
+    expect($output)->toBe('<script src="https://cdn.example.com/plain.js" defer></script>');
 });
 
 test('renderStyles does not include layout-specific CDN for different layout', function () {

@@ -30,7 +30,10 @@ const DEFAULT_BUTTONS = [
     'link',
 ];
 
-document.addEventListener('alpine:init', () => {
+// alpine:init fires once per full page load. After a wire:navigate from another layout this entry
+// loads with Alpine already running, so register right away when it is (see the layouts' comment
+// on keeping @themeScripts in <head>).
+const registerSynapseRte = () => {
     Alpine.data('synapseRte', (config) => ({
         editor: null,
         extension: null,
@@ -80,4 +83,10 @@ document.addEventListener('alpine:init', () => {
             }
         },
     }));
-});
+};
+
+if (window.Alpine) {
+    registerSynapseRte();
+} else {
+    document.addEventListener('alpine:init', registerSynapseRte);
+}

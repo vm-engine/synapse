@@ -25,7 +25,7 @@ application/
     └── components/         # sidebar-menu, header-nav, dark-mode-toggle, card, button, form-input
 ```
 
-Layouts load CSS/JS with `@themeStyles('<layout>')` / `@themeScripts('<layout>')`. Never add `@vite()` to a layout.
+Layouts load CSS/JS with `@themeStyles('<layout>')` / `@themeScripts('<layout>')`, both in `<head>` (on `wire:navigate` Livewire only waits for `<head>` scripts before starting Alpine). Never add `@vite()` to a layout.
 
 ## Colors & Fonts
 

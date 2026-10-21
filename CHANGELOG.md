@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Alpine components missing after a cross-layout `wire:navigate`** (guest → frontend/app after login, app → frontend, …): the first page logged `Undefined variable: frontendHeader` / `headerClass` / `ariaExpanded` and the header's scroll shadow / mobile menu stayed broken until a full reload. Livewire waits only for new `<head>` scripts before starting Alpine on a navigated page, but every layout rendered `@themeScripts('<layout>')` at the end of `<body>`. All theme layout stubs (`stubs/themes/{default,application}/layouts/*`) and the fallback `components/layouts/app.blade.php` now render it in `<head>` right after `@themeStyles`; the Bootstrap fallback layouts (`components/layouts/app-bootstrap.blade.php`, `layouts/app.blade.php`) load their `@vite` js entry in `<head>` too. **Projects that copied a theme must move `@themeScripts` into `<head>` in their own `synapps/resources/themes/*/layouts`** — see UPGRADE.md (v3.6.1).
+- `synapse-rte.js` stub registered `synapseRte` only on `alpine:init`, which does not fire after a navigate; it now registers immediately when Alpine is already running.
+- `synapps:upgrade-audit` (and the standalone `tools/synapse-upgrade-audit.php`) no longer walks into excluded directories (`vendor`, `node_modules`, `storage`, `bootstrap`, `.git`) before discarding their files — they are skipped before being opened, which makes the audit much faster on real projects — and a directory it cannot open (unreadable, or deleted mid-scan) is skipped instead of aborting the whole audit with `UnexpectedValueException`.
+- Flaky tests under `pest --parallel`: `SynAppsPatchResourcesEnvTestingTest` and `SynAppsUpgradeAuditTest` now run in a private base path instead of the shared Testbench root, where other test files create and delete the same files and directories.
+
+### Changed
+- CDN scripts from `theme.json` (`js`) render with `defer`, so they keep running after the page is parsed now that `@themeScripts` sits in `<head>`.
+
+### Added
+- `synapps:upgrade-audit` / `tools/synapse-upgrade-audit.php` rule F (manual review): `@themeScripts(...)` rendered after `</head>` in a layout. `UpgradeRule::matchingLines()` (default in `AbstractUpgradeRule`) lets a rule look at the whole file instead of one line.
+
 ## [3.6.0] - 2026-10-21
 
 ### Security

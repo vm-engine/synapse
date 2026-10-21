@@ -53,6 +53,34 @@ test('layouts do not hardcode Google Fonts or call @vite', function (string $the
         ->and($source)->not->toContain('@vite(');
 })->with('themes')->with(['app', 'guest', 'frontend']);
 
+// Livewire's wire:navigate waits only for new <head> scripts before starting Alpine on the
+// new page; body scripts are re-run but not awaited. A layout entry loaded from <body> would
+// register its Alpine components too late after a navigate from a different layout.
+test('layouts load their theme scripts inside <head>', function (string $theme, string $layout) {
+    $source = (string) file_get_contents(themeStubPath($theme, "layouts/{$layout}.blade.php"));
+
+    expect(substr_count($source, '@themeScripts('))->toBe(1)
+        ->and(strpos($source, '@themeScripts('))->toBeLessThan(strpos($source, '</head>'));
+
+    // @livewireScripts (when a layout renders it rather than relying on auto-injection) stays in <body>.
+    if (str_contains($source, '@livewireScripts')) {
+        expect(strpos($source, '@livewireScripts'))->toBeGreaterThan(strpos($source, '</head>'));
+    }
+})->with('themes')->with(['app', 'guest', 'frontend']);
+
+test('synapps fallback layouts load their js entry inside <head>', function (string $file) {
+    $source = (string) file_get_contents(dirname(__DIR__, 3).'/stubs/synapps/resources/views/'.$file);
+    $head = substr($source, 0, (int) strpos($source, '</head>'));
+
+    expect($head)->toMatch('/@themeScripts\(|@vite\(\[[^\]]*resources\/js\/app\.js/')
+        ->and(substr($source, (int) strpos($source, '</head>')))->not->toMatch('/@themeScripts\(|@vite\(\[[^\]]*resources\/js\//');
+})->with([
+    'components/layouts/app.blade.php',
+    'components/layouts/layout.blade.php',
+    'components/layouts/app-bootstrap.blade.php',
+    'layouts/app.blade.php',
+]);
+
 test('stub layouts rendering @themeHeaders do not also hardcode Google Fonts', function () {
     $offenders = collect(File::allFiles(dirname(__DIR__, 3).'/stubs'))
         ->filter(fn ($file) => str_ends_with($file->getFilename(), '.blade.php'))

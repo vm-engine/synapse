@@ -75,12 +75,16 @@ class ThemeService
      * (backward compatible) or an array with 'src', 'integrity', and
      * 'crossorigin' keys for Subresource Integrity.
      *
+     * Always `defer`: layouts render @themeScripts in <head> (so wire:navigate
+     * awaits it), and deferred CDN scripts still run after the page is parsed,
+     * in order with the Vite module entries.
+     *
      * @param  string|array<string, string>  $entry
      */
     protected function renderScriptTag(string|array $entry): string
     {
         if (is_string($entry)) {
-            return '<script src="'.e($entry).'"></script>';
+            return '<script src="'.e($entry).'" defer></script>';
         }
 
         $src = $entry['src'] ?? '';
@@ -93,7 +97,7 @@ class ThemeService
             $tag .= ' crossorigin="'.e($entry['crossorigin']).'"';
         }
 
-        return $tag.'></script>';
+        return $tag.' defer></script>';
     }
 
     /**

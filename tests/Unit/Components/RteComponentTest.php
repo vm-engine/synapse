@@ -60,3 +60,12 @@ it('ships a script that registers synapseRte and the extension hook', function (
         ->toContain('window.synapseRte')
         ->toContain("import('jodit')");
 });
+
+it('registers synapseRte even when Alpine is already running (after a wire:navigate)', function () {
+    $stub = (string) file_get_contents(__DIR__.'/../../../stubs/synapps/resources/js/synapse-rte.js');
+
+    // alpine:init fires once per full page load; a navigate from another layout loads this entry
+    // with Alpine already started, so an alpine:init-only registration would never run.
+    expect($stub)->toMatch('/if \\(window\\.Alpine\\) \\{\\s*registerSynapseRte\\(\\);/')
+        ->toContain("document.addEventListener('alpine:init', registerSynapseRte)");
+});

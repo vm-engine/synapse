@@ -355,21 +355,26 @@ Do **not** call `@vite(['resources/css/app.css'])` separately — it is already 
 
 ### @themeScripts
 
-Render CDN script tags **and** Vite asset tags for a specific layout type.
+Render CDN script tags **and** Vite asset tags for a specific layout type. Put it in `<head>`, right after `@themeStyles()`:
 
 ```blade
-<body>
+<head>
+    @themeStyles('app')
     @themeScripts('app')
     <!-- or auto-detect layout from URL -->
     @themeScripts()
-</body>
+</head>
 ```
+
+> **Keep it in `<head>` (since v3.6.1).** On `wire:navigate`, Livewire waits for new `<head>` scripts before starting Alpine on the new page, but body scripts are only re-run, never awaited. A layout entry rendered in `<body>` therefore registers its Alpine components too late after a navigate from a different layout (guest → app after login, app → frontend …), giving `Undefined variable: frontendHeader`-style errors until a full reload. Every tag `@themeScripts` emits is deferred (Vite `type="module"`, CDN scripts with `defer`), so on a full page load they still run after the page is parsed and after `livewire.js` — the same timing as at the end of `<body>`.
+>
+> Register Alpine components so they also work when Alpine is already running: `if (window.Alpine) { register(); } else { document.addEventListener('alpine:init', register); }`. `alpine:init` fires once per full page load, not after a navigate.
 
 **Output (example for `app` layout):**
 
 ```html
 <!-- CDN resources from theme.json -->
-<script src="https://cdn.example.com/analytics.js"></script>
+<script src="https://cdn.example.com/analytics.js" defer></script>
 
 <!-- Vite-compiled assets (base + layout-specific) -->
 <script type="module" src="/build/assets/base-[hash].js"></script>
@@ -513,6 +518,8 @@ Edit layout files in `layouts/`. The `@themeStyles()` and `@themeScripts()` dire
 
     {{-- CDN styles + Vite: base.css + app.css --}}
     @themeStyles('app')
+    {{-- CDN scripts + Vite: base.js + app.js — in <head>, see @themeScripts above --}}
+    @themeScripts('app')
     @livewireStyles
 </head>
 <body>
@@ -528,8 +535,6 @@ Edit layout files in `layouts/`. The `@themeStyles()` and `@themeScripts()` dire
         </main>
     </div>
 
-    {{-- CDN scripts + Vite: base.js + app.js --}}
-    @themeScripts('app')
     @livewireScripts
 </body>
 </html>

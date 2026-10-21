@@ -14,6 +14,10 @@
 
     <title>{{ $title ?? config('app.name') }}</title>
     @vite(['resources/css/app.css'])
+    {{-- The js entry stays in <head>: on wire:navigate Livewire waits only for new <head> scripts
+         before starting Alpine on the new page (body scripts are not awaited). Vite emits a deferred
+         module script, so a full page load still runs it after livewire.js. --}}
+    @vite(['resources/js/app.js'])
     @livewireStyles
 </head>
 
@@ -252,7 +256,6 @@
         <i class="fas fa-angle-up"></i>
     </a>
     <!-- End of Page Wrapper -->
-    @vite(['resources/js/app.js'])
     @livewireScripts
 </body>
 
