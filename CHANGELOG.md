@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.1] - 2026-10-21
+
 ### Fixed
 - **Alpine components missing after a cross-layout `wire:navigate`** (guest → frontend/app after login, app → frontend, …): the first page logged `Undefined variable: frontendHeader` / `headerClass` / `ariaExpanded` and the header's scroll shadow / mobile menu stayed broken until a full reload. Livewire waits only for new `<head>` scripts before starting Alpine on a navigated page, but every layout rendered `@themeScripts('<layout>')` at the end of `<body>`. All theme layout stubs (`stubs/themes/{default,application}/layouts/*`) and the fallback `components/layouts/app.blade.php` now render it in `<head>` right after `@themeStyles`; the Bootstrap fallback layouts (`components/layouts/app-bootstrap.blade.php`, `layouts/app.blade.php`) load their `@vite` js entry in `<head>` too. **Projects that copied a theme must move `@themeScripts` into `<head>` in their own `synapps/resources/themes/*/layouts`** — see UPGRADE.md (v3.6.1).
 - `synapse-rte.js` stub registered `synapseRte` only on `alpine:init`, which does not fire after a navigate; it now registers immediately when Alpine is already running.
