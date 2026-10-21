@@ -551,16 +551,36 @@ if ($id === false) {
 - `string` - The decrypted ID if valid
 - `false` - If token is invalid or expired
 
+#### `validateDeleteTokens(array $tokens): array|false` (static)
+
+Validates a bulk selection, all or nothing.
+
+```php
+$ids = Post::validateDeleteTokens($this->selected); // checkbox values = delete tokens
+
+if ($ids === false) {
+    // At least one token is invalid: delete nothing, ask the user to refresh
+} else {
+    Post::query()->whereKey($ids)->delete();
+}
+```
+
+**Returns:**
+- `list<string>` - The IDs of every token, deduplicated, in the given order (`[]` for an empty array)
+- `false` - If any token is invalid or not a string
+
+Because tokens are stable within a session, they can be used directly as checkbox values bound to a Livewire array (`value="{{ $post->delete_token }}" wire:model.live="selected"`) — the selection survives re-renders.
+
 ### How It Works
 
 1. **Token Generation:**
    - Creates a random 16-byte salt and stores it in the session
    - Combines the issuing model class, the model ID and the session salt: `"{class}|{id}|{salt}"`
-   - Encrypts the combined string using Laravel's encryption
-   - Returns the encrypted token
+   - Encrypts it with AES-256-CBC using a key derived from `APP_KEY`, with an IV derived from the content (HMAC), so the same record gets the **same token for the whole session**
+   - Appends an HMAC-SHA256 of IV + ciphertext and returns it as url-safe base64
 
 2. **Token Validation:**
-   - Decrypts the token
+   - Verifies the HMAC (constant-time), then decrypts the token
    - Extracts the class, ID and salt from the decrypted string
    - Compares the salt with the current session's salt
    - Checks the token's class is the validating model or a subclass of it (`is_a`)
