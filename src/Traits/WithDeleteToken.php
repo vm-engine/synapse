@@ -7,6 +7,9 @@ namespace VmEngine\Synapse\Traits;
 use Illuminate\Support\Facades\Crypt;
 
 /**
+ * Encrypted, session-bound delete tokens. A token carries the class that issued it, so it only
+ * validates on that model (or a parent class it extends), never on an unrelated model with the same id.
+ *
  * @phpstan-ignore trait.unused
  */
 trait WithDeleteToken
@@ -37,7 +40,7 @@ trait WithDeleteToken
             $salt = session('dToken');
         }
 
-        return Crypt::encryptString($id.'|'.$salt);
+        return Crypt::encryptString(static::class.'|'.$id.'|'.$salt);
     }
 
     public static function validateDeleteToken($token): string|false
@@ -52,15 +55,15 @@ trait WithDeleteToken
 
         try {
             $decrypted = Crypt::decryptString($token);
-            $parts = explode('|', $decrypted, 2);
+            $parts = explode('|', $decrypted, 3);
 
-            if (count($parts) !== 2) {
+            if (count($parts) !== 3) {
                 return false;
             }
 
-            [$id, $salt] = $parts;
+            [$class, $id, $salt] = $parts;
 
-            if ($salt !== session('dToken')) {
+            if ($salt !== session('dToken') || ! is_a($class, static::class, true)) {
                 return false;
             }
 

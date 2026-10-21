@@ -555,14 +555,15 @@ if ($id === false) {
 
 1. **Token Generation:**
    - Creates a random 16-byte salt and stores it in the session
-   - Combines the model ID with the session salt: `"{id}|{salt}"`
+   - Combines the issuing model class, the model ID and the session salt: `"{class}|{id}|{salt}"`
    - Encrypts the combined string using Laravel's encryption
    - Returns the encrypted token
 
 2. **Token Validation:**
    - Decrypts the token
-   - Extracts the ID and salt from the decrypted string
+   - Extracts the class, ID and salt from the decrypted string
    - Compares the salt with the current session's salt
+   - Checks the token's class is the validating model or a subclass of it (`is_a`)
    - Returns the ID if valid, `false` otherwise
 
 3. **Automatic Appending:**
@@ -573,6 +574,7 @@ if ($id === false) {
 ### Security Features
 
 - **Session-bound:** Tokens are tied to the user's session via a unique salt
+- **Model-bound:** A token only validates on the model that issued it (or a parent class), so a `Client` token cannot delete a `Category` with the same ID
 - **Encrypted:** Uses Laravel's encryption (AES-256-CBC by default)
 - **One-time use:** Each page load generates a fresh salt (configurable)
 - **CSRF protection:** Works alongside Laravel's CSRF protection

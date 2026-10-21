@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- `WithDeleteToken` binds a token to the model class that issued it (`{class}|{id}|{salt}`): `Model::validateDeleteToken()` now refuses a token from an unrelated model with the same id, while a subclass token still validates on its parent (e.g. the app's `User` on `synapps-auth`'s `User`). Public API unchanged; tokens rendered before the upgrade fail once until the page is reloaded.
+
 ## [3.5.0] - 2026-10-15
 
 ### Added
