@@ -65,7 +65,7 @@ php artisan synapps:upgrade-audit --apply      # also rewrite auto-fixable findi
 
 **Detects:**
 - Auto-fixable: Blade `<livewire:module.name>` dot-notation → `::` namespace notation, `Route::livewire()` dotted string targets, removed `registerMfcComponents()`/`registerLivewireComponents()` calls
-- Manual-review only (never auto-fixed): Livewire v3 `Livewire.hook()` JS calls (need porting to `Livewire.interceptMessage()`), `Route::get(Component::class)` candidates, `@themeScripts(...)` after `</head>` in a layout (rule F — must be in `<head>` so `wire:navigate` waits for it)
+- Manual-review only (never auto-fixed): Livewire v3 `Livewire.hook()` JS calls (need porting to `Livewire.interceptMessage()`), `Route::get(Component::class)` candidates, `@themeScripts(...)` after `</head>` in a layout (rule F — must be in `<head>` so `wire:navigate` waits for it), Alpine components registered only in an anonymous `alpine:init` callback (rule G — missing after a cross-layout `wire:navigate`)
 
 **If the project is stuck on a version too old to have this command**, copy the self-contained standalone script `vendor/vm-engine/synapse/tools/synapse-upgrade-audit.php` into the project root and run `php synapse-upgrade-audit.php` directly — no autoload/Composer dependency, audit-only. See [UPGRADE.md](UPGRADE.md#before-you-upgrade) and [docs/COMMANDS.md](docs/COMMANDS.md#synappsupgrade-audit).
 

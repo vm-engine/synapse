@@ -109,3 +109,16 @@ it('flags @themeScripts rendered after </head> (rule F)', function () {
         ->toContain('layouts/app.blade.php')
         ->not->toContain('layouts/guest.blade.php');
 });
+
+it('flags anonymous alpine:init registrations (rule G)', function () {
+    file_put_contents($this->fixtureRoot.'/legacy.js', "document.addEventListener('alpine:init', () => {\n    Alpine.data('a', () => ({}));\n});\n");
+    file_put_contents($this->fixtureRoot.'/fine.js', "if (window.Alpine) { register(); } else { document.addEventListener('alpine:init', register); }\n");
+
+    exec(sprintf('php %s --path=%s 2>&1', escapeshellarg($this->scriptPath), escapeshellarg($this->fixtureRoot)), $output, $exitCode);
+    $report = (string) file_get_contents($this->fixtureRoot.'/SYNAPSE_UPGRADE_AUDIT.md');
+
+    expect($exitCode)->toBe(0)
+        ->and($report)->toContain('alpine-init-only')
+        ->toContain('legacy.js')
+        ->not->toContain('fine.js');
+});

@@ -754,7 +754,7 @@ php artisan synapps:upgrade-audit --apply
 Findings fall into two groups:
 
 - **Auto-fixable** — mechanical, unambiguous rewrites (Blade `<livewire:module.name>` → `<livewire:module::name>`, `Route::livewire()` dotted string targets, removed `registerMfcComponents()`/`registerLivewireComponents()` calls).
-- **Manual review required** — flagged but never rewritten, since the fix isn't mechanical (Livewire v3 `Livewire.hook()` JS calls needing a port to `Livewire.interceptMessage()`, `Route::get(Component::class)` calls that may or may not be Livewire full-page routes, and `@themeScripts(...)` rendered after `</head>` in a layout — move it into `<head>` right after `@themeStyles(...)`, see [THEMES.md](THEMES.md#themescripts)).
+- **Manual review required** — flagged but never rewritten, since the fix isn't mechanical (Livewire v3 `Livewire.hook()` JS calls needing a port to `Livewire.interceptMessage()`, `Route::get(Component::class)` calls that may or may not be Livewire full-page routes, `@themeScripts(...)` rendered after `</head>` in a layout — move it into `<head>` right after `@themeStyles(...)`, see [THEMES.md](THEMES.md#themescripts) — and Alpine components registered only in an anonymous `alpine:init` callback, which never runs after a cross-layout `wire:navigate`).
 
 ### Before you're on a version that ships this command
 

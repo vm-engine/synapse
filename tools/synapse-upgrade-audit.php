@@ -95,6 +95,14 @@ function synapseUpgradeAuditRules(): array
             'autoFixable' => false,
             'extensions' => ['blade.php'],
         ],
+        [
+            'id' => 'G',
+            'category' => 'alpine-init-only',
+            'label' => "Alpine components registered only in an anonymous alpine:init callback (copied before v3.6.2) — they are missing after a cross-layout wire:navigate; use `if (window.Alpine) { register(); } else { document.addEventListener('alpine:init', register); }`",
+            'pattern' => '/addEventListener\(\s*[\'"]alpine:init[\'"]\s*,\s*(\(|function\b|async\b)/',
+            'autoFixable' => false,
+            'extensions' => ['js', 'blade.php'],
+        ],
     ];
 }
 

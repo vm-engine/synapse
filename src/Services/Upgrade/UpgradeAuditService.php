@@ -9,6 +9,7 @@ use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
+use VmEngine\Synapse\Services\Upgrade\Rules\AlpineInitOnlyRule;
 use VmEngine\Synapse\Services\Upgrade\Rules\BladeTagNotationRule;
 use VmEngine\Synapse\Services\Upgrade\Rules\JsLivewireHooksRule;
 use VmEngine\Synapse\Services\Upgrade\Rules\RegisterMethodsRule;
@@ -41,6 +42,7 @@ class UpgradeAuditService
             new JsLivewireHooksRule,
             new RouteGetLivewireCandidateRule,
             new ThemeScriptsInBodyRule,
+            new AlpineInitOnlyRule,
         ];
     }
 

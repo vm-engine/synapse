@@ -192,3 +192,17 @@ it('flags @themeScripts rendered after </head> as manual review only (rule F)', 
         ->and($findings[0]->category)->toBe('theme-scripts-in-body')
         ->and($findings[0]->autoFixable)->toBeFalse();
 });
+
+it('flags anonymous alpine:init registrations as manual review only (rule G)', function () {
+    writeFixtureFile($this->fixtureRoot, 'synapps/resources/themes/default/js/theme-app.js', "document.addEventListener('alpine:init', () => {\n    Alpine.data('a', () => ({}));\n});\n");
+    writeFixtureFile($this->fixtureRoot, 'synapps/resources/views/components/layouts/app.blade.php', "<script>\ndocument.addEventListener(\"alpine:init\", function () {\n    Alpine.data('b', () => ({}));\n});\n</script>\n");
+    writeFixtureFile($this->fixtureRoot, 'synapps/resources/js/fine.js', "const register = () => Alpine.data('c', () => ({}));\nif (window.Alpine) { register(); } else { document.addEventListener('alpine:init', register); }\n");
+
+    $findings = $this->service->scan($this->fixtureRoot, ['G'])->findings;
+
+    expect(array_map(fn ($f) => $f->file.':'.$f->line, $findings))->toEqualCanonicalizing([
+        'synapps/resources/themes/default/js/theme-app.js:1',
+        'synapps/resources/views/components/layouts/app.blade.php:2',
+    ])->and($findings[0]->category)->toBe('alpine-init-only')
+        ->and($findings[0]->autoFixable)->toBeFalse();
+});
