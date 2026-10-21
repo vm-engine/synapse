@@ -18,7 +18,8 @@
 
     <title>{{ $title ?? config('synapps.apps.title', config('app.name', 'Laravel')) }}</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- base.* carries Tailwind + synapse-components (adv-select, datepicker, toastr, …); app.* the app layout styles. --}}
+    @vite(['resources/css/base.css', 'resources/css/app.css', 'resources/js/base.js', 'resources/js/app.js'])
     @livewireStyles
 </head>
 

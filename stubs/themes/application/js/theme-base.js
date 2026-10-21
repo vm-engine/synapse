@@ -6,7 +6,11 @@
  * collapsible, tooltip, formValidator. Toasts use <x-synapse-toastr />.
  */
 
-document.addEventListener('alpine:init', () => {
+// alpine:init fires once per full page load. After a wire:navigate from another layout this entry
+// loads with Alpine already running, so register right away when it is.
+const onAlpine = (register) => (window.Alpine ? register() : document.addEventListener('alpine:init', register));
+
+onAlpine(() => {
 
     // ============================================
     // DROPDOWN COMPONENT

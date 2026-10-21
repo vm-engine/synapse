@@ -81,6 +81,31 @@ test('synapps fallback layouts load their js entry inside <head>', function (str
     'layouts/app.blade.php',
 ]);
 
+// synapse-components.js (synapseAdvSelect, synapseDatepicker, toastr, …) is imported by the base
+// entry since the per-layout split; a layout that loads only app.js has none of those components.
+test('synapps fallback layouts load the base entry as well as app', function (string $file) {
+    $source = (string) file_get_contents(dirname(__DIR__, 3).'/stubs/synapps/resources/views/'.$file);
+
+    if (str_contains($source, '@themeScripts(')) {
+        expect($source)->toContain('@themeStyles(');
+
+        return;
+    }
+
+    expect($source)->toContain('resources/js/base.js');
+
+    // The Tailwind layout also needs the base stylesheet; the Bootstrap layouts keep their own CSS
+    // (base.css carries Tailwind's preflight, which would restyle a Bootstrap page).
+    if (! str_contains($file, 'bootstrap')) {
+        expect($source)->toContain('resources/css/base.css');
+    }
+})->with([
+    'components/layouts/app.blade.php',
+    'components/layouts/layout.blade.php',
+    'components/layouts/app-bootstrap.blade.php',
+    'layouts/app.blade.php',
+]);
+
 test('stub layouts rendering @themeHeaders do not also hardcode Google Fonts', function () {
     $offenders = collect(File::allFiles(dirname(__DIR__, 3).'/stubs'))
         ->filter(fn ($file) => str_ends_with($file->getFilename(), '.blade.php'))
@@ -195,6 +220,23 @@ test('guest layout renders the slot with the app title', function (string $theme
 
     expect($html)->toContain('<p>page-body</p>')
         ->and($html)->toContain('Acme Portal');
+})->with('themes');
+
+// alpine:init fires once per full page load. After a wire:navigate from another layout the
+// layout's entry loads with Alpine already running, so an alpine:init-only registration never runs.
+test('theme JS registers its Alpine components even when Alpine is already running', function (string $theme) {
+    foreach (themeStubFiles($theme, '.js') as $file) {
+        $js = (string) file_get_contents($file);
+
+        if (! str_contains($js, 'Alpine.data(')) {
+            continue;
+        }
+
+        // An anonymous alpine:init callback can never also run right away, so every block must be
+        // a named register function called directly when window.Alpine already exists.
+        expect(preg_match('/addEventListener\(\s*[\'"]alpine:init[\'"]\s*,\s*(\(|function)/', $js))->toBe(0, basename($file).' has an alpine:init-only block')
+            ->and(str_contains($js, 'window.Alpine'))->toBeTrue(basename($file).' registers only on alpine:init');
+    }
 })->with('themes');
 
 test('theme JS registers its layout shells', function (string $theme, string $file, string $component) {

@@ -447,6 +447,32 @@ Nothing changes for a host that has no rich-text fields.
 
 - Your own Alpine registrations (theme or module JS) should use the same pattern: `if (window.Alpine) { register(); } else { document.addEventListener('alpine:init', register); }`.
 
+---
+
+### Upgrading to v3.6.2: Alpine registrations in copied files
+
+**Symptom fixed:** after a cross-layout `wire:navigate` (e.g. frontend → back office), components registered by copied theme JS, layouts, error pages or module views were missing (`Undefined variable: synapseAppShell`, `darkMode`, `sidebarToggle`, theme modals/tooltips/toasts …). Pages on the generic fallback layout (`synapps::components.layouts.layout`) also had none of the synapse components on any load.
+
+**Cause:** those files register their Alpine components inside `document.addEventListener('alpine:init', () => { … })`. `alpine:init` fires once per full page load, so after a navigate the callback never runs. The stubs now use a named function called immediately when Alpine is already running.
+
+**Required action:** run `php artisan synapps:upgrade-audit --only=G` and update every file it lists, either by re-copying the stub when you haven't customised it (e.g. `vendor/vm-engine/synapse/stubs/themes/default/js/theme-base.js` → `synapps/resources/themes/default/js/`, `stubs/synapps/resources/views/…` → `synapps/resources/views/…`) or by converting the block:
+
+```js
+// before
+document.addEventListener('alpine:init', () => {
+    Alpine.data('myComponent', () => ({ /* … */ }));
+});
+
+// after
+const onAlpine = (register) => (window.Alpine ? register() : document.addEventListener('alpine:init', register));
+
+onAlpine(() => {
+    Alpine.data('myComponent', () => ({ /* … */ }));
+});
+```
+
+If your project uses the generic fallback layout, also load the base entries in `synapps/resources/views/components/layouts/layout.blade.php`: `@vite(['resources/css/base.css', 'resources/css/app.css', 'resources/js/base.js', 'resources/js/app.js'])`. Rebuild assets (`npm run build`) after updating JS.
+
 ## Deprecation Warnings
 
 Synapse uses Laravel's logging system to warn about deprecated features:

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Theme JS registered Alpine components only in an anonymous `alpine:init` callback, so they were missing after a cross-layout `wire:navigate`: the default theme's `theme-base.js` (modal, tooltip, tabs, dropdown, toasts, …) and `theme-app.js` (sidebar, dark mode, notifications, …), and the application theme's shared `theme-base.js` components. They now register right away when Alpine is already running.
+- The generic fallback layout `components/layouts/layout.blade.php` loaded only the `app` entries, so pages using it (e.g. the todos stub module) had none of the synapse components (`Undefined variable: synapseAdvSelect` / `synapseDatepicker` / `toastrRoot` …) — `synapse-components.js` lives in the `base` entry since the per-layout split. It now loads `base.css` + `base.js` too; `layouts/app.blade.php` likewise, and the Bootstrap `app-bootstrap.blade.php` loads `base.js`.
+- `synapps:patch js` added the `$withBack` Alpine magic inside an anonymous `alpine:init` callback; it now registers right away when Alpine is already running. Existing projects: update the block in `resources/js/base.js` (rule G lists it).
+
+### Added
+- `synapps:upgrade-audit` / `tools/synapse-upgrade-audit.php` rule G (manual review): an Alpine registration inside an anonymous `alpine:init` callback — copies of layouts, error pages, theme JS or module views made before this release — which breaks after a cross-layout `wire:navigate`.
+
 ## [3.6.1] - 2026-10-21
 
 ### Fixed
