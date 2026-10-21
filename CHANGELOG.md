@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-10-21
+
 ### Security
 - `WithDeleteToken` binds a token to the model class that issued it (`{class}|{id}|{salt}`): `Model::validateDeleteToken()` now refuses a token from an unrelated model with the same id, while a subclass token still validates on its parent (e.g. the app's `User` on `synapps-auth`'s `User`). Public API unchanged; tokens rendered before the upgrade fail once until the page is reloaded.
+- Delete tokens are now stable per record within a session (AES-256-CBC with an HMAC-derived IV and an HMAC-SHA256 tag, url-safe base64, keys derived from `APP_KEY`) instead of `Crypt::encryptString()`'s random IV, so they can be used as bulk-selection checkbox values. Tokens rendered before the upgrade fail once until the page is reloaded.
+
+### Added
+- `WithDeleteToken::validateDeleteTokens(array $tokens)`: validates a bulk selection all-or-nothing — the deduplicated ids, or `false` if any token is invalid.
 
 ## [3.5.0] - 2026-10-15
 
