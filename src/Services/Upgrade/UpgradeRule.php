@@ -24,6 +24,16 @@ interface UpgradeRule
     public function matchesLine(string $line): bool;
 
     /**
+     * Zero-based indexes of the lines this rule flags in a file. Line rules flag every line
+     * matchesLine() accepts; a rule that needs the surrounding file (e.g. "after </head>")
+     * overrides this.
+     *
+     * @param  array<int, string>  $lines
+     * @return array<int, int>
+     */
+    public function matchingLines(array $lines): array;
+
+    /**
      * Rewrite the full file contents to the fixed form. Only called for
      * rules where isAutoFixable() is true.
      */

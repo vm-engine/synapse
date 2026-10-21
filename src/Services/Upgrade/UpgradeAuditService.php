@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Services\Upgrade;
 
 use FilesystemIterator;
+use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -13,6 +14,7 @@ use VmEngine\Synapse\Services\Upgrade\Rules\JsLivewireHooksRule;
 use VmEngine\Synapse\Services\Upgrade\Rules\RegisterMethodsRule;
 use VmEngine\Synapse\Services\Upgrade\Rules\RouteGetLivewireCandidateRule;
 use VmEngine\Synapse\Services\Upgrade\Rules\RouteLivewireNotationRule;
+use VmEngine\Synapse\Services\Upgrade\Rules\ThemeScriptsInBodyRule;
 
 /**
  * Detects and (optionally) auto-fixes legacy vm-engine/synapse patterns in a
@@ -38,6 +40,7 @@ class UpgradeAuditService
             new RegisterMethodsRule,
             new JsLivewireHooksRule,
             new RouteGetLivewireCandidateRule,
+            new ThemeScriptsInBodyRule,
         ];
     }
 
@@ -69,18 +72,16 @@ class UpgradeAuditService
                     continue;
                 }
 
-                foreach ($lines as $index => $line) {
-                    if ($rule->matchesLine($line)) {
-                        $findings[] = new UpgradeFinding(
-                            file: $relativePath,
-                            line: $index + 1,
-                            snippet: trim($line),
-                            ruleId: $rule->id(),
-                            category: $rule->category(),
-                            label: $rule->label(),
-                            autoFixable: $rule->isAutoFixable(),
-                        );
-                    }
+                foreach ($rule->matchingLines($lines) as $index) {
+                    $findings[] = new UpgradeFinding(
+                        file: $relativePath,
+                        line: $index + 1,
+                        snippet: trim($lines[$index]),
+                        ruleId: $rule->id(),
+                        category: $rule->category(),
+                        label: $rule->label(),
+                        autoFixable: $rule->isAutoFixable(),
+                    );
                 }
             }
         }
@@ -161,6 +162,10 @@ class UpgradeAuditService
     }
 
     /**
+     * PHP and JS files under the project root. Excluded directories (vendor, node_modules, …) are
+     * skipped at any depth before they are opened, so their contents are never read; directories
+     * that cannot be opened are skipped too.
+     *
      * @return array<int, string>
      */
     private function findFiles(string $projectRoot): array
@@ -168,36 +173,21 @@ class UpgradeAuditService
         $files = [];
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($projectRoot, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
+            new RecursiveCallbackFilterIterator(
+                new RecursiveDirectoryIterator($projectRoot, FilesystemIterator::SKIP_DOTS),
+                fn (SplFileInfo $fileInfo): bool => ! ($fileInfo->isDir() && in_array($fileInfo->getFilename(), self::EXCLUDED_DIRS, true)),
+            ),
+            RecursiveIteratorIterator::LEAVES_ONLY,
+            // A directory that cannot be opened (unreadable, or deleted mid-scan) is skipped, not fatal.
+            RecursiveIteratorIterator::CATCH_GET_CHILD,
         );
 
         foreach ($iterator as $fileInfo) {
             /** @var SplFileInfo $fileInfo */
-            if ($fileInfo->isDir()) {
-                continue;
-            }
-
-            $path = $fileInfo->getPathname();
-            $relative = ltrim(substr($path, strlen($projectRoot)), '/');
-
-            $excluded = false;
-            foreach (self::EXCLUDED_DIRS as $dir) {
-                if ($relative === $dir || str_starts_with($relative, $dir.'/') || str_contains($relative, '/'.$dir.'/')) {
-                    $excluded = true;
-
-                    break;
-                }
-            }
-
-            if ($excluded) {
-                continue;
-            }
-
             $name = $fileInfo->getFilename();
 
             if (str_ends_with($name, '.blade.php') || str_ends_with($name, '.php') || str_ends_with($name, '.js')) {
-                $files[] = $path;
+                $files[] = $fileInfo->getPathname();
             }
         }
 

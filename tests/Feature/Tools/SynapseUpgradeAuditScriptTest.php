@@ -72,3 +72,40 @@ it('respects a custom --output path', function () {
     expect($exitCode)->toBe(0);
     expect(file_exists($this->fixtureRoot.'/custom-report.md'))->toBeTrue();
 });
+
+it('skips excluded and unreadable directories instead of aborting', function () {
+    file_put_contents($this->fixtureRoot.'/resources/views/example.blade.php', '<livewire:example.todo-form />');
+    foreach (['vendor/acme', 'resources/locked'] as $dir) {
+        mkdir($this->fixtureRoot.'/'.$dir, 0777, true);
+        file_put_contents($this->fixtureRoot.'/'.$dir.'/view.blade.php', '<livewire:example.todo-form />');
+    }
+    chmod($this->fixtureRoot.'/vendor', 0000);
+    chmod($this->fixtureRoot.'/resources/locked', 0000);
+
+    try {
+        exec(sprintf('php %s --path=%s 2>&1', escapeshellarg($this->scriptPath), escapeshellarg($this->fixtureRoot)), $output, $exitCode);
+    } finally {
+        chmod($this->fixtureRoot.'/vendor', 0755);
+        chmod($this->fixtureRoot.'/resources/locked', 0755);
+    }
+
+    expect($exitCode)->toBe(0)
+        ->and(file_get_contents($this->fixtureRoot.'/SYNAPSE_UPGRADE_AUDIT.md'))
+        ->toContain('resources/views/example.blade.php')
+        ->not->toContain('vendor/acme')
+        ->not->toContain('resources/locked');
+});
+
+it('flags @themeScripts rendered after </head> (rule F)', function () {
+    mkdir($this->fixtureRoot.'/synapps/resources/themes/default/layouts', 0777, true);
+    file_put_contents($this->fixtureRoot.'/synapps/resources/themes/default/layouts/app.blade.php', "<html>\n<head>\n</head>\n<body>\n    @themeScripts('app')\n</body>\n</html>\n");
+    file_put_contents($this->fixtureRoot.'/synapps/resources/themes/default/layouts/guest.blade.php', "<html>\n<head>\n    @themeScripts('guest')\n</head>\n<body></body>\n</html>\n");
+
+    exec(sprintf('php %s --path=%s 2>&1', escapeshellarg($this->scriptPath), escapeshellarg($this->fixtureRoot)), $output, $exitCode);
+    $report = (string) file_get_contents($this->fixtureRoot.'/SYNAPSE_UPGRADE_AUDIT.md');
+
+    expect($exitCode)->toBe(0)
+        ->and($report)->toContain('theme-scripts-in-body')
+        ->toContain('layouts/app.blade.php')
+        ->not->toContain('layouts/guest.blade.php');
+});

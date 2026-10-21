@@ -38,6 +38,7 @@ declare(strict_types=1);
  *     pattern: string,
  *     autoFixable: bool,
  *     extensions: array<int, string>,
+ *     onlyAfter?: string,
  * }>
  */
 function synapseUpgradeAuditRules(): array
@@ -83,6 +84,16 @@ function synapseUpgradeAuditRules(): array
             'pattern' => '/Route::get\(\s*[\'"][^\'"]+[\'"]\s*,\s*([A-Za-z0-9_\\\\]+)::class\s*\)/',
             'autoFixable' => false,
             'extensions' => ['php'],
+        ],
+        [
+            'id' => 'F',
+            'category' => 'theme-scripts-in-body',
+            'label' => "@themeScripts(...) after </head> (layouts copied before v3.6.1) — move it into <head>, right after @themeStyles(...), so wire:navigate waits for the layout's Alpine components",
+            'pattern' => '/@themeScripts\s*\(/',
+            // Only lines after the first line matching this pattern count (here: after </head>).
+            'onlyAfter' => '#</head>#',
+            'autoFixable' => false,
+            'extensions' => ['blade.php'],
         ],
     ];
 }
@@ -172,6 +183,9 @@ function synapseUpgradeAuditDetectVersion(string $projectRoot): string
 const SYNAPSE_UPGRADE_AUDIT_EXCLUDED_DIRS = ['vendor', 'node_modules', 'storage', 'bootstrap', '.git'];
 
 /**
+ * PHP and JS files under the project root. Excluded directories are skipped at any depth before
+ * they are opened (their contents are never read); directories that cannot be opened are skipped too.
+ *
  * @return array<int, string> absolute file paths
  */
 function synapseUpgradeAuditFindFiles(string $projectRoot): array
@@ -179,37 +193,22 @@ function synapseUpgradeAuditFindFiles(string $projectRoot): array
     $files = [];
 
     $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($projectRoot, FilesystemIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::SELF_FIRST
+        new RecursiveCallbackFilterIterator(
+            new RecursiveDirectoryIterator($projectRoot, FilesystemIterator::SKIP_DOTS),
+            function (SplFileInfo $fileInfo): bool {
+                return ! ($fileInfo->isDir() && in_array($fileInfo->getFilename(), SYNAPSE_UPGRADE_AUDIT_EXCLUDED_DIRS, true));
+            }
+        ),
+        RecursiveIteratorIterator::LEAVES_ONLY,
+        RecursiveIteratorIterator::CATCH_GET_CHILD
     );
 
     foreach ($iterator as $fileInfo) {
         /** @var SplFileInfo $fileInfo */
-        if ($fileInfo->isDir()) {
-            if (in_array($fileInfo->getFilename(), SYNAPSE_UPGRADE_AUDIT_EXCLUDED_DIRS, true)) {
-                $iterator->getInnerIterator()->next();
-
-                continue;
-            }
-
-            continue;
-        }
-
-        $path = $fileInfo->getPathname();
-        $relative = ltrim(substr($path, strlen($projectRoot)), DIRECTORY_SEPARATOR);
-
-        foreach (SYNAPSE_UPGRADE_AUDIT_EXCLUDED_DIRS as $excluded) {
-            if ($relative === $excluded
-                || strpos($relative, $excluded.DIRECTORY_SEPARATOR) === 0
-                || strpos($relative, DIRECTORY_SEPARATOR.$excluded.DIRECTORY_SEPARATOR) !== false) {
-                continue 2;
-            }
-        }
-
         $name = $fileInfo->getFilename();
 
         if (str_ends_with($name, '.blade.php') || str_ends_with($name, '.php') || str_ends_with($name, '.js')) {
-            $files[] = $path;
+            $files[] = $fileInfo->getPathname();
         }
     }
 
@@ -259,7 +258,17 @@ function synapseUpgradeAuditScan(string $projectRoot): array
                 continue;
             }
 
+            // A rule with 'onlyAfter' ignores lines until one matches that pattern; a file without
+            // such a line has no findings for it.
+            $active = ! isset($rule['onlyAfter']);
+
             foreach ($lines as $index => $line) {
+                if (! $active) {
+                    $active = preg_match($rule['onlyAfter'], $line) === 1;
+
+                    continue;
+                }
+
                 if (preg_match($rule['pattern'], $line) === 1) {
                     $findings[] = [
                         'file' => $relativePath,

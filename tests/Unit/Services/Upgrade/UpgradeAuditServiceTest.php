@@ -151,3 +151,44 @@ it('renders a markdown report grouping auto-fixable and manual-review findings',
     expect($markdown)->toContain('blade-tag-notation');
     expect($markdown)->toContain('js-livewire-hooks');
 });
+
+it('never descends into excluded directories like vendor', function () {
+    writeFixtureFile($this->fixtureRoot, 'resources/views/example.blade.php', '<livewire:example.todo-form />');
+    writeFixtureFile($this->fixtureRoot, 'vendor/acme/pkg/view.blade.php', '<livewire:example.todo-form />');
+    chmod($this->fixtureRoot.'/vendor', 0000);
+
+    try {
+        $report = $this->service->scan($this->fixtureRoot);
+    } finally {
+        chmod($this->fixtureRoot.'/vendor', 0755);
+    }
+
+    expect(array_column($report->findings, 'file'))->toBe(['resources/views/example.blade.php']);
+});
+
+it('skips a directory it cannot read instead of aborting the scan', function () {
+    writeFixtureFile($this->fixtureRoot, 'resources/views/example.blade.php', '<livewire:example.todo-form />');
+    writeFixtureFile($this->fixtureRoot, 'resources/locked/secret.blade.php', '<livewire:example.todo-form />');
+    chmod($this->fixtureRoot.'/resources/locked', 0000);
+
+    try {
+        $report = $this->service->scan($this->fixtureRoot);
+    } finally {
+        chmod($this->fixtureRoot.'/resources/locked', 0755);
+    }
+
+    expect(array_column($report->findings, 'file'))->toBe(['resources/views/example.blade.php']);
+});
+
+it('flags @themeScripts rendered after </head> as manual review only (rule F)', function () {
+    writeFixtureFile($this->fixtureRoot, 'synapps/resources/themes/default/layouts/app.blade.php', "<html>\n<head>\n    @themeStyles('app')\n</head>\n<body>\n    @themeScripts('app')\n    @livewireScripts\n</body>\n</html>\n");
+    writeFixtureFile($this->fixtureRoot, 'synapps/resources/themes/default/layouts/guest.blade.php', "<html>\n<head>\n    @themeStyles('guest')\n    @themeScripts('guest')\n</head>\n<body></body>\n</html>\n");
+
+    $findings = $this->service->scan($this->fixtureRoot, ['F'])->findings;
+
+    expect($findings)->toHaveCount(1)
+        ->and($findings[0]->file)->toBe('synapps/resources/themes/default/layouts/app.blade.php')
+        ->and($findings[0]->line)->toBe(6)
+        ->and($findings[0]->category)->toBe('theme-scripts-in-body')
+        ->and($findings[0]->autoFixable)->toBeFalse();
+});
