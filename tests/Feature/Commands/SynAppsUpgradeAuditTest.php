@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\File;
 
+/**
+ * Runs in a private base path: the audit walks the whole project root, and other test files
+ * (e.g. SynAppsPatchResourcesSplitTest) create and delete directories in the shared Testbench
+ * root under --parallel — a directory vanishing mid-walk made RecursiveDirectoryIterator throw.
+ */
 beforeEach(function () {
+    $this->originalBasePath = base_path();
+    $this->sandbox = sys_get_temp_dir().'/synapse-upgrade-audit-'.bin2hex(random_bytes(6));
+    File::ensureDirectoryExists($this->sandbox.'/resources/views');
+    app()->setBasePath($this->sandbox);
+
     $this->reportPath = base_path('SYNAPSE_UPGRADE_AUDIT.md');
-    $this->fixtureFiles = [
-        base_path('resources/views/upgrade-audit-fixture.blade.php'),
-        base_path('upgrade-audit-fixture-routes.php'),
-    ];
 });
 
 afterEach(function () {
-    if (File::exists($this->reportPath)) {
-        File::delete($this->reportPath);
-    }
-
-    foreach ($this->fixtureFiles as $file) {
-        if (File::exists($file)) {
-            File::delete($file);
-        }
-        if (File::exists($file.'.bak')) {
-            File::delete($file.'.bak');
-        }
-    }
+    app()->setBasePath($this->originalBasePath);
+    File::deleteDirectory($this->sandbox);
 });
 
 it('reports findings without writing changes by default', function () {
