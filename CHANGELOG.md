@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The `dev-master` branch alias still said `3.4.x-dev`, so a path checkout could not satisfy `^3.6` constraints (e.g. `synmod-crm`); it is now `3.6.x-dev`.
+- The breadcrumbs partial's page title read `pageName` from the page's `x-data`, so every page that never declared it threw `Undefined variable: pageName` under the CSP Alpine build (e.g. the tenancy pages, the home dashboard). It now reads `$data.pageName || ''`.
+- The home module stub's `module.json` uses `__home::menu.fe.index`, which neither `lang/en` nor `lang/id` defined; both now do.
+- Indonesian (`lang/id.json`) had only the mail strings, so the calendar, colour picker, notification bell/list and search palette showed English on an `id` app; their 18 strings are now translated. The drawer, lightbox and confirm dialog's screen-reader "Close" is translatable too.
+
 ## [3.6.2] - 2026-10-21
 
 ### Fixed

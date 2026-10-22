@@ -27,7 +27,7 @@
             @click="drawerOpen = false"
         >
             <span class="ph ph-x"></span>
-            <span class="sr-only">Close</span>
+            <span class="sr-only">{{ __('Close') }}</span>
         </button>
 
         {{ $slot }}

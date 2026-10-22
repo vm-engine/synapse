@@ -91,7 +91,7 @@
                     type="button"
                     @click="cancel()"
                 >
-                    <span class="sr-only">Close</span>
+                    <span class="sr-only">{{ __('Close') }}</span>
                     <svg
                         class="h-5 w-5"
                         fill="none"
