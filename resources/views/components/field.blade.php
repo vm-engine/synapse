@@ -5,7 +5,9 @@
     (label for, aria-invalid, aria-describedby).
 
     Props:
-    - name (string): wire:model path, also the validation error key
+    - name (string): wire:model path, also the validation error key unless `error` is given
+    - error (string): Validation error key when it differs from the model path (e.g. name="profile.phone" error="phone")
+    - prefix (string): Text shown before the input in an input group, e.g. 'Rp'
     - label (string): Visible label
     - type (string): Input type (default: 'text')
     - required (bool) / disabled (bool): required marks the box and sets aria-required (no native
@@ -23,14 +25,18 @@
 @use('Illuminate\Support\ViewErrorBag')
 @php
     $errors ??= new ViewErrorBag;
-    $describedBy = trim(($errors->has($name) ? $id.'-error ' : '').($hint ? $id.'-hint' : ''));
+    $describedBy = trim(($errors->has($error) ? $id.'-error ' : '').($hint ? $id.'-hint' : ''));
     $wireModel = 'wire:model'.($modifier !== '' ? '.'.$modifier : '');
 @endphp
 <div @class(['form-box', 'required' => $required]) {{ $attributes->only('class') }}>
     <label for="{{ $id }}">{{ $label }}</label>
     @if ($slot->isEmpty())
+        @if ($prefix)
+            <div class="input-group">
+                <span class="input-group-item left">{{ $prefix }}</span>
+        @endif
         <input
-            class="form-input @error($name) has-error @enderror"
+            @class(['form-input', 'has-error' => $errors->has($error), 'pl-[62px]!' => $prefix])
             id="{{ $id }}"
             type="{{ $type }}"
             {{ $wireModel }}="{{ $name }}"
@@ -38,18 +44,21 @@
             @if ($inputmode) inputmode="{{ $inputmode }}" @endif
             @if ($autocomplete) autocomplete="{{ $autocomplete }}" @endif
             @if ($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
-            @error($name) aria-invalid="true" @enderror
+            @if ($errors->has($error)) aria-invalid="true" @endif
             @if ($required) aria-required="true" @endif
             @disabled($disabled)
             {{ $attributes->except('class') }}
         >
+        @if ($prefix)
+            </div>
+        @endif
     @else
         {{ $slot }}
     @endif
     @if ($hint)
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="{{ $id }}-hint">{{ $hint }}</p>
     @endif
-    @error($name)
-        <p class="form-error-message" id="{{ $id }}-error">{{ $message }}</p>
-    @enderror
+    @if ($errors->has($error))
+        <p class="form-error-message" id="{{ $id }}-error">{{ $errors->first($error) }}</p>
+    @endif
 </div>

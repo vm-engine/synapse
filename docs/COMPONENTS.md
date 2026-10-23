@@ -146,7 +146,9 @@ Label, wire-bound input and its error/hint in a `form-box`, linked for screen re
 
 | Prop | Default | Description |
 |---|---|---|
-| `name` | — | `wire:model` path, also the validation error key |
+| `name` | — | `wire:model` path, also the validation error key unless `error` is given |
+| `error` | `name` | Validation error key when the form validates under another key, e.g. `name="profile.phone" error="phone"` |
+| `prefix` | — | Text before the input in an input group, e.g. `Rp` |
 | `label` | — | Visible label |
 | `type` | `text` | Input type |
 | `required` / `disabled` | `false` | Marks the box required (`aria-required`, no native `required`, so the server-side message shows) / disables the input |

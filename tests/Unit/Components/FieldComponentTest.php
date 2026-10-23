@@ -60,6 +60,21 @@ describe('Field Component', function () {
         expect(Blade::render('<x-synapse-field name="q" label="Q" modifier="live" />'))->toContain('wire:model.live="q"');
     });
 
+    it('reads errors from a separate key when the model path differs', function () {
+        view()->share('errors', (new ViewErrorBag)->put('default', new MessageBag(['phone' => ['Required']])));
+
+        $html = Blade::render('<x-synapse-field name="profile.phone" error="phone" label="Phone" />');
+
+        expect($html)->toContain('wire:model="profile.phone"')->toContain('id="f-profile-phone"')
+            ->toContain('Required')->toContain('aria-invalid="true"');
+    });
+
+    it('renders a prefix in an input group', function () {
+        $html = Blade::render('<x-synapse-field name="amount" label="Nominal" prefix="Rp" />');
+
+        expect($html)->toContain('input-group')->toContain('>Rp</span>')->toContain('wire:model="amount"');
+    });
+
     it('disables the input', function () {
         expect(Blade::render('<x-synapse-field name="a" label="A" :disabled="true" />'))->toContain('disabled');
     });

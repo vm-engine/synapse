@@ -11,6 +11,9 @@ class Field extends Component
 {
     public string $id;
 
+    /** Validation error key; the model path unless the form validates under another key. */
+    public string $error;
+
     public function __construct(
         public string $name,
         public string $label,
@@ -22,9 +25,12 @@ class Field extends Component
         public ?string $inputmode = null,
         public ?string $autocomplete = null,
         public string $modifier = '',
+        public ?string $prefix = null,
         ?string $id = null,
+        ?string $error = null,
     ) {
         $this->id = $id ?? 'f-'.str_replace('.', '-', $name);
+        $this->error = $error ?? $name;
     }
 
     public function render()

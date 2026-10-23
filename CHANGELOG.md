@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `<x-synapse-field>` `error` prop (validation error key when it differs from the model path) and `prefix` prop (input-group text before the input, e.g. `Rp`).
+
 ## [3.7.0] - 2026-10-23
 
 ### Added
