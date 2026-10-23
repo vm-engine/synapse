@@ -922,7 +922,9 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 - `<x-synapse-copy-button text="" label="Copy" :icon-only="true" />` — clipboard copy with feedback + execCommand fallback.
 - `<x-synapse-confirm-dialog title="" message="" confirmText="" />`
 - `<x-synapse-drawer title="" />`
-- `<x-synapse-modal name="" max-width="xl">` — `open-modal-{name}` / `close-modal-{name}` window events, Escape closes; keep `name` lowercase.
+- `<x-synapse-modal name="" max-width="xl" title="">` + optional `<x-slot:footer>` — `open-modal-{name}` / `close-modal-{name}` window events, Escape closes; keep `name` lowercase. `title` renders the header + close button.
+- `<x-synapse-field name="" label="" type="text" hint="" required />` — form-box + label + input + error/hint (aria-linked); slot replaces the input.
+- `<x-synapse-empty-state icon="" title="" text="">` — empty list/panel block; slot = action.
 - `<x-synapse-lightbox name="" />` — `$dispatch('open-lightbox-{name}', { url })`.
 - `<x-synapse-toastr />`
 - `<x-synapse-alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`

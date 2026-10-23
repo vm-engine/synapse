@@ -19,7 +19,9 @@ use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\DragNDrop;
 use VmEngine\Synapse\Components\Drawer;
+use VmEngine\Synapse\Components\EmptyState;
 use VmEngine\Synapse\Components\ExcelExportButton;
+use VmEngine\Synapse\Components\Field;
 use VmEngine\Synapse\Components\FileDrop;
 use VmEngine\Synapse\Components\Kanban;
 use VmEngine\Synapse\Components\KanbanCard;
@@ -158,5 +160,7 @@ class SynapseViewServiceProvider extends ServiceProvider
         $blade->component(KanbanCard::class, 'synapse-kanban.card');
         $blade->component(Calendar::class, 'synapse-calendar');
         $blade->component(CopyButton::class, 'synapse-copy-button');
+        $blade->component(Field::class, 'synapse-field');
+        $blade->component(EmptyState::class, 'synapse-empty-state');
     }
 }

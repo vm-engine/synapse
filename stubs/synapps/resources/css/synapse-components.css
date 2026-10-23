@@ -1588,7 +1588,7 @@ span.flatpickr-weekday,
     @apply text-lg font-semibold text-gray-900 dark:text-white;
 }
 .syn-modal-close {
-    @apply text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
+    @apply -m-2 rounded-lg p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
 }
 .syn-modal-body {
     @apply p-6;

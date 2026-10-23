@@ -173,6 +173,7 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-datepicker />
 <x-synapse-currency currency="$" />
 <x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q" />
+<x-synapse-field name="amount" label="Amount" type="number" hint="..." required />   {{-- label + input + error/hint, aria-linked; slot replaces the input --}}
 <x-synapse-adv-select wire-model="status" :options="$statusOptions" />   {{-- options: [["value" => .., "label" => ..]] --}}
 <x-synapse-toggler label="Active" wire:model.live="isActive" />
 <x-synapse-color-picker wire:model="color" :swatches="['#ef4444', '#3b82f6']" />   {{-- #rrggbb, validate with hex_color --}}
@@ -195,9 +196,10 @@ $cssPath = theme_path('css/theme.css');
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
 <x-synapse-drawer title="Settings">...</x-synapse-drawer>
-<x-synapse-modal name="edit">...</x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
+<x-synapse-modal name="edit" title="Edit">... <x-slot:footer>...</x-slot:footer></x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
 <x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />
+<x-synapse-empty-state icon="ph ph-users" title="No members yet">…action…</x-synapse-empty-state>
 <x-synapse-copy-button text="..." label="Copy path" />   {{-- clipboard + execCommand fallback, "Copied" feedback --}}
 
 <!-- Planning & layout -->

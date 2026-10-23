@@ -1,6 +1,7 @@
 @props([
     'name' => 'modal',
     'maxWidth' => 'xl',
+    'title' => null,
 ])
 
 @php
@@ -50,6 +51,7 @@
     >
         <div
             class="syn-modal-panel {{ $maxWidthClass }}"
+            @if ($title) role="dialog" aria-modal="true" aria-labelledby="modal-{{ $name }}-title" @endif
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -58,7 +60,20 @@
             x-transition:leave-end="opacity-0 scale-95"
             @click.stop
         >
+            @if ($title)
+                <div class="syn-modal-header">
+                    <h3 class="syn-modal-title" id="modal-{{ $name }}-title">{{ $title }}</h3>
+                    <button class="syn-modal-close" type="button" @click="$dispatch('close-modal-{{ $name }}')">
+                        <span class="sr-only">{{ __('Close') }}</span><span class="ph ph-x text-xl" aria-hidden="true"></span>
+                    </button>
+                </div>
+            @endif
             {{ $slot }}
+            @isset($footer)
+                <div class="syn-modal-footer">
+                    {{ $footer }}
+                </div>
+            @endisset
         </div>
     </div>
 </div>

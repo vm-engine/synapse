@@ -473,6 +473,17 @@ onAlpine(() => {
 
 If your project uses the generic fallback layout, also load the base entries in `synapps/resources/views/components/layouts/layout.blade.php`: `@vite(['resources/css/base.css', 'resources/css/app.css', 'resources/js/base.js', 'resources/js/app.js'])`. Rebuild assets (`npm run build`) after updating JS.
 
+### Upgrading to v3.7.0: modal title/footer, field and empty-state components
+
+No breaking changes. New: `<x-synapse-modal title="…">` with an optional `<x-slot:footer>`, `<x-synapse-field>` and `<x-synapse-empty-state>` — see [docs/COMPONENTS.md](docs/COMPONENTS.md). Modules that copied their own modal header/footer or form-field partials can switch to these.
+
+`.syn-modal-close` now has padding for a 44px touch target. If you never edited it, re-copy the CSS stub and rebuild:
+
+```bash
+cp vendor/vm-engine/synapse/stubs/synapps/resources/css/synapse-components.css synapps/resources/css/
+npm run build
+```
+
 ## Deprecation Warnings
 
 Synapse uses Laravel's logging system to warn about deprecated features:

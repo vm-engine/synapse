@@ -12,6 +12,7 @@ class Modal extends Component
         public string $name = 'modal',
         public string $maxWidth = 'xl',
         public bool $show = false,
+        public ?string $title = null,
     ) {}
 
     public function render()

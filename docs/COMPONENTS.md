@@ -131,6 +131,32 @@ Date picker using Flatpickr:
 
 ---
 
+### Field
+
+Label, wire-bound input and its error/hint in a `form-box`, linked for screen readers (`for`, `aria-invalid`, `aria-describedby`).
+
+```blade
+<x-synapse-field name="amount" label="Amount" type="number" inputmode="decimal" hint="Minimum 10,000" required />
+
+{{-- Any other control: put it in the slot and give it the field id --}}
+<x-synapse-field name="form.group_id" label="Group">
+    <select class="form-input @error('form.group_id') has-error @enderror" id="f-form-group_id" wire:model="form.group_id">…</select>
+</x-synapse-field>
+```
+
+| Prop | Default | Description |
+|---|---|---|
+| `name` | — | `wire:model` path, also the validation error key |
+| `label` | — | Visible label |
+| `type` | `text` | Input type |
+| `required` / `disabled` | `false` | Marks the box required (`aria-required`, no native `required`, so the server-side message shows) / disables the input |
+| `hint` | — | Helper text under the input |
+| `step`, `inputmode`, `autocomplete` | — | Passed to the input |
+| `modifier` | — | `wire:model` modifier, e.g. `live` or `blur` |
+| `id` | `f-{name}` (dots → dashes) | Input id |
+
+Other attributes go to the input; `class` goes to the `form-box`.
+
 ### Search Box
 
 Text input with a fixed left search icon and an optional trailing slot:
@@ -515,17 +541,23 @@ Also closes on backdrop click, the close button, or Escape.
 ### Modal
 
 ```blade
-<x-synapse-modal name="edit-user" max-width="xl">
-    <div class="syn-modal-header">…</div>
+<x-synapse-modal name="edit-user" title="Edit user" max-width="xl">
     <div class="syn-modal-body">…</div>
-    <div class="syn-modal-footer">…</div>
+    <x-slot:footer>
+        <button class="btn" type="button" @click="$dispatch('close-modal-edit-user')">Cancel</button>
+        <button class="btn primary" type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save">Save</button>
+    </x-slot:footer>
 </x-synapse-modal>
 ```
 
-| Prop | Default | Description |
+| Prop / slot | Default | Description |
 |---|---|---|
 | `name` | `modal` | Event suffix — open with `$dispatch('open-modal-{name}')`, close with `close-modal-{name}` (also closes on Escape) |
 | `max-width` | `xl` | Panel width |
+| `title` | — | Renders the `syn-modal-header` with the title and a close button (screen-reader label "Close"), and labels the dialog |
+| `footer` slot | — | Rendered in the `syn-modal-footer` action bar |
+
+Without `title`/`footer` the slot is rendered as is, so hand-written `syn-modal-header` / `syn-modal-footer` markup keeps working.
 
 Event names are matched lowercase by the browser, so keep `name` lowercase.
 
@@ -751,6 +783,28 @@ Month grid (md+) and agenda list (mobile), built server-side.
 Each day shows up to 3 events plus "+N more".
 
 ## List Helpers
+
+### Empty State
+
+```blade
+@forelse ($members as $member)
+    …
+@empty
+    <tr><td colspan="5">
+        <x-synapse-empty-state icon="ph ph-users" title="No members yet" text="Add the first member.">
+            <a class="btn primary" href="{{ route('members.create') }}" wire:navigate>New member</a>
+        </x-synapse-empty-state>
+    </td></tr>
+@endforelse
+```
+
+| Prop | Default | Description |
+|---|---|---|
+| `title` | — | Heading |
+| `text` | — | Optional explanation |
+| `icon` | `ph ph-tray` | Icon class |
+
+The slot is the optional action. On filtered lists, show a "no results" title with a clear-filters button instead of the create action.
 
 ### Per-Page Selector
 
