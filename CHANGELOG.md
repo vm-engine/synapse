@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-10-23
+
 ### Added
 - `<x-synapse-modal>` `title` prop and `footer` slot: the title renders the `syn-modal-header` with a labelled close button and labels the dialog (`role="dialog"`, `aria-labelledby`); the footer slot renders the `syn-modal-footer` action bar. Modals without them render as before.
 - `<x-synapse-field>`: label, wire-bound input and error/hint in a `form-box`, linked with `for`, `aria-invalid` and `aria-describedby`; the slot replaces the input for selects and other controls.
@@ -16,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.syn-modal-close` gets padding so the close button is a 44px touch target (re-copy `synapse-components.css`).
 
 ### Fixed
-- The `dev-master` branch alias still said `3.4.x-dev`, so a path checkout could not satisfy `^3.6` constraints (e.g. `synmod-crm`); it is now `3.6.x-dev`.
+- The `dev-master` branch alias still said `3.4.x-dev`, so a path checkout could not satisfy `^3.6` constraints (e.g. `synmod-crm`); it is now `3.7.x-dev`.
 - The breadcrumbs partial's page title read `pageName` from the page's `x-data`, so every page that never declared it threw `Undefined variable: pageName` under the CSP Alpine build (e.g. the tenancy pages, the home dashboard). It now reads `$data.pageName || ''`.
 - The home module stub's `module.json` uses `__home::menu.fe.index`, which neither `lang/en` nor `lang/id` defined; both now do.
 - Indonesian (`lang/id.json`) had only the mail strings, so the calendar, colour picker, notification bell/list and search palette showed English on an `id` app; their 18 strings are now translated. The drawer, lightbox and confirm dialog's screen-reader "Close" is translatable too.
