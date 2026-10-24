@@ -364,7 +364,7 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 
 **3. SynapseRouteServiceProvider**: Route registration
 - `routes/web.php` - Standard (URL + name prefixed)
-- `routes/web.backend.php` - Backend — registered by **synapps-auth** (not this provider) when installed: URL `{backend_prefix}/{module url_prefix}/*`, name `{backend_name_prefix}.{module id}.*`, `web`+`auth`+`2fa-refresh`+`backend-access` middleware. Both prefixes come from `config('synapps.auth.routes.*')` (defaults `/apps` and `backend`), set via `synauth:install` / `synauth:config` — never hardcode them; use `backend_route()` / `route('backend.…')`.
+- `routes/web.backend.php` - Backend — registered by **synapps-auth** (not this provider) when installed: URL `{backend_prefix}/{module url_prefix}/*`, name `{backend_name_prefix}.{module id}.*`, `web`+`auth`+`2fa-refresh`+`backend-access` middleware. Both prefixes come from `config('synapps.auth.routes.*')` (defaults `/apps` and `backend`), set via `synauth:install` / `synauth:config` — never hardcode them; use `backend_route('module.route')` (`nameOnly: true` for `Route::has()`/`redirectRoute()`). In synapse stubs guard it with `function_exists('backend_route')`, since synapps-auth is optional.
 - `routes/web.override.php` - Override (no URL prefix, name prefixed)
 - `routes/api.php` - API routes (`/api/{prefix}/`, name `api.{id}.`)
 - `routes/api.override.php` - API override routes (`/api/`, name `api.{id}.`, no module prefix)
@@ -894,7 +894,7 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 - `<x-synapse-checkboxes name="" :options="[]" :model="[]" />`
 - `<x-synapse-radio-buttons name="" :options="[]" :model="" />`
 - `<x-synapse-password />`
-- `<x-synapse-currency currency="$" />`
+- `<x-synapse-currency currency="$" :decimals="0" :raw="false" />` — `raw` sends the plain number ("1250000.50") to `wire:model` instead of the formatted text; `<x-synapse-field type="currency" prefix="Rp" :decimals="2">` renders it with label/error wiring.
 - `<x-synapse-datepicker :flatpickr="{}" />`
 - `<x-synapse-search-box placeholder="" />` — left search icon, optional `trailing` slot, all other attributes (`wire:model`, ...) pass through to the `<input>`.
 - `<x-synapse-adv-select wire-model="" :options="[['value'=>..,'label'=>..]]" />` — replaces the removed `select`/`multi-select`/`select2`; supports `multiple`, remote `searchMethod`/`loadMethod`, `disabled`.

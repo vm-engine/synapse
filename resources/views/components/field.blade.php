@@ -8,6 +8,8 @@
     - name (string): wire:model path, also the validation error key unless `error` is given
     - error (string): Validation error key when it differs from the model path (e.g. name="profile.phone" error="phone")
     - prefix (string): Text shown before the input in an input group, e.g. 'Rp'
+    - type="currency": renders <x-synapse-currency raw> (thousands separators while typing, the plain
+      number on wire:model); `prefix` is its symbol and `decimals` (default 0) the decimal places
     - label (string): Visible label
     - type (string): Input type (default: 'text')
     - required (bool) / disabled (bool): required marks the box and sets aria-required (no native
@@ -30,7 +32,20 @@
 @endphp
 <div @class(['form-box', 'required' => $required]) {{ $attributes->only('class') }}>
     <label for="{{ $id }}">{{ $label }}</label>
-    @if ($slot->isEmpty())
+    @if ($slot->isEmpty() && $type === 'currency')
+        <x-synapse-currency
+            raw
+            :currency="$prefix ?? ''"
+            :decimals="$decimals"
+            :id="$id"
+            :class="$errors->has($error) ? 'has-error' : ''"
+            :aria-describedby="$describedBy !== '' ? $describedBy : null"
+            :aria-invalid="$errors->has($error) ? 'true' : null"
+            :aria-required="$required ? 'true' : null"
+            :disabled="$disabled"
+            {{ $attributes->except('class')->merge([$wireModel => $name]) }}
+        />
+    @elseif ($slot->isEmpty())
         @if ($prefix)
             <div class="input-group">
                 <span class="input-group-item left">{{ $prefix }}</span>

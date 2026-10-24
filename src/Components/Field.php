@@ -26,6 +26,7 @@ class Field extends Component
         public ?string $autocomplete = null,
         public string $modifier = '',
         public ?string $prefix = null,
+        public int $decimals = 0,
         ?string $id = null,
         ?string $error = null,
     ) {

@@ -516,7 +516,7 @@ In Blade:
 
 ```blade
 @can('example.users.create')
-    <a href="{{ route('backend.users.create') }}">Create User</a>
+    <a href="{{ backend_route('example.users.create') }}">Create User</a>
 @endcan
 ```
 

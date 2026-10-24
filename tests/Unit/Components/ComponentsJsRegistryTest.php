@@ -7,5 +7,5 @@ describe('synapse-components.js stub', function () {
         $js = file_get_contents(__DIR__.'/../../../stubs/synapps/resources/js/synapse-components.js');
 
         expect($js)->toContain("Alpine.data('{$name}'");
-    })->with(['synapseColorPicker', 'synapseSplitPane', 'synapseCopyButton']);
+    })->with(['synapseColorPicker', 'synapseSplitPane', 'synapseCopyButton', 'synapseCurrency']);
 });

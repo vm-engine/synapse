@@ -70,10 +70,11 @@
                     {{-- Auth Actions --}}
                     <div class="fe-header__actions">
                         @auth
-                            @if (Route::has('backend.home.dashboard'))
+                            {{-- backend_route() comes from synapps-auth, which also owns the back office prefix. --}}
+                            @if (function_exists('backend_route') && Route::has(backend_route('home.dashboard', nameOnly: true)))
                                 <a
                                     class="fe-action-link fe-action-link--primary"
-                                    href="{{ route('backend.home.dashboard') }}"
+                                    href="{{ backend_route('home.dashboard') }}"
                                 >
                                     <span class="fa-solid fa-gauge-high fa-sm"></span>
                                     {{ __('Dashboard') }}

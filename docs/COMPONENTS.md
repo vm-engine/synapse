@@ -107,10 +107,20 @@ Currency input with formatting:
 ```blade
 <x-synapse-currency currency="$" />
 <x-synapse-currency currency="Rp." />
+
+{{-- Shows "1.250.000,50" while typing; $amount receives "1250000.50" --}}
+<x-synapse-currency currency="Rp" raw :decimals="2" wire:model="amount" />
+
+{{-- Same, with label, error and hint wiring --}}
+<x-synapse-field name="amount" label="Amount" type="currency" prefix="Rp" :decimals="2" required />
 ```
 
 **Props:**
 - `currency` (string, default: 'Rp.') - Currency symbol
+- `decimals` (int, default: 0) - Decimal places the mask allows (',' decimal, '.' thousands)
+- `raw` (bool, default: false) - `wire:model` receives the plain number (`"1250000.50"`, `""` when empty) instead of the formatted text (`"1.250.000,50"`). Use it for decimal amounts so actions can validate with `numeric` and need no parsing. Requires the `synapseCurrency` component from `synapse-components.js`.
+
+Without `raw` the component keeps sending the formatted text, as before.
 
 ---
 

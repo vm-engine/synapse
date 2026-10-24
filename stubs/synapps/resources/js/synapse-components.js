@@ -323,6 +323,49 @@ Alpine.data('synapseDatepicker', (initialValue, flatpickrOptions) => ({
     }
 }));
 
+// <x-synapse-currency raw>: the input shows "1.250.000,50" (',' decimal, '.' thousands) while the
+// entangled wire:model value stays a plain decimal string "1250000.50", so Livewire actions need no parsing.
+// currency-helpers:start
+const synapseCurrencyParse = (text) => {
+    let digits = String(text ?? '').trim();
+    if (digits === '') return '';
+    const negative = digits.startsWith('-');
+    digits = digits.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
+    if (digits.endsWith('.')) digits = digits.slice(0, -1);
+    if (digits === '') return '';
+    return (negative ? '-' : '') + digits;
+};
+
+const synapseCurrencyFormat = (raw, decimals) => {
+    let value = String(raw ?? '').trim();
+    if (value === '' || Number.isNaN(Number(value))) return '';
+    const negative = value.startsWith('-');
+    const [whole, fraction = ''] = value.replace('-', '').split('.');
+    const grouped = (whole.replace(/^0+(?=\d)/, '') || '0').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const cents = fraction.slice(0, decimals).replace(/0+$/, '');
+    return (negative ? '-' : '') + grouped + (cents !== '' ? ',' + cents : '');
+};
+// currency-helpers:end
+
+Alpine.data('synapseCurrency', (value, decimals) => ({
+    value: value,
+    decimals: decimals,
+    display: '',
+    init() {
+        this.display = synapseCurrencyFormat(this.value, this.decimals);
+        this.$watch('display', (text) => {
+            const raw = synapseCurrencyParse(text);
+            if (raw !== String(this.value ?? '')) this.value = raw;
+        });
+        // Server-side changes (reset after save, a value set by an action): show them formatted.
+        this.$watch('value', (raw) => {
+            const shown = synapseCurrencyParse(this.display);
+            const same = shown === '' ? String(raw ?? '') === '' : Number(shown) === Number(raw);
+            if (!same) this.display = synapseCurrencyFormat(raw, this.decimals);
+        });
+    },
+}));
+
 // <x-synapse-drag-n-drop>
 Alpine.data('synapseDragDrop', (config) => ({
     fileName: '',

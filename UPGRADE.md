@@ -484,6 +484,17 @@ cp vendor/vm-engine/synapse/stubs/synapps/resources/css/synapse-components.css s
 npm run build
 ```
 
+### Upgrading to v3.7.2: decimal currency input
+
+No breaking changes. `<x-synapse-currency>` gains `decimals` and `raw` (see [docs/COMPONENTS.md](docs/COMPONENTS.md#currency-input)), and `<x-synapse-field type="currency">`. `raw` uses the new `synapseCurrency` Alpine component, so re-copy the JS stub and rebuild:
+
+```bash
+cp vendor/vm-engine/synapse/stubs/synapps/resources/js/synapse-components.js synapps/resources/js/
+npm run build
+```
+
+Projects that copied a theme `frontend.blade.php`: replace `route('backend.home.dashboard')` with `backend_route('home.dashboard')` and the `Route::has()` check with `Route::has(backend_route('home.dashboard', nameOnly: true))`.
+
 ## Deprecation Warnings
 
 Synapse uses Laravel's logging system to warn about deprecated features:

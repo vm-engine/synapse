@@ -290,3 +290,13 @@ test('default theme gives a plain .btn a border and fill, leaving variants and o
     expect($css)->toContain($selector)
         ->and($rule)->toContain('border border-gray-300 bg-gray-50');
 });
+
+test('layouts resolve back office routes through backend_route(), never a hardcoded backend. name', function (string $theme) {
+    foreach (themeStubFiles($theme, '.blade.php') as $file) {
+        expect((string) file_get_contents($file))->not->toMatch("/['\"]backend\\.[a-z]/", $file);
+    }
+})->with('themes');
+
+test('the frontend layout renders without synapps-auth installed', function (string $theme) {
+    expect(fn () => renderThemeLayout($theme, 'frontend'))->not->toThrow(Throwable::class);
+})->with('themes');

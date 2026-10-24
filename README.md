@@ -172,6 +172,7 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-checkboxes name="permissions" :options="$opts" :model="$selected" />
 <x-synapse-datepicker />
 <x-synapse-currency currency="$" />
+<x-synapse-currency currency="Rp" raw :decimals="2" wire:model="amount" />   {{-- shows 1.250.000,50, sends 1250000.50 --}}
 <x-synapse-search-box placeholder="Search..." wire:model.live.debounce="q" />
 <x-synapse-field name="amount" label="Amount" type="number" hint="..." required />   {{-- label + input + error/hint, aria-linked; slot replaces the input --}}
 <x-synapse-adv-select wire-model="status" :options="$statusOptions" />   {{-- options: [["value" => .., "label" => ..]] --}}
