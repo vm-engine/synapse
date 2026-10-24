@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.3] - 2026-10-24
+
+### Fixed
+- `<x-synapse-currency raw>` with `wire:model.live` sent a request on every keystroke (it entangled with `.live`, which bypasses wire:model's debounce), so the global loader flashed while typing. It now stays deferred and sends one `$commit` once typing pauses: 150ms, 250ms for a bare `.debounce`, or `.debounce.Nms`. Re-copy `synapse-components.js` and rebuild.
+
 ## [3.7.2] - 2026-10-24
 
 ### Added
