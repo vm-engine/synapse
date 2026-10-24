@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.2] - 2026-10-24
+
+### Added
+- `<x-synapse-currency>` `decimals` prop (decimal places the mask allows, default 0) and `raw` prop: the input still shows `1.250.000,50` while `wire:model` receives the plain number `1250000.50`, so decimal money fields need no server-side parsing. Opt-in; without it the formatted text is sent as before. Needs the new `synapseCurrency` component in `synapse-components.js` (re-copy the stub and rebuild).
+- `<x-synapse-field type="currency">` renders a raw currency input with the field's label, error and hint wiring (`prefix` = symbol, `decimals`).
+
+### Changed
+- `<x-synapse-currency>` sets `inputmode` (`numeric`, or `decimal` when `decimals` > 0) so phones show a number keypad, and omits the symbol box when `currency` is empty.
+
+### Fixed
+- The default and application theme `frontend.blade.php` stubs linked the dashboard via a hardcoded `backend.home.dashboard` route name, which breaks when the back office name prefix is configured; they now use `backend_route()` (guarded by `function_exists`, since synapps-auth is optional). Projects that copied the layout: replace `route('backend.home.dashboard')` with `backend_route('home.dashboard')` and the `Route::has()` check with `Route::has(backend_route('home.dashboard', nameOnly: true))`.
+- Docs no longer suggest `route('backend.…')` for back office links.
+
 ## [3.7.1] - 2026-10-23
 
 ### Added
