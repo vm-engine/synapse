@@ -347,15 +347,22 @@ const synapseCurrencyFormat = (raw, decimals) => {
 };
 // currency-helpers:end
 
-Alpine.data('synapseCurrency', (value, decimals) => ({
+// The entangle is always deferred: entangling with .live would send a $set request on every keystroke.
+// A live model (syncDelay set) is sent with one $commit once typing pauses, like wire:model.live.
+Alpine.data('synapseCurrency', (value, decimals, syncDelay) => ({
     value: value,
     decimals: decimals,
     display: '',
+    syncTimer: null,
     init() {
         this.display = synapseCurrencyFormat(this.value, this.decimals);
         this.$watch('display', (text) => {
             const raw = synapseCurrencyParse(text);
-            if (raw !== String(this.value ?? '')) this.value = raw;
+            if (raw === String(this.value ?? '')) return;
+            this.value = raw;
+            if (syncDelay === null) return;
+            clearTimeout(this.syncTimer);
+            this.syncTimer = setTimeout(() => this.$wire.$commit(), syncDelay);
         });
         // Server-side changes (reset after save, a value set by an action): show them formatted.
         this.$watch('value', (raw) => {
