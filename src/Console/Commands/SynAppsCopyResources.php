@@ -174,10 +174,10 @@ class SynAppsCopyResources extends Command
             mkdir($parentDir, 0755, true);
         }
 
-        // Remove existing destination to handle hardlinks
-        if (file_exists($dest) && is_dir($dest)) {
-            $this->removeDirectory($dest);
-        }
+        // The destination is merged, never cleared: these directories also hold host files the
+        // stubs do not ship (the per-layout synapps-*.css / synapps-*.js entry points Vite builds
+        // from), and wiping them silently broke the build. copyDirectory() replaces links in place,
+        // so a hard-linked destination no longer writes through to the stub.
 
         // Copy directory
         if (SynapseUtils::copyDirectory($source, $dest)) {
@@ -189,30 +189,6 @@ class SynAppsCopyResources extends Command
         $this->components->error("Failed to copy: {$label}");
 
         return false;
-    }
-
-    /**
-     * Recursively remove a directory
-     */
-    protected function removeDirectory(string $dir): bool
-    {
-        if (! is_dir($dir)) {
-            return false;
-        }
-
-        $items = array_diff(scandir($dir), ['.', '..']);
-
-        foreach ($items as $item) {
-            $path = $dir.DIRECTORY_SEPARATOR.$item;
-
-            if (is_dir($path)) {
-                $this->removeDirectory($path);
-            } else {
-                unlink($path);
-            }
-        }
-
-        return rmdir($dir);
     }
 
     /**

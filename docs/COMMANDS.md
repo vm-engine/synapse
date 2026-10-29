@@ -455,6 +455,10 @@ php artisan synapps:copy-themes [theme ...] [--force]
 
 Re-copy the stub layouts (incl. nav components), CSS, JS and static assets, or the bundled themes, into `synapps/resources`. Without options everything is copied; existing files are only overwritten after confirmation or with `--force`. Use after upgrading synapse when you want the new stub versions (e.g. the impersonation-banner slot in the layout stubs).
 
+`copy-resources` **merges**: it replaces the files the stubs ship and leaves every other file alone. That matters because `synapps/resources/css` and `/js` also hold host-only files — the per-layout `synapps-{app,base,frontend,guest}.css/.js` entry points that `synapps:patch` creates and Vite builds from. A file the stubs no longer ship is therefore left behind rather than removed; delete the directory yourself first if you want a clean reset.
+
+`copy-themes --force` is different: it resets each named theme directory wholesale, so files you added inside a bundled theme are removed.
+
 ---
 
 ## synapps:searchable-setup / synapps:searchable-forget

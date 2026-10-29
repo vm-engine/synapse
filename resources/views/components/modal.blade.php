@@ -2,6 +2,9 @@
     'name' => 'modal',
     'maxWidth' => 'xl',
     'title' => null,
+    {{-- Id of a heading the CONTENT renders, for a modal whose title lives in a child
+         Livewire component: labels the dialog without drawing a header here. --}}
+    'labelledby' => null,
 ])
 
 @php
@@ -51,14 +54,16 @@
     >
         <div
             class="syn-modal-panel {{ $maxWidthClass }}"
-            @if ($title) role="dialog" aria-modal="true" aria-labelledby="modal-{{ $name }}-title" @endif
+            @if ($title || $labelledby) role="dialog" aria-modal="true" aria-labelledby="{{ $labelledby ?? 'modal-'.$name.'-title' }}" @endif
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
+            x-ref="panel"
             @click.stop
+            @keydown.tab.prevent="trapTab($event)"
         >
             @if ($title)
                 <div class="syn-modal-header">

@@ -693,7 +693,7 @@ $breadcrumbs = Breadcrumbs::make('Home', '/')
     ->add('John Doe', '/users/1', 'fa-user');
 ```
 
-**Methods:** `make()`, `add()`, `hasItems()`, `items()`, `count()`
+**Methods:** `make()`, `add()`, `hasItems()`, `items()`, `count()`, `current()`
 
 ### SynapseUtils
 

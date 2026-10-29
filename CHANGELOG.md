@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.0] - 2026-10-29
+
+### Changed
+- `<x-synapse-adv-select>`: the single-select clear button now sits beside the dropdown arrow instead of right after the label, and has an accessible name ("Clear selection"). The selected label truncates and is readable in dark mode. Re-copy `synapse-components.css` and rebuild.
+- Tooltips (`.has-tooltip > .tooltip`) are hidden with opacity instead of `invisible`, so their text is the accessible name of icon-only buttons, and they now also show on keyboard focus. Re-copy `themes/default/css/theme-base.css` and rebuild.
+- `.syn-empty-state` text raised to `gray-500` / dark `gray-400` for contrast.
+
+### Added
+- `<x-synapse-adv-select>` is a focusable `role="combobox"`: Enter/Space/ArrowDown open it, ArrowUp/ArrowDown + Enter choose an option, Escape closes it and refocuses the box. It forwards `id`, `aria-label`, `aria-labelledby` and `aria-describedby`. Re-copy `synapse-components.js` and rebuild.
+- `Breadcrumbs::current()`: the last crumb's label.
+- `<x-synapse-field>`: `inputClass` prop (classes for the control itself, e.g. `text-right`, where `class` styles the form-box), `type="textarea"` with `rows`, and the label now carries `id="{id}-label"` so a non-labelable slot control (adv-select) can be named with `aria-labelledby`.
+- `<x-synapse-modal>` `labelledby` prop: labels the dialog from an id its content renders, for a modal holding a child Livewire form with its own header.
+
+### Fixed
+- Icon buttons (`.btn-icon`) are 44×44 squares, the WCAG AA hit floor — the 16px glyph was the whole tap area before. Row-action cells keep their buttons on one line, so table rows grow about 12px. The sizing rule is declared after `.has-tooltip`, whose `inline-block` would otherwise win at equal specificity. Re-copy `themes/default/css/theme-base.css` and `synapse-components.css`, then rebuild.
+- `<x-synapse-modal>` moves focus into the dialog on open (first `[autofocus]`, else the first focusable control), keeps Tab inside it, and returns focus to the element that opened it. Escape already closed the dialog; focus simply never left the trigger. Re-copy `synapse-components.js` and rebuild.
+- `.btn-icon` hover transition dropped from 500ms to the 150ms motion token.
+- `synapps:copy-resources` deleted every destination directory before copying, so it removed host files the stubs do not ship — including the per-layout `synapps-{app,base,frontend,guest}.css/.js` entry points that `synapps:patch` creates and Vite builds from, silently breaking the next build. It now merges into the destination. `SynapseUtils::copyDirectory()` unlinks a symlinked or hard-linked destination file before writing, which is what the wipe had been guarding against.
+- `composer.json` branch alias moved to `3.8.x-dev`, so a path/`@dev` checkout satisfies `^3.8` constraints.
+- The settings module stubs (`configuration-list`, `languages-list`) no longer carry a `#[Layout]` attribute; Livewire resolves the layout for them.
+- `<x-synapse-field>` emitted two `class` attributes (`@class([...])` plus `$attributes->only('class')`), so a caller's class — a grid span like `sm:col-span-2` — was silently dropped by the browser. The caller's class is now merged into the form-box. Its hint uses `.form-help` instead of repeating that class's utilities.
+
 ## [3.7.3] - 2026-10-24
 
 ### Fixed

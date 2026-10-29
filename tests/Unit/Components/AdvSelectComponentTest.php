@@ -5,6 +5,14 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Blade;
 use VmEngine\Synapse\Components\AdvSelect;
 
+function advSelectHtml(string $blade, array $data = []): string
+{
+    view()->addNamespace('synapse', __DIR__.'/../../../resources/views');
+    Blade::component(AdvSelect::class, 'synapse-adv-select');
+
+    return Blade::render($blade, $data);
+}
+
 describe('AdvSelect Component', function () {
     it('renders x-data as raw JSON literals, not JSON.parse(), for CSP-safe Alpine', function () {
         // SynapseViewServiceProvider (which registers <x-synapse-*> tags)
@@ -26,6 +34,33 @@ describe('AdvSelect Component', function () {
         expect($html)->not->toContain('JSON.parse')
             ->and($html)->toContain('&quot;value&quot;:1')
             ->and($html)->toContain('&quot;label&quot;:&quot;Admin \\&quot;Role\\&quot;&quot;');
+    });
+
+    it('puts the single-select clear button beside the arrow, after the label', function () {
+        $html = advSelectHtml('<x-synapse-adv-select wire-model="role" :options="[]" />');
+
+        $label = strpos($html, 'adv-select-item-single');
+        $actions = strpos($html, 'class="adv-select-actions"');
+        $clear = strpos($html, 'class="adv-select-clear"');
+        $arrow = strpos($html, 'adv-select-arrow');
+
+        expect($actions)->not->toBeFalse()
+            ->and($label)->toBeLessThan($actions)
+            ->and($actions)->toBeLessThan($clear)
+            ->and($clear)->toBeLessThan($arrow)
+            ->and($html)->toContain('aria-label="Clear selection"');
+    });
+
+    it('renders a focusable combobox that forwards id and aria attributes', function () {
+        $html = advSelectHtml('<x-synapse-adv-select wire-model="role" id="role-select" aria-labelledby="role-label" :options="[]" />');
+
+        expect($html)->toContain('role="combobox"')
+            ->toContain('aria-haspopup="listbox"')
+            ->toContain(':tabindex="disabled ? -1 : 0"')
+            ->toContain('id="role-select"')
+            ->toContain('aria-labelledby="role-label"')
+            ->toContain('@keydown.enter.prevent="toggleOpen"')
+            ->toContain('role="option"');
     });
 
     it('can be instantiated with only the required wireModel', function () {

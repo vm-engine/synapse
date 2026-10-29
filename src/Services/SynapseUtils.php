@@ -152,6 +152,13 @@ class SynapseUtils
                         return false;
                     }
                 } else {
+                    // Drop a destination that is a symlink, or a hard link sharing the source's
+                    // inode: copy() would otherwise write straight through it into the source.
+                    if (is_link($destinationPath)
+                        || (file_exists($destinationPath) && fileinode($destinationPath) === fileinode($sourcePath))) {
+                        unlink($destinationPath);
+                    }
+
                     // If it's a file, copy it.
                     if (! copy($sourcePath, $destinationPath)) {
                         error_log("Failed to copy file from $sourcePath to $destinationPath");

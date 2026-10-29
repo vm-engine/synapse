@@ -13,6 +13,8 @@ class Modal extends Component
         public string $maxWidth = 'xl',
         public bool $show = false,
         public ?string $title = null,
+        /** Id of a heading the content renders; labels the dialog without drawing a header. */
+        public ?string $labelledby = null,
     ) {}
 
     public function render()

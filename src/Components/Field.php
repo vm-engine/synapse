@@ -25,6 +25,10 @@ class Field extends Component
         public ?string $inputmode = null,
         public ?string $autocomplete = null,
         public string $modifier = '',
+        /** Classes for the control itself, e.g. 'text-right'; `class` styles the form-box instead. */
+        public string $inputClass = '',
+        /** Rows of a `type="textarea"` field. */
+        public string $rows = '3',
         public ?string $prefix = null,
         public int $decimals = 0,
         ?string $id = null,

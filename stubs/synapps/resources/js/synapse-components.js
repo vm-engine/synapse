@@ -50,6 +50,7 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
     selected: preload,
     multiple,
     open: false,
+    activeIndex: -1,
     searchMethod,
     loadMethod,
     wireModel,
@@ -154,6 +155,10 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
         }
     },
 
+    isActive(index) {
+        return index === this.activeIndex;
+    },
+
     async fetch() {
         const query = this.search.toLowerCase();
 
@@ -181,6 +186,8 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
         } else {
             this.results = staticResults;
         }
+
+        this.activeIndex = -1;
     },
 
     select(item) {
@@ -190,7 +197,7 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
             }
         } else {
             this.selected = [item];
-            this.$refs.search.blur();
+            this.$refs.box?.focus();
         }
         this.search = '';
         this.results = [];
@@ -211,6 +218,21 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
     },
 
     handleKeydown(e) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.activeIndex = Math.min(this.activeIndex + 1, this.results.length - 1);
+            return;
+        }
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.activeIndex = Math.max(this.activeIndex - 1, 0);
+            return;
+        }
+        if (e.key === 'Enter' && this.activeIndex >= 0 && this.results[this.activeIndex]) {
+            e.preventDefault();
+            this.select(this.results[this.activeIndex]);
+            return;
+        }
         if (e.key === 'Enter' && this.allowCreate && this.search.trim() && this.results
             .length === 0) {
             e.preventDefault();
@@ -218,7 +240,7 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
         }
         if (e.key === 'Escape') {
             this.open = false;
-            this.$refs.search.blur();
+            this.$refs.box?.focus();
         }
     },
 
@@ -552,19 +574,64 @@ Alpine.data('synapseLightbox', () => ({
 }));
 
 // <x-synapse-modal>
+// Tab order inside a dialog. Module scope, not an inline attribute: the CSP
+// Alpine build evaluates attributes without access to globals or closures.
+const SYNAPSE_FOCUSABLE = [
+    'a[href]', 'button:not([disabled])', 'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])', 'textarea:not([disabled])', '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
 Alpine.data('synapseModal', (name) => ({
     show: false,
+    trigger: null,
+
     open() {
+        // Remember who opened it, so focus can go back there on close.
+        this.trigger = document.activeElement;
         this.show = true;
-        // Focus the first [autofocus] field once visible: HTML autofocus only
-        // fires on page load, and CSP attributes can't hold a $nextTick callback.
-        this.$nextTick(() => this.$el.querySelector('[autofocus]')?.focus());
+        // HTML autofocus only fires on page load, and CSP attributes can't hold
+        // a $nextTick callback, so the first field is focused here.
+        this.$nextTick(() => this.focusFirst());
     },
+
+    focusFirst() {
+        const panel = this.$refs.panel;
+        if (!panel) return;
+        const target = panel.querySelector('[autofocus]')
+            || panel.querySelector(SYNAPSE_FOCUSABLE);
+        target?.focus();
+    },
+
+    // A modal's content can arrive late (a child Livewire component), so the
+    // list is read on each Tab rather than cached at open().
+    trapTab(event) {
+        const panel = this.$refs.panel;
+        if (!panel) return;
+        const items = [...panel.querySelectorAll(SYNAPSE_FOCUSABLE)]
+            .filter(el => el.offsetParent !== null);
+        if (items.length === 0) return;
+
+        const first = items[0];
+        const last = items[items.length - 1];
+        const current = document.activeElement;
+
+        if (event.shiftKey) {
+            (current === first || !panel.contains(current) ? last : items[items.indexOf(current) - 1] || last).focus();
+            return;
+        }
+        (current === last || !panel.contains(current) ? first : items[items.indexOf(current) + 1] || first).focus();
+    },
+
     close() {
         if (!this.show) return;
         this.show = false;
         this.$dispatch('closed-modal-' + name);
-    }
+        // Focus the trigger only if it is still in the document.
+        if (this.trigger && this.trigger.isConnected) {
+            this.trigger.focus();
+        }
+        this.trigger = null;
+    },
 }));
 
 // <x-synapse-password-generator>

@@ -56,7 +56,7 @@ describe('Currency Component', function () {
     it('renders a raw currency input from a currency field, wired for screen readers', function () {
         $html = Blade::render('<x-synapse-field name="amount" label="Nominal" type="currency" prefix="Rp" :decimals="2" hint="Minimal" required />');
 
-        expect($html)->toContain('<label for="f-amount">Nominal</label>')
+        expect($html)->toMatch('/<label[^>]*for="f-amount"[^>]*>Nominal<\/label>/s')
             ->toContain("synapseCurrency(\$wire.entangle('amount'), 2, null)")
             ->toContain('id="f-amount"')
             ->toContain('aria-describedby="f-amount-hint"')

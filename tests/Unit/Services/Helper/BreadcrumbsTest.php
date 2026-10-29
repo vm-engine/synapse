@@ -119,3 +119,8 @@ describe('Breadcrumbs', function () {
             ->and($breadcrumbs->items()[3]['icon'])->toBe('fa-lock');
     });
 });
+
+it('returns the last crumb label as the current page', function () {
+    expect(Breadcrumbs::make('Clients', '/clients')->add('Acme')->current())->toBe('Acme')
+        ->and(Breadcrumbs::make('Clients')->current())->toBe('Clients');
+});

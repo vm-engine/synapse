@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 use VmEngine\Synapse\Models\Config;
 use VmEngine\Synapse\Services\Helper\Breadcrumbs;
 
-new #[Layout('synapps::components.layouts.layout')] class extends Component
+new class extends Component
 {
     public string $search = '';
 

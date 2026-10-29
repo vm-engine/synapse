@@ -246,7 +246,7 @@ button[type="button"]:not(.btn-icon) {
    .secondary and .info variants are new here — lta.css never defined them,
    even though both are used in the app (e.g. invoice-list, tenant-list). */
 .btn-icon {
-    @apply text-gray-700 dark:text-gray-400 transition-colors duration-500;
+    @apply text-gray-700 dark:text-gray-400 transition-colors duration-150;
 }
 
 .btn-icon.primary {
@@ -584,11 +584,19 @@ input[type="radio"] {
 }
 
 .tooltip {
-    @apply invisible absolute left-1/2 -translate-x-1/2 -translate-y-full rounded-md bg-gray-700 px-2 py-1 text-center text-xs text-white;
+    @apply pointer-events-none absolute left-1/2 -translate-x-1/2 -translate-y-full rounded-md bg-gray-700 px-2 py-1 text-center text-xs text-white opacity-0 transition-opacity;
 }
 
 .has-tooltip > .tooltip {
-    @apply group-hover:visible;
+    @apply group-hover:opacity-100 group-focus-visible:opacity-100;
+}
+
+/* Sized here, after .has-tooltip: that rule's `inline-block` has the same
+   specificity, so an earlier `inline-flex` on .btn-icon would lose to it.
+   44x44 is the WCAG AA hit floor — the 16px glyph is not the tap area. */
+.btn-icon,
+.btn-icon.has-tooltip {
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-lg;
 }
 
 /* Swiper carousel overrides */

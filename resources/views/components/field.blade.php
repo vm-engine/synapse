@@ -26,32 +26,58 @@
 --}}
 @use('Illuminate\Support\ViewErrorBag')
 @php
-    $errors ??= new ViewErrorBag;
-    $describedBy = trim(($errors->has($error) ? $id.'-error ' : '').($hint ? $id.'-hint' : ''));
-    $wireModel = 'wire:model'.($modifier !== '' ? '.'.$modifier : '');
+    $errors ??= new ViewErrorBag();
+    $describedBy = trim(($errors->has($error) ? $id . '-error ' : '') . ($hint ? $id . '-hint' : ''));
+    $wireModel = 'wire:model' . ($modifier !== '' ? '.' . $modifier : '');
 @endphp
-<div @class(['form-box', 'required' => $required]) {{ $attributes->only('class') }}>
-    <label for="{{ $id }}">{{ $label }}</label>
+{{-- only('class') before merge(): a bare merge() would also print pass-through
+     attributes (maxlength, readonly, data-*) on the wrapper, where they mean nothing. --}}
+<div {{ $attributes->only('class')->merge(['class' => 'form-box' . ($required ? ' required' : '')]) }}>
+    <label
+        for="{{ $id }}"
+        id="{{ $id }}-label"
+    >{{ $label }}</label>
     @if ($slot->isEmpty() && $type === 'currency')
         <x-synapse-currency
             raw
             :currency="$prefix ?? ''"
             :decimals="$decimals"
             :id="$id"
-            :class="$errors->has($error) ? 'has-error' : ''"
+            :class="trim($inputClass . ($errors->has($error) ? ' has-error' : ''))"
             :aria-describedby="$describedBy !== '' ? $describedBy : null"
             :aria-invalid="$errors->has($error) ? 'true' : null"
             :aria-required="$required ? 'true' : null"
             :disabled="$disabled"
             {{ $attributes->except('class')->merge([$wireModel => $name]) }}
         />
+    @elseif ($slot->isEmpty() && $type === 'textarea')
+        <textarea
+            @class([
+                'form-input',
+                $inputClass => $inputClass !== '',
+                'has-error' => $errors->has($error),
+            ])
+            id="{{ $id }}"
+            rows="{{ $rows }}"
+            {{ $wireModel }}="{{ $name }}"
+            @if ($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
+            @if ($errors->has($error)) aria-invalid="true" @endif
+            @if ($required) aria-required="true" @endif
+            @disabled($disabled)
+            {{ $attributes->except('class') }}
+        ></textarea>
     @elseif ($slot->isEmpty())
         @if ($prefix)
             <div class="input-group">
                 <span class="input-group-item left">{{ $prefix }}</span>
         @endif
         <input
-            @class(['form-input', 'has-error' => $errors->has($error), 'pl-[62px]!' => $prefix])
+            @class([
+                'form-input',
+                $inputClass => $inputClass !== '',
+                'has-error' => $errors->has($error),
+                'pl-[62px]!' => $prefix,
+            ])
             id="{{ $id }}"
             type="{{ $type }}"
             {{ $wireModel }}="{{ $name }}"
@@ -65,15 +91,21 @@
             {{ $attributes->except('class') }}
         >
         @if ($prefix)
-            </div>
-        @endif
-    @else
-        {{ $slot }}
-    @endif
-    @if ($hint)
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="{{ $id }}-hint">{{ $hint }}</p>
-    @endif
-    @if ($errors->has($error))
-        <p class="form-error-message" id="{{ $id }}-error">{{ $errors->first($error) }}</p>
-    @endif
+</div>
+@endif
+@else
+{{ $slot }}
+@endif
+@if ($hint)
+    <p
+        class="form-help"
+        id="{{ $id }}-hint"
+    >{{ $hint }}</p>
+@endif
+@if ($errors->has($error))
+    <p
+        class="form-error-message"
+        id="{{ $id }}-error"
+    >{{ $errors->first($error) }}</p>
+@endif
 </div>

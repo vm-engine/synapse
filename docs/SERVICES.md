@@ -298,6 +298,7 @@ $breadcrumbs = Breadcrumbs::make('Home', '/', 'fa-solid fa-home')
 | `hasItems()` | - | Check if breadcrumbs has any items |
 | `items()` | - | Get all breadcrumb items as array |
 | `count()` | - | Get number of breadcrumb items |
+| `current()` | - | Label of the last item (the current page's heading), `''` when empty |
 
 ### Breadcrumb Item Structure
 

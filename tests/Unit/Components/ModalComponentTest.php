@@ -35,4 +35,13 @@ describe('Modal Component', function () {
 
         expect($html)->toContain('syn-modal-footer')->toContain('<button>Save</button>');
     });
+
+    it('labels the dialog from a content-supplied id when there is no title prop', function () {
+        $html = Blade::render('<x-synapse-modal name="tax-rate-form" labelledby="modal-tax-rate-form-title">body</x-synapse-modal>');
+
+        expect($html)->toContain('role="dialog"')
+            ->toContain('aria-modal="true"')
+            ->toContain('aria-labelledby="modal-tax-rate-form-title"')
+            ->not->toContain('syn-modal-header');
+    });
 });

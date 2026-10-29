@@ -724,7 +724,10 @@ span.flatpickr-weekday,
     @apply ml-1 text-sm;
 }
 .adv-select-item-single {
-    @apply text-gray-800;
+    @apply min-w-0 flex-1 truncate text-gray-800 dark:text-white/90;
+}
+.adv-select-actions {
+    @apply ml-auto flex shrink-0 items-center gap-2;
 }
 .adv-select-placeholder {
     @apply text-gray-400 dark:text-white/30;
@@ -736,7 +739,7 @@ span.flatpickr-weekday,
     @apply text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-300;
 }
 .adv-select-arrow {
-    @apply ml-auto shrink-0 text-xs text-gray-400 transition-transform duration-150;
+    @apply shrink-0 text-xs text-gray-400 transition-transform duration-150;
 }
 .adv-select-arrow.is-open {
     @apply rotate-180;
@@ -746,6 +749,9 @@ span.flatpickr-weekday,
 }
 .adv-select-option {
     @apply cursor-pointer p-2 hover:bg-blue-100 dark:hover:bg-gray-800;
+}
+.adv-select-option.is-active {
+    @apply bg-blue-100 dark:bg-gray-800;
 }
 .adv-select-option-create {
     @apply cursor-pointer border-t border-gray-200 p-2 hover:bg-green-100 dark:border-gray-700 dark:hover:bg-green-900/20;
@@ -1022,7 +1028,7 @@ span.flatpickr-weekday,
     @apply px-2.5 py-0.5 text-xs;
 }
 .syn-badge-sm {
-    @apply px-2 py-0.5 text-[0.6875rem];
+    @apply px-2 py-0.5 text-xs;
 }
 .syn-badge-icon {
     @apply text-[0.9em];
@@ -1060,7 +1066,7 @@ span.flatpickr-weekday,
     @apply text-base font-medium text-gray-800 dark:text-white/90;
 }
 .syn-panel-toolbar {
-    @apply my-auto flex gap-3 px-5 pb-4 sm:pb-0;
+    @apply my-auto flex flex-wrap items-center gap-3 px-5 pb-4 sm:pb-0;
 }
 .syn-panel-header:has(.syn-panel-chevron) {
     @apply cursor-pointer select-none;
@@ -1463,6 +1469,16 @@ span.flatpickr-weekday,
 .datatable:not(.datatable-scroll) > tbody > tr > td.datatable-col-checkbox {
     @apply max-sm:order-first max-sm:flex-row max-sm:justify-end max-sm:pb-2;
 }
+
+/* The action cell wraps its 44px buttons onto separate lines otherwise, which
+   pushes table rows from 73px to 121px. :has() avoids touching 93 view files.
+   :not(.flex) leaves module-authored layouts alone — synapps-auth stacks its
+   row actions with `flex flex-col`, and this rule is unlayered, so it would
+   otherwise override that view's own Tailwind alignment utilities. */
+.datatable td > div:not(.flex):has(> .btn-icon) {
+    @apply flex items-center justify-center gap-1;
+}
+
 .datatable:not(.datatable-scroll) > tbody > tr > td.datatable-col-actions {
     @apply max-sm:order-last max-sm:flex-row max-sm:justify-end max-sm:gap-2 max-sm:border-t max-sm:border-gray-100 max-sm:pt-2 max-sm:dark:border-gray-800;
 }
@@ -1638,7 +1654,7 @@ span.flatpickr-weekday,
 }
 
 .syn-empty-state {
-    @apply flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-600;
+    @apply flex flex-col items-center justify-center py-16 text-gray-500 dark:text-gray-400;
 }
 .syn-empty-state-icon {
     @apply mb-3 text-4xl;

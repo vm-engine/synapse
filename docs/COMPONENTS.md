@@ -148,9 +148,18 @@ Label, wire-bound input and its error/hint in a `form-box`, linked for screen re
 ```blade
 <x-synapse-field name="amount" label="Amount" type="number" inputmode="decimal" hint="Minimum 10,000" required />
 
+{{-- Multi-line --}}
+<x-synapse-field name="notes" label="Notes" type="textarea" rows="4" />
+
 {{-- Any other control: put it in the slot and give it the field id --}}
 <x-synapse-field name="form.group_id" label="Group">
     <select class="form-input @error('form.group_id') has-error @enderror" id="f-form-group_id" wire:model="form.group_id">…</select>
+</x-synapse-field>
+
+{{-- A control that is not labelable (a div, e.g. adv-select) cannot be named by `for`;
+     point it at the label's id instead --}}
+<x-synapse-field name="clientId" label="Client">
+    <x-synapse-adv-select aria-labelledby="f-clientId-label" wire-model="clientId" :options="$clients" />
 </x-synapse-field>
 ```
 
@@ -160,14 +169,16 @@ Label, wire-bound input and its error/hint in a `form-box`, linked for screen re
 | `error` | `name` | Validation error key when the form validates under another key, e.g. `name="profile.phone" error="phone"` |
 | `prefix` | — | Text before the input in an input group, e.g. `Rp` |
 | `label` | — | Visible label |
-| `type` | `text` | Input type |
+| `type` | `text` | Input type; `textarea` renders a `<textarea>`, `currency` a raw currency input |
+| `rows` | `3` | Rows of a `type="textarea"` field |
+| `inputClass` | — | Classes for the control itself, e.g. `text-right` (`class` styles the form-box instead) |
 | `required` / `disabled` | `false` | Marks the box required (`aria-required`, no native `required`, so the server-side message shows) / disables the input |
 | `hint` | — | Helper text under the input |
 | `step`, `inputmode`, `autocomplete` | — | Passed to the input |
 | `modifier` | — | `wire:model` modifier, e.g. `live` or `blur` |
 | `id` | `f-{name}` (dots → dashes) | Input id |
 
-Other attributes go to the input; `class` goes to the `form-box`.
+Other attributes go to the input; `class` is merged into the `form-box` (so a grid span like `sm:col-span-2` works), and the label carries `id="{id}-label"` for `aria-labelledby`.
 
 ### Search Box
 
@@ -567,9 +578,12 @@ Also closes on backdrop click, the close button, or Escape.
 | `name` | `modal` | Event suffix — open with `$dispatch('open-modal-{name}')`, close with `close-modal-{name}` (also closes on Escape) |
 | `max-width` | `xl` | Panel width |
 | `title` | — | Renders the `syn-modal-header` with the title and a close button (screen-reader label "Close"), and labels the dialog |
+| `labelledby` | — | Id of a heading the *content* renders. Labels the dialog (`role="dialog"`, `aria-labelledby`) without drawing a header — for a modal whose title lives in a child Livewire component |
 | `footer` slot | — | Rendered in the `syn-modal-footer` action bar |
 
-Without `title`/`footer` the slot is rendered as is, so hand-written `syn-modal-header` / `syn-modal-footer` markup keeps working.
+Without `title`/`footer` the slot is rendered as is, so hand-written `syn-modal-header` / `syn-modal-footer` markup keeps working — give that heading an id and pass it as `labelledby` so the dialog is still announced as one.
+
+The `footer` slot is rendered by the component that writes the `<x-synapse-modal>` tag. When the modal holds a *child* Livewire form (`<x-synapse-modal><livewire:thing-form /></x-synapse-modal>`), a `wire:click` in that slot would call the **outer** component — keep such a form's own footer inside the child view and use `labelledby`.
 
 Event names are matched lowercase by the browser, so keep `name` lowercase.
 
@@ -888,6 +902,12 @@ Supports:
 | `live` | `bool` | `false` | If `true`, updates Livewire instantly as user selects. |
 | `allowCreate` | `bool` | `false` | If `true`, allows creating new options by pressing Enter. |
 | `autoLoad` | `bool` | `true` | If `true`, auto-loads selected values from wireModel on init. |
+
+### Keyboard and labelling
+
+- The select box is a focusable `role="combobox"`: Enter, Space or ArrowDown opens it; in the dropdown, ArrowUp/ArrowDown move through the options, Enter picks one, and Escape closes it and returns focus to the box.
+- `id`, `aria-label`, `aria-labelledby` and `aria-describedby` are forwarded to the box. A `<label for>` cannot name a `div`, so name the select with `aria-labelledby` (pointing at the visible label's `id`) or `aria-label`.
+- In single-select mode the clear button sits beside the dropdown arrow, at the right edge of the box.
 
 ### Usage Examples
 

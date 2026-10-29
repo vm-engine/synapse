@@ -147,9 +147,18 @@ focusInput() is a no-op while disabled).
     {{-- Select box (display-only: placeholder / selection / pills + clear + arrow) --}}
     <div
         class="adv-select-input-box"
+        role="combobox"
+        aria-haspopup="listbox"
+        x-ref="box"
+        {{ $attributes->only(['id', 'aria-label', 'aria-labelledby', 'aria-describedby']) }}
         :class="{ 'is-open': open, 'is-disabled': disabled }"
         :aria-disabled="disabled"
+        :aria-expanded="open ? 'true' : 'false'"
+        :tabindex="disabled ? -1 : 0"
         @click="toggleOpen"
+        @keydown.enter.prevent="toggleOpen"
+        @keydown.space.prevent="toggleOpen"
+        @keydown.down.prevent="focusInput"
     >
         {{-- Placeholder (nothing selected, either mode) --}}
         <template x-if="selected.length === 0">
@@ -184,23 +193,29 @@ focusInput() is a no-op while disabled).
             ></span>
         </template>
 
-        {{-- Clear button for single select --}}
-        <template x-if="!multiple && selected.length">
-            <button
-                class="adv-select-clear"
-                type="button"
-                :disabled="disabled"
-                @click.stop="clearSelection"
-            >
-                <i class="ph ph-x"></i>
-            </button>
-        </template>
+        {{-- Trailing controls: the single-select clear button sits beside the arrow, not the label --}}
+        <span class="adv-select-actions">
+            <template x-if="!multiple && selected.length">
+                <button
+                    class="adv-select-clear"
+                    type="button"
+                    aria-label="{{ __('Clear selection') }}"
+                    :disabled="disabled"
+                    @click.stop="clearSelection"
+                >
+                    <i
+                        class="ph ph-x"
+                        aria-hidden="true"
+                    ></i>
+                </button>
+            </template>
 
-        {{-- Dropdown arrow --}}
-        <i
-            class="ph ph-caret-down adv-select-arrow"
-            :class="{ 'is-open': open }"
-        ></i>
+            <i
+                class="ph ph-caret-down adv-select-arrow"
+                aria-hidden="true"
+                :class="{ 'is-open': open }"
+            ></i>
+        </span>
     </div>
 
     {{-- Dropdown --}}
@@ -223,11 +238,14 @@ focusInput() is a no-op while disabled).
         />
 
         <template
-            x-for="item in results"
+            x-for="(item, index) in results"
             :key="item[valueField]"
         >
             <div
                 class="adv-select-option"
+                role="option"
+                :class="{ 'is-active': isActive(index) }"
+                :aria-selected="isActive(index) ? 'true' : 'false'"
                 x-text="item[labelField]"
                 @click="select(item)"
             ></div>
@@ -247,4 +265,3 @@ focusInput() is a no-op while disabled).
         </template>
     </div>
 </div>
-

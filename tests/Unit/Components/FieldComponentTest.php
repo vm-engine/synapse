@@ -5,12 +5,16 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
+use VmEngine\Synapse\Components\Currency;
 use VmEngine\Synapse\Components\Field;
 
 describe('Field Component', function () {
     beforeEach(function () {
         view()->addNamespace('synapse', __DIR__.'/../../../resources/views');
         Blade::component(Field::class, 'synapse-field');
+        // field.blade.php references <x-synapse-currency>, which Blade resolves at compile time
+        // whatever the runtime branch, so it must be registered here too.
+        Blade::component(Currency::class, 'synapse-currency');
         view()->share('errors', new ViewErrorBag);
     });
 
@@ -21,7 +25,7 @@ describe('Field Component', function () {
     it('renders a labelled wire-bound input', function () {
         $html = Blade::render('<x-synapse-field name="amount" label="Nominal" type="number" inputmode="decimal" required />');
 
-        expect($html)->toContain('<label for="f-amount">Nominal</label>')
+        expect($html)->toMatch('/<label[^>]*for="f-amount"[^>]*id="f-amount-label"[^>]*>Nominal<\/label>/s')
             ->toContain('id="f-amount"')
             ->toContain('wire:model="amount"')
             ->toContain('inputmode="decimal"')
@@ -77,5 +81,42 @@ describe('Field Component', function () {
 
     it('disables the input', function () {
         expect(Blade::render('<x-synapse-field name="a" label="A" :disabled="true" />'))->toContain('disabled');
+    });
+
+    it('merges a caller class into the form-box and puts inputClass on the input', function () {
+        $html = Blade::render('<x-synapse-field name="qty" label="Qty" class="sm:col-span-2" input-class="text-right" required />');
+
+        expect($html)->toMatch('/<div class="form-box required sm:col-span-2"\s*>/')
+            ->toMatch('/<input\s+class="form-input text-right/')
+            ->not->toContain('input-class=');
+    });
+
+    it('keeps pass-through attributes off the wrapper', function () {
+        $html = Blade::render('<x-synapse-field name="code" label="Code" maxlength="20" />');
+
+        expect($html)->toMatch('/<div class="form-box[^"]*"\s*>/')
+            ->toMatch('/<input[^>]*maxlength="20"/');
+    });
+
+    it('gives the label an id so a slot control can be named by it', function () {
+        $html = Blade::render('<x-synapse-field name="clientId" label="Client"><div role="combobox"></div></x-synapse-field>');
+
+        expect($html)->toMatch('/<label[^>]*for="f-clientId"[^>]*id="f-clientId-label"/s');
+    });
+
+    it('renders a textarea with rows when asked', function () {
+        $html = Blade::render('<x-synapse-field name="notes" label="Notes" type="textarea" rows="4" hint="Optional" />');
+
+        expect($html)->toMatch('/<textarea[^>]*id="f-notes"/')
+            ->toMatch('/<textarea[^>]*rows="4"/')
+            ->toMatch('/<textarea[^>]*wire:model="notes"/')
+            ->toContain('aria-describedby="f-notes-hint"')
+            ->not->toContain('<input');
+    });
+
+    it('styles the hint with the form-help class', function () {
+        $html = Blade::render('<x-synapse-field name="code" label="Code" hint="Leave blank to auto-generate" />');
+
+        expect($html)->toMatch('/<p[^>]*class="form-help"[^>]*id="f-code-hint"/s');
     });
 });

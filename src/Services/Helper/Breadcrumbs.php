@@ -55,4 +55,10 @@ class Breadcrumbs
     {
         return count($this->items);
     }
+
+    /** Label of the last crumb: the current page's heading. */
+    public function current(): string
+    {
+        return $this->items === [] ? '' : $this->items[array_key_last($this->items)]['label'];
+    }
 }
