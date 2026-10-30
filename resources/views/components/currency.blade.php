@@ -26,6 +26,9 @@
         }
     }
 @endphp
+{{-- A value that is all zeros and separators ("0", "0,00") is selected on focus, so typing replaces it
+     instead of appending to it; any real amount keeps the caret where the user clicked. Written as
+     replaceAll() chains, not a regex: Alpine's CSP-safe build cannot parse a regex literal. --}}
 <div class="input-group">
     @if ($currency !== '')
         <span class="input-group-item left">{{ $currency }}</span>
@@ -37,7 +40,7 @@
             x-data="synapseCurrency($wire.entangle('{{ $wireModel->value() }}'), {{ $decimals }}, {{ $syncDelay ?? 'null' }})"
             x-model="display"
             x-mask:dynamic="$money($input, ',', '.', decimals)"
-            x-on:focus="$event.target.value == '0' && $event.target.select()"
+            x-on:focus="$event.target.value.replaceAll('0', '').replaceAll('.', '').replaceAll(',', '') == '' && $event.target.select()"
             {{ $attributes->whereDoesntStartWith('wire:model')->class(['form-input', 'pl-[62px]!' => $currency !== '']) }}
         >
     @else
@@ -45,7 +48,7 @@
             type="text"
             inputmode="{{ $decimals > 0 ? 'decimal' : 'numeric' }}"
             x-mask:dynamic="$money($input, ',', '.', {{ $decimals }})"
-            x-on:focus="$event.target.value == '0' && $event.target.select()"
+            x-on:focus="$event.target.value.replaceAll('0', '').replaceAll('.', '').replaceAll(',', '') == '' && $event.target.select()"
             {{ $attributes->class(['form-input', 'pl-[62px]!' => $currency !== '']) }}
         >
     @endif

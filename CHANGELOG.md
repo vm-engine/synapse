@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.1] - 2026-10-30
+
+### Fixed
+- `<x-synapse-currency>`: select-on-focus now matches any all-zero value (`0,00`, `0.000`, not just `0`), so clicking a zeroed amount configured with `decimals` and typing replaces it instead of appending to the zero. The check is written as `replaceAll()` chains rather than a regex, which Alpine's CSP-safe build cannot parse.
+
 ## [3.8.0] - 2026-10-29
 
 ### Changed

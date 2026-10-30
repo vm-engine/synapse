@@ -53,6 +53,21 @@ describe('Currency Component', function () {
             ->and(Blade::render('<x-synapse-currency raw wire:model.live.debounce="amount" />'))->toContain("synapseCurrency(\$wire.entangle('amount'), 0, 250)");
     });
 
+    it('selects a zero value on focus so typing replaces it, whatever the decimals', function () {
+        // '0' with no decimals, '0,00' with two: typing into either must not append to the zero.
+        foreach ([
+            '<x-synapse-currency wire:model="amount" />',
+            '<x-synapse-currency :decimals="2" wire:model="amount" />',
+            '<x-synapse-currency raw :decimals="2" wire:model="amount" />',
+        ] as $template) {
+            expect(Blade::render($template))
+                ->toContain(
+                    // Not a regex: Alpine's CSP-safe build cannot parse a regex literal.
+                    "x-on:focus=\"\$event.target.value.replaceAll('0', '').replaceAll('.', '').replaceAll(',', '') == '' && \$event.target.select()\""
+                );
+        }
+    });
+
     it('renders a raw currency input from a currency field, wired for screen readers', function () {
         $html = Blade::render('<x-synapse-field name="amount" label="Nominal" type="currency" prefix="Rp" :decimals="2" hint="Minimal" required />');
 
