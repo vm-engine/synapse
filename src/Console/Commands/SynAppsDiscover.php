@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace VmEngine\Synapse\Console\Commands;
 
 use Composer\Semver\Comparator;
+use Composer\Semver\VersionParser;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Process;
+use UnexpectedValueException;
 
 class SynAppsDiscover extends Command
 {
@@ -41,9 +44,23 @@ class SynAppsDiscover extends Command
     protected int $composerDevDeps = 0;
 
     /**
+     * Composer packages whose constraint this run added or raised.
+     *
+     * @var list<string>
+     */
+    protected array $changedComposerPackages = [];
+
+    /**
+     * Shell commands from this run that exited non-zero.
+     *
+     * @var list<string>
+     */
+    protected array $failedCommands = [];
+
+    /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         $this->packageJson = read_json_file(base_path('package.json'));
         $this->composerJson = read_json_file(base_path('composer.json'));
@@ -64,8 +81,10 @@ class SynAppsDiscover extends Command
 
         if ($this->npmDeps || $this->npmDevDeps) {
             $this->components->info('Compiling assets');
-            exec('npm run build');
+            $this->runShell(['npm', 'run', 'build']);
         }
+
+        return $this->reportFailures();
     }
 
     private function discoverSynapseModules(): void
@@ -127,11 +146,11 @@ class SynAppsDiscover extends Command
         if ($this->composerDeps) {
             $this->components->info('Discovered '.$this->composerDeps.' Composer Dependencies');
         }
-        if ($this->npmDeps) {
-            $this->components->info('Discovered '.$this->npmDeps.' NPM Dev Dependencies');
+        if ($this->npmDevDeps) {
+            $this->components->info('Discovered '.$this->npmDevDeps.' NPM Dev Dependencies');
         }
-        if ($this->composerDeps) {
-            $this->components->info('Discovered '.$this->composerDeps.' Composer Dev Dependencies');
+        if ($this->composerDevDeps) {
+            $this->components->info('Discovered '.$this->composerDevDeps.' Composer Dev Dependencies');
         }
     }
 
@@ -178,14 +197,79 @@ class SynAppsDiscover extends Command
             json_encode($this->composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
         );
 
-        if ($this->composerDeps || $this->composerDevDeps || $removedCount > 0) {
-            $this->components->info('Running composer update');
-            exec('composer update');
+        if ($this->changedComposerPackages !== []) {
+            $packages = array_values(array_unique($this->changedComposerPackages));
+
+            // Only the packages this run touched. A bare `composer update`
+            // re-resolves the whole project, so an unrelated lock
+            // inconsistency fails the run after Composer has already started
+            // deleting packages out of vendor/.
+            $this->runShell(array_merge(['composer', 'update'], $packages, ['--with-all-dependencies']));
 
             return;
         }
-        $this->components->info('Running composer dump-autoload');
-        exec('composer dump-autoload');
+
+        $this->runShell(['composer', 'dump-autoload']);
+    }
+
+    /**
+     * Run a command in the project root, streaming its output, and remember a
+     * non-zero exit so reportFailures() can surface it at the end of the run.
+     *
+     * Using the Process facade rather than exec() keeps the exit code and the
+     * output: exec() discarded both, which is how a failed `composer update`
+     * used to pass unnoticed.
+     *
+     * @param  list<string>  $command
+     */
+    private function runShell(array $command): int
+    {
+        $printable = implode(' ', $command);
+
+        $this->components->info('Running '.$printable);
+
+        $result = Process::path(base_path())
+            ->forever()
+            ->run($command, function (string $type, string $output): void {
+                $this->output->write($output);
+            });
+
+        $exitCode = $result->exitCode() ?? 1;
+
+        if ($exitCode !== 0) {
+            $this->failedCommands[] = $printable;
+            $this->components->error('`'.$printable.'` exited with code '.$exitCode);
+        }
+
+        return $exitCode;
+    }
+
+    /**
+     * Summarise any shell command that exited non-zero.
+     *
+     * The manifests have already been rewritten by the time this runs, so the
+     * report names the failing command and says how to put an incomplete
+     * vendor/ back.
+     */
+    private function reportFailures(): int
+    {
+        if ($this->failedCommands === []) {
+            return self::SUCCESS;
+        }
+
+        $this->newLine();
+        $this->components->error('synapps:discover finished with errors');
+
+        foreach ($this->failedCommands as $failedCommand) {
+            $this->line('  failed: '.$failedCommand);
+        }
+
+        $this->components->warn(
+            'composer.json and package.json were already rewritten. If vendor/ is now incomplete, run '
+            .'`composer install --no-scripts`, then re-link any vendor package you keep as a symlink.'
+        );
+
+        return self::FAILURE;
     }
 
     private function updateNpm(): void
@@ -203,8 +287,7 @@ class SynAppsDiscover extends Command
                 base_path('package.json'),
                 json_encode($this->packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
             );
-            $this->components->info('Running npm install');
-            exec('npm i');
+            $this->runShell(['npm', 'install']);
         }
     }
 
@@ -213,8 +296,8 @@ class SynAppsDiscover extends Command
     {
         $this->compareDeps('packageJson', 'dependencies', $moduleDependecies['npm']['main'] ?? [], 'npmDeps');
         $this->compareDeps('packageJson', 'devDependencies', $moduleDependecies['npm']['dev'] ?? [], 'npmDevDeps');
-        $this->compareDeps('composerJson', 'require', $moduleDependecies['composer']['main'] ?? [], 'composerDeps');
-        $this->compareDeps('composerJson', 'require-dev', $moduleDependecies['composer']['dev'] ?? [], 'composerDevDeps');
+        $this->compareDeps('composerJson', 'require', $moduleDependecies['composer']['main'] ?? [], 'composerDeps', true);
+        $this->compareDeps('composerJson', 'require-dev', $moduleDependecies['composer']['dev'] ?? [], 'composerDevDeps', true);
     }
 
     /** @param  array<string, mixed>  $toLoop */
@@ -222,21 +305,86 @@ class SynAppsDiscover extends Command
         string $thisVar,
         string $thisVarKey,
         array $toLoop,
-        string $counterVar
+        string $counterVar,
+        bool $isComposer = false,
     ): void {
         $collection = $this->{$thisVar}[$thisVarKey] ?? [];
 
         foreach ($toLoop as $package => $version) {
-            if (
-                ! isset($collection[$package]) ||
-                Comparator::greaterThan($version, $collection[$package])
-            ) {
-                $collection[$package] = $version;
-                $this->{$counterVar}++;
-                $this->components->info('Discovered Dependency: '.$package.' - '.$version);
+            $package = (string) $package;
+            $version = (string) $version;
+
+            if (isset($collection[$package])) {
+                $wins = $isComposer
+                    ? $this->composerConstraintWins($package, $version, (string) $collection[$package])
+                    : Comparator::greaterThan($version, $collection[$package]);
+
+                if (! $wins) {
+                    continue;
+                }
             }
+
+            $collection[$package] = $version;
+            $this->{$counterVar}++;
+
+            if ($isComposer) {
+                $this->changedComposerPackages[] = $package;
+            }
+
+            $this->components->info('Discovered Dependency: '.$package.' - '.$version);
         }
 
         $this->{$thisVar}[$thisVarKey] = $collection;
+    }
+
+    /**
+     * Decide whether a module's Composer constraint should replace the one the
+     * root manifest already declares.
+     *
+     * Constraints are compared on their parsed lower bound, so compound forms
+     * (">=1.0", "^1.0|^2.0") order correctly instead of being compared as
+     * strings. A branch constraint ("dev-main", "@dev", "1.x-dev") never
+     * replaces a different constraint and is never replaced by one: moving a
+     * package between a stable release and a branch is the host project's
+     * decision, not a module's.
+     */
+    private function composerConstraintWins(string $package, string $moduleConstraint, string $rootConstraint): bool
+    {
+        if ($moduleConstraint === $rootConstraint) {
+            return false;
+        }
+
+        if ($this->isDevConstraint($moduleConstraint) || $this->isDevConstraint($rootConstraint)) {
+            $this->components->warn(
+                $package.': module wants '.$moduleConstraint.', root requires '.$rootConstraint
+                .'; leaving the root constraint alone because one of them is a branch constraint.'
+            );
+
+            return false;
+        }
+
+        $parser = new VersionParser;
+
+        try {
+            $moduleLowerBound = $parser->parseConstraints($moduleConstraint)->getLowerBound()->getVersion();
+            $rootLowerBound = $parser->parseConstraints($rootConstraint)->getLowerBound()->getVersion();
+        } catch (UnexpectedValueException) {
+            $this->components->warn(
+                $package.': cannot compare '.$moduleConstraint.' with the root\'s '.$rootConstraint
+                .'; leaving the root constraint alone.'
+            );
+
+            return false;
+        }
+
+        return Comparator::greaterThan($moduleLowerBound, $rootLowerBound);
+    }
+
+    /**
+     * Whether a constraint asks for a branch/dev version rather than a release.
+     */
+    private function isDevConstraint(string $constraint): bool
+    {
+        return str_contains($constraint, 'dev');
     }
 }

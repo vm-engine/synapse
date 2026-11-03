@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.2] - 2026-11-03
+
+### Fixed
+- `synapse:patch-composer` appends JSON list entries instead of merging them by index. Merging `repositories` (or `autoload.classmap`, or any other list) by numeric key overwrote whichever entry happened to sit at the same position instead of adding the new one, so patching `composer.local.json` silently destroyed existing repository entries. Re-patching no longer duplicates entries either.
+- `synapps:discover` reports dev-dependency counts from the dev counters. The "NPM Dev Dependencies" and "Composer Dev Dependencies" lines read the non-dev counters, so dev counts were never shown and the non-dev counts were printed twice.
+- `synapps:discover` no longer runs a bare `composer update`. It now updates only the packages whose constraint it just added or raised (`composer update <packages> --with-all-dependencies`), so an unrelated lock inconsistency can no longer fail the run after Composer has started deleting packages from `vendor/`.
+- `synapps:discover` runs `composer dump-autoload` — not `composer update` — when the only change is a removed module's PSR-4 namespace.
+- `synapps:discover` compares Composer constraints on their parsed lower bound instead of comparing the constraint strings, so compound constraints (`>=1.0`, `^1.0|^2.0`) order correctly. A module's branch constraint (`dev-main`, `@dev`) no longer overwrites a stable constraint in the host's `composer.json`; it warns and leaves it alone.
+- `synapps:discover` runs `composer`/`npm` through Laravel's `Process` facade instead of `exec()`, so their output is shown, a non-zero exit is reported with the failing command and a recovery hint, and the command exits non-zero.
+
 ## [3.8.1] - 2026-10-30
 
 ### Fixed

@@ -117,7 +117,7 @@ Critical command that:
 3. Aggregates dependencies from all modules
 4. Smart merges using semver (only upgrades)
 5. Updates `composer.json` and `package.json`
-6. Runs `composer dump-autoload` / `composer update` / `npm install` as needed
+6. Runs `composer update <changed packages> --with-all-dependencies` (never a bare `composer update`), or `composer dump-autoload` when only the autoload map changed, plus `npm install` / `npm run build` when `package.json` changed — all through the `Process` facade, reporting a non-zero exit and failing the command
 
 **Run after:** Creating modules, modifying `module.json`, changing dependencies
 
@@ -717,10 +717,6 @@ $breadcrumbs = Breadcrumbs::make('Home', '/')
 - `synapps_path($path)` - Absolute path to synapps
 - `template_assets($folder, $file)` - Template asset URL
 - `DS` - Directory separator constant
-
-**Array:**
-- `recuresive_array_merge(array $a1, array $a2)` - Deep merge
-- `array_is_list(array $arr)` - Check if sequential
 
 **Routing:**
 - `is_route($name, $class = 'active')` - Check current route

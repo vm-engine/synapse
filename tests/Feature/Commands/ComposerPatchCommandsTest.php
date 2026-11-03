@@ -168,3 +168,40 @@ it('deep merges nested arrays', function () {
     expect($patchedComposer['autoload']['psr-4'])->toHaveKey('App\\');
     expect($patchedComposer['autoload']['psr-4'])->toHaveKey('Tests\\');
 });
+
+it('appends list entries instead of merging them by index', function () {
+    File::put($this->composerPath, json_encode([
+        'repositories' => [
+            ['type' => 'vcs', 'url' => 'https://github.com/vm-engine/synmod-region'],
+            ['type' => 'vcs', 'url' => 'https://github.com/vm-engine/synapse'],
+        ],
+    ], JSON_PRETTY_PRINT));
+
+    File::put($this->composerLocalPath, json_encode([
+        'repositories' => [
+            ['type' => 'path', 'url' => './packages/synmod-crm', 'options' => ['symlink' => true]],
+        ],
+    ], JSON_PRETTY_PRINT));
+
+    $this->artisan('synapse:patch-composer')->assertExitCode(0);
+
+    $repositories = json_decode(File::get($this->composerPath), true)['repositories'];
+
+    expect($repositories)->toHaveCount(3)
+        ->and($repositories[0])->toBe(['type' => 'vcs', 'url' => 'https://github.com/vm-engine/synmod-region'])
+        ->and($repositories[2])->toBe(['type' => 'path', 'url' => './packages/synmod-crm', 'options' => ['symlink' => true]]);
+});
+
+it('does not duplicate list entries when re-patched', function () {
+    File::put($this->composerPath, json_encode([
+        'repositories' => [['type' => 'path', 'url' => './packages/synmod-crm']],
+    ], JSON_PRETTY_PRINT));
+
+    File::put($this->composerLocalPath, json_encode([
+        'repositories' => [['type' => 'path', 'url' => './packages/synmod-crm']],
+    ], JSON_PRETTY_PRINT));
+
+    $this->artisan('synapse:patch-composer')->assertExitCode(0);
+
+    expect(json_decode(File::get($this->composerPath), true)['repositories'])->toHaveCount(1);
+});

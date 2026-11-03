@@ -108,9 +108,10 @@ php artisan synapps:discover
 1. Scans `synapps/modules/` and `vendor/*/synmod-*` for `module.json` files
 2. Generates PSR-4 autoload namespaces in `composer.json` (3 per module: App, Seeders, Factories)
 3. Aggregates npm/composer dependencies from all modules
-4. Smart merges dependencies using semver (only upgrades versions)
-5. Runs `composer dump-autoload` or `composer update` as needed
-6. Runs `npm install` if package.json changed
+4. Smart merges dependencies using semver (only upgrades versions). Composer constraints are compared on their parsed lower bound; a module's branch constraint (`dev-main`, `@dev`) never overwrites a stable constraint in your `composer.json` — it warns instead
+5. Runs `composer update <only the packages whose constraint changed> --with-all-dependencies`, or `composer dump-autoload` when nothing but the autoload map changed. It never runs a bare `composer update`
+6. Runs `npm install` if `package.json` changed, then `npm run build`
+7. Reports any `composer`/`npm` command that exited non-zero and exits non-zero itself. The manifests are **not** rolled back — if `vendor/` is left incomplete, run `composer install --no-scripts` and re-link any vendor package you keep as a symlink
 
 ### When to run
 

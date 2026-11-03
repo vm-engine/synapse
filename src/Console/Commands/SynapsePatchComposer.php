@@ -122,11 +122,33 @@ class SynapsePatchComposer extends Command
     {
         foreach ($override as $key => $value) {
             if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
-                // If both are arrays, merge recursively
-                $base[$key] = $this->deepMerge($base[$key], $value);
+                // JSON lists (repositories, autoload.classmap, ...) carry no meaningful
+                // keys: merging them by numeric index would overwrite the entry that
+                // happens to sit at the same position instead of adding a new one.
+                $base[$key] = array_is_list($base[$key]) && array_is_list($value)
+                    ? $this->appendMissing($base[$key], $value)
+                    : $this->deepMerge($base[$key], $value);
             } else {
                 // Otherwise, override the value
                 $base[$key] = $value;
+            }
+        }
+
+        return $base;
+    }
+
+    /**
+     * Append the override list's entries to the base list, skipping exact duplicates.
+     *
+     * @param  list<mixed>  $base
+     * @param  list<mixed>  $override
+     * @return list<mixed>
+     */
+    private function appendMissing(array $base, array $override): array
+    {
+        foreach ($override as $value) {
+            if (! in_array($value, $base, true)) {
+                $base[] = $value;
             }
         }
 
