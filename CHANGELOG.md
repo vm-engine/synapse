@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.3] - 2026-11-04
+
+### Fixed
+- `synapps/config/compiled/checksum` is no longer documented in `CLAUDE.md` or `docs/CONFIGURATION.md`. The config generators stopped writing that file before 3.x, so a scaffolded module test asserting it exists (as the `home` stub's `ConfigTest` once did) failed against a correctly compiled project.
+- `SynAppsDiscoverComposerTest` restores the application's original base path in `afterEach` and creates its sandbox through the `File` facade, matching the sandbox convention the other command tests use. The old version pointed the app at a throwaway directory and never pointed it back, so under `pest --parallel` a later test in the same process could inherit the deleted path.
+
 ## [3.8.2] - 2026-11-03
 
 ### Fixed

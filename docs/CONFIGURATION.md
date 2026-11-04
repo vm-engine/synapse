@@ -416,7 +416,6 @@ Generated in `synapps/config/compiled/`:
 | `apps.json` | Compiled application configuration |
 | `modules.json` | Compiled module configuration with discovery |
 | `binding.json` | Service container bindings |
-| `checksum` | Configuration hash for cache validation |
 
 ### Override Configuration Files
 

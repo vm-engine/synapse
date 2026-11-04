@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Str;
 use VmEngine\Synapse\Console\Commands\SynAppsConfig;
 
 /**
@@ -52,9 +51,7 @@ function writeDiscoverableModule(
 ): string {
     $path = base_path('synapps/modules/discover-test-'.$id);
 
-    if (! is_dir($path)) {
-        mkdir($path, 0755, true);
-    }
+    File::ensureDirectoryExists($path);
 
     file_put_contents($path.'/module.json', json_encode([
         'id' => 'discover_test_'.str_replace('-', '_', $id),
@@ -72,13 +69,14 @@ function writeDiscoverableModule(
 beforeEach(function () {
     Process::fake();
 
-    // A private base path per test: synapps:discover rewrites base_path('composer.json'),
-    // which ComposerPatchCommandsTest also owns in the shared Testbench skeleton. Pointing
-    // the app at a throwaway directory keeps both files safe under `pest --parallel`.
-    $this->basePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'synapps-discover-'.Str::random(12);
-    mkdir($this->basePath.'/synapps/config', 0755, true);
-    mkdir($this->basePath.'/synapps/modules', 0755, true);
-    $this->app->setBasePath($this->basePath);
+    // A private base path: synapps:discover rewrites base_path('composer.json'), which
+    // ComposerPatchCommandsTest also owns in the shared Testbench skeleton, and test files
+    // run side by side under --parallel.
+    $this->originalBasePath = base_path();
+    $this->sandbox = sys_get_temp_dir().'/synapse-discover-'.bin2hex(random_bytes(6));
+    File::ensureDirectoryExists($this->sandbox.'/synapps/config');
+    File::ensureDirectoryExists($this->sandbox.'/synapps/modules');
+    app()->setBasePath($this->sandbox);
 
     writeRootComposerJson();
     file_put_contents(base_path('package.json'), json_encode(['dependencies' => new stdClass]));
@@ -102,7 +100,8 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    (new Filesystem)->deleteDirectory($this->basePath);
+    app()->setBasePath($this->originalBasePath);
+    File::deleteDirectory($this->sandbox);
 });
 
 test('a new module dependency triggers a targeted composer update, never a bare one', function () {

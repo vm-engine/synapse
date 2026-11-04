@@ -334,7 +334,6 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 
 *Compiled:*
 - `synapps/config/compiled/{apps,modules,binding}.json`
-- `synapps/config/compiled/checksum` - Config hash
 
 ### Module Discovery Flow
 
