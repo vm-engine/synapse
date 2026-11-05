@@ -139,6 +139,8 @@ Date picker using Flatpickr:
 **Props:**
 - `flatpickr` (string, default: '{}') - JSON configuration for Flatpickr
 
+All other attributes (`wire:model`, `id`, `class`, …) pass through to the `<input>`. Inside an `<x-synapse-field>` the input also picks up the field's error/hint description and invalid/required state through `@aware`, so the call site writes no aria.
+
 ---
 
 ### Field
@@ -156,10 +158,24 @@ Label, wire-bound input and its error/hint in a `form-box`, linked for screen re
     <select class="form-input @error('form.group_id') has-error @enderror" id="f-form-group_id" wire:model="form.group_id">…</select>
 </x-synapse-field>
 
-{{-- A control that is not labelable (a div, e.g. adv-select) cannot be named by `for`;
-     point it at the label's id instead --}}
-<x-synapse-field name="clientId" label="Client">
-    <x-synapse-adv-select aria-labelledby="f-clientId-label" wire-model="clientId" :options="$clients" />
+{{-- adv-select and datepicker take the aria wiring from the field themselves,
+     including the label's id (a div is not labelable, so `for` cannot name it) --}}
+<x-synapse-field name="clientId" label="Client" hint="Billing client">
+    <x-synapse-adv-select wire-model="clientId" :options="$clients" />
+</x-synapse-field>
+```
+
+**Slotted controls and aria.** The built-in branches wire `aria-describedby` (error and hint ids),
+`aria-invalid` and `aria-required` onto their own control. A slotted `<x-synapse-adv-select>` or
+`<x-synapse-datepicker>` gets the same wiring with nothing at the call site — both read the field's
+`$fieldAria` through `@aware`, and anything you pass explicitly still wins. Raw HTML in a slot cannot be
+reached by Blade, so write it there yourself:
+
+```blade
+<x-synapse-field name="code" label="Code" hint="Generated">
+    <input class="form-input @error('code') has-error @enderror" id="f-code" type="text"
+        aria-describedby="f-code-hint" @error('code') aria-invalid="true" aria-describedby="f-code-error f-code-hint" @enderror
+        wire:model="code">
 </x-synapse-field>
 ```
 
@@ -578,10 +594,14 @@ Also closes on backdrop click, the close button, or Escape.
 | `name` | `modal` | Event suffix — open with `$dispatch('open-modal-{name}')`, close with `close-modal-{name}` (also closes on Escape) |
 | `max-width` | `xl` | Panel width |
 | `title` | — | Renders the `syn-modal-header` with the title and a close button (screen-reader label "Close"), and labels the dialog |
-| `labelledby` | — | Id of a heading the *content* renders. Labels the dialog (`role="dialog"`, `aria-labelledby`) without drawing a header — for a modal whose title lives in a child Livewire component |
+| `labelledby` | — | Id of a heading the *content* renders. Names the dialog (`aria-labelledby`) without drawing a header — for a modal whose title lives in a child Livewire component |
 | `footer` slot | — | Rendered in the `syn-modal-footer` action bar |
 
-Without `title`/`footer` the slot is rendered as is, so hand-written `syn-modal-header` / `syn-modal-footer` markup keeps working — give that heading an id and pass it as `labelledby` so the dialog is still announced as one.
+The panel is always `role="dialog" aria-modal="true"`, so a title-less modal is still announced as a dialog and still traps focus. Only its *name* depends on a heading: pass `title`, or `labelledby` pointing at a heading the content renders.
+
+Without `title`/`footer` the slot is rendered as is, so hand-written `syn-modal-header` / `syn-modal-footer` markup keeps working — give that heading an id and pass it as `labelledby` so the dialog is announced with a name.
+
+Note that pass-through `{{ $attributes }}` land on the outermost element (the one wrapping backdrop and container), not on the panel — `role`/`aria-*` cannot be forwarded to the panel that way, which is why `labelledby` exists.
 
 The `footer` slot is rendered by the component that writes the `<x-synapse-modal>` tag. When the modal holds a *child* Livewire form (`<x-synapse-modal><livewire:thing-form /></x-synapse-modal>`), a `wire:click` in that slot would call the **outer** component — keep such a form's own footer inside the child view and use `labelledby`.
 
@@ -840,6 +860,11 @@ The slot is the optional action. On filtered lists, show a "no results" title wi
 
 Renders a 10/15/25/50 page-size `<select>` bound to the host's `$perPage` (`wire:model.live="perPage"`) next to `$paginator->links()`. The host component must have a public `$perPage` property.
 
+| Prop | Default | Description |
+|---|---|---|
+| `paginator` | — | The paginator whose `links()` are rendered beside the selector |
+| `label` | `Per page` | Accessible name (`aria-label`) of the `<select>`; it has no visible label |
+
 ### Sort Icon
 
 ```blade
@@ -907,6 +932,7 @@ Supports:
 
 - The select box is a focusable `role="combobox"`: Enter, Space or ArrowDown opens it; in the dropdown, ArrowUp/ArrowDown move through the options, Enter picks one, and Escape closes it and returns focus to the box.
 - `id`, `aria-label`, `aria-labelledby` and `aria-describedby` are forwarded to the box. A `<label for>` cannot name a `div`, so name the select with `aria-labelledby` (pointing at the visible label's `id`) or `aria-label`.
+- Inside an `<x-synapse-field>` none of that is needed: the select reads the field's label id, error/hint description and invalid/required state through `@aware` and applies them itself. Anything you pass explicitly wins, and an explicit `aria-label` suppresses the field's label id.
 - In single-select mode the clear button sits beside the dropdown arrow, at the right edge of the box.
 
 ### Usage Examples

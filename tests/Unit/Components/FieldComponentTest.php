@@ -5,7 +5,9 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
+use VmEngine\Synapse\Components\AdvSelect;
 use VmEngine\Synapse\Components\Currency;
+use VmEngine\Synapse\Components\Datepicker;
 use VmEngine\Synapse\Components\Field;
 
 describe('Field Component', function () {
@@ -15,6 +17,8 @@ describe('Field Component', function () {
         // field.blade.php references <x-synapse-currency>, which Blade resolves at compile time
         // whatever the runtime branch, so it must be registered here too.
         Blade::component(Currency::class, 'synapse-currency');
+        Blade::component(AdvSelect::class, 'synapse-adv-select');
+        Blade::component(Datepicker::class, 'synapse-datepicker');
         view()->share('errors', new ViewErrorBag);
     });
 
@@ -112,6 +116,67 @@ describe('Field Component', function () {
             ->toMatch('/<textarea[^>]*wire:model="notes"/')
             ->toContain('aria-describedby="f-notes-hint"')
             ->not->toContain('<input');
+    });
+
+    it('exposes the aria wiring for slotted controls to consume', function () {
+        $errors = (new ViewErrorBag)->put('default', new MessageBag(['amount' => ['Too small']]));
+        view()->share('errors', $errors);
+
+        $field = new Field(name: 'amount', label: 'Nominal', hint: 'Minimal', required: true);
+
+        expect($field->fieldAria)->toBe([
+            'aria-labelledby' => 'f-amount-label',
+            'aria-describedby' => 'f-amount-error f-amount-hint',
+            'aria-invalid' => 'true',
+            'aria-required' => 'true',
+        ]);
+    });
+
+    it('leaves out the aria it has nothing to point at', function () {
+        expect((new Field(name: 'amount', label: 'Nominal'))->fieldAria)
+            ->toBe(['aria-labelledby' => 'f-amount-label']);
+    });
+
+    it('wires a slotted adv-select to the label, error and hint with no call-site aria', function () {
+        $errors = (new ViewErrorBag)->put('default', new MessageBag(['clientId' => ['Pick one']]));
+        view()->share('errors', $errors);
+
+        $html = Blade::render(
+            '<x-synapse-field name="clientId" label="Client" hint="Billing" required>'
+            .'<x-synapse-adv-select wire-model="clientId" />'
+            .'</x-synapse-field>'
+        );
+
+        expect($html)->toContain('aria-labelledby="f-clientId-label"')
+            ->toContain('aria-describedby="f-clientId-error f-clientId-hint"')
+            ->toContain('aria-invalid="true"')
+            ->toContain('aria-required="true"');
+    });
+
+    it('lets a slotted control override the aria the field supplies', function () {
+        $html = Blade::render(
+            '<x-synapse-field name="clientId" label="Client">'
+            .'<x-synapse-adv-select wire-model="clientId" aria-label="Pick a client" />'
+            .'</x-synapse-field>'
+        );
+
+        expect($html)->toContain('aria-label="Pick a client"')
+            ->not->toContain('aria-labelledby');
+    });
+
+    it('wires a slotted datepicker to the error with no call-site aria', function () {
+        $errors = (new ViewErrorBag)->put('default', new MessageBag(['dueAt' => ['Required']]));
+        view()->share('errors', $errors);
+
+        $html = Blade::render(
+            '<x-synapse-field name="dueAt" label="Due">'
+            .'<x-synapse-datepicker wire:model="dueAt" />'
+            .'</x-synapse-field>'
+        );
+
+        expect($html)->toMatch('/<input[^>]*aria-describedby="f-dueAt-error"/')
+            ->toMatch('/<input[^>]*aria-invalid="true"/')
+            ->toMatch('/<input[^>]*class="form-input"/');
     });
 
     it('styles the hint with the form-help class', function () {

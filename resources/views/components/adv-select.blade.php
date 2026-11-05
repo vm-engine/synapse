@@ -1,3 +1,4 @@
+@aware(['fieldAria' => []])
 {{--
 ====================================================================
   <x-adv-select> — Advanced Select Component (Livewire + Alpine.js)
@@ -150,7 +151,11 @@ focusInput() is a no-op while disabled).
         role="combobox"
         aria-haspopup="listbox"
         x-ref="box"
-        {{ $attributes->only(['id', 'aria-label', 'aria-labelledby', 'aria-describedby']) }}
+        {{-- $fieldAria: wiring from a wrapping <x-synapse-field> (label id, error/hint
+             description, invalid/required state). Explicit attributes win; the
+             field's label id is dropped when the caller gave an aria-label. --}}
+        {{ $attributes->only(['id', 'aria-label', 'aria-labelledby', 'aria-describedby'])
+            ->merge($attributes->has('aria-label') ? array_diff_key($fieldAria, ['aria-labelledby' => '']) : $fieldAria) }}
         :class="{ 'is-open': open, 'is-disabled': disabled }"
         :aria-disabled="disabled"
         :aria-expanded="open ? 'true' : 'false'"

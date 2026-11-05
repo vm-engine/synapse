@@ -54,7 +54,11 @@
     >
         <div
             class="syn-modal-panel {{ $maxWidthClass }}"
-            @if ($title || $labelledby) role="dialog" aria-modal="true" aria-labelledby="{{ $labelledby ?? 'modal-'.$name.'-title' }}" @endif
+            role="dialog"
+            aria-modal="true"
+            {{-- Named only when a heading exists to point at: the header this draws,
+                 or one the content renders and names through `labelledby`. --}}
+            @if ($title || $labelledby) aria-labelledby="{{ $labelledby ?? 'modal-'.$name.'-title' }}" @endif
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.4] - 2026-11-05
+
+### Fixed
+- `<x-synapse-field>`: a slotted control now gets the field's aria wiring. The slot branch forwarded none of it, so every field wrapping a select, datepicker or adv-select — the majority of real usage — had only `<label for>` and no error association. The component exposes the wiring as `$fieldAria` (label id, `aria-describedby` for the error/hint ids, `aria-invalid`, `aria-required`), and `<x-synapse-adv-select>` / `<x-synapse-datepicker>` read it through `@aware` and apply it themselves, so the call site writes no aria and an explicit attribute still wins. Raw HTML in a slot is out of Blade's reach and still writes its own; the component docblock and `docs/COMPONENTS.md` spell out that contract.
+- `<x-synapse-modal>`: the panel is always `role="dialog" aria-modal="true"`. Both were conditional on `title`, so a title-less modal — one whose header is owned by a nested Livewire form, a legitimate and common shape — was an unlabelled `<div>` with no dialog role. `aria-labelledby` is still emitted only when `title` or `labelledby` names a heading to point at.
+- `<x-synapse-per-page-selector>`: the page-size `<select>` has an accessible name (`aria-label`, defaulting to the translatable "Per page", overridable with the new `label` prop). It has no visible label, so it was an unlabelled control in every list using the component.
+
 ## [3.8.3] - 2026-11-04
 
 ### Fixed

@@ -19,6 +19,14 @@ describe('Modal Component', function () {
             ->not->toContain('syn-modal-footer');
     });
 
+    it('marks the panel as a modal dialog even without a title', function () {
+        $html = Blade::render('<x-synapse-modal name="plain"><p>Body</p></x-synapse-modal>');
+
+        expect($html)->toMatch('/syn-modal-panel[^>]*role="dialog"/s')
+            ->toContain('aria-modal="true"')
+            ->not->toContain('aria-labelledby');
+    });
+
     it('renders a header with a labelled close button when a title is given', function () {
         $html = Blade::render('<x-synapse-modal name="edit" title="Edit group">Body</x-synapse-modal>');
 

@@ -9,9 +9,13 @@ use Illuminate\View\Component;
 
 class PerPageSelector extends Component
 {
-    /** @param  LengthAwarePaginator<int, mixed>  $paginator */
+    /**
+     * @param  LengthAwarePaginator<int, mixed>  $paginator
+     * @param  string|null  $label  Accessible name for the per-page <select> (default: "Per page").
+     */
     public function __construct(
         public LengthAwarePaginator $paginator,
+        public ?string $label = null,
     ) {}
 
     public function render()

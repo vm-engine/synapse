@@ -2,6 +2,7 @@
     <div class="flex-none p-1">
         <select
             class="syn-per-page-select"
+            aria-label="{{ $label ?? __('Per page') }}"
             wire:model.live="perPage"
         >
             <option value="10">10</option>

@@ -20,6 +20,9 @@
     - id (string): Input id (default: 'f-' + name with dots as dashes)
 
     Slot: replaces the default <input> (select, x-synapse-currency, datepicker…); give that control id="{{ $id }}".
+      x-synapse-adv-select and x-synapse-datepicker pick up the label/error/hint aria wiring themselves
+      (they read this component's $fieldAria through @aware). Raw HTML in a slot cannot, so write it there:
+      aria-describedby="{{ $id }}-error" (and/or "{{ $id }}-hint"), aria-invalid and aria-required.
 
     Usage:
     <x-synapse-field name="amount" label="Nominal" type="number" inputmode="decimal" hint="Minimal Rp10.000" required />
@@ -27,7 +30,7 @@
 @use('Illuminate\Support\ViewErrorBag')
 @php
     $errors ??= new ViewErrorBag();
-    $describedBy = trim(($errors->has($error) ? $id . '-error ' : '') . ($hint ? $id . '-hint' : ''));
+    $describedBy = $fieldAria['aria-describedby'] ?? '';
     $wireModel = 'wire:model' . ($modifier !== '' ? '.' . $modifier : '');
 @endphp
 {{-- only('class') before merge(): a bare merge() would also print pass-through

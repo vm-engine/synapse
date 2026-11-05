@@ -1,3 +1,4 @@
+@aware(['fieldAria' => []])
 <div
     class="input-group"
     wire:ignore
@@ -9,7 +10,8 @@
         @else
             x-data="synapseDatepicker(null, {{ $flatpickr }})"
         @endif
-        {{ $attributes->merge(['class' => 'form-input']) }}
+        {{-- $fieldAria: wiring from a wrapping <x-synapse-field>; explicit attributes win. --}}
+        {{ $attributes->merge(($attributes->has('aria-label') ? array_diff_key($fieldAria, ['aria-labelledby' => '']) : $fieldAria) + ['class' => 'form-input']) }}
     >
     <span class="input-group-item right pointer-events-none">
         <svg
