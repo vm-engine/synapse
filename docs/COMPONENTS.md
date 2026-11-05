@@ -2,6 +2,16 @@
 
 Synapse provides pre-built Blade components for common UI patterns. All components use the `synapse::` namespace.
 
+## Component Text and Translations
+
+The text these components emit themselves — `Close`, `Clear selection`, `No results found.`, `Per page`, the notifications panel, the calendar, the search palette — **is already translated into Indonesian by the package**, in `lang/id.json`, loaded through `loadJsonTranslationsFrom()` in `SynapseServiceProvider::register()`.
+
+Do not re-declare those keys in your app. A host app's `lang/{locale}.json` takes precedence over a package's, so an app-level copy silently overrides the package's wording — with no error, and no sign anything is being shadowed until someone diffs the two files. One project had reimplemented 20 of these keys and was quietly replacing two of them with different wording. Check `vendor/vm-engine/synapse/lang/id.json` before adding any key of your own.
+
+Add an app-level entry only to *deliberately* reword a string. If a key is missing or wrong in the package, fix it there — `tests/Unit/TranslationsTest.php` fails if any bare `__('…')` key the package emits has no `id.json` entry, so a gap is a package bug, not something for every app to patch around.
+
+Strings you pass in as props (`title`, `label`, `placeholder`, …) are yours to translate; only the components' built-in text comes from the package.
+
 ## Form Components
 
 ### Checkboxes

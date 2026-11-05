@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.5] - 2026-11-05
+
+### Fixed
+- `lang/id.json` gains the three keys the package emitted but never translated: `Per page` (the per-page selector's `aria-label`, added in 3.8.4), and `Copied` / `Copy failed` (`<x-synapse-copy-button>`'s feedback, missing since the component landed). The app locale on Synapse projects is `id` with no English fallback, so an untranslated key renders as the key itself — the per-page selector's accessible name read "Per page" to an Indonesian screen-reader user, which made the 3.8.4 fix useless to them.
+- A test now asserts that every bare `__('…')` key the package's own views and classes emit has an entry in `lang/id.json`, so a new untranslated string fails the suite instead of shipping. It walks all 243 files under `resources/views/` and `src/` recursively; namespaced keys (`module::group.key`) are the consuming module's to translate and are skipped.
+
+### Documentation
+- `docs/COMPONENTS.md` opens with a note that the package already translates its components' own text in `lang/id.json`, and that a host app's `lang/{locale}.json` silently overrides it. Nothing documented this before, so projects had no way to know the keys existed; one had reimplemented 20 of them and was shadowing the package's wording in two places with no error to show it.
+
 ## [3.8.4] - 2026-11-05
 
 ### Fixed
