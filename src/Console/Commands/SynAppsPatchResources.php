@@ -15,7 +15,8 @@ class SynAppsPatchResources extends Command
      * @var string
      */
     protected $signature = 'synapps:patch
-        {object?* : Resource(s) to patch — theme, seeder, css, npm, js, vite, layouts, tests. Omit to patch everything.}';
+        {object?* : Resource(s) to patch — theme, seeder, css, npm, js, vite, layouts, tests. Omit to patch everything.}
+        {--force : Reinstall the package-owned stub files (synapse-components.js/css) even if they already exist; the current file is kept as .bak and host-owned entry points are never overwritten. For a broad stub refresh of whole directories use synapps:copy-resources instead.}';
 
     /**
      * The console command description.
@@ -87,6 +88,13 @@ class SynAppsPatchResources extends Command
 
         if ($wants('layouts')) {
             $patches = array_merge($patches, $this->patchSplitLayouts());
+        } elseif ($this->option('force')) {
+            // --force names the two package-owned files, which happen to live in the `layouts`
+            // subset. Honour it whatever object was given, so `synapps:patch js --force` does
+            // what it reads like instead of reinstalling nothing. The rest of the layouts
+            // subset still belongs to a `layouts` run.
+            $patches['synapps/resources/js — synapse-components.js'] = $this->installComponentsJs();
+            $patches['synapps/resources/css — synapse-components.css'] = $this->migrateLtaCssToComponentsCss();
         }
 
         if ($wants('tests')) {
@@ -98,7 +106,27 @@ class SynAppsPatchResources extends Command
                 $this->components->info("Patched: {$label}");
             }
         }
+
+        if ($this->option('force')) {
+            $this->components->warn(
+                '--force covers package-owned files only. Left untouched: '
+                .implode(', ', self::HOST_OWNED_FILES)
+            );
+            $this->components->info('Run `npm run build` to pick up the reinstalled assets.');
+        }
     }
+
+    /**
+     * Entry points the host authors and --force must never overwrite — a host's @source
+     * directives, Vite inputs and global JS helpers live in these.
+     *
+     * @var array<int, string>
+     */
+    private const HOST_OWNED_FILES = [
+        'resources/css/{base,app,frontend,guest}.css',
+        'resources/js/{base,app,frontend,guest}.js',
+        'vite.config.js',
+    ];
 
     // ─── Per-layout CSS/JS split ──────────────────────────────────────────────
 
@@ -557,11 +585,12 @@ class SynAppsPatchResources extends Command
         $componentsPath = $cssDir.'/synapse-components.css';
         $patched = false;
 
-        if (! file_exists($ltaPath) && file_exists($componentsPath)) {
+        if (! file_exists($ltaPath) && file_exists($componentsPath) && ! $this->option('force')) {
             return false;
         }
 
-        if (! file_exists($componentsPath)) {
+        if (! file_exists($componentsPath) || $this->option('force')) {
+            $this->createBackup($componentsPath);
             $stubPath = __DIR__.'/../../../stubs/synapps/resources/css/synapse-components.css';
             file_put_contents($componentsPath, $this->readFile($stubPath));
             $patched = true;
@@ -608,7 +637,8 @@ class SynAppsPatchResources extends Command
         $synappsJsPath = $jsDir.'/synapps.js';
         $patched = false;
 
-        if (! file_exists($componentsPath)) {
+        if (! file_exists($componentsPath) || $this->option('force')) {
+            $this->createBackup($componentsPath);
             $stubPath = __DIR__.'/../../../stubs/synapps/resources/js/synapse-components.js';
             file_put_contents($componentsPath, $this->readFile($stubPath));
             $patched = true;

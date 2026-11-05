@@ -241,6 +241,79 @@ test('leaves an existing synapse-components.js and import alone', function () {
         ->and(File::get($jsDir.'/synapps.js'))->toBe("import './synapse-components.js';\n");
 });
 
+// ─── --force (package-owned stub files only) ──────────────────────────────────
+
+test('--force reinstalls synapse-components.js and keeps the previous file as .bak', function () {
+    $jsDir = base_path('synapps/resources/js');
+    File::put($jsDir.'/synapse-components.js', "/* customised */\n");
+    File::put($jsDir.'/synapps.js', "import './synapse-components.js';\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts'], '--force' => true]);
+
+    expect(File::get($jsDir.'/synapse-components.js'))->toContain("Alpine.data('synapseDatepicker'")
+        ->and(File::get($jsDir.'/synapse-components.js.bak'))->toBe("/* customised */\n");
+});
+
+test('--force reinstalls synapse-components.css and keeps the previous file as .bak', function () {
+    $cssDir = base_path('synapps/resources/css');
+    File::put($cssDir.'/synapse-components.css', "/* customised */\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts'], '--force' => true]);
+
+    expect(File::get($cssDir.'/synapse-components.css'))->toContain('.flatpickr-')
+        ->and(File::get($cssDir.'/synapse-components.css.bak'))->toBe("/* customised */\n");
+});
+
+// A repeat --force replaces package content with package content, so the .bak deliberately
+// stays pinned to the host's own copy rather than tracking the last forced write.
+test('a second --force leaves the original .bak in place', function () {
+    $jsDir = base_path('synapps/resources/js');
+    File::put($jsDir.'/synapse-components.js', "/* customised */\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts'], '--force' => true]);
+    $this->artisan('synapps:patch', ['object' => ['layouts'], '--force' => true]);
+
+    expect(File::get($jsDir.'/synapse-components.js.bak'))->toBe("/* customised */\n");
+});
+
+// --force names the two package-owned files, which live in the `layouts` subset. A user
+// reaching for them is as likely to type `patch js --force`, so the flag has to apply
+// whatever object was named rather than silently reinstalling nothing.
+test('--force reinstalls the component files even when another object is named', function () {
+    $jsDir = base_path('synapps/resources/js');
+    $cssDir = base_path('synapps/resources/css');
+    File::put($jsDir.'/synapse-components.js', "/* customised */\n");
+    File::put($cssDir.'/synapse-components.css', "/* customised */\n");
+
+    $this->artisan('synapps:patch', ['object' => ['js'], '--force' => true]);
+
+    expect(File::get($jsDir.'/synapse-components.js'))->toContain("Alpine.data('synapseDatepicker'")
+        ->and(File::get($jsDir.'/synapse-components.js.bak'))->toBe("/* customised */\n")
+        ->and(File::get($cssDir.'/synapse-components.css'))->toContain('.flatpickr-')
+        ->and(File::get($cssDir.'/synapse-components.css.bak'))->toBe("/* customised */\n");
+});
+
+// The named object still decides everything else: `js --force` must not create the layout
+// entry files, which only a `layouts` run owns.
+test('--force does not pull in the rest of the layouts subset', function () {
+    $this->artisan('synapps:patch', ['object' => ['js'], '--force' => true]);
+
+    expect(File::exists(base_path('synapps/resources/css/synapps-base.css')))->toBeFalse()
+        ->and(File::exists(resource_path('css/base.css')))->toBeFalse();
+});
+
+test('--force does not overwrite host-owned entry points', function () {
+    File::put(resource_path('css/base.css'), "/* host base */\n");
+    File::put(resource_path('js/base.js'), "/* host base */\n");
+    File::put(base_path('vite.config.js'), "/* host vite */\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts'], '--force' => true]);
+
+    expect(File::get(resource_path('css/base.css')))->toBe("/* host base */\n")
+        ->and(File::get(resource_path('js/base.js')))->toBe("/* host base */\n")
+        ->and(File::get(base_path('vite.config.js')))->toBe("/* host vite */\n");
+});
+
 // ─── createBaseJs / rewriteAppJsToFocused ─────────────────────────────────────
 
 test('creates base.js from monolith app.js and rewrites app.js', function () {

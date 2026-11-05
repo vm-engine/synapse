@@ -913,6 +913,35 @@ describe('StatTile Component', function () {
         expect($component->valueColor)->toBe('red');
     });
 
+    it('renders a zero value, which is data and not absence', function () {
+        $tile = Blade::render('<x-synapse-stat-tile label="Pending" :value="0" />');
+        $card = Blade::render('<x-synapse-stat-tile variant="card" label="Pending" :value="0" sublabel="0" />');
+        $string = Blade::render('<x-synapse-stat-tile label="Pending" value="0" />');
+
+        expect($tile)->toContain('syn-stat-tile-value')->toContain('0')
+            ->and($card)->toContain('syn-stat-tile-card-value')->toContain('syn-stat-tile-card-sublabel')
+            ->and($string)->toContain('syn-stat-tile-value');
+    });
+
+    it('still treats null and an empty string as absent', function () {
+        $null = Blade::render('<x-synapse-stat-tile label="Pending" :value="null" />');
+        $empty = Blade::render('<x-synapse-stat-tile label="Pending" value="" />');
+
+        expect($null)->not->toContain('syn-stat-tile-value')
+            ->and($empty)->not->toContain('syn-stat-tile-value');
+    });
+
+    it('passes attributes through to the root of the tile variant, as the card variant does', function () {
+        $tile = Blade::render('<x-synapse-stat-tile label="Pending" value="3" class="ring-2" wire:key="k-1" data-filter="pending" />');
+        $card = Blade::render('<x-synapse-stat-tile variant="card" label="Pending" value="3" class="ring-2" wire:key="k-1" />');
+
+        expect($tile)->toContain('ring-2')
+            ->toContain('wire:key="k-1"')
+            ->toContain('data-filter="pending"')
+            ->toContain('syn-stat-tile-bordered')
+            ->and($card)->toContain('ring-2')->toContain('wire:key="k-1"');
+    });
+
     it('renders the icon square only when an icon is given', function () {
         $withIcon = Blade::render('<x-synapse-stat-tile icon="fa-solid fa-file-invoice" color="blue" label="Total Invoices" value="2.613" />');
         $withoutIcon = Blade::render('<x-synapse-stat-tile label="Status" :bordered="false" />');

@@ -152,6 +152,45 @@ php artisan synapps:patch theme vite
 | `layouts` | Per-layout CSS/JS split only (see below) |
 | `tests` | Testing infrastructure only (see below) |
 
+### `--force` — reinstalling the package-owned files
+
+Most of this command's file creations are skip-if-exists: both
+`synapps/resources/js/synapse-components.js` and `synapps/resources/css/synapse-components.css`
+are copied once and then left alone forever, so a fix shipped in the package's Alpine or
+component CSS never arrives through the command that installed them.
+
+> **Overlaps with `synapps:copy-resources`.** `copy-resources --js --css --force` also replaces
+> these two files, and is the right tool for a broad "give me the current stubs" refresh during
+> an upgrade. It copies whole stub directories, so asking it for the components file also rewrites
+> `synapps.js`, `synapse-rte.js`, `sb-admin-2.min.js` and `synapps.css`, and it writes no backup.
+> Use `patch --force` when you want only the component files and a way back.
+
+`--force` reinstalls exactly those two files from the current package stubs:
+
+```bash
+php artisan synapps:patch --force        # both files
+php artisan synapps:patch js --force     # same two files — --force ignores the object filter
+npm run build                            # required — these are bundled assets
+```
+
+`--force` applies to those two files whatever object you name, so you do not have to know that
+they happen to live in the `layouts` subset. The named object still decides everything else: the
+command above forces the component files and patches `resources/js/app.js`, and creates none of
+the layout entry files.
+
+The previous file is kept as `.bak` next to it. That backup is written **once**, so it stays
+pinned to the project's own copy rather than tracking the last forced write — a later `--force`
+replaces package content with package content, where there is nothing to preserve.
+
+`--force` does **not** touch the host-owned entry points, even though they are also
+skip-if-exists: `resources/css/{base,app,frontend,guest}.css`, `resources/js/{base,app,frontend,guest}.js`
+and `vite.config.js` hold your `@source` directives, Vite inputs and global JS helpers. The
+command prints this list on every forced run.
+
+If you customised `synapse-components.js` in place, diff it against the `.bak` after forcing and
+re-apply your changes — ideally as a separate file imported from `synapps.js`, so the next
+`--force` costs nothing.
+
 ### What it does (no arguments — full run)
 
 1. **Base synapps imports** — adds `import '../../synapps/resources/js/synapps.js';` to `resources/js/app.js` and `@import '../../synapps/resources/css/synapps.css';` to `resources/css/app.css`
@@ -459,6 +498,14 @@ Re-copy the stub layouts (incl. nav components), CSS, JS and static assets, or t
 `copy-resources` **merges**: it replaces the files the stubs ship and leaves every other file alone. That matters because `synapps/resources/css` and `/js` also hold host-only files — the per-layout `synapps-{app,base,frontend,guest}.css/.js` entry points that `synapps:patch` creates and Vite builds from. A file the stubs no longer ship is therefore left behind rather than removed; delete the directory yourself first if you want a clean reset.
 
 `copy-themes --force` is different: it resets each named theme directory wholesale, so files you added inside a bundled theme are removed.
+
+**Granularity warning.** `copy-resources` is directory-granular and keeps **no backup**. `--js`
+rewrites all four JS stubs (`synapps.js`, `synapse-components.js`, `synapse-rte.js`,
+`sb-admin-2.min.js`) and `--css` rewrites `synapps.css` as well as `synapse-components.css` —
+including files the stubs ship but you may have edited in place, and including ones you did not
+have before (a project predating `synapse-rte.js` gains it). If you only want the component
+files refreshed, and want the previous version kept as `.bak`, use
+[`synapps:patch --force`](#synappspatch) instead.
 
 ---
 

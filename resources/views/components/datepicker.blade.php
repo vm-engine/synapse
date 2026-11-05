@@ -6,9 +6,9 @@
     <input
         type="text"
         @if ($attributes->wire('model')->value())
-            x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'){{ $attributes->wire('model')->hasModifier('live') ? '.live' : '' }}, {{ $flatpickr }})"
+            x-data="synapseDatepicker($wire.entangle('{{ $attributes->wire('model')->value() }}'){{ $attributes->wire('model')->hasModifier('live') ? '.live' : '' }}, {{ $flatpickr }}{{ $modeArgument }})"
         @else
-            x-data="synapseDatepicker(null, {{ $flatpickr }})"
+            x-data="synapseDatepicker(null, {{ $flatpickr }}{{ $modeArgument }})"
         @endif
         {{-- $fieldAria: wiring from a wrapping <x-synapse-field>; explicit attributes win. --}}
         {{ $attributes->merge(($attributes->has('aria-label') ? array_diff_key($fieldAria, ['aria-labelledby' => '']) : $fieldAria) + ['class' => 'form-input']) }}

@@ -16,6 +16,9 @@
     - color (string): Accent color — 'gray', 'blue', 'indigo', 'purple', 'red', 'orange', 'green' (default: 'gray')
     - label (string): Caption. Can be overridden with <x-slot:label>.
     - value (string): Already-formatted value (caller formats numbers/currency). Can be overridden with <x-slot:value>.
+      A zero renders: label/value/sublabel are tested with filled(), so 0 and "0" show and only
+      null/'' are treated as absent. Other attributes (class, wire:key, data-*, aria-*) reach the
+      root element in both variants.
     - valueColor (string): Value text color override, same palette as `color` (tile variant only)
     - bordered (bool): tile variant only — white card + border + rounded-xl (default) vs gray-50 flat + rounded-lg (false)
     - variant (string): 'tile' (default) or 'card'
@@ -72,13 +75,13 @@
             <div class="syn-stat-tile-card-row">
                 <div class="{{ $iconClass }}"><i class="{{ $icon }}"></i></div>
                 <div class="syn-stat-tile-card-body">
-                    @if ($label)
+                    @if (filled($label))
                         <div class="syn-stat-tile-card-title">{{ $label }}</div>
                     @endif
-                    @if ($value)
+                    @if (filled($value))
                         <div class="syn-stat-tile-card-value">{{ $value }}</div>
                     @endif
-                    @if ($sublabel)
+                    @if (filled($sublabel))
                         <div
                             class="syn-stat-tile-card-sublabel {{ $sublabelColor ? 'syn-stat-tile-value-' . $sublabelColor : '' }}">
                             {{ $sublabel }}
@@ -94,7 +97,7 @@
             @endif
 
             <div class="syn-stat-tile-card-header">
-                @if ($label)
+                @if (filled($label))
                     <div class="syn-stat-tile-card-title">{{ $label }}</div>
                 @endif
                 @if ($iconPosition === 'title' && $icon)
@@ -106,10 +109,10 @@
                 @endif
             </div>
 
-            @if ($value)
+            @if (filled($value))
                 <div class="syn-stat-tile-card-value">{{ $value }}</div>
             @endif
-            @if ($sublabel)
+            @if (filled($sublabel))
                 <div
                     class="syn-stat-tile-card-sublabel {{ $sublabelColor ? 'syn-stat-tile-value-' . $sublabelColor : '' }}">
                     {{ $sublabel }}
@@ -120,7 +123,11 @@
         @endif
         </{{ $tag }}>
     @else
-        <div class="syn-stat-tile {{ $bordered ? 'syn-stat-tile-bordered' : 'syn-stat-tile-flat' }}">
+        <div {{ $attributes->class([
+            'syn-stat-tile',
+            'syn-stat-tile-bordered' => $bordered,
+            'syn-stat-tile-flat' => ! $bordered,
+        ]) }}>
             @if ($icon)
                 <div
                     class="syn-stat-tile-icon syn-stat-tile-icon-{{ $color }} {{ $iconBackground ? '' : 'syn-stat-tile-icon-bare' }}">
@@ -129,11 +136,11 @@
             @endif
 
             <div class="syn-stat-tile-body">
-                @if ($label)
+                @if (filled($label))
                     <div class="syn-stat-tile-label">{{ $label }}</div>
                 @endif
 
-                @if ($value)
+                @if (filled($value))
                     <div class="syn-stat-tile-value {{ $valueColor ? 'syn-stat-tile-value-' . $valueColor : '' }}">
                         {{ $value }}
                     </div>

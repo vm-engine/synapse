@@ -14,6 +14,8 @@
  * Published by synapps:patch from vm-engine/synapse's stub; keep the two in sync.
  */
 import flatpickr from "flatpickr";
+import monthSelectPlugin from "flatpickr/dist/plugins/monthSelect";
+import "flatpickr/dist/plugins/monthSelect/style.css";
 
 // Livewire CSP build: assigning through $wire (e.g. the x-modelable="$wire.value"
 // binding Livewire adds to every #[Modelable] child) throws "properties[name] is
@@ -326,16 +328,31 @@ Alpine.data('synapseConfirmDialog', (defaults) => ({
 }));
 
 // <x-synapse-datepicker>
-Alpine.data('synapseDatepicker', (initialValue, flatpickrOptions) => ({
+// mode: 'date' (default) or 'month' — a year/month grid via flatpickr's monthSelect plugin,
+// formatted 'Y-m' so the submitted value matches what <input type="month"> would send.
+Alpine.data('synapseDatepicker', (initialValue, flatpickrOptions, mode = 'date') => ({
     flatpickrInstance: null,
     value: initialValue,
     init() {
-        this.flatpickrInstance = flatpickr(this.$el, Object.assign({}, flatpickrOptions, {
+        // Month defaults go first so a call-site :flatpickr dateFormat still wins.
+        const config = Object.assign({}, mode === 'month' ? { dateFormat: 'Y-m' } : {}, flatpickrOptions, {
             defaultDate: this.value || null,
             onChange: (selectedDates, dateStr, instance) => {
                 this.value = dateStr;
             }
-        }));
+        });
+
+        if (mode === 'month') {
+            // The plugin's dateFormat drives the input text while flatpickr's drives parsing,
+            // so it is built from the effective format rather than a second hardcoded 'Y-m'.
+            config.plugins = [monthSelectPlugin({
+                shorthand: false,
+                dateFormat: config.dateFormat,
+                altFormat: config.dateFormat,
+            })];
+        }
+
+        this.flatpickrInstance = flatpickr(this.$el, config);
         this.$watch('value', (val) => {
             if (this.flatpickrInstance && val !== this.flatpickrInstance.input
                 .value) {

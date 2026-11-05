@@ -240,6 +240,9 @@ focusInput() is a no-op while disabled).
             x-on:input.debounce.300ms="fetch()"
             x-on:keydown="handleKeydown($event)"
             placeholder="{{ $placeholder }}"
+            {{-- A placeholder is not an accessible name: this input sits inside the
+                 dropdown, so it needs its own, distinct from the combobox's. --}}
+            aria-label="{{ $searchLabel ?? __('Search') }}"
         />
 
         <template

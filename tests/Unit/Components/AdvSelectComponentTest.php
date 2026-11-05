@@ -14,6 +14,20 @@ function advSelectHtml(string $blade, array $data = []): string
 }
 
 describe('AdvSelect Component', function () {
+    it('names the dropdown filter input, which a placeholder does not do', function () {
+        $html = advSelectHtml('<x-synapse-adv-select wire-model="clientId" placeholder="Pilih klien" />');
+
+        expect($html)->toMatch('/<input[^>]*class="adv-select-input"[\s\S]*?aria-label="Search"/')
+            ->toContain('placeholder="Pilih klien"');
+    });
+
+    it('lets the caller rename the dropdown filter input', function () {
+        $html = advSelectHtml('<x-synapse-adv-select wire-model="clientId" search-label="Cari klien" />');
+
+        expect($html)->toContain('aria-label="Cari klien"')
+            ->not->toContain('aria-label="Search"');
+    });
+
     it('renders x-data as raw JSON literals, not JSON.parse(), for CSP-safe Alpine', function () {
         // SynapseViewServiceProvider (which registers <x-synapse-*> tags)
         // only boots when SynapseUtils::isSynAppsAutoloaded() is true, which

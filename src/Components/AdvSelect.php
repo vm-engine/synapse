@@ -27,6 +27,8 @@ class AdvSelect extends Component
         public bool $allowCreate = false,
         public bool $autoLoad = true,
         public bool $disabled = false,
+        /** Accessible name for the dropdown's filter input (default: "Search"). */
+        public ?string $searchLabel = null,
     ) {}
 
     public function render()

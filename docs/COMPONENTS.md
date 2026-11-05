@@ -141,13 +141,32 @@ Date picker using Flatpickr:
 ```blade
 <x-synapse-datepicker />
 
+<!-- Month/year only — replaces <input type="month"> -->
+<x-synapse-datepicker mode="month" wire:model.live="period" />
+
 <!-- With custom Flatpickr config -->
 <x-synapse-datepicker
     :flatpickr='{"dateFormat": "Y-m-d", "enableTime": true}' />
+
+<!-- Date + time, and time only (verified round-tripping through wire:model) -->
+<x-synapse-datepicker
+    :flatpickr="json_encode(['enableTime' => true, 'dateFormat' => 'Y-m-d H:i', 'time_24hr' => true])" />
+<x-synapse-datepicker
+    :flatpickr="json_encode(['noCalendar' => true, 'enableTime' => true, 'dateFormat' => 'H:i'])" />
 ```
 
 **Props:**
 - `flatpickr` (string, default: '{}') - JSON configuration for Flatpickr
+- `mode` (string, default: 'date') - `'month'` renders a year/month grid (Flatpickr's `monthSelect`
+  plugin) and formats as `Y-m`, matching what `<input type="month">` submits, so an existing
+  `wire:model` value and `date_format:Y-m` validation need no change. Any other value is treated as
+  `'date'`. A `dateFormat` in `flatpickr` still wins and applies to both the grid and the input text.
+
+`mode="month"` needs the Alpine side of the package in the host app, and
+`synapps/resources/js/synapse-components.js` is only *created* by `synapps:patch`, never updated by it.
+Refresh it with `php artisan synapps:patch --force` (that file and `synapse-components.css` only, previous
+version kept as `.bak`), then `npm run build`. `synapps:copy-resources --js --force` also replaces it, but
+copies the whole stub directory and keeps no backup — see docs/COMMANDS.md.
 
 All other attributes (`wire:model`, `id`, `class`, …) pass through to the `<input>`. Inside an `<x-synapse-field>` the input also picks up the field's error/hint description and invalid/required state through `@aware`, so the call site writes no aria.
 
