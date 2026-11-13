@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.10.0] - 2026-11-13
+
+### Added
+- Indonesian validation, auth, password and pagination messages ship with the package: `lang/id/{validation,auth,passwords,pagination}.php`, with a `validation.attributes` map for field names shared across modules. Laravel ships these in English only and Synapse apps run with `APP_FALLBACK_LOCALE=id`, so every project had to keep its own `lang/id/validation.php` — and `auth.failed`, `passwords.sent` and the pagination labels rendered as raw keys in projects that had not written theirs. `SynapseLangServiceProvider` (which already owns the translator, but had only commented-out code) now looks group files up in the framework's English, then Synapse's `lang/`, then the project's `lang/`, each overriding the previous key by key — so a project overrides one message by writing only that key. Tests check the lookup order, that every shipped file has every framework key with the same `:placeholders`, and that a project override wins while the rest still comes from Synapse. **Upgrading:** a project's existing `lang/id/validation.php` keeps working (it still wins); delete it, or cut it down to its own overrides.
+- Eight components replacing partials that projects and modules kept copying:
+  - `<x-synapse-breadcrumbs :breadcrumbs="$this->breadcrumbs" />` — the backend page title + trail. Same markup as the `layouts.partials.breadcrumbs` include it replaces, plus `aria-label` on the `<nav>`, `aria-current="page"` on the last crumb and hidden decorative chevrons. Falls back to `/` for the home link when synapps-auth is not installed.
+  - `<x-synapse-loader />` — the global loading overlay, on while `wire:navigate` runs or a Livewire request is in flight. Its Alpine half (`synapseLoader`) now lives in `synapse-components.js`; the old partial registered `globalLoader` from an inline `<script>`, which does not run under a strict CSP or after a morph. The stub app layouts render it.
+  - `<x-synapse-confirm-button>` — opens the confirm dialog for a Livewire method; `token` (a `WithDeleteToken` delete token) for deletes, `param` for anything else, icon+tooltip or `labelled`, optional `confirm-text`.
+  - `<x-synapse-save-button>` — primary button with a spinner and "Saving…" while its action runs; `target` adds a file-upload property to the busy state, `submit` makes it a form submit button.
+  - `<x-synapse-form-action-bar>` — the sticky required-hint / Cancel / Save bar for long page forms (`.syn-form-action-bar`); slot for extra buttons.
+  - `<x-synapse-section-heading>` — left-hand title + help of a two-column form section (`.syn-section-label`).
+  - `<x-synapse-modal-header>` / `<x-synapse-modal-footer>` — header and Cancel/Save footer for a child Livewire form inside `<x-synapse-modal labelledby="modal-{name}-title">`, where the title depends on the form's state so the modal's own `title` cannot be used.
+
+  Method and modal names interpolated into `wire:click` / `$dispatch` go through `SanitizesWireArguments`. The Indonesian strings are in `lang/id.json`.
+
+### Changed
+- The package's test suite always runs in English: `phpunit.xml` forces `APP_LOCALE`/`APP_FALLBACK_LOCALE=en` and `TestCase` pins `app.locale`/`app.fallback_locale` (a `force="true"` env cannot override a value exported in `$_SERVER`), with a test that fails otherwise. Translation tests use a throwaway locale instead of asserting `lang/id.json` text.
+- Synapse's own views, stubs and stub modules (home, settings, todos, including their `module.json` menu icons) use Phosphor instead of Font Awesome. A spinner is `ph ph-spinner syn-spin`.
+
+### Deprecated
+- `synapps::components.layouts.partials.breadcrumbs` and `…partials.loader` are one-line shims over the new components, kept so existing `@include` calls work. Use the components.
+- Font Awesome. The `@import` in `synapps.css` stays so a project's own `fa-*` classes keep rendering; it will be removed in 4.0.
+
+### Fixed
+- `<x-synapse-radio-buttons>`: the selected value reaches Alpine as a JSON string. It was interpolated bare into `x-data="{ selected: … }"`, so an empty value rendered `{ selected:  }` (a parse error that broke every radio on the page) and any non-numeric value became an undefined variable — or extra JavaScript — in the expression.
+- `<x-synapse-loader>` covers the whole `wire:navigate`: it now starts on `livewire:navigate` (the click) instead of `livewire:navigating`, which Livewire fires only after the page has been fetched, right before the swap — so the overlay never showed during the wait. A navigation another listener cancels resets it. (The old `partials/loader` had the same flaw.)
+- `<x-synapse-adv-select>`: the default placeholder is translated (`Select an option` → "Pilih opsi"). It was a bare English default argument, which never passes through `__()`, so the translation coverage test could not see it.
+- `<x-synapse-password>`, `<x-synapse-toastr>` and `<x-synapse-alert>` translate their placeholder and close-button `aria-label`s ("Enter your password", "Dismiss notification", "Close alert"). A new test fails on any literal text in a component's `placeholder`, `aria-label` or `title`, which the `__()`-based translation test could not see.
+- `<x-synapse-password-generator>`: the three icon-only buttons have a translated accessible name (`aria-label` + `title`: "Generate password", "Apply password", "Copy password") — they carried an English `title` only — and the input placeholder is translated too.
+- `.syn-modal-header` and `.syn-modal-footer` are `sticky` (with the panel's background, so content scrolls underneath). `.syn-modal-panel` is the scroll container, so in a long modal the title, close button and action buttons scrolled out of view.
+- `<x-synapse-adv-select>` inside a modal or drawer: the open dropdown is pinned to the viewport (`position: fixed`, re-placed on scroll/resize, opening upward when there is more room above). It was `absolute` inside an `overflow-y-auto` panel, so the list either stretched the panel — the modal grew a scrollbar and scrolled — or was clipped at its edge. Adv-selects outside a modal or drawer are unchanged. **The Alpine half has no automated test** (no JS harness); modals and drawers were browser-verified downstream. Projects pick this up with `synapps:patch --force` and `npm run build`.
+
 ## [3.9.0] - 2026-11-05
 
 ### Added
