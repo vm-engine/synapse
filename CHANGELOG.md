@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.1] - 2026-11-13
+
+### Fixed
+- A full `synapps:patch` (no object, and so also `synapps:patch --force`) no longer drops a project's own imports from `resources/js/app.js` / `resources/css/app.css`. The pre-split import patchers re-added the direct `synapps.js` / `synapps.css` import to an already-split file; the focused-import rewrite later in the same run then took the file for a monolith and overwrote it with its single import — losing `synapse-rte.js`, a module's `cms.js` and anything else the host had added, with no fresh backup (the `.bak` is write-once, so it held an older copy if one existed). The import patchers now leave a split entry alone (its `base.*` exists, or it imports `synapps-app.*`), and the rewrite keeps every line `base.*` does not already carry, so a genuine monolith migration still moves those lines rather than dropping them. Reported from 4vmcloud's 3.8.1 → 3.10.0 upgrade.
+- The `--force` note said the host entry points were "left untouched" even when the same run had rewritten `app.js`. It now says `--force` never overwrites them and that the regular patches above may still have edited them.
+
 ## [3.10.0] - 2026-11-13
 
 ### Added
