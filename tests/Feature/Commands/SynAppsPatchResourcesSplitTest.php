@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\File;
+use VmEngine\Synapse\Console\Commands\SynAppsPatchResources;
 
 /**
  * Tests for SynAppsPatchResources layouts operations.
@@ -480,4 +481,74 @@ test('app.js not rewritten if already in focused form', function () {
     $this->artisan('synapps:patch', ['object' => ['layouts']]);
 
     expect(File::get(resource_path('js/app.js')))->toBe($focusedJs);
+});
+
+// ─── Host imports on an already-split project ────────────────────────────────
+// A full `synapps:patch` used to run the pre-split import patchers first: they re-added the
+// direct synapps.js / synapps.css import to an already-split app.js / app.css, which then made
+// the focused rewrite treat the file as a monolith and overwrite it — dropping every host import
+// (synapse-rte.js, a module's cms.js) with nothing to show for it.
+
+/** Call one of the command's protected steps directly (a full run would patch the shared skeleton). */
+function runPatchStep(string $method): bool
+{
+    $command = app(SynAppsPatchResources::class);
+
+    return (new ReflectionMethod($command, $method))->invoke($command);
+}
+
+test('does not add the monolith synapps.js import to an already-split app.js', function () {
+    $splitJs = "import '../../synapps/resources/js/synapps-app.js';\nimport '../../synapps/resources/js/synapse-rte.js';\nimport '../../vendor/vm-engine/synmod-cms/resources/js/cms.js';\n";
+    File::put(resource_path('js/base.js'), "import '../../synapps/resources/js/synapps-base.js';\n");
+    File::put(resource_path('js/app.js'), $splitJs);
+
+    expect(runPatchStep('patchAppJsImport'))->toBeFalse()
+        ->and(File::get(resource_path('js/app.js')))->toBe($splitJs);
+});
+
+test('does not add the monolith synapps.css import to an already-split app.css', function () {
+    $splitCss = "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n@import './host-extra.css';\n";
+    File::put(resource_path('css/base.css'), "@import '../../synapps/resources/css/synapps-base.css';\n");
+    File::put(resource_path('css/app.css'), $splitCss);
+
+    expect(runPatchStep('patchAppCssImport'))->toBeFalse()
+        ->and(File::get(resource_path('css/app.css')))->toBe($splitCss);
+});
+
+test('the focused app.js rewrite keeps host imports that base.js does not carry', function () {
+    File::put(resource_path('js/base.js'), "import '../../synapps/resources/js/synapps-base.js';\n");
+    File::put(resource_path('js/app.js'), "import '../../synapps/resources/js/synapps.js';\nimport '../../synapps/resources/js/synapse-rte.js';\nimport '../../vendor/vm-engine/synmod-cms/resources/js/cms.js';\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+
+    expect(File::get(resource_path('js/app.js')))
+        ->toBe("import '../../synapps/resources/js/synapps-app.js';\nimport '../../synapps/resources/js/synapse-rte.js';\nimport '../../vendor/vm-engine/synmod-cms/resources/js/cms.js';\n");
+});
+
+test('the focused app.css rewrite keeps host lines that base.css does not carry', function () {
+    File::put(resource_path('css/base.css'), "@import '../../synapps/resources/css/synapps-base.css';\n");
+    File::put(resource_path('css/app.css'), "@import '../../synapps/resources/css/synapps.css';\n@import './host-extra.css';\n");
+
+    $this->artisan('synapps:patch', ['object' => ['layouts']]);
+
+    expect(File::get(resource_path('css/app.css')))
+        ->toBe("@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n@import './host-extra.css';\n");
+});
+
+test('--force does not claim the host entry points were left untouched', function () {
+    $this->artisan('synapps:patch', ['object' => ['layouts'], '--force' => true])
+        ->doesntExpectOutputToContain('Left untouched')
+        ->expectsOutputToContain('never overwrites');
+});
+
+test('the full-run order leaves an already-split app.js byte for byte (the 4vmcloud report)', function () {
+    $splitJs = "import '../../synapps/resources/js/synapps-app.js';\nimport '../../synapps/resources/js/synapse-rte.js';\nimport '../../vendor/vm-engine/synmod-cms/resources/js/cms.js';\n";
+    File::put(resource_path('js/base.js'), "import '../../synapps/resources/js/synapps-base.js';\n");
+    File::put(resource_path('js/app.js'), $splitJs);
+
+    runPatchStep('patchAppJsImport');                      // what a full run does first
+    $this->artisan('synapps:patch', ['object' => ['layouts']]); // then the layouts subset
+
+    expect(File::get(resource_path('js/app.js')))->toBe($splitJs)
+        ->and(File::exists(resource_path('js/app.js.bak')))->toBeFalse();
 });

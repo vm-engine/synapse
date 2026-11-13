@@ -182,10 +182,11 @@ The previous file is kept as `.bak` next to it. That backup is written **once**,
 pinned to the project's own copy rather than tracking the last forced write — a later `--force`
 replaces package content with package content, where there is nothing to preserve.
 
-`--force` does **not** touch the host-owned entry points, even though they are also
-skip-if-exists: `resources/css/{base,app,frontend,guest}.css`, `resources/js/{base,app,frontend,guest}.js`
-and `vite.config.js` hold your `@source` directives, Vite inputs and global JS helpers. The
-command prints this list on every forced run.
+`--force` never *overwrites* the host-owned entry points: `resources/css/{base,app,frontend,guest}.css`,
+`resources/js/{base,app,frontend,guest}.js` and `vite.config.js` hold your `@source` directives, Vite
+inputs and global JS helpers. The command prints this list on every forced run. The regular patches
+in the same run (the focused-import rewrite, Vite inputs, `@source` lines) still apply to them as
+they do without `--force` — check the `Patched:` lines.
 
 If you customised `synapse-components.js` in place, diff it against the `.bak` after forcing and
 re-apply your changes — ideally as a separate file imported from `synapps.js`, so the next
@@ -209,7 +210,7 @@ Brings the project from the single `app.css`/`app.js` monolith to the 8-entry-po
 
 1. Creates `synapps/resources/css/synapps-{base,app,frontend,guest}.css` and matching `.js` files — each imports the active theme's corresponding `theme-{layout}.css`/`.js` split file
 2. Creates `resources/css/{base,frontend,guest}.css` and `resources/js/{base,frontend,guest}.js` if missing — `base.*` is migrated from the existing monolithic `app.*` content (its `synapps.css`/`.js` import is repointed to `synapps-base.*`, and any direct `theme.css`/`.js` import is stripped since `theme-base.*` now handles it)
-3. **Rewrites** `resources/css/app.css` and `resources/js/app.js` to a single focused import of `synapps-app.css`/`.js` — detected by the presence of the Tailwind/synapps monolith markers, so it only rewrites files still in the old form
+3. **Rewrites** `resources/css/app.css` and `resources/js/app.js` to a focused import of `synapps-app.css`/`.js` — detected by the presence of the direct `synapps.css`/`.js` monolith import, so it only rewrites files still in the old form. Lines the new `base.*` does not already carry (a module's own script, `synapse-rte.js`, …) are kept below the focused import, never dropped. A full run never re-adds the monolith import to a file that is already split (before 3.10.1 it did, and the rewrite then discarded the host's imports).
 4. Patches the active-theme import line in all 8 `synapps-*.css`/`.js` files whenever the active theme changes (e.g. after `synapps:reconfig` or editing `apps.json` directly) — idempotent, only writes when the theme path actually differs
 5. Expands `vite.config.js`'s `input` array to all 8 entry points (`resources/{css,js}/{base,app,frontend,guest}.*`)
 

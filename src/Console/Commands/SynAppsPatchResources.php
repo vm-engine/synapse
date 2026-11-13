@@ -109,8 +109,9 @@ class SynAppsPatchResources extends Command
 
         if ($this->option('force')) {
             $this->components->warn(
-                '--force covers package-owned files only. Left untouched: '
+                '--force reinstalls package-owned files only and never overwrites the host entry points ('
                 .implode(', ', self::HOST_OWNED_FILES)
+                .'). The regular patches listed above may still have edited them.'
             );
             $this->components->info('Run `npm run build` to pick up the reinstalled assets.');
         }
@@ -393,8 +394,14 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
+        $hostLines = $this->hostLinesMissingFrom($content, resource_path('css/base.css'), [
+            '#^@import\s+[\'"]\.\./\.\./synapps/resources/css/synapps(-app)?\.css[\'"]#',
+            '#^@reference\s+[\'"]\.\./\.\./synapps/resources/css/tailwind-ref\.css[\'"]#',
+            '#^@import\s+[\'"]\.\./\.\./synapps/resources/themes/.*?/css/theme\.css[\'"]#',
+        ]);
+
         $this->createBackup($cssPath);
-        file_put_contents($cssPath, "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n");
+        file_put_contents($cssPath, "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n".$hostLines);
 
         return true;
     }
@@ -492,8 +499,13 @@ class SynAppsPatchResources extends Command
             return false;
         }
 
+        $hostLines = $this->hostLinesMissingFrom($content, resource_path('js/base.js'), [
+            '#^import\s+[\'"]\.\./\.\./synapps/resources/js/synapps(-app)?\.js[\'"]#',
+            '#^import\s+[\'"]\.\./\.\./synapps/resources/themes/.*?/js/theme\.js[\'"]#',
+        ]);
+
         $this->createBackup($jsPath);
-        file_put_contents($jsPath, "import '../../synapps/resources/js/synapps-app.js';\n");
+        file_put_contents($jsPath, "import '../../synapps/resources/js/synapps-app.js';\n".$hostLines);
 
         return true;
     }
@@ -718,6 +730,10 @@ class SynAppsPatchResources extends Command
      */
     protected function patchAppJsImport(): bool
     {
+        if ($this->isSplitEntry('js')) {
+            return false;
+        }
+
         $jsLine = "import '../../synapps/resources/js/synapps.js';";
 
         $jsPatched = false;
@@ -750,6 +766,10 @@ class SynAppsPatchResources extends Command
      */
     protected function patchAppCssImport(): bool
     {
+        if ($this->isSplitEntry('css')) {
+            return false;
+        }
+
         $cssLine = "@import '../../synapps/resources/css/synapps.css';";
 
         $cssPatched = false;
@@ -1430,6 +1450,51 @@ SERVER;
         }
 
         return $contents;
+    }
+
+    /**
+     * Whether resources/{js,css}/app.{js,css} is already split per layout — its base entry
+     * exists, or it imports the synapps-app intermediary. The pre-split import patchers must
+     * leave such a file alone: re-adding the direct synapps.{js,css} import there made the
+     * focused rewrite take it for a monolith and overwrite the host's own imports.
+     */
+    protected function isSplitEntry(string $extension): bool
+    {
+        $appPath = resource_path("{$extension}/app.{$extension}");
+
+        return file_exists(resource_path("{$extension}/base.{$extension}"))
+            || (file_exists($appPath) && str_contains($this->readFile($appPath), "synapps/resources/{$extension}/synapps-app.{$extension}"));
+    }
+
+    /**
+     * The lines of a monolith entry that the focused rewrite must keep: everything except the
+     * imports it replaces and anything the layout's base entry already carries (createBase*()
+     * copies the monolith there). So a host import is moved, never dropped.
+     *
+     * @param  list<string>  $ownedPatterns  regexes for the lines the rewrite itself writes or retires
+     */
+    protected function hostLinesMissingFrom(string $content, string $basePath, array $ownedPatterns): string
+    {
+        $baseLines = file_exists($basePath) ? array_map('trim', explode("\n", $this->readFile($basePath))) : [];
+        $kept = [];
+
+        foreach (explode("\n", $content) as $line) {
+            $trimmed = trim($line);
+
+            if ($trimmed === '' || in_array($trimmed, $baseLines, true)) {
+                continue;
+            }
+
+            foreach ($ownedPatterns as $pattern) {
+                if (preg_match($pattern, $trimmed) === 1) {
+                    continue 2;
+                }
+            }
+
+            $kept[] = rtrim($line);
+        }
+
+        return $kept === [] ? '' : implode("\n", $kept)."\n";
     }
 
     /**
