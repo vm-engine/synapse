@@ -552,3 +552,62 @@ test('the full-run order leaves an already-split app.js byte for byte (the 4vmcl
     expect(File::get(resource_path('js/app.js')))->toBe($splitJs)
         ->and(File::exists(resource_path('js/app.js.bak')))->toBeFalse();
 });
+
+// ─── Shared content goes to base.*, not the split app.* ──────────────────────
+// After the split, the Tailwind @source list and the withBack helpers live in base.css / base.js
+// (loaded on every layout). The @source and global-helper patchers still wrote them into app.*,
+// checking only app.* for what was already there — so every full run duplicated base.* content.
+
+test('the @source patcher leaves a split app.css alone when base.css already carries the list', function () {
+    $focusedCss = "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n";
+    File::put(resource_path('css/app.css'), $focusedCss);
+    File::put(resource_path('css/base.css'), "@import \"tailwindcss\";\n@source '../../synapps/**/*.blade.php';\n@source '../../synapps/**/*.js';\n@source '../../synapps/resources/themes/**/*.blade.php';\n@source '../../synapps/resources/themes/**/*.js';\n@source '../../vendor/vm-engine/*/**/*.blade.php';\n@source '../../vendor/vm-engine/*/**/*.js';\n@source '../../vendor/*/synmod-*/**/*.blade.php';\n@source '../../vendor/*/synmod-*/**/*.js';\n@source '../../vendor/*/synapps-*/**/*.blade.php';\n@source '../../vendor/*/synapps-*/**/*.js';\n");
+    $baseBefore = File::get(resource_path('css/base.css'));
+
+    expect(runPatchStep('patchCssSource'))->toBeFalse()
+        ->and(File::get(resource_path('css/app.css')))->toBe($focusedCss)
+        ->and(File::get(resource_path('css/base.css')))->toBe($baseBefore);
+});
+
+test('the @source patcher adds a missing directive to base.css, not app.css', function () {
+    $focusedCss = "@reference '../../synapps/resources/css/tailwind-ref.css';\n@import '../../synapps/resources/css/synapps-app.css';\n";
+    File::put(resource_path('css/app.css'), $focusedCss);
+    File::put(resource_path('css/base.css'), "@import \"tailwindcss\";\n@source '../../synapps/**/*.blade.php';\n");
+
+    expect(runPatchStep('patchCssSource'))->toBeTrue()
+        ->and(File::get(resource_path('css/app.css')))->toBe($focusedCss)
+        ->and(File::get(resource_path('css/base.css')))->toContain("@source '../../vendor/*/synapps-*/**/*.js';");
+});
+
+test('the global-helpers patcher leaves a split app.js alone when base.js already has them', function () {
+    $focusedJs = "import '../../synapps/resources/js/synapps-app.js';\nimport '../../synapps/resources/js/synapse-rte.js';\n";
+    $baseJs = "import '../../synapps/resources/js/synapps-base.js';\n\n// Synapse global helpers\nwindow.withBack = (url) => url;\n";
+    File::put(resource_path('js/app.js'), $focusedJs);
+    File::put(resource_path('js/base.js'), $baseJs);
+
+    expect(runPatchStep('patchAppJsGlobals'))->toBeFalse()
+        ->and(File::get(resource_path('js/app.js')))->toBe($focusedJs)
+        ->and(File::get(resource_path('js/base.js')))->toBe($baseJs);
+});
+
+test('the global-helpers patcher adds the helpers to base.js, not app.js', function () {
+    $focusedJs = "import '../../synapps/resources/js/synapps-app.js';\n";
+    File::put(resource_path('js/app.js'), $focusedJs);
+    File::put(resource_path('js/base.js'), "import '../../synapps/resources/js/synapps-base.js';\n");
+
+    expect(runPatchStep('patchAppJsGlobals'))->toBeTrue()
+        ->and(File::get(resource_path('js/app.js')))->toBe($focusedJs)
+        ->and(File::get(resource_path('js/base.js')))->toContain('// Synapse global helpers');
+});
+
+test('a split app.* with no base.* is left alone by both patchers', function () {
+    $focusedCss = "@import '../../synapps/resources/css/synapps-app.css';\n";
+    $focusedJs = "import '../../synapps/resources/js/synapps-app.js';\n";
+    File::put(resource_path('css/app.css'), $focusedCss);
+    File::put(resource_path('js/app.js'), $focusedJs);
+
+    expect(runPatchStep('patchCssSource'))->toBeFalse()
+        ->and(runPatchStep('patchAppJsGlobals'))->toBeFalse()
+        ->and(File::get(resource_path('css/app.css')))->toBe($focusedCss)
+        ->and(File::get(resource_path('js/app.js')))->toBe($focusedJs);
+});

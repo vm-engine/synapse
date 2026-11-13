@@ -62,7 +62,7 @@ class SynAppsPatchResources extends Command
         ] : [];
 
         if ($wants('css')) {
-            $patches['app.css — @source directives'] = $this->patchCssSource();
+            $patches['base.css (app.css before the split) — @source directives'] = $this->patchCssSource();
         }
 
         if ($wants('theme')) {
@@ -83,7 +83,7 @@ class SynAppsPatchResources extends Command
         }
 
         if ($wants('js')) {
-            $patches['app.js — global helpers'] = $this->patchAppJsGlobals();
+            $patches['base.js (app.js before the split) — global helpers'] = $this->patchAppJsGlobals();
         }
 
         if ($wants('layouts')) {
@@ -798,13 +798,14 @@ class SynAppsPatchResources extends Command
     }
 
     /**
-     * Patch app.css to add @source directives for module files
+     * Add the module @source directives to the Tailwind entry: base.css once the project is
+     * split per layout (it holds `@import "tailwindcss"`), app.css before that.
      */
     protected function patchCssSource(): bool
     {
-        $cssPath = resource_path('css/app.css');
+        $cssPath = $this->sharedEntryPath('css');
 
-        if (! file_exists($cssPath)) {
+        if ($cssPath === null || ! file_exists($cssPath)) {
             return false;
         }
 
@@ -1467,6 +1468,22 @@ SERVER;
     }
 
     /**
+     * The entry that holds content shared by every layout: base.{js,css} once the project is
+     * split, app.{js,css} before that (createBase*() later copies it into base.*). Null for a
+     * split app.* with no base.* — there is no safe place to write, so the caller does nothing.
+     */
+    protected function sharedEntryPath(string $extension): ?string
+    {
+        $basePath = resource_path("{$extension}/base.{$extension}");
+
+        if (file_exists($basePath)) {
+            return $basePath;
+        }
+
+        return $this->isSplitEntry($extension) ? null : resource_path("{$extension}/app.{$extension}");
+    }
+
+    /**
      * The lines of a monolith entry that the focused rewrite must keep: everything except the
      * imports it replaces and anything the layout's base entry already carries (createBase*()
      * copies the monolith there). So a host import is moved, never dropped.
@@ -1515,14 +1532,15 @@ SERVER;
     }
 
     /**
-     * Patch app.js to add global Synapse JS helper functions (e.g. withBack).
+     * Add the global Synapse JS helpers (withBack, the $withBack magic) to the entry every
+     * layout loads: base.js once the project is split per layout, app.js before that.
      * Idempotent — skips if the marker comment already exists.
      */
     protected function patchAppJsGlobals(): bool
     {
-        $jsPath = resource_path('js/app.js');
+        $jsPath = $this->sharedEntryPath('js');
 
-        if (! file_exists($jsPath)) {
+        if ($jsPath === null || ! file_exists($jsPath)) {
             return false;
         }
 

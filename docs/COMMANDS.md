@@ -145,9 +145,9 @@ php artisan synapps:patch theme vite
 |---|---|
 | `theme` | Legacy monolith theme import into `app.css`/`app.js` (only applies if a theme still has a single `theme.css`/`theme.js`, pre-2.4.0 style) |
 | `seeder` | Commenting out the default Laravel welcome route and `User::factory()` seeder call |
-| `css` | Tailwind `@source` directives in `resources/css/app.css` |
+| `css` | Tailwind `@source` directives in `resources/css/base.css` (`app.css` before the per-layout split) |
 | `npm` | `package.json` `"watch": "vite build --watch"` script |
-| `js` | `window.withBack()` global JS helper in `resources/js/app.js` |
+| `js` | `window.withBack()` global JS helper in `resources/js/base.js` (`app.js` before the per-layout split) |
 | `vite` | `vite.config.js` static-asset-copy plugin + dev-server watch config |
 | `layouts` | Per-layout CSS/JS split only (see below) |
 | `tests` | Testing infrastructure only (see below) |
@@ -201,7 +201,7 @@ re-apply your changes — ideally as a separate file imported from `synapps.js`,
 5. **`routes/web.php`** — comments out the default Laravel welcome route, but only if no other routes are defined in the file
 6. **`database/seeders/DatabaseSeeder.php`** — comments out the default `User::factory()` call (handles multi-line calls too)
 7. **`package.json`** — adds a `"watch": "vite build --watch"` script
-8. **`resources/js/app.js`** — appends the global `window.withBack()` helper plus a `mousedown` interceptor that recomputes the `?back=` URL at click time (fixes stale URLs after Livewire pagination)
+8. **`resources/js/base.js`** (`app.js` before the per-layout split) — appends the global `window.withBack()` helper plus a `mousedown` interceptor that recomputes the `?back=` URL at click time (fixes stale URLs after Livewire pagination)
 9. **Per-layout CSS/JS split** (`layouts`) — see below
 
 ### Per-layout CSS/JS split (`layouts`)
@@ -228,7 +228,7 @@ Each successfully patched file/operation is reported individually:
 Patched: app.js — synapps import
 Patched: app.css — synapps import
 Patched: vite.config.js
-Patched: app.js — global helpers
+Patched: base.js (app.js before the split) — global helpers
 Patched: resources/css/base.css
 Patched: resources/js/base.js
 Patched: resources/css/app.css — rewrite to focused import
