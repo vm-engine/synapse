@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.2] - 2026-11-13
+
+### Fixed
+- A full `synapps:patch` no longer duplicates `base.*` content into a split `resources/css/app.css` / `resources/js/app.js`. The `@source` patcher and the global-helpers patcher (`withBack`, the `$withBack` magic, the back-URL `mousedown` listener) still targeted `app.*` and only checked `app.*` for what was there, so every run on a split project prepended the 10 `@source` lines to `app.css` and appended the helpers to `app.js` — registering `withBack` twice and binding the listener twice on backend pages. Both now write to the entry every layout loads: `base.*` once it exists, `app.*` only before the split (the migration then carries it into `base.*`); a split `app.*` with no `base.*` is left alone. Reported from 4vmcloud's 3.10.1 verification.
+
 ## [3.10.1] - 2026-11-13
 
 ### Fixed
