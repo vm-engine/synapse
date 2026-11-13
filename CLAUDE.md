@@ -359,7 +359,7 @@ During `finalize()`, values starting with `env::` are replaced with actual env v
 - **Applies config overrides** from `synapps/config/override/`
 - **Registers SynapseFinder** — overrides Livewire's `livewire.finder` singleton to fix an MFC discovery bug where directories whose names contain "index" as a substring (e.g. `todo-index`) were incorrectly resolved (see `src/Finder/SynapseFinder.php`)
 
-**2. SynapseLangServiceProvider**: Language files
+**2. SynapseLangServiceProvider**: Owns the translator; group files (`validation`, `auth`, `passwords`, `pagination`) resolve framework English → `lang/` here (ships `id`) → the project's `lang/`, key by key
 
 **3. SynapseRouteServiceProvider**: Route registration
 - `routes/web.php` - Standard (URL + name prefixed)
@@ -920,6 +920,10 @@ See [docs/TRAITS.md#remembersqueryparams](docs/TRAITS.md#remembersqueryparams) f
 - `<x-synapse-modal name="" max-width="xl" title="">` + optional `<x-slot:footer>` — `open-modal-{name}` / `close-modal-{name}` window events, Escape closes; keep `name` lowercase. `title` renders the header + close button.
 - `<x-synapse-field name="" label="" type="text" hint="" prefix="" error="" required />` — form-box + label + input + error/hint (aria-linked); slot replaces the input; `error` = validation key when it differs from `name`.
 - `<x-synapse-empty-state icon="" title="" text="">` — empty list/panel block; slot = action.
+- `<x-synapse-confirm-button method="" token="" label="" title="" message="" />` — opens the confirm dialog; `token` (delete_token) for deletes, `param` otherwise; `labelled` for a text button.
+- `<x-synapse-save-button action="save" />` — busy state; `<x-synapse-form-action-bar action="" cancel-url="" />` — sticky bar for long page forms; `<x-synapse-section-heading title="" help="" />`.
+- `<x-synapse-modal-header modal="" title="" />` / `<x-synapse-modal-footer modal="" />` — chrome for a child form inside `<x-synapse-modal labelledby="modal-{name}-title">`.
+- `<x-synapse-breadcrumbs :breadcrumbs="$this->breadcrumbs" />` and `<x-synapse-loader />` (once per layout) — replace the deprecated `layouts.partials.{breadcrumbs,loader}` includes.
 - `<x-synapse-lightbox name="" />` — `$dispatch('open-lightbox-{name}', { url })`.
 - `<x-synapse-toastr />`
 - `<x-synapse-alert type="success|warning|danger|info" message="" title="" :dismissible="true" :border="false" :solid="false" />`

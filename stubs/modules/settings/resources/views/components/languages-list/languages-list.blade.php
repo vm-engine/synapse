@@ -1,5 +1,5 @@
 <div x-data="{ pageName: 'Languages', isHome: false }">
-    @include('synapps::components.layouts.partials.breadcrumbs')
+    <x-synapse-breadcrumbs :breadcrumbs="$breadcrumbs ?? null" />
 
     <div class="space-y-4">
         {{-- Language Tabs (if multi-language enabled) --}}
@@ -88,7 +88,7 @@
             @empty
                 <div class="card">
                     <div class="flex flex-col items-center justify-center p-10">
-                        <i class="fa-solid fa-inbox mb-4 text-6xl text-gray-300 dark:text-gray-600"></i>
+                        <i class="ph ph-tray mb-4 text-6xl text-gray-300 dark:text-gray-600"></i>
                         <p class="text-center text-gray-500 dark:text-gray-400">
                             {{ __('settings::page.languages.no_data') }}
                         </p>
@@ -107,7 +107,7 @@
                         wire:loading
                         wire:target="loadMore"
                     >
-                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <i class="ph ph-spinner syn-spin"></i>
                         <span>{{ __('settings::page.languages.loading') }}</span>
                     </div>
                 </div>

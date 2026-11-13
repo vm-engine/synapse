@@ -36,7 +36,7 @@
             "position": 0,
             "route": "home.dashboard",
             "class": "",
-            "icon": "fa-solid fa-house"
+            "icon": "ph ph-house"
         }
     }
 }

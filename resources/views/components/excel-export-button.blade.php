@@ -33,12 +33,12 @@
         wire:target="{{ $action }}"
     >
         <span
-            class="fa-solid fa-file-excel mr-1"
+            class="ph ph-file-xls mr-1"
             wire:loading.remove
             wire:target="{{ $action }}"
         ></span>
         <span
-            class="fa-solid fa-spinner fa-spin mr-1"
+            class="ph ph-spinner syn-spin mr-1"
             wire:loading
             wire:target="{{ $action }}"
         ></span>
@@ -74,7 +74,7 @@
     <div class="flex items-center gap-3">
         @if ($isFailed)
             <span class="text-sm text-red-600 dark:text-red-400">
-                <span class="fa-solid fa-exclamation-triangle mr-1"></span>
+                <span class="ph ph-warning mr-1"></span>
                 {{ $failedLabel }}
             </span>
         @endif
@@ -89,18 +89,18 @@
                 wire:target="{{ $action }}"
             >
                 <span
-                    class="fa-solid fa-file-excel mr-1"
+                    class="ph ph-file-xls mr-1"
                     wire:loading.remove
                     wire:target="{{ $action }}"
                 ></span>
                 <span
-                    class="fa-solid fa-spinner fa-spin mr-1"
+                    class="ph ph-spinner syn-spin mr-1"
                     wire:loading
                     wire:target="{{ $action }}"
                 ></span>
                 @if ($isProcessing)
                     <span
-                        class="fa-solid fa-spinner fa-spin mr-1"
+                        class="ph ph-spinner syn-spin mr-1"
                         wire:poll.{{ $pollInterval }}="$refresh"
                     ></span>
                     {{ $processingLabel }}
@@ -135,7 +135,7 @@
                 type="button"
                 wire:click="{{ $downloadAction }}"
             >
-                <span class="fa-solid fa-download mr-1"></span>
+                <span class="ph ph-download-simple mr-1"></span>
                 {{ $downloadLabel }}
             </button>
 
@@ -146,7 +146,7 @@
                     title="{{ $dismissLabel }}"
                     wire:click="{{ $dismissAction }}"
                 >
-                    <span class="fa-solid fa-xmark"></span>
+                    <span class="ph ph-x"></span>
                 </button>
             @endif
         @endif

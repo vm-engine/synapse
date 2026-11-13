@@ -76,7 +76,7 @@
                                     class="fe-action-link fe-action-link--primary"
                                     href="{{ backend_route('home.dashboard') }}"
                                 >
-                                    <span class="fa-solid fa-gauge-high fa-sm"></span>
+                                    <span class="ph ph-gauge"></span>
                                     {{ __('Dashboard') }}
                                 </a>
                             @endif
@@ -102,7 +102,7 @@
                     :aria-expanded="ariaExpanded"
                     @click="toggle"
                 >
-                    <span class="fa-solid fa-bars"></span>
+                    <span class="ph ph-list"></span>
                 </button>
             </div>
         </header>

@@ -29,7 +29,7 @@
             "name": "__settings::menu.settings",
             "position": 999,
             "class": "",
-            "icon": "fa-solid fa-cog",
+            "icon": "ph ph-gear",
             "acl": "settings.any",
             "sub": {
                 "configuration": {
@@ -37,7 +37,7 @@
                     "name": "__settings::menu.configuration",
                     "route": "settings.configuration",
                     "class": "",
-                    "icon": "fa-solid fa-sliders",
+                    "icon": "ph ph-sliders-horizontal",
                     "acl": "settings.configuration"
                 },
                 "languages": {
@@ -45,7 +45,7 @@
                     "name": "__settings::menu.languages",
                     "route": "settings.languages",
                     "class": "",
-                    "icon": "fa-solid fa-language",
+                    "icon": "ph ph-translate",
                     "acl": "settings.languages"
                 }
             }

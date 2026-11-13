@@ -174,3 +174,14 @@ describe('AdvSelect Component', function () {
         expect($component->disabled)->toBeTrue();
     });
 });
+
+// The default used to be a bare English string argument, so it never went through __().
+it('passes the default placeholder through the translator', function () {
+    expect(advSelectHtml('<x-synapse-adv-select wire-model="clientId" />'))->toContain('placeholder="Select an option"');
+
+    app('translator')->addLines(['*.Select an option' => 'Pick one'], 'test');
+    app()->setLocale('test');
+
+    expect(advSelectHtml('<x-synapse-adv-select wire-model="clientId" />'))->toContain('placeholder="Pick one"')
+        ->and(advSelectHtml('<x-synapse-adv-select wire-model="clientId" placeholder="Choose a client" />'))->toContain('placeholder="Choose a client"');
+});

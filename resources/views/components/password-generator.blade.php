@@ -6,7 +6,7 @@
         type="text"
         x-ref="passwordInput"
         readonly
-        placeholder="Enter or generate password"
+        placeholder="{{ __('Enter or generate password') }}"
         {{ $attributes->merge(['class' => 'form-input pr-32']) }}
     />
 
@@ -15,7 +15,8 @@
         <button
             class="syn-password-generator-btn"
             type="button"
-            title="Generate Password"
+            title="{{ __('Generate password') }}"
+            aria-label="{{ __('Generate password') }}"
             @click="generate()"
         >
             <span class="ph ph-arrow-clockwise"></span>
@@ -26,7 +27,8 @@
             <button
                 class="syn-password-generator-btn"
                 type="button"
-                title="Apply Password"
+                title="{{ __('Apply password') }}"
+            aria-label="{{ __('Apply password') }}"
                 @click="setProperty()"
             >
                 <svg
@@ -46,7 +48,8 @@
         <button
             class="syn-password-generator-btn"
             type="button"
-            title="Copy Password"
+            title="{{ __('Copy password') }}"
+            aria-label="{{ __('Copy password') }}"
             @click="copyPassword()"
         >
             <svg

@@ -12,7 +12,7 @@
       color tint, and optional clickable/hover-shadow affordance.
 
     Props:
-    - icon (string): Optional icon class — Phosphor (recommended) e.g. 'ph ph-invoice', or FontAwesome e.g. 'fa-solid fa-file-invoice'
+    - icon (string): Optional icon class — Phosphor, e.g. 'ph ph-invoice'
     - color (string): Accent color — 'gray', 'blue', 'indigo', 'purple', 'red', 'orange', 'green' (default: 'gray')
     - label (string): Caption. Can be overridden with <x-slot:label>.
     - value (string): Already-formatted value (caller formats numbers/currency). Can be overridden with <x-slot:value>.

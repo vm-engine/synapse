@@ -34,6 +34,7 @@
     x-data="applicationAppShell()"
     :class="{ 'dark': darkMode }"
 >
+    <x-synapse-loader />
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR: Darker, Independently Scrollable -->
         @include('theme::components.sidebar-menu')

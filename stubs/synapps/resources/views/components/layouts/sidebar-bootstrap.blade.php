@@ -12,7 +12,7 @@
         href="index.html"
     >
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+            <i class="ph ph-smiley-wink"></i>
         </div>
         <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
     </a>
@@ -27,7 +27,7 @@
             href="{{ route('home.dashboard') }}"
             wire:navigate
         >
-            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <i class="ph ph-gauge"></i>
             <span>Home</span></a>
     </li>
 
@@ -40,7 +40,7 @@
             href="{{ route('example.index') }}"
             wire:navigate
         >
-            <i class="fas fa-fw fa-database"></i>
+            <i class="ph ph-database"></i>
             <span>Example</span></a>
     </li>
 
@@ -50,7 +50,7 @@
             href="{{ route('test.index') }}"
             wire:navigate
         >
-            <i class="fas fa-fw fa-database"></i>
+            <i class="ph ph-database"></i>
             <span>Test Module</span></a>
     </li>
 
@@ -68,7 +68,7 @@
             @click="opened = !opened"
             :class="{ 'collapsed': !opened }"
         >
-            <i class="fas fa-fw fa-cog"></i>
+            <i class="ph ph-gear"></i>
             <span>Components</span>
         </a>
         <div
@@ -107,7 +107,7 @@
             aria-expanded="true"
             aria-controls="collapseTwo"
         >
-            <i class="fas fa-fw fa-cog"></i>
+            <i class="ph ph-gear"></i>
             <span>Components</span>
         </a>
         <div
@@ -140,7 +140,7 @@
             aria-expanded="true"
             aria-controls="collapseUtilities"
         >
-            <i class="fas fa-fw fa-wrench"></i>
+            <i class="ph ph-wrench"></i>
             <span>Utilities</span>
         </a>
         <div
@@ -189,7 +189,7 @@
             aria-expanded="true"
             aria-controls="collapsePages"
         >
-            <i class="fas fa-fw fa-folder"></i>
+            <i class="ph ph-folder"></i>
             <span>Pages</span>
         </a>
         <div
@@ -232,7 +232,7 @@
             class="nav-link"
             href="charts.html"
         >
-            <i class="fas fa-fw fa-chart-area"></i>
+            <i class="ph ph-chart-line-up"></i>
             <span>Charts</span></a>
     </li>
 
@@ -242,7 +242,7 @@
             class="nav-link"
             href="tables.html"
         >
-            <i class="fas fa-fw fa-table"></i>
+            <i class="ph ph-table"></i>
             <span>Tables</span></a>
     </li>
 

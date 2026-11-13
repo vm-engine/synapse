@@ -2,7 +2,7 @@
     <!-- Elements -->
     <div
         class="syn-radio-buttons-row"
-        x-data="{ selected: {{ $model ?? '' }} }"
+        x-data="{ selected: {{ json_encode((string) $model) }} }"
     >
         @foreach ($options as $key => $option)
             <div>

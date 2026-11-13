@@ -204,6 +204,18 @@ $cssPath = theme_path('css/theme.css');
 <x-synapse-toastr />
 <x-synapse-empty-state icon="ph ph-users" title="No members yet">…action…</x-synapse-empty-state>
 <x-synapse-copy-button text="..." label="Copy path" />   {{-- clipboard + execCommand fallback, "Copied" feedback --}}
+<x-synapse-confirm-button method="delete" :token="$row->delete_token" label="Delete" title="Delete?" message="Sure?" />
+<x-synapse-modal-header modal="edit" :title="$title" />   {{-- inside a child form in <x-synapse-modal labelledby="modal-edit-title"> --}}
+<x-synapse-modal-footer modal="edit" />                  {{-- Cancel + save button --}}
+
+<!-- Form actions -->
+<x-synapse-save-button action="save" />                  {{-- spinner + "Saving…" while busy --}}
+<x-synapse-form-action-bar action="save" :cancel-url="$backUrl" />   {{-- sticky bar for long page forms --}}
+<x-synapse-section-heading title="Contact" help="Who we call." />
+
+<!-- Layout chrome -->
+<x-synapse-breadcrumbs :breadcrumbs="$this->breadcrumbs" />
+<x-synapse-loader />                                     {{-- once per layout; the stub layouts include it --}}
 
 <!-- Planning & layout -->
 <x-synapse-steps :steps="['Details', 'Media', 'Review']" :current="$step" go-method="goToStep" />
@@ -226,7 +238,7 @@ Synapse-provided components (badge, panel, search-box, confirm-dialog, ...) acce
 
 **Phosphor Icons** (`@phosphor-icons/web`, loaded from `node_modules` — no CDN) is the recommended set: 9,000+ icons, and — unlike FontAwesome Free — every icon has a real glyph in every weight it ships. Classes look like `ph ph-<name>` (e.g. `ph ph-house`, `ph ph-trash`, `ph ph-check-circle`). Only the `regular` weight is imported by default (`@import "@phosphor-icons/web/regular";` in `synapps.css`) to keep the CSS bundle small; to add another weight (`bold`, `fill`, `duotone`, `light`, `thin`), add its import next to it and use the matching class prefix documented at [phosphoricons.com](https://phosphoricons.com).
 
-**FontAwesome Free** (`@fortawesome/fontawesome-free`) remains installed and available as an alternative — classes look like `fa-solid fa-<name>`. Watch out: FA Free ships one font file per style (solid/regular/brands), and **most icons only have a glyph in the solid font** — `fa-regular`/`fa-light`/`fa-duotone` render nothing for the vast majority of icons in the free tier (those weights are Pro-only per-icon). Stick to `fa-solid` unless you've confirmed the specific icon has a free non-solid glyph.
+**FontAwesome Free** (`@fortawesome/fontawesome-free`) is **deprecated** and will be removed in 4.0. Synapse's own views, stubs and stub modules use Phosphor only; the `@import` in `synapps.css` is kept so a project's own `fa-*` classes keep rendering until it migrates.
 
 ## Notifications
 

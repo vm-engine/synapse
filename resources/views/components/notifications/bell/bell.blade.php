@@ -14,7 +14,7 @@
             aria-label="{{ __('Notifications') }}"
         >
             <i
-                class="fa-solid fa-bell"
+                class="ph ph-bell"
                 aria-hidden="true"
             ></i>
             @if ($this->unreadCount > 0)

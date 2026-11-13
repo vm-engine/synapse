@@ -8,6 +8,9 @@ use Illuminate\View\Component;
 
 class AdvSelect extends Component
 {
+    /** Placeholder text (default: "Select an option", translated). */
+    public string $placeholder;
+
     /**
      * @param  array<int|string, mixed>|null  $preload
      * @param  array<int|string, mixed>  $options
@@ -17,7 +20,7 @@ class AdvSelect extends Component
         public ?string $searchMethod = null,
         public ?string $loadMethod = null,
         public bool $multiple = false,
-        public string $placeholder = 'Select an option',
+        ?string $placeholder = null,
         public string $labelField = 'label',
         public string $valueField = 'value',
         public ?array $preload = null,
@@ -29,7 +32,9 @@ class AdvSelect extends Component
         public bool $disabled = false,
         /** Accessible name for the dropdown's filter input (default: "Search"). */
         public ?string $searchLabel = null,
-    ) {}
+    ) {
+        $this->placeholder = $placeholder ?? __('Select an option');
+    }
 
     public function render()
     {

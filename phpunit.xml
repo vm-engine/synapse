@@ -25,6 +25,9 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Tests always run in English: assert the English source strings, never a project translation. -->
+        <env name="APP_LOCALE" value="en" force="true"/>
+        <env name="APP_FALLBACK_LOCALE" value="en" force="true"/>
         <env name="APP_KEY" value="base64:2fl+Ktvkujq3jWLJFpv4V4J9vpTQKfPgvKYi8R3J8Gs="/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>

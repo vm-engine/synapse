@@ -89,6 +89,51 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
         window.addEventListener('reset-tag-input', () => {
             this.clearSelection();
         });
+
+        if (this.$el.closest('.syn-modal-panel, .syn-drawer-panel')) {
+            this.floatDropdownInPanel();
+        }
+    },
+
+    /**
+     * A modal or drawer panel is a scroll container, so an absolutely positioned
+     * dropdown would stretch it (and be clipped by it). Pin the open dropdown to
+     * the viewport instead, under or over the box, whichever side has more room.
+     * Both panels are untransformed while open, so `fixed` is viewport-relative.
+     */
+    floatDropdownInPanel() {
+        const dropdown = this.$el.querySelector('.adv-select-dropdown');
+        const gap = 4;
+        const edge = 8;
+        const maxHeight = 240; // the dropdown's own max-h-60
+
+        const place = () => {
+            const box = this.$refs.box.getBoundingClientRect();
+            const below = window.innerHeight - box.bottom - gap - edge;
+            const above = box.top - gap - edge;
+            const openUp = below < maxHeight && above > below;
+
+            Object.assign(dropdown.style, {
+                position: 'fixed',
+                left: `${box.left}px`,
+                width: `${box.width}px`,
+                margin: '0',
+                maxHeight: `${Math.min(maxHeight, openUp ? above : below)}px`,
+                top: openUp ? 'auto' : `${box.bottom + gap}px`,
+                bottom: openUp ? `${window.innerHeight - box.top + gap}px` : 'auto',
+            });
+        };
+
+        this.$watch('open', (isOpen) => {
+            if (isOpen) {
+                place();
+                window.addEventListener('scroll', place, true);
+                window.addEventListener('resize', place);
+            } else {
+                window.removeEventListener('scroll', place, true);
+                window.removeEventListener('resize', place);
+            }
+        });
     },
 
     async loadInitialValues() {
@@ -994,3 +1039,38 @@ window.addEventListener("synapse-restored-query", (event) => {
     Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));
     window.history.replaceState(window.history.state, "", url);
 });
+
+/**
+ * Global loading overlay (<x-synapse-loader>): on while wire:navigate runs or a
+ * Livewire request is in flight, off when it settles either way.
+ */
+Alpine.data('synapseLoader', () => ({
+    loading: false,
+
+    init() {
+        // livewire:navigate fires on the click, before the page is fetched (livewire:navigating
+        // only fires once the fetch is done). Another listener may cancel it, so check after
+        // every listener has run and stand down if the navigation is not happening.
+        document.addEventListener('livewire:navigate', (event) => {
+            this.loading = true;
+            setTimeout(() => {
+                if (event.defaultPrevented) {
+                    this.loading = false;
+                }
+            });
+        });
+        document.addEventListener('livewire:navigated', () => {
+            this.loading = false;
+        });
+
+        Livewire.interceptMessage(({ onSuccess, onError, onFailure }) => {
+            this.loading = true;
+            const done = () => {
+                this.loading = false;
+            };
+            onSuccess(done);
+            onError(done);
+            onFailure(done);
+        });
+    },
+}));

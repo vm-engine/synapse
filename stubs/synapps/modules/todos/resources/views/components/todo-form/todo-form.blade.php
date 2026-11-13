@@ -97,7 +97,7 @@
                 type="button"
                 wire:click="resetForm"
             >
-                <span class="fa-solid fa-rotate-right"></span>
+                <span class="ph ph-arrow-clockwise"></span>
                 {{ __('todos::todos.buttons.reset') }}
             </button>
 
@@ -107,7 +107,7 @@
                     type="button"
                     wire:click="cancelEdit"
                 >
-                    <span class="fa-solid fa-times"></span>
+                    <span class="ph ph-x"></span>
                     {{ __('todos::todos.buttons.cancel_edit') }}
                 </button>
             @endif
@@ -119,7 +119,7 @@
                 wire:loading.attr="disabled"
                 wire:target="save"
             >
-                <span class="fa-solid fa-floppy-disk"></span>
+                <span class="ph ph-floppy-disk"></span>
                 <span
                     wire:loading.remove
                     wire:target="save"

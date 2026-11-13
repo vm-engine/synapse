@@ -130,7 +130,7 @@
                                     'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400' =>
                                         !$isOverdue && !$isDueToday,
                                 ])>
-                                    <i class="fa-solid fa-clock mr-1"></i>
+                                    <i class="ph ph-clock mr-1"></i>
                                     {{ $todo->due_date->format('M d, Y H:i') }}
                                     @if ($isOverdue)
                                         ({{ __('todos::todos.list.overdue') }})
@@ -145,7 +145,7 @@
                         @if ($todo->completed && $todo->completed_at)
                             <div class="mt-2">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                                    <i class="fa-solid fa-check-circle mr-1"></i>
+                                    <i class="ph ph-check-circle mr-1"></i>
                                     {{ __('todos::todos.list.completed_at', ['time' => $todo->completed_at->diffForHumans()]) }}
                                 </span>
                             </div>
@@ -160,7 +160,7 @@
                             title="{{ __('todos::todos.tooltips.edit') }}"
                             wire:click="editTodo({{ $todo->id }})"
                         >
-                            <span class="fa-solid fa-edit"></span>
+                            <span class="ph ph-pencil-simple"></span>
                             <span class="tooltip">{{ __('todos::todos.tooltips.edit') }}</span>
                         </button>
 
@@ -174,13 +174,13 @@
                                 confirmText: '{{ __('todos::todos.confirm.delete_confirm') }}',
                                 cancelText: '{{ __('todos::todos.confirm.delete_cancel') }}',
                                 confirmColor: 'danger',
-                                icon: 'fa-solid fa-trash',
+                                icon: 'ph ph-trash',
                                 wireMethod: 'deleteTodo',
                                 wireParams: ['{{ $todo->delete_token }}'],
                                 wireComponent: '{{ $this->getId() }}'
                             })"
                         >
-                            <span class="fa-solid fa-trash"></span>
+                            <span class="ph ph-trash"></span>
                             <span class="tooltip">{{ __('todos::todos.tooltips.delete') }}</span>
                         </button>
                     </div>
@@ -189,7 +189,7 @@
         @empty
             <div class="card">
                 <div class="flex flex-col items-center justify-center p-10">
-                    <i class="fa-solid fa-inbox mb-4 text-6xl text-gray-300 dark:text-gray-600"></i>
+                    <i class="ph ph-tray mb-4 text-6xl text-gray-300 dark:text-gray-600"></i>
                     <p class="text-center text-gray-500 dark:text-gray-400">
                         @if ($search || $filterCompleted !== 'all' || $filterOverdue)
                             {{ __('todos::todos.empty.no_results') }}
@@ -212,7 +212,7 @@
                     wire:loading
                     wire:target="loadMore"
                 >
-                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <i class="ph ph-spinner syn-spin"></i>
                     <span>{{ __('todos::todos.list.loading_more') }}</span>
                 </div>
             </div>

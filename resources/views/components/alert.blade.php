@@ -8,7 +8,7 @@
     - title (string): Optional alert title
     - message (string): Optional alert message (can also use slot for HTML content)
     - dismissible (bool): Whether alert can be closed (default: true)
-    - icon (string): Custom FontAwesome icon class (auto-assigned based on type if not provided)
+    - icon (string): Custom icon class (Phosphor; auto-assigned based on type if not provided)
     - border (bool): Show left border accent (default: false)
     - solid (bool): Use solid background instead of light variant (default: false)
 
@@ -95,7 +95,7 @@
             <button
                 class="syn-alert-close"
                 type="button"
-                aria-label="Close alert"
+                aria-label="{{ __('Close alert') }}"
                 @click="show = false"
             >
                 <svg

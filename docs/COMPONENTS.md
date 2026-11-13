@@ -12,6 +12,21 @@ Add an app-level entry only to *deliberately* reword a string. If a key is missi
 
 Strings you pass in as props (`title`, `label`, `placeholder`, …) are yours to translate; only the components' built-in text comes from the package.
 
+### Validation, auth, password and pagination messages
+
+Laravel ships these group files in English only, and a Synapse app runs with `APP_LOCALE` **and** `APP_FALLBACK_LOCALE` set to `id` — so without an Indonesian copy every message renders as its raw key (`validation.required`, `auth.failed`). The package ships `lang/id/{validation,auth,passwords,pagination}.php`, including a `validation.attributes` map for field names shared across modules (`name` → "nama", `email` → "alamat email", …).
+
+`SynapseLangServiceProvider` owns the translator and looks group files up in three places, each overriding the previous **key by key**: the framework's English → `vendor/vm-engine/synapse/lang` → the project's `lang/`. So a project does not need its own `lang/id/validation.php`. To reword one message or name one field, write only that key:
+
+```php
+// lang/id/validation.php in the project
+return [
+    'attributes' => ['npwp' => 'NPWP'],
+];
+```
+
+Module-specific field names belong in the component's `validationAttributes()`, not in the shared map.
+
 ## Form Components
 
 ### Checkboxes
@@ -68,19 +83,19 @@ Read-only password generator with separate generate and apply actions:
 
 ```blade
 {{-- Single property --}}
-<x-synapse::password-generator
+<x-synapse-password-generator
     model="password"
     :length="12"
 />
 
 {{-- Multiple properties (e.g., password + confirmation) --}}
-<x-synapse::password-generator
+<x-synapse-password-generator
     :model="['password', 'password_confirmation']"
     :length="16"
 />
 
 {{-- Display only (no apply button) --}}
-<x-synapse::password-generator :length="20" />
+<x-synapse-password-generator :length="20" />
 ```
 
 **Props:**
@@ -224,6 +239,55 @@ reached by Blade, so write it there yourself:
 | `id` | `f-{name}` (dots → dashes) | Input id |
 
 Other attributes go to the input; `class` is merged into the `form-box` (so a grid span like `sm:col-span-2` works), and the label carries `id="{id}-label"` for `aria-labelledby`.
+
+### Save Button
+
+```blade
+<x-synapse-save-button />                                  {{-- wire:click="save" --}}
+<x-synapse-save-button action="store" target="attachments" :label="__('crm::labels.save_draft')" />
+<form wire:submit="save"> … <x-synapse-save-button submit /> </form>
+```
+
+| Prop | Default | Description |
+|---|---|---|
+| `action` | `save` | Livewire method (a bare identifier; anything else falls back to `save`) |
+| `label` | `__('Save')` | Button text |
+| `icon` | `ph ph-floppy-disk` | Icon class, swapped for a spinner while busy |
+| `target` | — | Extra `wire:target`, e.g. a file-upload property, so the button also waits for the upload |
+| `submit` | `false` | `type="submit"` with no `wire:click`, for a `<form wire:submit>` |
+
+While the action runs the button is disabled and reads "Saving…".
+
+### Form Action Bar
+
+Sticky bar for **long forms on their own page** (short forms and modal forms keep their buttons inline):
+
+```blade
+<x-synapse-form-action-bar action="save" :cancel-url="backend_route('crm.clients.index')" />
+
+<x-synapse-form-action-bar :hint="false">
+    <button class="btn" type="button" wire:click="saveDraft">Draft</button>
+</x-synapse-form-action-bar>
+```
+
+| Prop / slot | Default | Description |
+|---|---|---|
+| `action` | `save` | Save method, passed to `<x-synapse-save-button>` |
+| `cancel-url` | — | Renders a Cancel link (`wire:navigate`) when set |
+| `save-label`, `save-target` | — | `label` / `target` of the save button |
+| `hint` | `__('Required field')` | Text after the red `*`; `false` hides it |
+| slot | — | Extra buttons, before the save button |
+
+### Section Heading
+
+Left-hand title of a two-column form section (`.syn-section-label`):
+
+```blade
+<div class="grid gap-6 lg:grid-cols-3">
+    <x-synapse-section-heading :title="__('crm::labels.contact')" :help="__('crm::labels.contact_help')" />
+    <div class="space-y-4 lg:col-span-2">…fields…</div>
+</div>
+```
 
 ### Search Box
 
@@ -447,7 +511,7 @@ Pill-shaped status/label badge with color variants and an optional icon:
 **Props:**
 - `color` (string, default: 'gray') - `'gray'`, `'brand'`, `'success'`, `'warning'`, `'danger'`, `'info'`
 - `size` (string, default: 'md') - `'sm'`, `'md'`
-- `icon` (string, optional) - Icon class — Phosphor (recommended) e.g. `'ph ph-check'`, or FontAwesome e.g. `'fa-solid fa-check'` (see [Icons](../README.md#icons))
+- `icon` (string, optional) - Icon class — Phosphor, e.g. `'ph ph-check'` (see [Icons](../README.md#icons))
 
 ---
 
@@ -522,7 +586,7 @@ Single-metric card. Two variants:
 ```
 
 **Props:**
-- `icon` (string, optional) - Icon class — Phosphor (recommended) e.g. `'ph ph-invoice'`, or FontAwesome e.g. `'fa-solid fa-file-invoice'` (see [Icons](../README.md#icons))
+- `icon` (string, optional) - Icon class — Phosphor, e.g. `'ph ph-invoice'` (see [Icons](../README.md#icons))
 - `color` (string, default: 'gray') - `'gray'`, `'blue'`, `'indigo'`, `'purple'`, `'red'`, `'orange'`, `'green'`
 - `label` / `value` (string, optional) - Caption / already-formatted value (caller formats numbers/currency); each can be overridden with a matching `<x-slot:label>` / `<x-slot:value>` for rich content
 - `valueColor` (string, optional) - `variant="tile"` only - value text color override, same palette as `color`
@@ -564,6 +628,34 @@ Modal confirmation for destructive actions:
 - `icon` (string, default: 'ph ph-warning-circle')
 
 ---
+
+### Confirm Button
+
+Opens the confirm dialog for a Livewire method. Render `<x-synapse-confirm-dialog />` once on the page (e.g. at the end of the list view) — the button only dispatches its event.
+
+```blade
+{{-- Delete: pass the model's delete_token, never its id --}}
+<x-synapse-confirm-button method="delete" :token="$client->delete_token" :label="__('crm::labels.delete')"
+    :title="__('crm::labels.confirm_delete_title')" :message="__('crm::labels.confirm_delete_message', ['name' => $client->name])"
+    :component="$this->getId()" />
+
+{{-- Any other action: param, labelled button, custom confirm text --}}
+<x-synapse-confirm-button method="void" :param="$invoice->id" icon="ph ph-prohibit" color="warning" labelled
+    :label="__('crm::labels.void')" :confirm-text="__('crm::labels.yes')" :title="…" :message="…" />
+```
+
+| Prop | Default | Description |
+|---|---|---|
+| `method` | — | Method the dialog calls on confirm (a bare identifier; anything else is dropped) |
+| `label` | — | Verb naming the action: the tooltip (or button text when `labelled`) and the dialog's confirm button |
+| `title`, `message` | — | Dialog text |
+| `token` | — | A `WithDeleteToken` delete token — use for deletes |
+| `param` | — | Argument for any other action |
+| `icon` | `ph ph-trash` | Icon class |
+| `color` | `danger` | Button and confirm-button colour |
+| `component` | — | Livewire component id the method lives on (`$this->getId()`) |
+| `labelled` | `false` | A `btn` with text instead of an icon button with a tooltip |
+| `confirm-text` | `label` | Override the dialog's confirm button text |
 
 ### Drawer
 
@@ -632,9 +724,37 @@ Without `title`/`footer` the slot is rendered as is, so hand-written `syn-modal-
 
 Note that pass-through `{{ $attributes }}` land on the outermost element (the one wrapping backdrop and container), not on the panel — `role`/`aria-*` cannot be forwarded to the panel that way, which is why `labelledby` exists.
 
-The `footer` slot is rendered by the component that writes the `<x-synapse-modal>` tag. When the modal holds a *child* Livewire form (`<x-synapse-modal><livewire:thing-form /></x-synapse-modal>`), a `wire:click` in that slot would call the **outer** component — keep such a form's own footer inside the child view and use `labelledby`.
+The `footer` slot is rendered by the component that writes the `<x-synapse-modal>` tag. When the modal holds a *child* Livewire form (`<x-synapse-modal><livewire:thing-form /></x-synapse-modal>`), a `wire:click` in that slot would call the **outer** component — keep such a form's own footer inside the child view and use `labelledby` — [`<x-synapse-modal-header>` / `<x-synapse-modal-footer>`](#modal-header--modal-footer) draw that header and footer for you.
 
 Event names are matched lowercase by the browser, so keep `name` lowercase.
+
+### Modal Header / Modal Footer
+
+For a form that is its own Livewire component rendered **inside** a modal, where the title depends on the form's state (Add vs Edit) and the save button must call the form, not the page:
+
+```blade
+{{-- page --}}
+<x-synapse-modal name="tax-rate-form" labelledby="modal-tax-rate-form-title">
+    <livewire:crm::tax-rate-form />
+</x-synapse-modal>
+
+{{-- tax-rate-form view --}}
+<div>
+    <x-synapse-modal-header modal="tax-rate-form" :title="$taxRateId ? __('crm::labels.edit') : __('crm::labels.add_tax_rate')" />
+    <div class="syn-modal-body">…</div>
+    <x-synapse-modal-footer modal="tax-rate-form" />
+</div>
+```
+
+| Component | Prop / slot | Default | Description |
+|---|---|---|---|
+| header | `modal` | — | The modal's `name`; the heading gets `id="modal-{name}-title"`, which the modal's `labelledby` points at |
+| header | `title` | — | Heading text; the close button dispatches `close-modal-{name}` |
+| footer | `modal` | — | Cancel dispatches `close-modal-{name}` |
+| footer | `action`, `save-label` | `save` | Passed to `<x-synapse-save-button>` |
+| footer | slot | — | Replaces the save button (e.g. a Send or Next button) |
+
+Both sit inside the modal's scrolling panel and stay in view (`.syn-modal-header`/`.syn-modal-footer` are sticky).
 
 ### Toggler
 
@@ -709,7 +829,7 @@ Flexible alert component with dismissible functionality:
 - `title` (string, optional) - Alert title
 - `message` (string, optional) - Alert message (can also use slot for HTML)
 - `dismissible` (boolean, default: true) - Whether alert can be closed
-- `icon` (string, auto-assigned) - Icon class, Phosphor by default (auto-assigned based on type) — pass a FontAwesome class instead to override (see [Icons](../README.md#icons))
+- `icon` (string, auto-assigned) - Icon class, Phosphor, auto-assigned by type — pass another class to override (see [Icons](../README.md#icons))
 - `border` (boolean, default: false) - Show left border accent
 - `solid` (boolean, default: false) - Use solid background instead of light variant
 
@@ -774,6 +894,29 @@ Copies `text` to the clipboard with "Copied" / "Copy failed" feedback (icon swap
 | `text` | string | — | Required |
 | `label` | string | `Copy` | Accessible name and visible label |
 | `iconOnly` | bool | `true` | Hide the visible label |
+
+## Layout Chrome
+
+### Breadcrumbs
+
+Page title (from the layout's Alpine `pageName`) and the trail built with `VmEngine\Synapse\Services\Helper\Breadcrumbs`:
+
+```blade
+<x-synapse-breadcrumbs :breadcrumbs="$this->breadcrumbs" />
+```
+
+The home link goes to `backend_route('home.dashboard')` (or `/` without synapps-auth). The last crumb is marked `aria-current="page"`. Replaces `@include('synapps::components.layouts.partials.breadcrumbs', …)` — that partial still exists as a deprecated shim over this component.
+
+### Loader
+
+Global loading overlay, shown while `wire:navigate` runs or any Livewire request is in flight:
+
+```blade
+<body …>
+    <x-synapse-loader />
+```
+
+Place it once per layout; the stub layouts already do. Its Alpine half is `synapseLoader` in `synapse-components.js` (no inline script, so it works under a strict CSP and after a morph). Replaces the old `layouts.partials.loader` include, now a deprecated shim.
 
 ## Planning & Layout Components
 

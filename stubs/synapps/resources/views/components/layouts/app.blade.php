@@ -38,6 +38,7 @@
     x-data="synapseAppShell('{{ synav()->getActiveMenu() }}')"
     :class="{ 'dark bg-gray-900': darkMode === true }"
 >
+    <x-synapse-loader />
     <script nonce="{{ csp_nonce() }}">
     (() => {
         const register = () => {

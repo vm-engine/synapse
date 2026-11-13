@@ -26,5 +26,19 @@
     "Clear selection": "Hapus pilihan",
     "Per page": "Per halaman",
     "Copied": "Tersalin",
-    "Copy failed": "Gagal menyalin"
+    "Copy failed": "Gagal menyalin",
+    "Breadcrumb": "Navigasi",
+    "Cancel": "Batal",
+    "Loading…": "Memuat…",
+    "Required field": "Wajib diisi",
+    "Save": "Simpan",
+    "Saving…": "Menyimpan…",
+    "Select an option": "Pilih opsi",
+    "Generate password": "Buat kata sandi",
+    "Apply password": "Terapkan kata sandi",
+    "Copy password": "Salin kata sandi",
+    "Enter or generate password": "Masukkan atau buat kata sandi",
+    "Enter your password": "Masukkan kata sandi",
+    "Dismiss notification": "Tutup notifikasi",
+    "Close alert": "Tutup peringatan"
 }

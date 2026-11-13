@@ -63,10 +63,10 @@ new class extends Component
     {
         return Breadcrumbs::make(
             label: 'Settings',
-            icon: 'fa-solid fa-gear',
+            icon: 'ph ph-gear',
         )->add(
             label: 'Configuration',
-            icon: 'fa-solid fa-sliders',
+            icon: 'ph ph-sliders-horizontal',
         );
     }
 

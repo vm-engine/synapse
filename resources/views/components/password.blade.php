@@ -4,7 +4,7 @@
 >
     <input
         :type="showPassword ? 'text' : 'password'"
-        placeholder="Enter your password"
+        placeholder="{{ __('Enter your password') }}"
         {{ $attributes->merge(['class' => 'form-input']) }}
     />
     <span

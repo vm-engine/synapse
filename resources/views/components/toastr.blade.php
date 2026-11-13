@@ -121,7 +121,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <button
                                 class="syn-toastr-dismiss"
                                 type="button"
-                                aria-label="dismiss notification"
+                                aria-label="{{ __('Dismiss notification') }}"
                                 x-on:click="dismiss"
                             >
                                 <svg
@@ -203,7 +203,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <button
                                 class="syn-toastr-dismiss"
                                 type="button"
-                                aria-label="dismiss notification"
+                                aria-label="{{ __('Dismiss notification') }}"
                                 x-on:click="dismiss"
                             >
                                 <svg
@@ -285,7 +285,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <button
                                 class="syn-toastr-dismiss"
                                 type="button"
-                                aria-label="dismiss notification"
+                                aria-label="{{ __('Dismiss notification') }}"
                                 x-on:click="dismiss"
                             >
                                 <svg
@@ -367,7 +367,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <button
                                 class="syn-toastr-dismiss"
                                 type="button"
-                                aria-label="dismiss notification"
+                                aria-label="{{ __('Dismiss notification') }}"
                                 x-on:click="dismiss"
                             >
                                 <svg
@@ -453,7 +453,7 @@ class="whitespace-nowrap rounded-radius bg-warning px-4 py-2 text-center text-sm
                             <button
                                 class="syn-toastr-dismiss"
                                 type="button"
-                                aria-label="dismiss notification"
+                                aria-label="{{ __('Dismiss notification') }}"
                                 x-on:click="dismiss"
                             >
                                 <svg

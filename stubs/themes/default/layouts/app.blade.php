@@ -38,6 +38,7 @@
     x-data="{ page: '{{ synav()->getActiveMenu() }}', 'loaded': true, 'darkMode': $persist(false).as('darkMode'), 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
     :class="{ 'dark bg-gray-900': darkMode === true }"
 >
+    <x-synapse-loader />
     <div class="page-wrapper">
         @include('synapps::components.layouts.partials.sidebar')
         <div class="main-container">

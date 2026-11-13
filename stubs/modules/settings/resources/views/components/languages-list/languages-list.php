@@ -83,10 +83,10 @@ new class extends Component
     {
         return Breadcrumbs::make(
             label: 'Settings',
-            icon: 'fa-solid fa-gear',
+            icon: 'ph ph-gear',
         )->add(
             label: 'Languages',
-            icon: 'fa-solid fa-language',
+            icon: 'ph ph-translate',
         );
     }
 

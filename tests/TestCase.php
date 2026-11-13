@@ -9,6 +9,7 @@ use Mews\Purifier\PurifierServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use VmEngine\Synapse\Facades\DbConfig;
 use VmEngine\Synapse\Facades\DbLang;
+use VmEngine\Synapse\SynapseLangServiceProvider;
 use VmEngine\Synapse\SynapseServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -21,6 +22,9 @@ abstract class TestCase extends Orchestra
         return [
             LivewireServiceProvider::class,
             SynapseServiceProvider::class,
+            // Owns the translator in a real app (package discovery); puts Synapse's lang/ between
+            // the framework's and the project's.
+            SynapseLangServiceProvider::class,
             // The optional rich-text editor's sanitiser (VmEngine\Synapse\Rte\RichText).
             PurifierServiceProvider::class,
         ];
@@ -49,6 +53,11 @@ abstract class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
+
+        // Always English, whatever APP_LOCALE the shell or web server exports: env() reads
+        // $_SERVER first, which phpunit.xml's force="true" cannot override.
+        $app['config']->set('app.locale', 'en');
+        $app['config']->set('app.fallback_locale', 'en');
     }
 
     /**

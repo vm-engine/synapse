@@ -25,7 +25,7 @@
 - Each click replaces the previous password
 
 ```blade
-<x-synapse::password-generator :length="16" />
+<x-synapse-password-generator :length="16" />
 ```
 
 **Example Flow:**
@@ -46,9 +46,9 @@ Click 🔄 → "L7%nRt4!" displayed in readonly field (replaces previous)
 - Only visible when `model` prop is provided
 
 ```blade
-<x-synapse::password-generator model="password" />
+<x-synapse-password-generator model="password" />
 {{-- or --}}
-<x-synapse::password-generator :model="['password', 'password_confirmation']" />
+<x-synapse-password-generator :model="['password', 'password_confirmation']" />
 ```
 
 **Example Flow:**
@@ -103,7 +103,7 @@ Click 📋 → "aB3$xY7z" copied to clipboard
 **Use Case:** Display password suggestions without binding
 
 ```blade
-<x-synapse::password-generator :length="20" />
+<x-synapse-password-generator :length="20" />
 ```
 
 ```
@@ -120,7 +120,7 @@ Note: No ✓ (Apply) button shown because no model prop
 **Use Case:** Set password and confirmation simultaneously
 
 ```blade
-<x-synapse::password-generator
+<x-synapse-password-generator
     :model="['password', 'password_confirmation', 'temp_password']"
     :length="16"
 />
@@ -144,7 +144,7 @@ Note: No ✓ (Apply) button shown because no model prop
     x-data="{ applied: false }"
     @password-set.window="applied = true; setTimeout(() => applied = false, 2000)"
 >
-    <x-synapse::password-generator
+    <x-synapse-password-generator
         :model="['password', 'password_confirmation']"
     />
 
@@ -219,7 +219,7 @@ Note: No ✓ (Apply) button shown because no model prop
 
 ### Password Generator Component
 ```blade
-<x-synapse::password-generator model="password" />
+<x-synapse-password-generator model="password" />
 ```
 - ✅ Built-in secure generation
 - ❌ Manual sync via Apply button

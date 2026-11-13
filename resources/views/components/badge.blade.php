@@ -6,7 +6,7 @@
     Props:
     - color (string): 'gray', 'brand', 'success', 'warning', 'danger', 'info' (default: 'gray')
     - size (string): 'sm', 'md' (default: 'md')
-    - icon (string): Optional icon class — Phosphor (recommended) e.g. 'ph ph-check', or FontAwesome e.g. 'fa-solid fa-check'
+    - icon (string): Optional icon class — Phosphor, e.g. 'ph ph-check'
 
     Usage Examples:
 

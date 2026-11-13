@@ -33,7 +33,7 @@
 
                     <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
+                        <i class="ph ph-list"></i>
                     </button>
 
                     <!-- Topbar Search -->
@@ -44,7 +44,7 @@
                                 aria-label="Search" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" type="button">
-                                    <i class="fas fa-search fa-sm"></i>
+                                    <i class="ph ph-magnifying-glass"></i>
                                 </button>
                             </div>
                         </div>
@@ -57,7 +57,7 @@
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
+                                <i class="ph ph-magnifying-glass"></i>
                             </a>
                             <!-- Dropdown - Messages -->
                             <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
@@ -69,7 +69,7 @@
                                             aria-describedby="basic-addon2">
                                         <div class="input-group-append">
                                             <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
+                                                <i class="ph ph-magnifying-glass"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -81,7 +81,7 @@
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-bell fa-fw"></i>
+                                <i class="ph ph-bell"></i>
                                 <!-- Counter - Alerts -->
                                 <span class="badge badge-danger badge-counter">3+</span>
                             </a>
@@ -94,7 +94,7 @@
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
+                                            <i class="ph ph-file-text text-white"></i>
                                         </div>
                                     </div>
                                     <div>
@@ -106,7 +106,7 @@
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-success">
-                                            <i class="fas fa-donate text-white"></i>
+                                            <i class="ph ph-hand-coins text-white"></i>
                                         </div>
                                     </div>
                                     <div>
@@ -117,7 +117,7 @@
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-warning">
-                                            <i class="fas fa-exclamation-triangle text-white"></i>
+                                            <i class="ph ph-warning text-white"></i>
                                         </div>
                                     </div>
                                     <div>
@@ -134,7 +134,7 @@
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-envelope fa-fw"></i>
+                                <i class="ph ph-envelope"></i>
                                 <!-- Counter - Messages -->
                                 <span class="badge badge-danger badge-counter">7</span>
                             </a>
@@ -208,20 +208,20 @@
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <i class="ph ph-user mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <i class="ph ph-gear-six mr-2 text-gray-400"></i>
                                     Settings
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <i class="ph ph-list-bullets mr-2 text-gray-400"></i>
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <i class="ph ph-sign-out mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
                             </div>
@@ -253,7 +253,7 @@
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
+        <i class="ph ph-caret-up"></i>
     </a>
     <!-- End of Page Wrapper -->
     @livewireScripts
