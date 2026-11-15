@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.3] - 2026-11-15
+
 ### Added
 - `<x-synapse-adv-select>` options can carry a `depth` (0 = top level). The dropdown indents the option by that depth. The closed control, the selected pills and the search all use the bare label, so a tree (parent pages, categories) no longer needs `— ` label prefixes, which showed up in the selected value and in search matches.
 - `<x-synapse-drawer>`:
