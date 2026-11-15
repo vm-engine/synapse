@@ -206,6 +206,12 @@ Alpine.data('synapseAdvSelect', (preload, multiple, searchMethod, loadMethod, wi
         return index === this.activeIndex;
     },
 
+    /** Indents a tree option by its `depth` (0 = top level); the label itself stays bare. */
+    optionIndent(item) {
+        const depth = Number(item.depth) || 0;
+        return depth > 0 ? { paddingInlineStart: `${0.5 + depth}rem` } : {};
+    },
+
     async fetch() {
         const query = this.search.toLowerCase();
 
@@ -642,6 +648,15 @@ const SYNAPSE_FOCUSABLE = [
     'a[href]', 'button:not([disabled])', 'input:not([disabled]):not([type="hidden"])',
     'select:not([disabled])', 'textarea:not([disabled])', '[tabindex]:not([tabindex="-1"])',
 ].join(',');
+
+/**
+ * <x-synapse-drawer name="…">: a named drawer owns its `drawerOpen` (shadowing any
+ * parent's) and is opened/closed by the open-drawer-{name} / close-drawer-{name}
+ * window events bound in the view.
+ */
+Alpine.data('synapseDrawer', () => ({
+    drawerOpen: false,
+}));
 
 Alpine.data('synapseModal', (name) => ({
     show: false,

@@ -671,7 +671,23 @@ Slide-out side panel:
 ```
 
 **Props:**
-- `title` (string, required) - Drawer header title
+- `title` (string, required): drawer header title. **Rendered as raw HTML**, so callers can pass icon markup. Never put user input in it.
+- `name` (string, optional): a named drawer keeps its own open state and opens/closes on window events, like the modal. Without it, the drawer reads `drawerOpen` from the parent Alpine scope. The name also sets the ids (`drawer-{name}`, `drawer-{name}-title`).
+- Any other attributes (`class`, `data-*`) go onto `.syn-drawer-panel`.
+
+**Slots:** default = the scrolling body; `footer` = pinned to the bottom, always visible.
+
+```blade
+<button type="button" @click="$dispatch('open-drawer-filters')">Filters</button>
+
+<x-synapse-drawer name="filters" title="Filters" class="w-96">
+    …fields…
+    <x-slot:footer>
+        <button type="button" class="btn" @click="$dispatch('close-drawer-filters')">Close</button>
+        <button type="button" class="btn btn-primary" wire:click="apply">Apply</button>
+    </x-slot:footer>
+</x-synapse-drawer>
+```
 
 ---
 
@@ -1106,6 +1122,18 @@ Supports:
 - `id`, `aria-label`, `aria-labelledby` and `aria-describedby` are forwarded to the box. A `<label for>` cannot name a `div`, so name the select with `aria-labelledby` (pointing at the visible label's `id`) or `aria-label`.
 - Inside an `<x-synapse-field>` none of that is needed: the select reads the field's label id, error/hint description and invalid/required state through `@aware` and applies them itself. Anything you pass explicitly wins, and an explicit `aria-label` suppresses the field's label id.
 - In single-select mode the clear button sits beside the dropdown arrow, at the right edge of the box.
+
+### Tree options (`depth`)
+
+Give an option a `depth` (0 = top level, the default) to indent it in the dropdown. Pass the options in tree order. The closed control, the selected pills and the search all use the bare label, so don't add `— ` prefixes to labels.
+
+```blade
+<x-synapse-adv-select wire-model="parentId" :options="[
+    ['value' => 1, 'label' => 'About'],
+    ['value' => 2, 'label' => 'Our Team', 'depth' => 1],
+    ['value' => 3, 'label' => 'Careers', 'depth' => 2],
+]" />
+```
 
 ### Usage Examples
 

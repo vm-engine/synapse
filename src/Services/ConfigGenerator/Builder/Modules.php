@@ -20,6 +20,9 @@ class Modules extends BuilderBase
     /** @var array<string, mixed> */
     protected array $configDevOverride;
 
+    /** @var list<string>|null Root composer.json PSR-4 paths, read once per build. */
+    private ?array $autoloadPaths = null;
+
     public function init(): void
     {
         $this->loadModulePackageConfig();
@@ -48,12 +51,9 @@ class Modules extends BuilderBase
                 $moduleConfig['is_package'] = 1;
             }
 
-            // Check if module is discovered
-            if (Str::contains($modulePath, 'synapps'.DS.'modules')) {
-                $mainComposer = file_get_contents(base_path('composer.json'));
-                if ($mainComposer === false || strpos($mainComposer, addcslashes('synapps'.DS.'modules'.DS.$moduleConfig['id'], '\\')) === false) {
-                    continue;
-                }
+            // A directory module counts only once the root composer.json autoloads it (synapps:discover).
+            if (Str::contains($modulePath, 'synapps'.DS.'modules') && ! $this->isAutoloaded((string) $moduleConfig['id'])) {
+                continue;
             }
 
             $this->synapps->config['modules'][$moduleConfig['id']] = $moduleConfig;
@@ -65,6 +65,47 @@ class Modules extends BuilderBase
         $this->synapps->config['modules']
             = $this->synapps->config['modules_ori']
             = $moduleSorted->toArray();
+    }
+
+    /**
+     * Whether a root composer.json PSR-4 path points into synapps/modules/{id}/. Separators are
+     * normalized, so a composer.json written on Windows ("synapps\modules\home\src\") counts on
+     * Linux and vice versa, and the id must match a whole path segment (home ≠ homepage).
+     */
+    private function isAutoloaded(string $moduleId): bool
+    {
+        $this->autoloadPaths ??= $this->rootAutoloadPaths();
+        $prefix = 'synapps/modules/'.$moduleId.'/';
+
+        foreach ($this->autoloadPaths as $path) {
+            if (str_starts_with($path, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Root composer.json PSR-4 paths, '/'-separated and '/'-terminated.
+     *
+     * @return list<string>
+     */
+    private function rootAutoloadPaths(): array
+    {
+        $composer = json_decode((string) @file_get_contents(base_path('composer.json')), true);
+        $psr4 = is_array($composer) ? ($composer['autoload']['psr-4'] ?? []) : [];
+        $paths = [];
+
+        foreach (is_array($psr4) ? $psr4 : [] as $dirs) {
+            foreach ((array) $dirs as $dir) {
+                if (is_string($dir)) {
+                    $paths[] = rtrim(ltrim(str_replace('\\', '/', $dir), './'), '/').'/';
+                }
+            }
+        }
+
+        return $paths;
     }
 
     private function loadSynAppsModuleConfig(): void

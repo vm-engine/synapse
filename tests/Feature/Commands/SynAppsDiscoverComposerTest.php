@@ -205,3 +205,20 @@ test('dev dependency counts are reported from the dev counters', function () {
     expect($composer['require'])->toBe(['vendor/main-package' => '^1.0'])
         ->and($composer['require-dev'])->toBe(['vendor/dev-package' => '^2.0']);
 });
+
+test('module autoload paths are written with forward slashes and replace Windows-written ones', function () {
+    writeRootComposerJson([], [
+        'App\\' => 'app/',
+        'SynApps\\Modules\\DiscoverTestSlashes\\' => 'synapps\\modules\\discover-test-slashes\\src\\',
+    ]);
+    writeDiscoverableModule('slashes');
+
+    $this->artisan('synapps:discover')->assertSuccessful();
+
+    expect(readRootComposerJson()['autoload']['psr-4'])
+        ->toMatchArray([
+            'SynApps\\Modules\\DiscoverTestSlashes\\' => 'synapps/modules/discover-test-slashes/src/',
+            'SynDB\\Modules\\DiscoverTestSlashes\\Seeders\\' => 'synapps/modules/discover-test-slashes/database/seeders/',
+            'SynDB\\Modules\\DiscoverTestSlashes\\Factories\\' => 'synapps/modules/discover-test-slashes/database/factories/',
+        ]);
+});

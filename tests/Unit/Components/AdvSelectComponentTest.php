@@ -185,3 +185,10 @@ it('passes the default placeholder through the translator', function () {
     expect(advSelectHtml('<x-synapse-adv-select wire-model="clientId" />'))->toContain('placeholder="Pick one"')
         ->and(advSelectHtml('<x-synapse-adv-select wire-model="clientId" placeholder="Choose a client" />'))->toContain('placeholder="Choose a client"');
 });
+
+it('indents dropdown options by their depth while showing the bare label', function () {
+    $html = advSelectHtml('<x-synapse-adv-select wire-model="parentId" :options="[]" />');
+
+    expect($html)->toMatch('/class="adv-select-option"[^>]*:style="optionIndent\(item\)"/')
+        ->toContain('x-text="selected[0][labelField]"');
+});

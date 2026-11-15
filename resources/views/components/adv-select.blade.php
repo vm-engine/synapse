@@ -33,6 +33,10 @@ A fully featured, reactive select component that supports:
 | autoLoad          | bool        | true                | If true, auto-loads selected values from wireModel on init. |
 | disabled          | bool        | false               | If true, the select is non-interactive and visually dimmed. |
 
+Tree options: give an option a `depth` (0 = top level) and the dropdown
+indents it; the closed control, pills and search use the bare label.
+  ['value' => 7, 'label' => 'Our Team', 'depth' => 1]
+
 --------------------------------------------------------------------
 💡 Examples
 --------------------------------------------------------------------
@@ -119,7 +123,8 @@ public function loadUser(int|array $ids): array
 
 Component: VmEngine\Synapse\Components\AdvSelect
 View: synapse::components.adv-select
-Version: 1.2.0 — added a `disabled` prop (native disabled on the search
+Version: 1.3.0 — options may carry a `depth` for tree indentation.
+1.2.0 — added a `disabled` prop (native disabled on the search
 input and clear/remove buttons, `is-disabled` CSS class, and
 focusInput() is a no-op while disabled).
 --------------------------------------------------------------------
@@ -254,6 +259,7 @@ focusInput() is a no-op while disabled).
                 role="option"
                 :class="{ 'is-active': isActive(index) }"
                 :aria-selected="isActive(index) ? 'true' : 'false'"
+                :style="optionIndent(item)"
                 x-text="item[labelField]"
                 @click="select(item)"
             ></div>

@@ -198,7 +198,7 @@ $cssPath = theme_path('css/theme.css');
 
 <!-- UI components -->
 <x-synapse-confirm-dialog title="Delete?" message="Are you sure?" />
-<x-synapse-drawer title="Settings">...</x-synapse-drawer>
+<x-synapse-drawer name="settings" title="Settings">... <x-slot:footer>...</x-slot:footer></x-synapse-drawer>   {{-- $dispatch('open-drawer-settings'); no name = parent drawerOpen --}}
 <x-synapse-modal name="edit" title="Edit">... <x-slot:footer>...</x-slot:footer></x-synapse-modal>     {{-- $dispatch('open-modal-edit') / 'close-modal-edit' --}}
 <x-synapse-lightbox name="preview" />                {{-- open via $dispatch('open-lightbox-preview', { url }) --}}
 <x-synapse-toastr />

@@ -100,9 +100,12 @@ class SynAppsDiscover extends Command
             ));
             $moduleNamespace = 'SynApps\\Modules\\'.$moduleConfig['id_case']['pascal'].'\\';
             $dbNamespace = 'SynDB\\Modules\\'.$moduleConfig['id_case']['pascal'].'\\';
-            $this->namespaces[$moduleNamespace] = ltrim($modulePath, DS).DS.'src'.DS;
-            $this->namespaces[$dbNamespace.'Seeders\\'] = ltrim($modulePath, DS).DS.'database'.DS.'seeders'.DS;
-            $this->namespaces[$dbNamespace.'Factories\\'] = ltrim($modulePath, DS).DS.'database'.DS.'factories'.DS;
+            // Always '/': Composer accepts it on every OS, so a composer.json committed from
+            // Windows still autoloads (and is still discovered by synapps:config) on Linux.
+            $autoloadBase = trim(str_replace('\\', '/', $modulePath), '/');
+            $this->namespaces[$moduleNamespace] = $autoloadBase.'/src/';
+            $this->namespaces[$dbNamespace.'Seeders\\'] = $autoloadBase.'/database/seeders/';
+            $this->namespaces[$dbNamespace.'Factories\\'] = $autoloadBase.'/database/factories/';
             $this->components->info("Discovered Module: {$moduleConfig['name']} at {$modulePath}");
 
             $this->compareDependencies($moduleConfig['dependencies']);

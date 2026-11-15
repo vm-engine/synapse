@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `<x-synapse-adv-select>` options can carry a `depth` (0 = top level). The dropdown indents the option by that depth. The closed control, the selected pills and the search all use the bare label, so a tree (parent pages, categories) no longer needs `— ` label prefixes, which showed up in the selected value and in search matches.
+- `<x-synapse-drawer>`:
+  - A `name` prop. A named drawer keeps its own `drawerOpen` and opens/closes on the `open-drawer-{name}` / `close-drawer-{name}` window events, the same way the modal does. Without `name` the drawer still reads the parent Alpine scope's `drawerOpen`.
+  - A `footer` slot pinned to the bottom of the panel. The panel is now a flex column: the header (title and close button), a scrolling `.syn-drawer-body`, then `.syn-drawer-footer`.
+  - Attributes are forwarded onto `.syn-drawer-panel`, e.g. `class="w-96"`.
+- An image placeholder, done in CSS only. A grey box (`gray-100`, `neutral-800` in dark mode) with a centred image icon sits behind every `<img>` while it loads, so a slow or hanging image (e.g. an unreachable host) shows it from the first paint. A loaded picture covers it. An image that fails keeps it through `img::after`, which browsers render only on broken images (Chrome, Edge, Firefox; Safari keeps its native icon), with the image's reserved size and `border-radius`. SVG and PNG images (which may be transparent logos or icons) and `.no-img-placeholder` get no box while loading, only the broken state. The rules sit in `@layer base`, so utilities such as `absolute` on an `<img>` still win over its `position: relative`.
+
+### Changed
+- Drawer ids come from `name` (`drawer-{name}`, `drawer-{name}-title`), or from a random suffix when there is no name. Two drawers on one page no longer share `id="drawer-example"` / `id="drawer-label"`. The panel has `role="dialog"`.
+- The drawer panel no longer has its own `p-4` and no longer scrolls itself. The body has the padding and does the scrolling, and the header stays in view. Markup that offset the panel padding (negative margins against `p-4`) should switch to the `footer` slot.
+- The drawer `title` is still rendered as raw HTML, because callers pass icon markup. This is now documented: never put user input in it.
+
+### Fixed
+- Directory modules (`synapps/modules/*`) vanished from the compiled config when `composer.json` was written on a different OS. `synapps:discover` wrote module PSR-4 paths with the OS separator, so a Windows machine committed `synapps\modules\home\src\`. `synapps:config` (the `Modules` builder) then looked for the current OS's form in the raw file text, so on Linux it skipped `home`, `settings` and `todos`. Their service providers never registered, and the next request failed with `Unable to find component: [home::landing]`. `synapps:discover` now always writes `/` paths (Composer accepts them on every OS). The builder reads the PSR-4 paths, normalizes separators, and matches the `synapps/modules/{id}/` segment exactly, so an already-committed backslash `composer.json` works too, and a `homepage` module no longer counts as `home`.
+
 ## [3.10.2] - 2026-11-13
 
 ### Fixed

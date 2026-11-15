@@ -669,6 +669,44 @@ describe('Semantic CSS classes', function () {
 
         expect($html)->toContain('@keydown.escape.window="drawerOpen = false"');
     });
+
+    it('leaves an unnamed drawer on the parent scope drawerOpen, with ids unique per drawer', function () {
+        $html = Blade::render('<x-synapse-drawer title="A">a</x-synapse-drawer><x-synapse-drawer title="B">b</x-synapse-drawer>');
+
+        preg_match_all('/\bid="(drawer-[^"]+)"/', $html, $ids);
+
+        expect($html)->not->toContain('x-data')
+            ->and($ids[1])->toHaveCount(4)
+            ->and(array_unique($ids[1]))->toHaveCount(4);
+    });
+
+    it('opens and closes a named drawer by window event and derives its ids from the name', function () {
+        $html = Blade::render('<x-synapse-drawer name="filters" title="Filters">Body</x-synapse-drawer>');
+
+        expect($html)->toContain('x-data="synapseDrawer()"')
+            ->toContain('@open-drawer-filters.window="drawerOpen = true"')
+            ->toContain('@close-drawer-filters.window="drawerOpen = false"')
+            ->toContain('id="drawer-filters"')
+            ->toContain('aria-labelledby="drawer-filters-title"')
+            ->toContain('id="drawer-filters-title"')
+            ->toContain('aria-controls="drawer-filters"')
+            ->toContain('role="dialog"');
+    });
+
+    it('forwards attributes onto the panel', function () {
+        $html = Blade::render('<x-synapse-drawer title="T" class="w-96" data-test="x">Body</x-synapse-drawer>');
+
+        expect($html)->toMatch('/<div[^>]*class="syn-drawer-panel w-96"[^>]*data-test="x"/');
+    });
+
+    it('renders the body in a scrolling region and an optional pinned footer after it', function () {
+        $without = Blade::render('<x-synapse-drawer title="T">Body</x-synapse-drawer>');
+        $with = Blade::render('<x-synapse-drawer title="T">Body<x-slot:footer><button>Save</button></x-slot:footer></x-synapse-drawer>');
+
+        expect($without)->toMatch('/class="syn-drawer-body"[^>]*>\s*Body/')
+            ->not->toContain('syn-drawer-footer')
+            ->and($with)->toMatch('/syn-drawer-body[\s\S]*Body[\s\S]*class="syn-drawer-footer"[^>]*>\s*<button>Save<\/button>/');
+    });
 });
 
 describe('Badge Component', function () {
