@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-11-15
+
+Same code as 3.10.3, re-released as a minor version. 3.10.3 added features (adv-select `depth` tree options, the named drawer with its `footer` slot, the CSS image placeholder), so semantic versioning calls for a minor bump. Require `^3.11` when you depend on them. The changes are listed under 3.10.3 below.
+
 ## [3.10.3] - 2026-11-15
 
 ### Added
